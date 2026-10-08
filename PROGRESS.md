@@ -125,3 +125,29 @@
   运行 tests/compare_engines.py 即可对比
 - "网速慢怎么办"被规则引擎归为usage_guide（"怎么"与"慢"同分时按字典序优先usage_guide），
   词表优先级待真实案例调优
+
+## 2026-10-08 Jev接入OpenRouter decisions端点（真实调用打通）
+
+**背景**: api.typesafe.com域名公网DNS不存在（NXDOMAIN）；改走OpenRouter后确认
+typesafe/jev-1.13为System One结构化决策模型，须使用专用/api/alpha/decisions端点（不支持chat/completions）。
+
+**实测确认的decisions契约**（通过zod校验错误逐轮探测）:
+- POST {JEV_API_BASE}/alpha/decisions，body: {model, state, questions}
+- state: string | record | array（传record含message/context/previous_intent等）
+- questions判别键为**type**（非kind），值noul/choice/score
+- choice/score问题需**instructions+criteria**（criteria: choice=record选项→说明，score=数组分档）
+- noul问题仅需instructions；score分档**最多10档**（超限报"Too many score levels"）
+- score返回criteria**分档索引值**（非0-100原值），按档数归一化映射回0-1/0-100
+- 响应answers.{字段}.{choice|noul|score}+probabilities+confidence，附usage与成本
+
+**JevEngine适配**: questions定义含instructions/criteria（score各10档）；noul按>=0.5判定；
+score按(档数-1)归一化；解析失败/HTTP错误均回退jev_failed且错误信息携带响应体；真实调用实测:
+- "多少钱"→price_inquiry(conf 0.85)、"tiktok登不上怎么办"→technical_support、
+  "你们这个垃圾产品不行"→negative情绪+escalate_to_human=True
+- 延迟约1秒/次（TDD假设200ms，实测偏高，记录）；单次成本约$0.000036
+
+**对比测试（10问题，Jev列启用真实调用）**: rule与Jev在8/10问题上判断一致；
+Jev对模糊消息（"咋整啊"/"能不能直播"）返回unclear+澄清（更稳健）；
+"网速慢怎么办"Jev判troubleshooting（比规则引擎的usage_guide更贴切）。
+
+**验证**: pytest两套35 passed；e2e 6/6；配置更新（JEV_API_BASE=https://openrouter.ai/api、新增JEV_MODEL）。

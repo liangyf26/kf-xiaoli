@@ -28,7 +28,7 @@ class Settings(BaseSettings):
 
     # 决策引擎可选配置
     JEV_API_KEY: str = ""
-    JEV_API_BASE: str = "https://openrouter.ai/api/v1"
+    JEV_API_BASE: str = "https://openrouter.ai/api"
     JEV_MODEL: str = "typesafe/jev-1.13"
     KEV_MODEL_PATH: str = "tt-hous/kev-0.5b"
     KEV_DEVICE: str = "cpu"

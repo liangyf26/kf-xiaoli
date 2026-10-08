@@ -183,7 +183,7 @@ def test_jev_config_exists():
 
 
 def test_jev_structure():
-    """任务书3.1验收2：客户端结构与questions定义完整（不依赖key状态）。"""
+    """任务书3.1验收2：客户端结构与questions定义完整（TypeSafe decisions契约）。"""
     engine = JevEngine("test-key")
     assert hasattr(engine, "decide"), "缺少decide方法"
     assert hasattr(engine, "questions"), "缺少questions定义"
@@ -194,45 +194,64 @@ def test_jev_structure():
     assert "technical_complexity" in engine.questions
     assert "escalate_to_human" in engine.questions
     assert len(engine.questions) == 6, f"questions应6个: {len(engine.questions)}"
-    assert engine.questions["intent"]["kind"] == "choice"
+    # decisions契约：type判别键，choice/score需instructions+criteria，noul需instructions
+    assert engine.questions["intent"]["type"] == "choice"
     assert len(engine.questions["intent"]["options"]) == 7
-    assert engine.questions["needs_clarification"]["kind"] == "noul"
+    assert "criteria" in engine.questions["intent"] and "instructions" in engine.questions["intent"]
+    assert engine.questions["needs_clarification"]["type"] == "noul"
+    assert engine.questions["needs_clarification"].get("instructions")
+    assert engine.questions["intent_confidence"]["type"] == "score"
+    assert isinstance(engine.questions["intent_confidence"]["criteria"], list)
+    assert engine.questions["user_emotion"]["type"] == "choice"
+    assert engine.questions["technical_complexity"]["type"] == "score"
+    assert engine.questions["escalate_to_human"]["type"] == "noul"
     assert engine.model == settings.JEV_MODEL, "模型名应来自配置"
 
 
-def test_jev_chat_response_parsing():
-    """OpenRouter chat契约的响应解析：正常JSON/代码块包裹/非法输出/越界值。"""
+def test_jev_answers_parsing():
+    """decisions端点answers结构解析：正常/异常意图/越界score/noul阈值。"""
     engine = JevEngine("test-key")
 
-    good = engine._parse_chat_response(
-        '{"intent": "price_inquiry", "intent_confidence": 0.92, "needs_clarification": false,'
-        ' "technical_complexity": 20, "user_emotion": "neutral", "escalate_to_human": false}',
-        88,
-    )
+    def make_answers(intent="price_inquiry", score=8.28, noul=0.15, emotion="neutral",
+                     complexity=1.8, escalate=0.1):
+        return {
+            "intent": {"type": "choice", "choice": intent, "confidence": 0.95},
+            "needs_clarification": {"type": "noul", "noul": noul},
+            "intent_confidence": {"type": "score", "score": score},
+            "user_emotion": {"type": "choice", "choice": emotion},
+            "technical_complexity": {"type": "score", "score": complexity},
+            "escalate_to_human": {"type": "noul", "noul": escalate},
+        }
+
+    good = engine._result_from_answers(make_answers(), 88)
     assert good.engine == "jev"
     assert good.intent == "price_inquiry"
-    assert abs(good.intent_confidence - 0.92) < 1e-9
+    assert abs(good.intent_confidence - 0.92) < 0.01  # 8.28/9归一化
     assert good.needs_clarification is False
+    assert good.technical_complexity == 20  # 1.8/9*100
+    assert good.escalate_to_human is False
     assert good.latency_ms == 88
 
-    wrapped = engine._parse_chat_response(
-    "```json\n{\"intent\": \"usage_guide\", \"intent_confidence\": 0.7, \"needs_clarification\": true,"
-    " \"clarification_reason\": \"问题模糊\", \"technical_complexity\": 40,"
-    ' "user_emotion": "neutral", "escalate_to_human": false}\n```',
-        50,
+    # noul>=0.5为真
+    clarify = engine._result_from_answers(make_answers(noul=0.85), 50)
+    assert clarify.needs_clarification is True
+    assert clarify.clarification_reason == "Jev判断需要澄清"
+
+    # 复杂度封顶100，escalate阈值
+    extreme = engine._result_from_answers(
+        make_answers(score=15.0, complexity=20.0, escalate=0.6), 10
     )
-    assert wrapped.engine == "jev"
-    assert wrapped.intent == "usage_guide"
-    assert wrapped.clarification_reason == "问题模糊"
-
-    bad = engine._parse_chat_response("这不是JSON输出", 50)
-    assert bad.engine == "jev_failed"
-    assert bad.intent == "unclear"
-    assert bad.intent_confidence < 0.5
-
-    weird = engine._parse_chat_response('{"intent": "hack", "intent_confidence": 7.5}', 10)
+    assert extreme.intent_confidence == 1.0
+    assert extreme.technical_complexity == 100
+    assert extreme.escalate_to_human is True
+    # 非法意图归unclear
+    weird = engine._result_from_answers(make_answers(intent="hack"), 10)
     assert weird.intent == "unclear"
-    assert weird.intent_confidence == 1.0
+
+    # answers缺失字段 → 回退
+    broken = engine._result_from_answers({"intent": {}}, 10)
+    assert broken.engine == "jev_failed"
+    assert broken.intent == "unclear"
 
 
 def test_jev_timeout_fallback():
@@ -395,7 +414,7 @@ ALL_TESTS = [
     test_rule_long_input_latency,
     test_jev_config_exists,
     test_jev_structure,
-    test_jev_chat_response_parsing,
+    test_jev_answers_parsing,
     test_jev_timeout_fallback,
     test_kev_config_exists,
     test_kev_graceful_fallback_and_short_circuit,
