@@ -54,3 +54,26 @@
 - `pytest tests/test_phase1_units.py` → 9 passed
 
 **说明**：浏览器UI人工检查清单（任务3.3）按任务书决策5为手动验收项，不纳入自动化；自动化行为验证以 tests/e2e_test.py 为准。
+
+## 2026-10-08 第二轮验收整改（验收报告：docs/20261008-phase1-acceptance-report.md）
+
+针对报告6项发现逐条整改：
+
+| 报告发现 | 整改措施 | 结果 |
+|---------|---------|------|
+| 1.等待层边界未覆盖（max_seconds封顶/倒计时内容/取消） | 新增test_wait_aggregator_max_seconds_cap（2.7-3.6秒窗口断言封顶触发）、test_wait_aggregator_countdown_push（remaining_seconds/message_count字段）、test_wait_aggregator_cancel（取消后不触发+缓冲回收） | ✅ |
+| 2.断开清理未覆盖 | 新增test_connection_manager_disconnect_cancels_timer（连接管理器+等待汇总联动） | ✅ |
+| 3.启动失败暗卷未自动化 | e2e新增scenario_startup_missing_knowledge_file（OS环境变量覆盖知识库路径指向不存在文件，断言FileNotFoundError退出）和scenario_startup_missing_knowledge_config（临时ENV_FILE仅缺KNOWLEDGE_BASE_PATH，断言ValidationError+字段名，证明未使用默认值） | ✅ |
+| 4.重复回复检查窗口过短（2秒） | 检查窗口延长到首条消息起max_seconds封顶+5秒缓冲（时长从服务端配置读取，非硬编码） | ✅ |
+| 5.E2E可能误连其他进程 | 端口默认自动选择空闲端口（E2E_PORT仍可固定）；就绪检查改为/healthz并校验应用标识sdwan-kf-xiaoli；轮询期间监测子进程存活，提前退出即失败并输出服务日志尾部 | ✅ |
+| 6.pytest模式残留临时目录和ENV_FILE | 模块导入时保存原ENV_FILE；teardown_module（pytest自动调用）+atexit+脚本finally三重清理，幂等；实测pytest/脚本两种模式运行后临时目录残留0个 | ✅ |
+| 报告"浏览器手动项未执行" | 重跑§3.3全部6项检查（真实浏览器），6/6通过，截图与结果表留存于docs/acceptance-evidence/ | ✅ |
+
+**整改后复跑结果**：
+- `python tests/run_all.py` → 单元验收 13/13，端到端验收 5/5，退出码0
+- `pytest tests/test_phase1_units.py` → 13 passed
+- 临时目录残留：pytest模式0个、脚本模式0个
+- 代码变更：backend/main.py新增GET /healthz健康检查端点（返回应用标识与问答对数量，供E2E身份校验）
+
+**遗留说明**：报告第4项（浏览器项）已由本次执行留证，但按任务书决策5仍属人工验收范畴，
+后续版本需复跑清单（docs/acceptance-evidence/20261008-phase1-ui-checklist.md）。

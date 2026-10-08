@@ -57,6 +57,16 @@ async def index() -> FileResponse:
     return FileResponse(BASE_DIR / "static" / "index.html")
 
 
+@app.get("/healthz")
+async def healthz() -> dict:
+    """健康检查：E2E测试用它确认所连服务确为本应用。"""
+    return {
+        "app": "sdwan-kf-xiaoli",
+        "status": "ok",
+        "qa_pairs": len(knowledge_base.qa_pairs),
+    }
+
+
 manager = ConnectionManager()
 aggregator = WaitAggregator()
 

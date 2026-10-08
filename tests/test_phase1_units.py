@@ -8,11 +8,13 @@
 知识库加载分类/意图检索/错误处理。
 """
 import asyncio
+import atexit
 import os
 import shutil
 import subprocess
 import sys
 import tempfile
+import time
 from datetime import datetime
 from pathlib import Path
 
@@ -36,7 +38,28 @@ _ENV_TEST.write_text(
     encoding="utf-8",
 )
 _ENV_BROKEN.write_text("MODEL_API_BASE=http://test\n", encoding="utf-8")
+
+# pytest模式下模块导入发生在收集阶段：先保存原环境变量，测试结束后恢复
+_ORIG_ENV_FILE = os.environ.get("ENV_FILE")
 os.environ["ENV_FILE"] = str(_ENV_TEST)
+
+_CLEANED = False
+
+
+def _cleanup():
+    """恢复ENV_FILE并删除临时配置目录（脚本与pytest两种模式共用，幂等）。"""
+    global _CLEANED
+    if _CLEANED:
+        return
+    _CLEANED = True
+    if _ORIG_ENV_FILE is None:
+        os.environ.pop("ENV_FILE", None)
+    else:
+        os.environ["ENV_FILE"] = _ORIG_ENV_FILE
+    shutil.rmtree(_TMPDIR, ignore_errors=True)
+
+
+atexit.register(_cleanup)
 
 from backend.config import settings  # noqa: E402
 from backend.connection_manager import ConnectionManager  # noqa: E402
@@ -156,6 +179,120 @@ def test_wait_aggregator_sliding_window():
     asyncio.run(run())
 
 
+def test_wait_aggregator_max_seconds_cap():
+    """任务书1.5验收：总等待达到max_seconds时必须封顶触发。"""
+    triggered = []
+
+    async def on_timeout(session, text):
+        triggered.append((time.monotonic(), text))
+
+    async def run():
+        aggregator = WaitAggregator(slide_seconds=2, max_seconds=3)
+        session = _new_session(connection=None)
+
+        t0 = time.monotonic()
+        await aggregator.add_message(session, "a", on_timeout)  # t=0
+        await asyncio.sleep(1)
+        await aggregator.add_message(session, "b", on_timeout)  # t=1，重置后应在t=3
+        await asyncio.sleep(1)
+        await aggregator.add_message(session, "c", on_timeout)  # t=2，max剩余1秒 → 应在t=3封顶触发
+        await asyncio.sleep(1.5)  # t=3.5
+
+        assert len(triggered) == 1, f"应恰好触发1次: {triggered!r}"
+        fired_at, text = triggered[0]
+        elapsed = fired_at - t0
+        assert 2.7 <= elapsed <= 3.6, f"应在max_seconds≈3秒封顶触发，实际{elapsed:.2f}秒"
+        assert text == "a b c", f"汇总内容错误: {text!r}"
+
+    asyncio.run(run())
+
+
+def test_wait_aggregator_countdown_push():
+    """任务书1.5验收：每次新消息推送倒计时状态（remaining_seconds/message_count）。"""
+
+    class MockConnection:
+        def __init__(self):
+            self.messages = []
+
+        async def send_json(self, data):
+            self.messages.append(data)
+
+    async def run():
+        aggregator = WaitAggregator(slide_seconds=2, max_seconds=5)
+        connection = MockConnection()
+        session = _new_session(connection=connection)
+        triggered = []
+
+        async def on_timeout(s, text):
+            triggered.append(text)
+
+        await aggregator.add_message(session, "m1", on_timeout)
+        await asyncio.sleep(0.3)
+        await aggregator.add_message(session, "m2", on_timeout)
+        await asyncio.sleep(2.2)
+
+        assert len(connection.messages) == 2, f"每条消息应推送一次倒计时: {connection.messages!r}"
+        first, second = connection.messages
+        assert first["type"] == "waiting" and second["type"] == "waiting"
+        assert first["remaining_seconds"] == 2, f"首条倒计时=slide_seconds: {first!r}"
+        assert first["message_count"] == 1 and second["message_count"] == 2
+        assert triggered == ["m1 m2"], f"汇总应正常触发: {triggered!r}"
+
+    asyncio.run(run())
+
+
+def test_wait_aggregator_cancel():
+    """任务书1.5验收：定时器可被取消，取消后不触发且回收缓冲。"""
+    triggered = []
+
+    async def on_timeout(session, text):
+        triggered.append(text)
+
+    async def run():
+        aggregator = WaitAggregator(slide_seconds=1, max_seconds=5)
+        session = _new_session(connection=None)
+
+        await aggregator.add_message(session, "x", on_timeout)
+        await aggregator.cancel(session)
+        await asyncio.sleep(1.8)  # 超过原窗口，不应触发
+
+        assert triggered == [], "取消后不应触发回调"
+        assert session.waiting_queue.messages == [], "取消后应清空缓冲"
+        assert session.timer_task is None, "取消后应清空定时器引用"
+
+    asyncio.run(run())
+
+
+def test_connection_manager_disconnect_cancels_timer():
+    """任务书1.4验收：disconnect清理会话并取消等待定时器（连接管理器+等待汇总联动）。"""
+    triggered = []
+
+    async def on_timeout(session, text):
+        triggered.append(text)
+
+    class MockWebSocket:
+        async def accept(self):
+            pass
+
+        async def send_json(self, data):
+            pass
+
+    async def run():
+        manager = ConnectionManager()
+        aggregator = WaitAggregator(slide_seconds=1, max_seconds=5)
+        session_id = await manager.connect(MockWebSocket())
+        session = manager.get_session(session_id)
+
+        await aggregator.add_message(session, "hello", on_timeout)
+        manager.disconnect(session_id)
+        await asyncio.sleep(1.5)  # 超过原窗口
+
+        assert triggered == [], "断开连接后定时器应被取消，不触发回调"
+        assert session_id not in manager.active_sessions
+
+    asyncio.run(run())
+
+
 def test_knowledge_load_and_classify():
     """任务书2.1验收：加载、解析结构、分类索引、意图检索、全量文本。"""
     kb = KnowledgeBase(ROOT / "data" / "sdwan.md")
@@ -206,11 +343,20 @@ ALL_TESTS = [
     test_models,
     test_connection_manager,
     test_wait_aggregator_sliding_window,
+    test_wait_aggregator_max_seconds_cap,
+    test_wait_aggregator_countdown_push,
+    test_wait_aggregator_cancel,
+    test_connection_manager_disconnect_cancels_timer,
     test_knowledge_load_and_classify,
     test_knowledge_missing_file,
     test_knowledge_empty_file,
     test_knowledge_broken_format_fallback,
 ]
+
+
+def teardown_module(module):
+    """pytest模式：收集/运行结束后恢复环境变量并清理临时目录。"""
+    _cleanup()
 
 
 def main():
@@ -230,4 +376,4 @@ if __name__ == "__main__":
     try:
         sys.exit(main())
     finally:
-        shutil.rmtree(_TMPDIR, ignore_errors=True)
+        _cleanup()
