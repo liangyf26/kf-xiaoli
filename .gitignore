@@ -56,3 +56,6 @@ models/
 # Temporary files
 *.tmp
 temp/
+
+# 模型权重不入库（jaredpalmer/kev-0.5b本地serve检查点，见PROGRESS.md部署说明）
+runs/

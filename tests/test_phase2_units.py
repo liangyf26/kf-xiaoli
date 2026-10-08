@@ -275,13 +275,13 @@ def test_kev_config_exists():
     """任务书4.1验收1：Kev配置字段存在。"""
     assert hasattr(settings, "KEV_MODEL_PATH"), "缺少KEV_MODEL_PATH"
     assert hasattr(settings, "KEV_DEVICE"), "缺少KEV_DEVICE"
+    assert hasattr(settings, "KEV_SERVE_URL"), "缺少KEV_SERVE_URL"
 
 
-def test_kev_graceful_fallback_and_short_circuit():
-    """模型不可用（依赖缺失/模型无法下载）时优雅回退且二次调用短路。
+def test_kev_graceful_fallback():
+    """服务不可达/依赖缺失时优雅回退（不抛异常），二次调用行为一致。
 
-    任务书止损规则2：Kev模型下载失败时跳过真实推理、标记依赖问题，
-    引擎不得抛异常导致调用方崩溃。
+    任务书止损规则2：Kev不可用时跳过、标记依赖问题，调用方不得崩溃。
     """
     engine = KevEngine(model_path=settings.KEV_MODEL_PATH, device=settings.KEV_DEVICE)
 
@@ -295,7 +295,49 @@ def test_kev_graceful_fallback_and_short_circuit():
     assert first.intent == "unclear"
     assert 0 <= first.intent_confidence <= 1
     assert first.latency_ms >= 0
-    assert second.engine == first.engine, "二次调用应与首次一致（加载失败短路）"
+    assert second.engine == first.engine, "二次调用应与首次一致"
+
+
+def test_kev_serve_answers_parsing():
+    """kev.serve /v1/systemone的answers解析（与OpenRouter decisions同构）。
+
+    score为分档索引期望值按(档数-1)归一化；noul>=0.5为真；
+    非法意图归unclear；answers缺失字段回退kev_failed。
+    """
+    engine = KevEngine()
+
+    def make_answers(intent="price_inquiry", score=8.28, noul=0.15, emotion="neutral",
+                     complexity=1.8, escalate=0.1):
+        return {
+            "intent": {"type": "choice", "choice": intent, "confidence": 0.95},
+            "needs_clarification": {"type": "noul", "noul": noul},
+            "intent_confidence": {"type": "score", "score": score},
+            "user_emotion": {"type": "choice", "choice": emotion},
+            "technical_complexity": {"type": "score", "score": complexity},
+            "escalate_to_human": {"type": "noul", "noul": escalate},
+        }
+
+    good = engine._result_from_answers(make_answers(), 88)
+    assert good.engine == "kev"
+    assert good.intent == "price_inquiry"
+    assert abs(good.intent_confidence - 0.92) < 0.01
+    assert good.needs_clarification is False
+    assert good.technical_complexity == 20
+
+    clarify = engine._result_from_answers(make_answers(noul=0.85), 50)
+    assert clarify.needs_clarification is True
+
+    extreme = engine._result_from_answers(make_answers(score=15.0, complexity=20.0, escalate=0.6), 10)
+    assert extreme.intent_confidence == 1.0
+    assert extreme.technical_complexity == 100
+    assert extreme.escalate_to_human is True
+
+    weird = engine._result_from_answers(make_answers(intent="hack"), 10)
+    assert weird.intent == "unclear"
+
+    broken = engine._result_from_answers({"intent": {}}, 10)
+    assert broken.engine == "kev_failed"
+    assert broken.intent == "unclear"
 
 
 def test_kev_json_parse_tolerance():
@@ -417,7 +459,8 @@ ALL_TESTS = [
     test_jev_answers_parsing,
     test_jev_timeout_fallback,
     test_kev_config_exists,
-    test_kev_graceful_fallback_and_short_circuit,
+    test_kev_graceful_fallback,
+    test_kev_serve_answers_parsing,
     test_kev_json_parse_tolerance,
     test_factory_creates_all_engines,
     test_factory_invalid_engine_raises,

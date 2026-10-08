@@ -151,3 +151,30 @@ Jev对模糊消息（"咋整啊"/"能不能直播"）返回unclear+澄清（更�
 "网速慢怎么办"Jev判troubleshooting（比规则引擎的usage_guide更贴切）。
 
 **验证**: pytest两套35 passed；e2e 6/6；配置更新（JEV_API_BASE=https://openrouter.ai/api、新增JEV_MODEL）。
+
+## 2026-10-08 Kev真实模型下载与本地运行打通（jaredpalmer/kev-0.5b）
+
+**任务书模型ID勘误**: tt-hous/kev-0.5b不存在（作者名下无此模型）。实际模型为 **jaredpalmer/kev-0.5b**
+（Qwen2.5-0.5B基座 + LoRA16 + 指针头的Jev同架构决策模型，typesafe/decision-model标签，
+prefill-only单次前向输出概率分布，不生成文本；0.5B为原型，官方已迭代Kev-0.8B/4B/9B）。
+
+**部署方案**（transformers直载不可行——自定义指针头架构，官方路径是kev包起本地服务）:
+- 新增独立虚拟环境 .venv-kev（Python 3.13，kev包要求>=3.12）：torch 2.8.0+cpu / transformers 5.19 / peft 0.21.2 / typesafe-sdk 0.7.2
+- 权重: GitHub release v0.1.0 kev-0.5b.tar.gz（38MB）→ runs/kev/
+- 基座Qwen2.5-0.5B(988MB)经 **hf-mirror.com** 下载（huggingface.co直连被墙；须禁用hf-xet否则CDN挂起: HF_HUB_DISABLE_XET=1）
+- 启动: HF_ENDPOINT=https://hf-mirror.com HF_HOME=D:\hf-cache KEV_DTYPE=bf16 .venv-kev/Scripts/python.exe -m kev.serve --run runs/kev --port 8009
+
+**踩坑记录**:
+- C盘满导致pip失败 → 全部缓存/临时/模型目录迁至D盘（PIP_CACHE_DIR/HF_HOME/TEMP）
+- kev.serve默认fp32加载（0.5B≈2GB+合并副本）在内存紧张机器上原生OOM（exit 2816，transformers物化线程崩溃）→ KEV_DTYPE=bf16解决
+- 系统代理劫持127.0.0.1请求 → 本地HTTP调用需绕过代理
+- score criteria最多10档（同decisions契约）；Windows不支持symlink缓存有告警但可用
+
+**验证**: /v1/systemone契约端到端跑通（HTTP 200，answers结构与OpenRouter decisions同构）；
+KevEngine HTTP模式（KEV_SERVE_URL）+解析测试；pytest两套36 passed。
+
+**性能与质量限制（如实记录）**:
+- 本机内存压力：系统提交内存28.5/33.5GB耗尽（os error 1455页面文件太小），推理70-107秒/次
+  （正常机器0.5B CPU前向亚秒级，任务书CPU<1000ms在本机当前内存状态下无法达成，需释放内存后重启serve）
+- 模型为英文训练原型（banking77/agnews/MNLI等），中文属分布外：'多少钱'被判usage_guide，
+  分类质量对中文不可靠，需真实案例评估（任务书决策5）

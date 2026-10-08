@@ -32,6 +32,9 @@ class Settings(BaseSettings):
     JEV_MODEL: str = "typesafe/jev-1.13"
     KEV_MODEL_PATH: str = "tt-hous/kev-0.5b"
     KEV_DEVICE: str = "cpu"
+    # Kev本地serve（kev包的python -m kev.serve）：非空时KevEngine走HTTP模式
+    KEV_SERVE_URL: str = ""
+    KEV_API_KEY: str = ""
 
     # 日志与服务
     LOG_LEVEL: str = "INFO"
