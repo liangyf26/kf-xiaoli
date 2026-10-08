@@ -183,11 +183,8 @@ def test_jev_config_exists():
 
 
 def test_jev_structure():
-    """任务书3.1验收2（无key路径）：客户端结构与questions定义完整。"""
-    assert settings.JEV_API_KEY in ("", "your-jev-api-key-here"), (
-        "检测到真实API key，本用例仅验证无key路径；真实调用请用compare_engines.py"
-    )
-    engine = JevEngine(settings.JEV_API_KEY)
+    """任务书3.1验收2：客户端结构与questions定义完整（不依赖key状态）。"""
+    engine = JevEngine("test-key")
     assert hasattr(engine, "decide"), "缺少decide方法"
     assert hasattr(engine, "questions"), "缺少questions定义"
     assert "intent" in engine.questions
@@ -200,6 +197,42 @@ def test_jev_structure():
     assert engine.questions["intent"]["kind"] == "choice"
     assert len(engine.questions["intent"]["options"]) == 7
     assert engine.questions["needs_clarification"]["kind"] == "noul"
+    assert engine.model == settings.JEV_MODEL, "模型名应来自配置"
+
+
+def test_jev_chat_response_parsing():
+    """OpenRouter chat契约的响应解析：正常JSON/代码块包裹/非法输出/越界值。"""
+    engine = JevEngine("test-key")
+
+    good = engine._parse_chat_response(
+        '{"intent": "price_inquiry", "intent_confidence": 0.92, "needs_clarification": false,'
+        ' "technical_complexity": 20, "user_emotion": "neutral", "escalate_to_human": false}',
+        88,
+    )
+    assert good.engine == "jev"
+    assert good.intent == "price_inquiry"
+    assert abs(good.intent_confidence - 0.92) < 1e-9
+    assert good.needs_clarification is False
+    assert good.latency_ms == 88
+
+    wrapped = engine._parse_chat_response(
+    "```json\n{\"intent\": \"usage_guide\", \"intent_confidence\": 0.7, \"needs_clarification\": true,"
+    " \"clarification_reason\": \"问题模糊\", \"technical_complexity\": 40,"
+    ' "user_emotion": "neutral", "escalate_to_human": false}\n```',
+        50,
+    )
+    assert wrapped.engine == "jev"
+    assert wrapped.intent == "usage_guide"
+    assert wrapped.clarification_reason == "问题模糊"
+
+    bad = engine._parse_chat_response("这不是JSON输出", 50)
+    assert bad.engine == "jev_failed"
+    assert bad.intent == "unclear"
+    assert bad.intent_confidence < 0.5
+
+    weird = engine._parse_chat_response('{"intent": "hack", "intent_confidence": 7.5}', 10)
+    assert weird.intent == "unclear"
+    assert weird.intent_confidence == 1.0
 
 
 def test_jev_timeout_fallback():
@@ -362,6 +395,7 @@ ALL_TESTS = [
     test_rule_long_input_latency,
     test_jev_config_exists,
     test_jev_structure,
+    test_jev_chat_response_parsing,
     test_jev_timeout_fallback,
     test_kev_config_exists,
     test_kev_graceful_fallback_and_short_circuit,
