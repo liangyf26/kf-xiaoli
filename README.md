@@ -144,11 +144,21 @@ cat test_results.json
 
 ## 🧪 测试
 
-### 运行单元测试
+### 运行验收测试
 
 ```bash
-pytest tests/
+# 全量验收（单元 + 端到端，端到端自动启停服务）
+python tests/run_all.py
+
+# 仅单元验收（也兼容pytest）
+python tests/test_phase1_units.py
+pytest tests/test_phase1_units.py
+
+# 仅端到端验收（自动在8001端口启停服务，E2E_PORT可改端口）
+python tests/e2e_test.py
 ```
+
+测试内容与任务书验收命令的对应关系见 `tests/README.md`。
 
 ### 测试用例说明
 
