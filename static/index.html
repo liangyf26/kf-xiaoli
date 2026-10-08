@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDWAN智能客服</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="chat-container">
+        <header class="chat-header">
+            <h1>SDWAN智能客服机器人 Demo</h1>
+            <button id="clear-btn" type="button">清空对话</button>
+        </header>
+
+        <main id="message-list" class="message-list">
+            <div class="system-tip">您好，我是SDWAN智能客服机器人，有问题请直接输入。</div>
+        </main>
+
+        <div id="waiting-bar" class="waiting-bar hidden">
+            <span id="waiting-text"></span>
+        </div>
+        <div id="thinking-bar" class="thinking-bar hidden">💭 正在思考中...</div>
+
+        <footer class="input-area">
+            <input id="message-input" type="text" placeholder="请输入您的问题..." autocomplete="off">
+            <button id="send-btn" type="button">发送</button>
+        </footer>
+    </div>
+
+    <div id="disconnect-tip" class="disconnect-tip hidden">
+        <span>连接已断开</span>
+        <button id="reconnect-btn" type="button">重新连接</button>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

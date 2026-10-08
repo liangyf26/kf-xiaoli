@@ -12,6 +12,9 @@ httpx==0.26.0
 # 数据验证
 pydantic==2.5.3
 
+# 配置管理（pydantic v2的Settings）
+pydantic-settings==2.2.1
+
 # 日志
 python-json-logger==2.0.7
 
