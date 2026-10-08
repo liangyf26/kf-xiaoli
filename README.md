@@ -115,6 +115,10 @@ cat test_results.json
 
 ```
 707-kf-xiaoli/
+├── docs/                     # 项目文档
+│   ├── 产品需求文档-20261008.md
+│   ├── 技术设计文档-20261008.md
+│   └── 20261008-phase1-Infrastructure-taskbook.md  # Phase 1任务书
 ├── backend/                    # 后端代码
 │   ├── main.py                # FastAPI入口
 │   ├── config.py              # 配置管理
@@ -224,6 +228,9 @@ huggingface-cli download tt-hous/kev-0.5b
 - [x] 配置文件和README
 
 ### 进行中（Phase 1）
+
+任务书详见 `docs/20261008-phase1-Infrastructure-taskbook.md`。
+
 - [ ] FastAPI + WebSocket基础框架
 - [ ] 知识库加载和解析
 - [ ] 规则引擎实现
@@ -236,7 +243,7 @@ huggingface-cli download tt-hous/kev-0.5b
 - [ ] 路由和编排逻辑
 - [ ] 批量测试脚本
 
-详见《技术设计文档-20261008.md》第十章实施路线图。
+详见《技术设计文档-20261008.md》（`docs/技术设计文档-20261008.md`）第十章实施路线图。
 
 ## 🤝 贡献
 
