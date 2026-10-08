@@ -77,3 +77,51 @@
 
 **遗留说明**：报告第4项（浏览器项）已由本次执行留证，但按任务书决策5仍属人工验收范畴，
 后续版本需复跑清单（docs/acceptance-evidence/20261008-phase1-ui-checklist.md）。
+
+## Phase 2 开始（2026-10-08）
+- 任务0: 环境验证通过，开始决策层开发（规则引擎/Jev API/Kev-0.5B）
+
+## Phase 2 完成情况（2026-10-08）
+
+### 已实现功能
+- ✅ 决策层抽象接口（DecisionResult/DecisionEngine，backend/decision_layer/base.py）
+- ✅ 规则引擎（关键词匹配6意图+unclear，<100ms，backend/decision_layer/rule_engine.py）
+- ✅ Jev API集成（TypeSafe问题定义6项，5秒超时回退，backend/decision_layer/jev_client.py）
+- ✅ Kev-0.5B本地模型（懒加载/CPU-GPU/JSON解析容错，backend/decision_layer/kev_client.py）
+- ✅ 决策引擎工厂（create_decision_engine，配置/环境变量切换，无效值报错）
+- ✅ 决策引擎集成到main.py（回复payload携带intent/engine元数据，澄清计数与会话上下文联动）
+- ✅ 3引擎对比测试脚本（tests/compare_engines.py，10个问题，输出engine_comparison.json）
+
+### 技术指标
+- 规则引擎响应时间: 0-1ms（要求<100ms）✅
+- 意图识别类别: 7种（price_inquiry/product_comparison/technical_support/usage_guide/troubleshooting/purchase_process/unclear）
+- 对比测试: 10个问题，规则引擎全部输出合理意图，engine_comparison.json已生成
+- 单元验收: Phase 2共21项全过（接口3+规则9+Jev3+Kev3+工厂2+对比1）；pytest两套合计34 passed
+- e2e: 6/6（新增决策元数据场景，验证WebSocket回复携带intent/engine字段）
+
+### 对比结果（tests/compare_engines.py tests/test_questions_phase2.txt）
+- 规则引擎: 平均延迟0.0ms；10个问题中9个识别出具体意图，"要直播的线路"无关键词命中归为unclear
+- Jev: 未配置真实API_KEY，按任务书决策3跳过真实调用（记录skipped原因）
+- Kev: 模型不可用，全部回退kev_failed（详见下方遗留问题）
+
+### 验收官暗卷3项实测
+1. 口语"咋整": 规则引擎按任务书关键词字典（咋/咋整在usage_guide列表）识别为usage_guide并触发澄清（长度<5字）；
+   Jev/Kev不可用回退unclear。注：任务书暗卷预期troubleshooting与其自身关键词字典（咋整→usage_guide）存在矛盾，
+   已按任务书字典实现并如实记录，待真实案例评估阶段（任务书决策5）修正词表
+2. 超长文本1000字: 三引擎均正常返回DecisionResult，无崩溃（规则0ms/Jev回退1046ms/Kev回退0ms）
+3. 快速切换DECISION_ENGINE三次（rule/jev/kev）: 每次工厂均创建正确引擎类型
+
+### 待Phase 3实现
+- LLM客户端（Qwen27B）
+- Prompt构建器和Few-shot示例
+- 路由器和编排层（按决策结果路由：澄清/FAQ匹配/LLM生成/转人工）
+- 真实回复生成（替换Echo mock）
+
+### 遗留问题
+- **Kev模型依赖问题（任务书止损规则2）**: 本机网络无法访问huggingface.co（对照组已知模型同样返回000），
+  tt-hous/kev-0.5b无法下载；transformers/torch未安装（避免拉取2GB+依赖）。引擎代码完整
+  （懒加载+JSON容错+优雅回退），依赖安装且模型可用后即可启用真实推理
+- **Jev真实调用未验证**: 无真实API key（任务书决策3允许），结构/超时回退已验证，接入真实key后
+  运行 tests/compare_engines.py 即可对比
+- "网速慢怎么办"被规则引擎归为usage_guide（"怎么"与"慢"同分时按字典序优先usage_guide），
+  词表优先级待真实案例调优

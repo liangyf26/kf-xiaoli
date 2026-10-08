@@ -3,12 +3,13 @@
 运行方式（使用项目虚拟环境）:
     python tests/e2e_test.py
 
-运行场景（对应任务书任务1.6/4.2验收与"验收官暗卷"）:
+运行场景（对应任务书任务1.6/4.2验收、Phase 2任务5.3验收与"验收官暗卷"）:
     1. 单条消息 → waiting倒计时 → response（Echo+首条问候语）
     2. 3条连续消息（间隔2秒） → 仅1次回复且汇总完整（滑动窗口，检查窗口覆盖到max_seconds封顶）
     3. 清空对话 → 再次回复重新携带问候语（会话状态重置）
-    4. 暗卷第2项：服务启动时知识库文件缺失 → 报错退出而非静默失败
-    5. 暗卷第3项：仅缺少KNOWLEDGE_BASE_PATH配置 → 报错退出而非使用默认值
+    4. 回复payload携带决策元数据（intent/engine等，Phase 2集成验证）
+    5. 暗卷第2项：服务启动时知识库文件缺失 → 报错退出而非静默失败
+    6. 暗卷第3项：仅缺少KNOWLEDGE_BASE_PATH配置 → 报错退出而非使用默认值
 
 端口默认自动选择空闲端口，避免与其他进程冲突；可用环境变量 E2E_PORT 固定。
 就绪检查通过 /healthz 确认服务身份，并监测子进程存活，防止误连其他进程的服务。
@@ -156,10 +157,24 @@ async def scenario_clear_conversation():
         assert "Echo: 清空后再测" in answer, f"回复内容错误: {answer!r}"
 
 
+async def scenario_decision_meta():
+    """任务书5.3验收：决策引擎集成——回复payload携带决策元数据。"""
+    async with websockets.connect(URI) as ws:
+        await ws.send(json.dumps({"type": "user_message", "content": "多少钱"}))
+        data = await recv_response(ws, timeout=SLIDE_WAIT + 30)
+        payload = data["data"]
+        assert "intent" in payload and payload["intent"], "回复缺少决策意图字段"
+        assert "engine" in payload and payload["engine"], "回复缺少决策引擎字段"
+        assert "intent_confidence" in payload and 0 <= payload["intent_confidence"] <= 1
+        assert "needs_clarification" in payload and "escalate_to_human" in payload
+        assert "Echo" in payload["answer"], "Phase 1 Echo行为被破坏"
+
+
 WS_SCENARIOS = [
     scenario_single_message,
     scenario_three_messages_one_reply,
     scenario_clear_conversation,
+    scenario_decision_meta,
 ]
 
 

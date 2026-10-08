@@ -13,6 +13,7 @@ from fastapi.staticfiles import StaticFiles
 
 from backend.config import settings
 from backend.connection_manager import ConnectionManager
+from backend.decision_layer import create_decision_engine
 from backend.knowledge import KnowledgeBase
 from backend.models import Message
 from backend.wait_aggregator import WaitAggregator
@@ -69,14 +70,36 @@ async def healthz() -> dict:
 
 manager = ConnectionManager()
 aggregator = WaitAggregator()
+# 决策引擎按DECISION_ENGINE配置创建（Phase 2）；真实路由在Phase 3接入
+decision_engine = create_decision_engine()
+logger.info("决策引擎已加载: %s", type(decision_engine).__name__)
 
 
 async def handle_aggregated(session, combined: str) -> None:
-    """等待结束的回调：Phase 1返回Echo mock回复。"""
+    """等待结束的回调：先经决策层识别意图，Phase 1仍返回Echo mock回复。"""
     parts = []
     if session.is_first_message:
         parts.append(settings.FIRST_MESSAGE_GREETING)
         session.is_first_message = False
+
+    # 决策层意图识别（RuleBasedEngine<100ms；Jev/Kev视配置与可用性）
+    context = {
+        "history": [{"role": m.role, "content": m.content} for m in session.context.history[-10:]],
+        "previous_intent": session.context.last_intent or None,
+        "clarification_count": session.context.clarification_count,
+        "covered_topics": session.context.covered_topics,
+    }
+    decision = await decision_engine.decide(combined, context)
+    session.context.last_intent = decision.intent
+    if decision.needs_clarification:
+        session.context.clarification_count += 1
+    logger.info(
+        "session=%s 决策: intent=%s confidence=%.2f clarify=%s emotion=%s escalate=%s latency=%dms engine=%s",
+        session.session_id, decision.intent, decision.intent_confidence,
+        decision.needs_clarification, decision.user_emotion,
+        decision.escalate_to_human, decision.latency_ms, decision.engine,
+    )
+
     parts.append(f"Echo: {combined}")
     answer = "\n".join(parts)
 
@@ -87,7 +110,15 @@ async def handle_aggregated(session, combined: str) -> None:
 
     await manager.send_message(session.session_id, {
         "type": "response",
-        "data": {"answer": answer, "sources": []},
+        "data": {
+            "answer": answer,
+            "sources": [],
+            "intent": decision.intent,
+            "intent_confidence": decision.intent_confidence,
+            "needs_clarification": decision.needs_clarification,
+            "escalate_to_human": decision.escalate_to_human,
+            "engine": decision.engine,
+        },
     })
 
 
@@ -112,6 +143,8 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
                 session.context.history.clear()
                 session.context.covered_topics.clear()
                 session.context.user_needs.clear()
+                session.context.last_intent = ""
+                session.context.clarification_count = 0
                 session.is_first_message = True
                 logger.info("session=%s 对话已清空", session_id)
 

@@ -10,7 +10,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 
 STEPS = [
-    ("单元验收", ROOT / "tests" / "test_phase1_units.py"),
+    ("Phase 1单元验收", ROOT / "tests" / "test_phase1_units.py"),
+    ("Phase 2单元验收", ROOT / "tests" / "test_phase2_units.py"),
     ("端到端验收", ROOT / "tests" / "e2e_test.py"),
 ]
 

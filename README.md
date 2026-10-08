@@ -236,22 +236,21 @@ huggingface-cli download tt-hous/kev-0.5b
 - [x] PRD和TDD文档
 - [x] 项目结构搭建
 - [x] 配置文件和README
+- [x] Phase 1：FastAPI + WebSocket基础框架、知识库、Web界面
+- [x] Phase 2：决策层（规则引擎/Jev/Kev）+ 工厂切换 + 对比测试
 
-### 进行中（Phase 1）
+### 进行中（Phase 3）
 
-任务书详见 `docs/20261008-phase1-Infrastructure-taskbook.md`。
+任务书详见 `docs/20261008-phase3-taskbook.md`（待编写）。
 
-- [ ] FastAPI + WebSocket基础框架
-- [ ] 知识库加载和解析
-- [ ] 规则引擎实现
-- [ ] Web界面开发
+- [ ] LLM客户端（Qwen27B集成）
+- [ ] Prompt构建器和Few-shot示例
+- [ ] 路由和编排逻辑（澄清/FAQ/LLM生成/转人工）
+- [ ] 真实回复生成（替换Echo mock）
 
 ### 待开始
-- [ ] Jev API集成
-- [ ] Kev模型部署
-- [ ] LLM客户端实现
-- [ ] 路由和编排逻辑
 - [ ] 批量测试脚本
+- [ ] 准确率评估
 
 详见《技术设计文档-20261008.md》（`docs/技术设计文档-20261008.md`）第十章实施路线图。
 

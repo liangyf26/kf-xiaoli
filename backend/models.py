@@ -20,6 +20,8 @@ class ConversationContext(BaseModel):
     history: list[Message] = Field(default_factory=list, description="对话历史")
     covered_topics: list[str] = Field(default_factory=list, description="已覆盖话题")
     user_needs: dict[str, Any] = Field(default_factory=dict, description="用户需求画像")
+    last_intent: str = Field(default="", description="上一轮决策意图")
+    clarification_count: int = Field(default=0, description="本轮会话已澄清次数")
 
 
 class WaitingQueue(BaseModel):
