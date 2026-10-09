@@ -1,16 +1,17 @@
-"""Phase 3 单元验收测试（任务书任务1-4验收命令的可重复版本）。
+"""Phase 3 单元验收测试（任务书任务1-4验收命令的可重复版本，共19项）。
 
 运行方式（使用项目虚拟环境）:
     python tests/test_phase3_units.py
     pytest tests/test_phase3_units.py
 
-覆盖：LLM客户端（结构/参数/超时语义，真实调用在API不可达时跳过）、JSON解析器4例、
-Few-shot示例库结构、示例选择器、Prompt构建器、路由决策5例、处理路径3例。
-编排器端到端（需真实LLM）见 tests/run_e2e_tests.py。
+覆盖：LLM客户端（结构/参数/超时语义，真实调用在API不可达时按标准skip处理）、JSON解析器4例、
+Few-shot示例库结构与每意图数量、示例选择器、Prompt构建器、路由决策5例、处理路径3例。
+编排器端到端（需真实LLM）见 tests/run_e2e_tests.py 与 tests/eval_accuracy.py。
 """
 import asyncio
 import os
 import sys
+import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -69,7 +70,7 @@ def test_llm_client_structure():
 
 
 def test_llm_client_real_call():
-    """任务书1.1验收测试1：真实对话（API不可达时跳过）。"""
+    """任务书1.1验收测试1：真实对话（API不可达时按标准skip处理）。"""
     import httpx
 
     from backend.llm.client import QwenClient
@@ -77,9 +78,8 @@ def test_llm_client_real_call():
     try:
         httpx.get(f"{settings.MODEL_API_BASE}/models",
                   headers={"Authorization": f"Bearer {settings.MODEL_API_KEY}"}, timeout=5)
-    except httpx.HTTPError:
-        print("跳过: Qwen API不可达")
-        return
+    except httpx.HTTPError as exc:
+        raise unittest.SkipTest(f"Qwen API不可达，跳过真实调用: {exc}")
 
     async def run():
         client = QwenClient()
@@ -90,6 +90,18 @@ def test_llm_client_real_call():
 
     result = asyncio.run(run())
     assert result["response"] and result["latency_ms"] > 0
+
+
+def test_few_shot_example_counts():
+    """任务书2.1验收：必需意图每个3-5个示例（按'示例N（'切分计数）。"""
+    import re
+
+    required = ("price_inquiry", "technical_support", "troubleshooting",
+                "usage_guide", "product_comparison", "purchase_process", "account_management")
+    for intent in required:
+        block = FEW_SHOT_EXAMPLES[intent]
+        count = len(re.findall(r"示例\d+（", block))
+        assert 3 <= count <= 5, f"{intent}示例数量{count}不在3-5范围"
 
 
 def test_llm_client_timeout_message():
@@ -255,6 +267,7 @@ ALL_TESTS = [
     test_parser_incomplete_json,
     test_parser_plain_text,
     test_few_shot_examples_structure,
+    test_few_shot_example_counts,
     test_selector_by_intent,
     test_selector_clarification,
     test_prompt_builder_structure,
@@ -270,15 +283,20 @@ ALL_TESTS = [
 
 
 def main():
-    failed = 0
+    import unittest
+
+    failed = skipped = 0
     for test in ALL_TESTS:
         try:
             test()
             print(f"OK {test.__name__}")
+        except unittest.SkipTest as exc:
+            skipped += 1
+            print(f"SKIP {test.__name__}: {exc}")
         except Exception as exc:  # noqa: BLE001 逐项报告后继续
             failed += 1
             print(f"FAIL {test.__name__}: {exc}")
-    print(f"=== Phase 3单元验收: {len(ALL_TESTS) - failed}/{len(ALL_TESTS)} 通过 ===")
+    print(f"=== Phase 3单元验收: {len(ALL_TESTS) - failed - skipped}/{len(ALL_TESTS)} 通过, {skipped}跳过, {failed}失败 ===")
     return 1 if failed else 0
 
 

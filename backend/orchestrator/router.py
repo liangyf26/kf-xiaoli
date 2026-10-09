@@ -30,8 +30,12 @@ class CustomerServiceRouter:
         self.knowledge_base = knowledge_base
         self.prompt_builder = prompt_builder
 
-    def _determine_path(self, decision: DecisionResult, context: Dict[str, Any]) -> ProcessingPath:
-        """路径优先级：转人工 > 澄清(未超次数) > FAQ > LLM > 降级人工。"""
+    def _determine_path(self, decision: DecisionResult, context: Dict[str, Any], message: str = "") -> ProcessingPath:
+        """路径优先级：转人工 > 澄清(未超次数) > FAQ > LLM > 降级人工。
+
+        澄清仅针对短而模糊的问题（<8字符）；长但关键词未命中的问题交给LLM尝试
+        （prompt含澄清指示兜底，避免误澄清具体问题）。
+        """
         # 1. 转人工（情绪负面/决策层明确要求）
         if decision.escalate_to_human:
             return ProcessingPath.HUMAN_ESCALATION
@@ -39,7 +43,9 @@ class CustomerServiceRouter:
         # 2. 澄清（已澄清2次以上不再澄清，避免用户烦躁）
         clarification_count = int(context.get("clarification_count", 0) or 0)
         if decision.needs_clarification and clarification_count < 2:
-            return ProcessingPath.CLARIFICATION
+            if len(message.strip()) < 8:
+                return ProcessingPath.CLARIFICATION
+            # 长而具体的问题：交给LLM尝试回答
 
         # 3. FAQ直接命中（低复杂度+高置信度）
         if decision.technical_complexity <= FAQ_MAX_COMPLEXITY and decision.intent_confidence >= FAQ_MIN_CONFIDENCE:

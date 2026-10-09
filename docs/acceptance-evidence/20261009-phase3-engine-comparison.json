@@ -1,0 +1,363 @@
+{
+  "summary": {
+    "question_count": 10,
+    "rule_avg_latency_ms": 0.0,
+    "rule_max_latency_ms": 0,
+    "jev_skipped": false,
+    "kev_available": true,
+    "kev_avg_latency_ms": 1140.5,
+    "note": "Kev经本地kev.serve推理"
+  },
+  "results": [
+    {
+      "question": "多少钱",
+      "engines": {
+        "rule": {
+          "intent": "price_inquiry",
+          "intent_confidence": 0.9,
+          "needs_clarification": true,
+          "user_emotion": "neutral",
+          "technical_complexity": 20,
+          "escalate_to_human": false,
+          "latency_ms": 0,
+          "engine": "rule"
+        },
+        "jev": {
+          "intent": "price_inquiry",
+          "intent_confidence": 0.846,
+          "needs_clarification": true,
+          "user_emotion": "neutral",
+          "technical_complexity": 10,
+          "escalate_to_human": false,
+          "latency_ms": 1359,
+          "engine": "jev"
+        },
+        "kev": {
+          "intent": "price_inquiry",
+          "intent_confidence": 0.425,
+          "needs_clarification": true,
+          "user_emotion": "neutral",
+          "technical_complexity": 31,
+          "escalate_to_human": true,
+          "latency_ms": 1265,
+          "engine": "kev"
+        }
+      }
+    },
+    {
+      "question": "tiktok登不上",
+      "engines": {
+        "rule": {
+          "intent": "technical_support",
+          "intent_confidence": 0.9,
+          "needs_clarification": false,
+          "user_emotion": "neutral",
+          "technical_complexity": 60,
+          "escalate_to_human": false,
+          "latency_ms": 0,
+          "engine": "rule"
+        },
+        "jev": {
+          "intent": "technical_support",
+          "intent_confidence": 0.601,
+          "needs_clarification": true,
+          "user_emotion": "negative",
+          "technical_complexity": 55,
+          "escalate_to_human": false,
+          "latency_ms": 1264,
+          "engine": "jev"
+        },
+        "kev": {
+          "intent": "technical_support",
+          "intent_confidence": 0.494,
+          "needs_clarification": true,
+          "user_emotion": "negative",
+          "technical_complexity": 46,
+          "escalate_to_human": true,
+          "latency_ms": 1125,
+          "engine": "kev"
+        }
+      }
+    },
+    {
+      "question": "怎么用",
+      "engines": {
+        "rule": {
+          "intent": "usage_guide",
+          "intent_confidence": 0.7,
+          "needs_clarification": true,
+          "user_emotion": "neutral",
+          "technical_complexity": 40,
+          "escalate_to_human": false,
+          "latency_ms": 0,
+          "engine": "rule"
+        },
+        "jev": {
+          "intent": "usage_guide",
+          "intent_confidence": 0.384,
+          "needs_clarification": true,
+          "user_emotion": "neutral",
+          "technical_complexity": 27,
+          "escalate_to_human": false,
+          "latency_ms": 1203,
+          "engine": "jev"
+        },
+        "kev": {
+          "intent": "usage_guide",
+          "intent_confidence": 0.472,
+          "needs_clarification": false,
+          "user_emotion": "neutral",
+          "technical_complexity": 35,
+          "escalate_to_human": true,
+          "latency_ms": 1125,
+          "engine": "kev"
+        }
+      }
+    },
+    {
+      "question": "能不能直播",
+      "engines": {
+        "rule": {
+          "intent": "product_comparison",
+          "intent_confidence": 0.7,
+          "needs_clarification": false,
+          "user_emotion": "neutral",
+          "technical_complexity": 50,
+          "escalate_to_human": false,
+          "latency_ms": 0,
+          "engine": "rule"
+        },
+        "jev": {
+          "intent": "unclear",
+          "intent_confidence": 0.45,
+          "needs_clarification": true,
+          "user_emotion": "neutral",
+          "technical_complexity": 8,
+          "escalate_to_human": false,
+          "latency_ms": 1171,
+          "engine": "jev"
+        },
+        "kev": {
+          "intent": "unclear",
+          "intent_confidence": 0.439,
+          "needs_clarification": false,
+          "user_emotion": "neutral",
+          "technical_complexity": 37,
+          "escalate_to_human": true,
+          "latency_ms": 1140,
+          "engine": "kev"
+        }
+      }
+    },
+    {
+      "question": "咋整啊",
+      "engines": {
+        "rule": {
+          "intent": "usage_guide",
+          "intent_confidence": 0.9,
+          "needs_clarification": true,
+          "user_emotion": "neutral",
+          "technical_complexity": 40,
+          "escalate_to_human": false,
+          "latency_ms": 0,
+          "engine": "rule"
+        },
+        "jev": {
+          "intent": "unclear",
+          "intent_confidence": 0.078,
+          "needs_clarification": true,
+          "user_emotion": "urgent",
+          "technical_complexity": 4,
+          "escalate_to_human": true,
+          "latency_ms": 1250,
+          "engine": "jev"
+        },
+        "kev": {
+          "intent": "unclear",
+          "intent_confidence": 0.394,
+          "needs_clarification": true,
+          "user_emotion": "neutral",
+          "technical_complexity": 40,
+          "escalate_to_human": true,
+          "latency_ms": 1157,
+          "engine": "kev"
+        }
+      }
+    },
+    {
+      "question": "价格表",
+      "engines": {
+        "rule": {
+          "intent": "price_inquiry",
+          "intent_confidence": 0.7,
+          "needs_clarification": true,
+          "user_emotion": "neutral",
+          "technical_complexity": 20,
+          "escalate_to_human": false,
+          "latency_ms": 0,
+          "engine": "rule"
+        },
+        "jev": {
+          "intent": "price_inquiry",
+          "intent_confidence": 0.903,
+          "needs_clarification": true,
+          "user_emotion": "neutral",
+          "technical_complexity": 10,
+          "escalate_to_human": false,
+          "latency_ms": 1436,
+          "engine": "jev"
+        },
+        "kev": {
+          "intent": "price_inquiry",
+          "intent_confidence": 0.465,
+          "needs_clarification": false,
+          "user_emotion": "neutral",
+          "technical_complexity": 32,
+          "escalate_to_human": true,
+          "latency_ms": 1125,
+          "engine": "kev"
+        }
+      }
+    },
+    {
+      "question": "看视频卡",
+      "engines": {
+        "rule": {
+          "intent": "troubleshooting",
+          "intent_confidence": 0.7,
+          "needs_clarification": true,
+          "user_emotion": "neutral",
+          "technical_complexity": 60,
+          "escalate_to_human": false,
+          "latency_ms": 0,
+          "engine": "rule"
+        },
+        "jev": {
+          "intent": "troubleshooting",
+          "intent_confidence": 0.71,
+          "needs_clarification": true,
+          "user_emotion": "negative",
+          "technical_complexity": 66,
+          "escalate_to_human": false,
+          "latency_ms": 1219,
+          "engine": "jev"
+        },
+        "kev": {
+          "intent": "unclear",
+          "intent_confidence": 0.47,
+          "needs_clarification": true,
+          "user_emotion": "neutral",
+          "technical_complexity": 41,
+          "escalate_to_human": true,
+          "latency_ms": 1109,
+          "engine": "kev"
+        }
+      }
+    },
+    {
+      "question": "支持YouTube吗",
+      "engines": {
+        "rule": {
+          "intent": "product_comparison",
+          "intent_confidence": 0.7,
+          "needs_clarification": false,
+          "user_emotion": "neutral",
+          "technical_complexity": 50,
+          "escalate_to_human": false,
+          "latency_ms": 0,
+          "engine": "rule"
+        },
+        "jev": {
+          "intent": "product_comparison",
+          "intent_confidence": 0.78,
+          "needs_clarification": true,
+          "user_emotion": "neutral",
+          "technical_complexity": 15,
+          "escalate_to_human": false,
+          "latency_ms": 1328,
+          "engine": "jev"
+        },
+        "kev": {
+          "intent": "product_comparison",
+          "intent_confidence": 0.467,
+          "needs_clarification": false,
+          "user_emotion": "neutral",
+          "technical_complexity": 34,
+          "escalate_to_human": true,
+          "latency_ms": 1125,
+          "engine": "kev"
+        }
+      }
+    },
+    {
+      "question": "要直播的线路",
+      "engines": {
+        "rule": {
+          "intent": "unclear",
+          "intent_confidence": 0.3,
+          "needs_clarification": true,
+          "user_emotion": "neutral",
+          "technical_complexity": 10,
+          "escalate_to_human": false,
+          "latency_ms": 0,
+          "engine": "rule"
+        },
+        "jev": {
+          "intent": "unclear",
+          "intent_confidence": 0.6,
+          "needs_clarification": true,
+          "user_emotion": "neutral",
+          "technical_complexity": 27,
+          "escalate_to_human": false,
+          "latency_ms": 1140,
+          "engine": "jev"
+        },
+        "kev": {
+          "intent": "unclear",
+          "intent_confidence": 0.502,
+          "needs_clarification": true,
+          "user_emotion": "neutral",
+          "technical_complexity": 40,
+          "escalate_to_human": true,
+          "latency_ms": 1109,
+          "engine": "kev"
+        }
+      }
+    },
+    {
+      "question": "网速慢怎么办",
+      "engines": {
+        "rule": {
+          "intent": "usage_guide",
+          "intent_confidence": 0.7,
+          "needs_clarification": false,
+          "user_emotion": "neutral",
+          "technical_complexity": 40,
+          "escalate_to_human": false,
+          "latency_ms": 0,
+          "engine": "rule"
+        },
+        "jev": {
+          "intent": "troubleshooting",
+          "intent_confidence": 0.847,
+          "needs_clarification": true,
+          "user_emotion": "neutral",
+          "technical_complexity": 66,
+          "escalate_to_human": false,
+          "latency_ms": 1280,
+          "engine": "jev"
+        },
+        "kev": {
+          "intent": "troubleshooting",
+          "intent_confidence": 0.464,
+          "needs_clarification": true,
+          "user_emotion": "negative",
+          "technical_complexity": 48,
+          "escalate_to_human": true,
+          "latency_ms": 1125,
+          "engine": "kev"
+        }
+      }
+    }
+  ]
+}

@@ -26,7 +26,7 @@ class PromptBuilder:
         """组装完整prompt，返回字符串。"""
         sections = [
             self._role_section(),
-            self._knowledge_section(decision, knowledge_base),
+            self._knowledge_section(decision, knowledge_base, message),
             self._history_section(context),
             self._intent_section(decision),
             self._examples_section(decision, context),
@@ -54,13 +54,13 @@ class PromptBuilder:
             "才回复\"暂时无法回答，需要人工介入\"，禁止编造知识库以外的产品信息。"
         )
 
-    def _knowledge_section(self, decision: DecisionResult, knowledge_base: KnowledgeBase) -> str:
-        """按意图筛选知识库内容。"""
+    def _knowledge_section(self, decision: DecisionResult, knowledge_base: KnowledgeBase, message: str = "") -> str:
+        """按意图筛选知识库内容（按与问题的相关度排序，目标问答不会被截断丢弃）。"""
         if decision.escalate_to_human:
             return ""
-        knowledge = knowledge_base.get_by_intent(decision.intent)
+        knowledge = knowledge_base.get_by_intent(decision.intent, query=message)
         if not knowledge:
-            knowledge = knowledge_base.get_by_intent("general") or ""
+            knowledge = knowledge_base.get_by_intent("general", query=message) or ""
         if not knowledge:
             return ""
         if len(knowledge) > KNOWLEDGE_MAX_CHARS:

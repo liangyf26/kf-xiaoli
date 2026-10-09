@@ -1,0 +1,381 @@
+{
+  "date": "2026-10-09",
+  "target": ">85%",
+  "accuracy": 0.95,
+  "passed": 19,
+  "total": 20,
+  "scoring": "expected_keywords任一命中即通过（关键词取自知识库原文）",
+  "results": [
+    {
+      "id": 1,
+      "question": "直播线路多少钱一个月",
+      "kb_refs": [
+        "问题1"
+      ],
+      "expected_keywords": [
+        "260"
+      ],
+      "hit_keywords": [
+        "260"
+      ],
+      "passed": true,
+      "path": "faq_match",
+      "latency_ms": 0,
+      "answer_preview": "问题1: 开场【price】\n120/月一条idc线路，独享，社媒TK，FB，5-10兆以上包稳。\n180/月一条ISP家庭IP线路，独享，主推，社媒TK，FB，对IP有要求选这个，5-10兆以上包稳"
+    },
+    {
+      "id": 2,
+      "question": "都有哪些价格",
+      "kb_refs": [
+        "问题1"
+      ],
+      "expected_keywords": [
+        "120",
+        "180"
+      ],
+      "hit_keywords": [
+        "120",
+        "180"
+      ],
+      "passed": true,
+      "path": "llm_generation",
+      "latency_ms": 7515,
+      "answer_preview": "价格如下：IDC线路120元/月（独享，社媒TK/FB，5-10兆以上包稳）；ISP家庭IP线路180元/月（独享，对IP有要求选这个）；ISP家庭IP直播优化线路260元/月（专门针对TK直播优化）"
+    },
+    {
+      "id": 3,
+      "question": "拼车共享IP多少钱一人",
+      "kb_refs": [
+        "问题1"
+      ],
+      "expected_keywords": [
+        "50"
+      ],
+      "hit_keywords": [
+        "50"
+      ],
+      "passed": true,
+      "path": "faq_match",
+      "latency_ms": 0,
+      "answer_preview": "问题1: 开场【price】\n120/月一条idc线路，独享，社媒TK，FB，5-10兆以上包稳。\n180/月一条ISP家庭IP线路，独享，主推，社媒TK，FB，对IP有要求选这个，5-10兆以上包稳"
+    },
+    {
+      "id": 4,
+      "question": "路由器硬件多少钱",
+      "kb_refs": [
+        "问题1"
+      ],
+      "expected_keywords": [
+        "300"
+      ],
+      "hit_keywords": [
+        "300"
+      ],
+      "passed": true,
+      "path": "faq_match",
+      "latency_ms": 0,
+      "answer_preview": "问题1: 开场【price】\n120/月一条idc线路，独享，社媒TK，FB，5-10兆以上包稳。\n180/月一条ISP家庭IP线路，独享，主推，社媒TK，FB，对IP有要求选这个，5-10兆以上包稳"
+    },
+    {
+      "id": 5,
+      "question": "用你们的线路会被封号吗",
+      "kb_refs": [
+        "问题2"
+      ],
+      "expected_keywords": [
+        "不会",
+        "独享"
+      ],
+      "hit_keywords": [
+        "不会",
+        "独享"
+      ],
+      "passed": true,
+      "path": "llm_generation",
+      "latency_ms": 5936,
+      "answer_preview": "不会。我们线路是本地独立IP、独享带宽，按使用指导一机一线路用就不会被封号或降权。"
+    },
+    {
+      "id": 6,
+      "question": "tiktok提示登录不上怎么办",
+      "kb_refs": [
+        "问题11"
+      ],
+      "expected_keywords": [
+        "拔卡",
+        "后台",
+        "地区"
+      ],
+      "hit_keywords": [
+        "拔卡",
+        "后台",
+        "地区"
+      ],
+      "passed": true,
+      "path": "llm_generation",
+      "latency_ms": 8329,
+      "answer_preview": "按顺序排查一下：1.手机拔卡（千万别插卡）；2.地区切到美国、语言US英语、时区美国；3.不允许APP跟踪；4.清理TikTok后台；5.确认客户端线路开关已打开；6.再重新打开TikTok登录。基本"
+    },
+    {
+      "id": 7,
+      "question": "客户端怎么安装使用",
+      "kb_refs": [
+        "问题3"
+      ],
+      "expected_keywords": [
+        "客户端",
+        "路由器"
+      ],
+      "hit_keywords": [
+        "客户端"
+      ],
+      "passed": true,
+      "path": "llm_generation",
+      "latency_ms": 12578,
+      "answer_preview": "{\"answer\": \"各平台客户端教程：\\n苹果（iPhone/iPad/macOS）：https://docs.qq.com/doc/DRnZTRXZmaGZPRGVE\\n安卓：https://d"
+    },
+    {
+      "id": 8,
+      "question": "美区apple id怎么申请注册",
+      "kb_refs": [
+        "问题8"
+      ],
+      "expected_keywords": [
+        "国内",
+        "注册"
+      ],
+      "hit_keywords": [
+        "国内",
+        "注册"
+      ],
+      "passed": true,
+      "path": "llm_generation",
+      "latency_ms": 6905,
+      "answer_preview": "国内号码就能注册，不用外国手机。信息填写可以用网上生成工具（比如 https://www.shenfendaquan.com/）。注册教程看这个：https://www.rei3.com/forum-"
+    },
+    {
+      "id": 9,
+      "question": "使用顺序是怎么样的",
+      "kb_refs": [
+        "问题10"
+      ],
+      "expected_keywords": [
+        "拔卡",
+        "切换地区",
+        "apple"
+      ],
+      "hit_keywords": [
+        "拔卡",
+        "切换地区",
+        "apple"
+      ],
+      "passed": true,
+      "path": "llm_generation",
+      "latency_ms": 5828,
+      "answer_preview": "以美区加州为例，苹果手机的使用顺序：拔卡（不插卡）→切换地区为美国、语言US英语、时区美国→连WiFi→登录美区apple id→装手机客户端→扫线路专属二维码→打开线路开关→装TikTok→登录账号"
+    },
+    {
+      "id": 10,
+      "question": "能不能开试用体验",
+      "kb_refs": [
+        "问题16"
+      ],
+      "expected_keywords": [
+        "试用"
+      ],
+      "hit_keywords": [
+        "试用"
+      ],
+      "passed": true,
+      "path": "llm_generation",
+      "latency_ms": 4437,
+      "answer_preview": "可以试用的。"
+    },
+    {
+      "id": 11,
+      "question": "付款可以开发票吗",
+      "kb_refs": [
+        "问题1"
+      ],
+      "expected_keywords": [
+        "发票",
+        "合同"
+      ],
+      "hit_keywords": [
+        "发票",
+        "合同"
+      ],
+      "passed": true,
+      "path": "llm_generation",
+      "latency_ms": 4780,
+      "answer_preview": "可以的，千元以上能签合同开发票。"
+    },
+    {
+      "id": 12,
+      "question": "有账号卖吗",
+      "kb_refs": [
+        "问题57"
+      ],
+      "expected_keywords": [
+        "没有"
+      ],
+      "hit_keywords": [
+        "没有"
+      ],
+      "passed": true,
+      "path": "llm_generation",
+      "latency_ms": 4156,
+      "answer_preview": "没有哈，我们专业做线路的，账号的话建议去淘宝、闲鱼上看看。"
+    },
+    {
+      "id": 13,
+      "question": "一条线路支持几台设备",
+      "kb_refs": [
+        "问题19"
+      ],
+      "expected_keywords": [
+        "挤占",
+        "带宽",
+        "可行"
+      ],
+      "hit_keywords": [
+        "挤占",
+        "带宽"
+      ],
+      "passed": true,
+      "path": "llm_generation",
+      "latency_ms": 5625,
+      "answer_preview": "可以多台设备用，但一条线路带宽有限，设备多了会挤占，卡了就少上几台。"
+    },
+    {
+      "id": 14,
+      "question": "办公室宽带有什么要求",
+      "kb_refs": [
+        "问题5"
+      ],
+      "expected_keywords": [
+        "电信",
+        "联通"
+      ],
+      "hit_keywords": [
+        "电信",
+        "联通"
+      ],
+      "passed": true,
+      "path": "llm_generation",
+      "latency_ms": 3733,
+      "answer_preview": "没有太多特殊要求，常见的电信、联通宽带就可以用。"
+    },
+    {
+      "id": 15,
+      "question": "运营商送的手机卡能用吗",
+      "kb_refs": [
+        "问题6"
+      ],
+      "expected_keywords": [
+        "插卡",
+        "用不上",
+        "用不到"
+      ],
+      "hit_keywords": [
+        "插卡",
+        "用不上"
+      ],
+      "passed": true,
+      "path": "llm_generation",
+      "latency_ms": 6016,
+      "answer_preview": "用不上。特别是做TikTok的话，手机千万别插卡，直接拔掉就行。"
+    },
+    {
+      "id": 16,
+      "question": "户外能不能用",
+      "kb_refs": [
+        "问题18"
+      ],
+      "expected_keywords": [
+        "能用"
+      ],
+      "hit_keywords": [
+        "能用"
+      ],
+      "passed": true,
+      "path": "llm_generation",
+      "latency_ms": 4265,
+      "answer_preview": "能用。"
+    },
+    {
+      "id": 17,
+      "question": "为什么美国线路延迟高",
+      "kb_refs": [
+        "问题28"
+      ],
+      "expected_keywords": [
+        "距离",
+        "越远"
+      ],
+      "hit_keywords": [
+        "距离"
+      ],
+      "passed": true,
+      "path": "llm_generation",
+      "latency_ms": 7734,
+      "answer_preview": "主要是距离问题。美国在地球另一面，跨大洋通信距离远，经过的中转设备也多，延迟自然就高。而且美国东海岸还要先过西海岸再走内陆中转，所以东海岸比西海岸还会再差一点。这是物理距离决定的，没办法完全避免。"
+    },
+    {
+      "id": 18,
+      "question": "路由网口接上后断断续续的怎么办",
+      "kb_refs": [
+        "问题40"
+      ],
+      "expected_keywords": [
+        "千兆",
+        "网口",
+        "协商"
+      ],
+      "hit_keywords": [],
+      "passed": false,
+      "path": "llm_generation",
+      "latency_ms": 7937,
+      "answer_preview": "这个情况知识库里没有具体的排查步骤，建议直接联系人工客服，可以远程帮你排查路由器网关的网络问题。"
+    },
+    {
+      "id": 19,
+      "question": "能不能跨多个国家访问",
+      "kb_refs": [
+        "问题17"
+      ],
+      "expected_keywords": [
+        "多条",
+        "一个国家"
+      ],
+      "hit_keywords": [
+        "多条",
+        "一个国家"
+      ],
+      "passed": true,
+      "path": "llm_generation",
+      "latency_ms": 5405,
+      "answer_preview": "一条线路就是一个国家，不能跨。要多个国家切换的话，就买多条国家线路。"
+    },
+    {
+      "id": 20,
+      "question": "苹果手机使用前要做什么准备",
+      "kb_refs": [
+        "问题10",
+        "问题7"
+      ],
+      "expected_keywords": [
+        "拔卡",
+        "美区"
+      ],
+      "hit_keywords": [
+        "拔卡",
+        "美区"
+      ],
+      "passed": true,
+      "path": "llm_generation",
+      "latency_ms": 10297,
+      "answer_preview": "苹果手机用前主要几件事：①拔卡，别插SIM卡；②地区切美国，语言切US英语，时区切美国；③提前注册好美区apple id（国内号码就能注册）；④准备好宽带和WiFi，建议联通的。搞定这些再装客户端绑线"
+    }
+  ]
+}

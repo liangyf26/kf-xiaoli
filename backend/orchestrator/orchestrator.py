@@ -69,14 +69,14 @@ class Orchestrator:
             decision.escalate_to_human, decision.engine,
         )
 
-        # 2. 路由
-        path = self.router._determine_path(decision, orchestrator_context)
+        # 2. 路由（传入message供澄清判断：长问题不误澄清）
+        path = self.router._determine_path(decision, orchestrator_context, message)
 
         # 3. 处理
         if path == ProcessingPath.CLARIFICATION:
             result = await handle_clarification(message, decision, orchestrator_context)
         elif path == ProcessingPath.FAQ_MATCH:
-            result = await handle_faq_match(decision, self.knowledge_base)
+            result = await handle_faq_match(decision, self.knowledge_base, message)
         elif path == ProcessingPath.HUMAN_ESCALATION:
             result = await handle_escalation(decision, orchestrator_context)
         else:

@@ -39,11 +39,15 @@ INTENT_CATEGORY_MAP: dict[str, str] = {
 
 # 一个意图可能横跨多个知识类别（Phase 1分类器与意图命名不完全对齐）：
 # technical_support（技术支持）与troubleshooting（故障排查）的知识互相重叠；
-# purchase_process（购买流程）的付款/合同/淘宝信息在price类问答中
+# purchase_process（购买流程）的付款/合同/淘宝信息在price类问答中；
+# product_comparison（能不能…）的试用/设备支持信息横跨purchase与usage
 INTENT_MULTI_CATEGORIES: dict[str, tuple[str, ...]] = {
     "technical_support": ("technical", "troubleshooting"),
     "troubleshooting": ("troubleshooting", "technical"),
     "purchase_process": ("purchase", "price"),
+    "product_comparison": ("product", "purchase", "usage"),
+    "usage_guide": ("usage", "product"),
+    "price_inquiry": ("price", "purchase"),
 }
 
 # 全部分类（含可能为空的general）
@@ -124,11 +128,13 @@ class KnowledgeBase:
                 return category
         return "general"
 
-    def get_by_intent(self, intent: str) -> str:
-        """按意图（或分类键）返回该类别全部问答的拼接文本。
+    def get_by_intent(self, intent: str, query: str = "", limit: int = 0) -> str:
+        """按意图（或分类键）返回相关问答的拼接文本。
 
         支持跨类别：INTENT_MULTI_CATEGORIES中的意图取多个类别的并集
         （如technical_support同时取technical与troubleshooting类知识）。
+        提供query时按与问题的2字符重合度对问答做相关度排序（降序），
+        确保目标问答不会被截断丢弃；limit>0时限制返回的问答条数。
         """
         categories: tuple[str, ...]
         if intent in INTENT_MULTI_CATEGORIES:
@@ -147,7 +153,23 @@ class KnowledgeBase:
         if not pairs:
             logger.warning("意图/分类 %s 无匹配问答", intent)
             return ""
+
+        if query:
+            pairs = sorted(pairs, key=lambda qa: -self._relevance(qa, query))
+
+        if limit > 0:
+            pairs = pairs[:limit]
         return "\n\n".join(self._format(qa) for qa in pairs)
+
+    @staticmethod
+    def _relevance(qa: QAPair, query: str) -> int:
+        """粗排相关度：问题的2字符片段在问答标题+内容中的出现次数。"""
+        query = re.sub(r"[，。？！、\s]", "", query)
+        if len(query) < 2:
+            return 0
+        text = f"{qa.title}{qa.content}"
+        shingles = {query[i:i + 2] for i in range(len(query) - 1)}
+        return sum(1 for s in shingles if s in text)
 
     def get_all(self) -> str:
         """返回全量知识库文本（用于整体注入prompt）。"""

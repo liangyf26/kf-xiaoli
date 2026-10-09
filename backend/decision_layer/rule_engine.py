@@ -10,11 +10,11 @@ from backend.decision_layer.base import DecisionEngine, DecisionResult
 # 意图关键词字典（与TDD 2.3.2一致）
 INTENT_KEYWORDS: Dict[str, Tuple[str, ...]] = {
     "price_inquiry": ("多少钱", "价格", "费用", "收费", "元", "钱"),
-    "technical_support": ("连不上", "不上", "登不上", "错误", "失败", "问题", "故障"),
+    "technical_support": ("连不上", "不上", "登不上", "错误", "失败", "问题", "故障", "封号", "降权", "延迟"),
     "usage_guide": ("怎么", "如何", "怎样", "咋", "咋整", "用法", "使用"),
     "product_comparison": ("能不能", "可以", "支持", "有没有", "区别", "对比"),
     "troubleshooting": ("卡", "慢", "掉线", "断开", "不稳定", "不行", "死活", "用不了"),
-    "purchase_process": ("购买", "买", "订购", "下单"),
+    "purchase_process": ("购买", "买", "订购", "下单", "账号", "试用"),
 }
 
 # 无关键词时的兜底意图与置信度

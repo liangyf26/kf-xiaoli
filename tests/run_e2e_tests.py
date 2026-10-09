@@ -114,7 +114,7 @@ async def run_case(case: dict, index: int) -> dict:
 
 
 async def run_perf(rounds: int = 10) -> int:
-    """性能测试：直连编排器计时（不经过WebSocket与等待汇总）。"""
+    """性能测试：FAQ路径直连编排器计时 + LLM生成路径抽样计时。"""
     from backend.orchestrator.orchestrator import Orchestrator
 
     orchestrator = Orchestrator()
@@ -124,19 +124,36 @@ async def run_perf(rounds: int = 10) -> int:
         result = await orchestrator.process("直播线路多少钱", {})
         elapsed = time.monotonic() - start
         times.append(elapsed)
-        print(f"第{i+1}次: {elapsed:.2f}秒 (path={result['path']})")
+        print(f"FAQ第{i+1}次: {elapsed:.2f}秒 (path={result['path']})")
 
     avg_time = sum(times) / len(times)
     max_time = max(times)
-    print(f"\n平均响应时间: {avg_time:.2f}秒")
-    print(f"最大响应时间: {max_time:.2f}秒")
+    print(f"\nFAQ路径平均: {avg_time:.2f}秒 | 最大: {max_time:.2f}秒")
+
+    # LLM生成路径抽样（技术支持复杂度60→LLM）
+    llm_times = []
+    for i in range(3):
+        start = time.monotonic()
+        result = await orchestrator.process("tiktok登不上怎么办", {})
+        elapsed = time.monotonic() - start
+        llm_times.append(elapsed)
+        print(f"LLM第{i+1}次: {elapsed:.2f}秒 (path={result['path']})")
+
+    llm_avg = sum(llm_times) / len(llm_times)
+    print(f"LLM路径平均: {llm_avg:.2f}秒")
+    print(f"\n平均响应时间: {avg_time:.2f}秒（FAQ）/ {llm_avg:.2f}秒（LLM）")
+    print(f"最大响应时间: {max(max_time, max(llm_times)):.2f}秒")
+
     if avg_time >= 10:
-        print(f"FAIL 平均响应时间过长: {avg_time:.2f}秒（要求<10秒）")
+        print(f"FAIL FAQ平均响应时间过长: {avg_time:.2f}秒（要求<10秒）")
         return 1
-    if max_time >= 15:
-        print(f"FAIL 最大响应时间过长: {max_time:.2f}秒（要求<15秒）")
+    if llm_avg >= 10:
+        print(f"FAIL LLM平均响应时间过长: {llm_avg:.2f}秒（要求<10秒）")
         return 1
-    print("OK 性能测试通过（平均<10秒，最大<15秒）")
+    if max(max_time, max(llm_times)) >= 15:
+        print(f"FAIL 最大响应时间过长: {max(max_time, max(llm_times)):.2f}秒（要求<15秒）")
+        return 1
+    print("OK 性能测试通过（FAQ与LLM路径均满足平均<10秒、最大<15秒）")
     return 0
 
 

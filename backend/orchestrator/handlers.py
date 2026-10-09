@@ -37,9 +37,9 @@ async def handle_clarification(message: str, decision: DecisionResult, context: 
     }
 
 
-async def handle_faq_match(decision: DecisionResult, knowledge_base: KnowledgeBase) -> Dict[str, Any]:
-    """知识库直接命中：返回原文与来源（问题编号）。"""
-    knowledge = knowledge_base.get_by_intent(decision.intent)
+async def handle_faq_match(decision: DecisionResult, knowledge_base: KnowledgeBase, message: str = "") -> Dict[str, Any]:
+    """知识库直接命中：返回原文与来源（问题编号），按与问题的相关度排序取前3条。"""
+    knowledge = knowledge_base.get_by_intent(decision.intent, query=message, limit=3)
     if not knowledge:
         return {
             "answer": settings.NO_ANSWER_MESSAGE,
@@ -47,14 +47,12 @@ async def handle_faq_match(decision: DecisionResult, knowledge_base: KnowledgeBa
             "path": "faq_match",
         }
 
-    # 提取来源编号并限制答案长度（最多3个问答对）
+    # 提取来源编号（相关度排序后的前3条）
     sources = re.findall(r"问题(\d+)", knowledge)
     sources = [f"问题{n}" for n in dict.fromkeys(sources)][:3]
-    blocks = re.split(r"\n\n(?=问题\d+)", knowledge)
-    answer = "\n\n".join(blocks[:3])
 
     return {
-        "answer": answer,
+        "answer": knowledge,
         "sources": sources,
         "path": "faq_match",
     }
