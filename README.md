@@ -4,7 +4,7 @@
 
 ## 📋 项目特点
 
-- **3种决策方案对比**：规则引擎、Jev API、Kev-0.5B，可切换测试
+- **3种决策方案对比**：规则引擎、Jev API（OpenRouter）、Kev本地模型（GPU）
 - **智能等待汇总**：自动汇总用户连续发送的多条消息
 - **澄清式对话**：遇到模糊问题主动澄清，避免盲目猜测
 - **多轮上下文理解**：基于对话历史理解短问题和代词指代
@@ -92,7 +92,7 @@ DECISION_ENGINE=rule
 # Jev API（需要API key，85%+准确率）
 DECISION_ENGINE=jev
 
-# Kev-0.5B（本地部署，68-75%准确率）
+# Kev本地模型（GPU部署，见下方"Kev模型加载失败"一节）
 DECISION_ENGINE=kev
 ```
 
@@ -176,9 +176,9 @@ python tests/e2e_test.py
 
 | 组件 | 响应时间 |
 |------|---------|
-| 规则引擎 | <100ms |
-| Jev API | <1秒 |
-| Kev-0.5B | <500ms |
+| 规则引擎 | <1ms |
+| Jev API | 1-2秒（OpenRouter） |
+| Kev本地模型（GPU） | 约1秒（RTX 2050实测；无CUDA graphs约束下官方数据百毫秒级） |
 | LLM生成 | <5秒 |
 
 ### 准确率（目标）
@@ -213,16 +213,20 @@ curl http://localhost:11434/v1/models
 
 ### 3. Kev模型加载失败
 
-**原因**：模型未下载或GPU显存不足
+Kev经本地服务运行（真实模型 jaredpalmer/kev-0.5b / kev-0.8b，非 tthous）：
 
-**解决**：
 ```bash
-# 手动下载模型
-huggingface-cli download tt-hous/kev-0.5b
+# 一次性环境准备（Python 3.12+，详见 PROGRESS.md 部署说明）
+py -3.13 -m venv .venv-kev
+.venv-kev\Scripts\python.exe -m pip install torch "kev[serve] @ git+https://github.com/jaredpalmer/kev"
 
-# 或切换到CPU模式
-# 在.env中设置：KEV_DEVICE=cpu
+# 启动GPU服务（自动预检显存；4GB卡建议 0.8b，Kev-4B需≥10GB显存）
+.venv-kev\Scripts\python.exe scripts\kev_gpu_serve.py --model 0.8b --port 8009 --warmup
 ```
+
+- `.env` 中 `KEV_SERVE_URL=http://127.0.0.1:8009`（已默认配置），KevEngine自动对接
+- HuggingFace 直连不可用时脚本自动走 hf-mirror 镜像；模型缓存位于 `HF_HOME` 指向目录
+- 服务未启动时 Kev 决策自动降级为低置信度结果（不阻塞对话）
 
 ### 4. WebSocket连接断开
 

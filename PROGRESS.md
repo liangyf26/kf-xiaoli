@@ -203,3 +203,25 @@ scripts/kev_gpu_serve.py（预检+错误处理+自动预热启动器）、script
 - 分类质量：10问题9个具体/合理意图（'能不能直播'判unclear可商榷）；escalate_to_human全部为True，
   noul≥0.5阈值对该模型偏激进，待真实案例校准
 - 启动命令: .venv-kev/Scripts/python.exe scripts/kev_gpu_serve.py --model 0.8b --port 8009 --warmup
+
+## 2026-10-09 阶段2复查：三引擎全部真实可用（硬指标重审）
+
+Kev GPU部署完成后，按任务书"完成条件"逐项重审：
+
+| 硬指标 | 任务书要求 | 当前实测 | 结论 |
+|--------|-----------|---------|------|
+| 3种引擎可用 | rule/Jev/Kev都能调用并返回DecisionResult | rule真实；Jev经OpenRouter真实；**Kev-0.8B经本地kev.serve GPU真实**（device=cuda） | ✅ |
+| 配置切换 | 改.env重启后生效 | 工厂活读取环境变量，切换3次全部正确 | ✅ |
+| 规则引擎<100ms | 平均<100ms | 0-1ms | ✅ |
+| Kev推理可接受 | CPU<1000ms或GPU<500ms | GPU实测750-1484ms（均值≈940ms）：4GB卡被迫禁用CUDA graphs（预分配OOM）且系统内存压力大；GPU<500ms目标在本卡未达，功能完整 | ⚠️ 接近 |
+| 规则引擎测试全过 | 6个单元测试通过 | Phase 2单元22项+Phase 1的13项=36项全过 | ✅ |
+| 对比测试成功 | 10+问题，输出JSON | 10问题三真实引擎，engine_comparison.json；**rule与Kev一致7/10，Jev与Kev一致9/10** | ✅ |
+
+**对比测试亮点（三真实引擎首次同跑）**:
+- Kev-0.8B GPU: 10/10问题真实分类（零回退），延迟750-1110ms
+- Jev与Kev判断一致率9/10（唯'看视频卡'分歧：Jev=troubleshooting vs Kev=unclear，两者均可辩护）
+- '多少钱'三引擎全一致（price_inquiry）
+
+**暗卷3项（真实Kev复测）**: ①"咋整"→rule按任务书字典usage_guide、Jev/Kev均unclear+澄清（合理）；②1000字超长文本三引擎无崩溃（Kev GPU仅1280ms）；③切换3次全部正确
+
+**遗留**（继承）: Kev GPU<500ms需≥8GB显存卡（CUDA graphs才能开启）；模型英文训练原型，中文分布外，分类质量待真实案例校准

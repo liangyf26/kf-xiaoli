@@ -96,13 +96,20 @@ async def main() -> int:
         )
 
     rule_latencies = [r["engines"]["rule"]["latency_ms"] for r in results]
+    kev_real = [r for r in results if r["engines"]["kev"].get("engine") == "kev"]
+    kev_latencies = [r["engines"]["kev"]["latency_ms"] for r in kev_real]
     summary = {
         "question_count": len(results),
         "rule_avg_latency_ms": round(sum(rule_latencies) / len(rule_latencies), 2),
         "rule_max_latency_ms": max(rule_latencies),
         "jev_skipped": bool(jev_skipped_reason),
-        "kev_available": any(r["engines"]["kev"]["engine"] == "kev" for r in results),
-        "note": "Kev模型当前不可用（网络无法访问HuggingFace/依赖未安装），记录为kev_failed回退结果",
+        "kev_available": bool(kev_real),
+        "kev_avg_latency_ms": round(sum(kev_latencies) / len(kev_latencies), 2) if kev_latencies else None,
+        "note": (
+            "Kev经本地kev.serve推理"
+            if kev_real
+            else "Kev模型不可用（服务未启动或依赖缺失），记录为kev_failed回退结果"
+        ),
     }
     output = {"summary": summary, "results": results}
     OUTPUT_PATH.write_text(json.dumps(output, ensure_ascii=False, indent=2), encoding="utf-8")
