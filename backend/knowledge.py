@@ -171,6 +171,20 @@ class KnowledgeBase:
         shingles = {query[i:i + 2] for i in range(len(query) - 1)}
         return sum(1 for s in shingles if s in text)
 
+    def search_all(self, query: str = "", limit: int = 6) -> str:
+        """跨全类别相关度检索（unclear意图兜底）：全库按与查询的2字符重合度降序。
+
+        意图无法归类（unclear）时不应放弃知识支撑：按查询相关度返回全库最匹配的
+        若干条问答，交由生成层判断能否作答。无查询或全部零相关时返回空串。
+        """
+        if not query:
+            return ""
+        ranked = sorted(self.qa_pairs, key=lambda qa: -self._relevance(qa, query))
+        matched = [qa for qa in ranked if self._relevance(qa, query) > 0][:limit]
+        if not matched:
+            return ""
+        return "\n\n".join(self._format(qa) for qa in matched)
+
     def get_all(self) -> str:
         """返回全量知识库文本（用于整体注入prompt）。"""
         return "\n\n".join(self._format(qa) for qa in self.qa_pairs)

@@ -1,279 +1,216 @@
 # SDWAN智能客服机器人 Demo
 
-基于大语言模型的智能客服系统，支持多种决策引擎对比测试，专为SDWAN产品咨询场景优化。
+基于大语言模型的智能客服系统，专为SDWAN专线产品咨询场景优化。支持3种决策引擎（规则/Jev API/Kev本地模型）可切换对比，答案全部基于知识库生成并标注来源，知识库外问题不编造、正确拒答。
 
-## 📋 项目特点
+**状态**：Demo开发完成（Phase 1-4全部交付），验收指标实测达标——批量测试通过率100%、答案准确率≥90%（严格口径）、平均响应3.2秒、3引擎可切换。
 
-- **3种决策方案对比**：规则引擎、Jev API（OpenRouter）、Kev本地模型（GPU）
-- **智能等待汇总**：自动汇总用户连续发送的多条消息
-- **澄清式对话**：遇到模糊问题主动澄清，避免盲目猜测
-- **多轮上下文理解**：基于对话历史理解短问题和代词指代
-- **答案来源标注**：每次回复标注知识库来源，方便验证
-- **实时WebSocket通信**：支持倒计时、思考状态等实时推送
+## 📋 功能特性
+
+- **3种决策引擎对比**：规则引擎（<1ms关键词匹配）/ Jev API（OpenRouter结构化决策）/ Kev本地模型（GPU推理），`.env`一键切换
+- **智能等待汇总**：连续发送多条消息自动汇总（滑动15秒窗口，30秒封顶），带倒计时推送
+- **四路处理编排**：转人工 > 澄清 > 知识库FAQ直连 > LLM生成，按意图/置信度/复杂度路由
+- **知识库接地生成**：LLM只基于知识库相关度Top-6条目作答，来源标注可折叠展示，未提及对象一律拒答不编造
+- **多轮上下文**：短问题接续上文理解（"多少钱"接"直播线路"后正确报价）
+- **运行时监控**：统一格式日志按日期轮转 + `/metrics` 指标端点（请求数/引擎分布/延迟/错误）
 
 ## 🚀 快速开始
 
 ### 1. 环境要求
 
-- Python 3.10+
-- 本地部署的Qwen2.5-27B模型（开发）或9B（生产）
-- （可选）GPU用于Kev决策模型加速
+- Python 3.10+（开发验证用3.11）
+- 一个OpenAI兼容的LLM API（如本地Ollama跑 `qwen2.5:27b`，或内网Qwen服务）
+- （可选）OpenRouter API Key（Jev引擎）；GPU + kev本地服务（Kev引擎）
 
-### 2. 安装依赖
+### 2. 安装
 
 ```bash
-# 创建虚拟环境
+# 创建并激活虚拟环境
 python -m venv .venv
+.venv\Scripts\activate          # Windows
+# source .venv/bin/activate     # Linux/Mac
 
-# 激活虚拟环境
-# Windows:
-.venv\Scripts\activate
-# Linux/Mac:
-source .venv/bin/activate
-
-# 安装依赖
 pip install -r requirements.txt
 ```
+
+> Windows若系统默认Python版本过低，用 `py -3.11 -m venv .venv` 指定版本创建。
+> 完整安装含Kev所需的torch/transformers（约2.5GB）；仅用rule/jev引擎时可先装核心依赖：
+> `pip install fastapi "uvicorn[standard]" websockets httpx pydantic pydantic-settings python-dotenv`
 
 ### 3. 配置
 
 ```bash
-# 复制配置模板
 cp .env.example .env
-
-# 编辑 .env 文件，填入实际配置
-# 必填项：
-# - MODEL_API_BASE: Qwen模型API地址
-# - MODEL_NAME: 模型名称
-# - DECISION_ENGINE: 选择决策引擎 (rule/jev/kev)
+# 编辑 .env，至少填写：
+#   MODEL_API_BASE=http://localhost:11434/v1   （LLM API地址）
+#   MODEL_NAME=qwen2.5:27b                     （模型名）
+#   DECISION_ENGINE=rule                       （决策引擎，先用rule最简单）
 ```
 
-**重要配置项说明**：
+所有配置项及注释见 [.env.example](.env.example)；接口协议与决策引擎契约见 [docs/api.md](docs/api.md)。
 
-| 配置项 | 说明 | 默认值 |
-|--------|------|--------|
-| `DECISION_ENGINE` | 决策引擎选择 | `rule` |
-| `CONTEXT_TURNS` | 保留对话轮数 | `10` |
-| `WAIT_SLIDE_SECONDS` | 滑动窗口等待（秒） | `15` |
-| `JEV_API_KEY` | Jev API密钥（选择jev时必填） | - |
-| `KEV_DEVICE` | Kev运行设备（cpu/cuda:0） | `cpu` |
-
-### 4. 启动服务
+### 4. 启动
 
 ```bash
-# 启动FastAPI服务
 python -m backend.main
-
-# 或使用uvicorn
-uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+# 浏览器打开 http://localhost:8000
 ```
 
-### 5. 访问界面
+### 5. 对话验证
 
-浏览器打开：http://localhost:8000
+发送"直播线路多少钱"→ 返回四档线路价格与来源标注；发送"支持YouTube吗"→ 正确拒答（知识库外不编造）。
 
 ## 📖 使用说明
 
-### Web界面使用
+### Web界面
 
-1. **发送消息**：在输入框输入问题，点击"发送"或按回车
-2. **等待汇总**：连续发送多条消息时，系统会等待15秒汇总后统一回复
-3. **查看来源**：每条回复下方显示答案来源（如"问题3, 问题12"）
-4. **清空对话**：点击"清空对话"按钮重新开始
+1. **发送消息**：输入框输入问题，点击"发送"或回车；连续发送会等待15秒汇总后统一回复（倒计时可见）
+2. **查看来源**：回复下方"查看来源"折叠展示知识库问题编号
+3. **清空对话**：点击"清空对话"重置会话（服务端同步重置上下文）
+4. **断线重连**：连接断开自动提示并重连
 
 ### 切换决策引擎
 
-编辑`.env`文件，修改`DECISION_ENGINE`参数：
+编辑 `.env` 的 `DECISION_ENGINE` 后**重启服务**：
 
-```env
-# 规则引擎（最快，60-70%准确率）
-DECISION_ENGINE=rule
+| 引擎 | 说明 | 实测延迟 |
+|---|---|---|
+| `rule` | 关键词词典匹配，无需外部依赖 | <1ms |
+| `jev` | OpenRouter Jev结构化决策API，需 `JEV_API_KEY` | ~1s/次 |
+| `kev` | 本地kev.serve GPU服务，需先启动（见FAQ第3条） | ~1s/次 |
 
-# Jev API（需要API key，85%+准确率）
-DECISION_ENGINE=jev
+三引擎对同一评估集的准确率对比见 `tests/results/engine_accuracy_report_*.md`。
 
-# Kev本地模型（GPU部署，见下方"Kev模型加载失败"一节）
-DECISION_ENGINE=kev
-```
-
-修改后**重启服务**生效。
-
-### 批量测试
+### 运行监控
 
 ```bash
-# 准备测试文件 tests/test_questions.txt
-# 格式：每行一个问题，空行分隔不同会话
-
-# 运行批量测试
-python tests/batch_test.py
-
-# 查看结果
-cat test_results.json
+curl http://localhost:8000/metrics        # 请求数/引擎与路径分布/平均延迟/错误数
+curl -X POST http://localhost:8000/metrics/reset   # 重置指标
 ```
+
+日志文件 `logs/app.log` 按日期轮转（保留14天），关键日志点：用户消息接收、决策结果、路由路径、LLM调用、回复发送、异常。
+
+### 批量测试与评估（全部脚本在 tests/ 下）
+
+```bash
+# 全量回归（单元 + 端到端，自动启停服务）
+python tests/run_all.py
+
+# 批量测试（20问，经完整编排流程；--engine 可指定引擎）
+python tests/batch_test.py tests/test_questions_final.txt
+python tests/generate_report.py tests/results/batch_test_*.json    # 生成Markdown报告
+
+# 准确率评估（10个知识库标注用例，严格口径：澄清不计作答）
+python tests/accuracy_evaluation.py tests/accuracy_test_cases.json --engine rule
+
+# 3引擎准确率对比报告
+python tests/accuracy_evaluation.py tests/accuracy_test_cases.json --engine rule
+python tests/accuracy_evaluation.py tests/accuracy_test_cases.json --engine jev
+python tests/accuracy_evaluation.py tests/accuracy_test_cases.json --engine kev
+python tests/compare_engine_accuracy.py
+
+# 性能分析（组件级耗时画像）
+python tests/performance_profile.py
+```
+
+## 📊 测试结果摘要（2026-10-09实测）
+
+| 指标 | 要求 | 实测 | 结论 |
+|---|---|---|---|
+| 批量测试通过率 | ≥90%（20+问） | **20/20 = 100%** | ✅ |
+| 答案准确率（严格口径） | ≥85%（10标注用例） | rule **100%** / jev **100%** / kev **100%** | ✅ |
+| 来源标注准确率 | — | 100%（9/9考核题） | ✅ |
+| 平均响应时间 | <10秒 | **3.16秒**（优化前4.40秒，-28%） | ✅ |
+| LLM路径延迟 | — | 6.3秒/次（优化前9.8秒，-35%） | ✅ |
+| 单元+端到端回归 | — | pytest 67项（66 passed + 1环境跳过），E2E 6/6 | ✅ |
+
+完整数据：`tests/results/`（batch_test_*.json、accuracy_eval_*.json、engine_accuracy_report_*.md、performance_profile_*.json、test_report_*.md）。阶段验收报告见 `docs/`。
+
+> 准确率口径说明：10个标注用例的预期关键词客观取自知识库原文；"澄清反问"不计作答（澄清话术常罗列具体选项，宽松口径会被关键词误判）。
 
 ## 🏗️ 项目结构
 
 ```
 707-kf-xiaoli/
-├── docs/                     # 项目文档
-│   ├── 产品需求文档-20261008.md
-│   ├── 技术设计文档-20261008.md
-│   └── 20261008-phase1-Infrastructure-taskbook.md  # Phase 1任务书
-├── backend/                    # 后端代码
-│   ├── main.py                # FastAPI入口
-│   ├── config.py              # 配置管理
-│   ├── models.py              # 数据模型
-│   ├── connection_manager.py  # WebSocket管理
-│   ├── wait_aggregator.py     # 等待汇总层
-│   ├── knowledge.py           # 知识库模块
-│   ├── decision_layer/        # 决策层（3种引擎）
-│   ├── orchestrator/          # 路由和编排
-│   └── llm/                   # LLM客户端
-├── static/                    # 前端静态文件
-│   ├── index.html
-│   ├── app.js
-│   └── style.css
-├── data/
-│   └── sdwan.md              # 知识库（59个问答）
-├── tests/                    # 测试脚本
-├── logs/                     # 日志目录
-├── .env                      # 配置文件（不提交）
-├── .env.example              # 配置模板
-└── requirements.txt          # 依赖列表
+├── backend/                    # 后端
+│   ├── main.py                 # FastAPI入口（WebSocket + /healthz + /metrics）
+│   ├── config.py               # pydantic-settings配置（缺失必需字段启动报错）
+│   ├── models.py               # 数据模型
+│   ├── connection_manager.py   # WebSocket连接管理
+│   ├── wait_aggregator.py      # 等待汇总层（滑动窗口+倒计时）
+│   ├── knowledge.py            # 知识库解析/分类/相关度检索
+│   ├── metrics.py              # 运行时指标收集
+│   ├── decision_layer/         # 决策层：base/rule_engine/jev_client/kev_client
+│   ├── orchestrator/           # 编排层：router/handlers/prompt_builder/few_shot_examples
+│   └── llm/                    # Qwen客户端（持久连接）+ 容错JSON解析
+├── static/                     # 前端（深色主题Web界面）
+├── data/sdwan.md               # 知识库（58个问答对，7个分类）
+├── tests/                      # 测试脚本与结果（tests/results/为报告产物）
+├── docs/                       # PRD/TDD/各阶段任务书与验收报告/api.md
+├── scripts/                    # Kev GPU部署辅助脚本
+├── logs/                       # 运行日志（按日期轮转）与metrics.json
+├── .env.example                # 配置模板（全项注释）
+└── requirements.txt
 ```
-
-## 🧪 测试
-
-### 运行验收测试
-
-```bash
-# 全量验收（单元 + 端到端，端到端自动启停服务）
-python tests/run_all.py
-
-# 仅单元验收（也兼容pytest）
-python tests/test_phase1_units.py
-pytest tests/test_phase1_units.py
-
-# 仅端到端验收（自动在8001端口启停服务，E2E_PORT可改端口）
-python tests/e2e_test.py
-```
-
-测试内容与任务书验收命令的对应关系见 `tests/README.md`。
-
-### 测试用例说明
-
-| 测试场景 | 输入示例 | 预期行为 |
-|---------|---------|---------|
-| 首次对话 | "你好" | 包含机器人身份告知 |
-| 短问题+上下文 | "直播线路"→"多少钱" | 无需澄清，直接回答价格 |
-| 短问题无上下文 | "多少钱" | 澄清：提供选项让用户选择 |
-| 知识库外问题 | "支持YouTube吗" | 返回"暂时无法回答，需要人工介入" |
-| 连续发送 | "多少钱"→(3秒)→"直播的" | 等待15秒后汇总回复 |
-
-## 📊 性能指标
-
-### 响应时间（目标）
-
-| 组件 | 响应时间 |
-|------|---------|
-| 规则引擎 | <1ms |
-| Jev API | 1-2秒（OpenRouter） |
-| Kev本地模型（GPU） | 约1秒（RTX 2050实测；无CUDA graphs约束下官方数据百毫秒级） |
-| LLM生成 | <5秒 |
-
-### 准确率（目标）
-
-| 阶段 | 意图识别准确率 | 答案准确率 |
-|------|---------------|-----------|
-| MVP | >70% | >90% |
-| 生产 | >85% | >95% |
 
 ## 🔧 常见问题
 
-### 1. 启动报错：知识库文件不存在
+### 1. 启动报错：知识库文件不存在 / 配置缺失
 
-**原因**：`data/sdwan.md`文件缺失或路径配置错误
-
-**解决**：
-- 检查`data/sdwan.md`是否存在
-- 检查`.env`中`KNOWLEDGE_BASE_PATH`配置
+`data/sdwan.md` 缺失或 `.env` 必填项（MODEL_API_BASE/MODEL_NAME/CONTEXT_TURNS/WAIT_SLIDE_SECONDS/WAIT_MAX_SECONDS/KNOWLEDGE_BASE_PATH/DECISION_ENGINE）缺失时，服务**启动即报错退出**（设计行为，禁止静默回退）。按报错字段名补齐即可。
 
 ### 2. Qwen模型连接失败
 
-**原因**：模型未启动或API地址错误
-
-**解决**：
 ```bash
-# 确认Qwen模型已启动（以Ollama为例）
-ollama run qwen2.5:27b
-
-# 测试API
+# 确认LLM API可达（以Ollama为例）
 curl http://localhost:11434/v1/models
 ```
 
-### 3. Kev模型加载失败
+LLM调用超时60秒、失败自动重试1次；持续失败请检查 `MODEL_API_BASE` 与模型服务。
 
-Kev经本地服务运行（真实模型 jaredpalmer/kev-0.5b / kev-0.8b，非 tthous）：
+### 3. Kev引擎如何启用
+
+Kev经本地kev.serve服务运行（真实模型 jaredpalmer/kev-0.5b / kev-0.8b）：
 
 ```bash
-# 一次性环境准备（Python 3.12+，详见 PROGRESS.md 部署说明）
+# 一次性环境准备（Python 3.12+，独立venv避免污染主环境）
 py -3.13 -m venv .venv-kev
 .venv-kev\Scripts\python.exe -m pip install torch "kev[serve] @ git+https://github.com/jaredpalmer/kev"
 
-# 启动GPU服务（自动预检显存；4GB卡建议 0.8b，Kev-4B需≥10GB显存）
+# 启动GPU服务（自动显存预检+预热；4GB卡建议0.8b）
 .venv-kev\Scripts\python.exe scripts\kev_gpu_serve.py --model 0.8b --port 8009 --warmup
 ```
 
-- `.env` 中 `KEV_SERVE_URL=http://127.0.0.1:8009`（已默认配置），KevEngine自动对接
-- HuggingFace 直连不可用时脚本自动走 hf-mirror 镜像；模型缓存位于 `HF_HOME` 指向目录
-- 服务未启动时 Kev 决策自动降级为低置信度结果（不阻塞对话）
+`.env` 中 `KEV_SERVE_URL=http://127.0.0.1:8009`（默认已配）。服务未启动时Kev决策自动降级（不阻塞对话）。HuggingFace直连不可用时脚本自动走hf-mirror镜像。**已知限制**：kev-0.8b为英文训练原型，noul判定头对中文无区分度，已按评估实测校准阈值（见 `backend/decision_layer/kev_client.py` 注释）；4GB显存卡无法开启CUDA graphs，Kev-4B需≥10GB显存。
 
 ### 4. WebSocket连接断开
 
-**原因**：网络不稳定或服务器重启
+刷新页面即可，前端自动重连；服务端会话状态随连接断开清理。
 
-**解决**：刷新页面，前端会自动重连
+### 5. 为什么有的问题会先反问澄清
+
+意图不明确的短消息（<8字、无上下文、未超2次）会返回带具体选项的澄清问句（如"多少钱"→列出四档线路价格供选择），这是防止盲目猜测的产品设计；长而具体的问题直接进LLM生成。
 
 ## 📝 开发计划
 
-### 已完成
-- [x] PRD和TDD文档
-- [x] 项目结构搭建
-- [x] 配置文件和README
 - [x] Phase 1：FastAPI + WebSocket基础框架、知识库、Web界面
-- [x] Phase 2：决策层（规则引擎/Jev/Kev）+ 工厂切换 + 对比测试
+- [x] Phase 2：决策层（规则/Jev/Kev三引擎真实可用）+ 工厂切换
+- [x] Phase 3：LLM生成层（Few-shot/Prompt/路由/编排器）+ 深色主题前端
+- [x] Phase 4：批量测试、准确率评估、性能优化、日志监控、文档交付
 
-### 进行中（Phase 3）
+### 后续建议
 
-任务书详见 `docs/20261008-phase3-taskbook.md`（待编写）。
+1. 收集真实用户对话，扩充标注集与Few-shot示例（当前标注集10例为知识库推导）
+2. 接入中文校准的决策模型（Kev英文原型对中文noul无区分度，见FAQ第3条）
+3. 知识库热更新（当前重启生效）
+4. 对接微信/飞书等平台渠道
 
-- [ ] LLM客户端（Qwen27B集成）
-- [ ] Prompt构建器和Few-shot示例
-- [ ] 路由和编排逻辑（澄清/FAQ/LLM生成/转人工）
-- [ ] 真实回复生成（替换Echo mock）
+## 📄 许可与联系
 
-### 待开始
-- [ ] 批量测试脚本
-- [ ] 准确率评估
-
-详见《技术设计文档-20261008.md》（`docs/技术设计文档-20261008.md`）第十章实施路线图。
-
-## 🤝 贡献
-
-本项目为内部Demo项目，暂不接受外部贡献。
-
-## 📄 许可
-
-内部项目，保留所有权利。
-
-## 📮 联系
-
-如有问题，请联系项目负责人。
+内部Demo项目，保留所有权利。注意：`.env` 含密钥已gitignore；Jev API数据出境需评估合规。
 
 ---
 
 **注意事项**：
-1. `.env`文件包含敏感信息，已添加到`.gitignore`，不会提交到Git
-2. 知识库`data/sdwan.md`包含产品信息，注意保密
-3. 生产环境部署前请充分测试
-4. Jev API会将数据发送到国外，使用前评估数据安全风险
+1. 知识库`data/sdwan.md`包含产品信息，注意保密
+2. 生产环境部署前请充分测试
+3. 接口协议与配置详情见 [docs/api.md](docs/api.md)

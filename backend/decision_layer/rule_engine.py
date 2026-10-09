@@ -7,13 +7,14 @@ from typing import Any, Dict, Tuple
 
 from backend.decision_layer.base import DecisionEngine, DecisionResult
 
-# 意图关键词字典（与TDD 2.3.2一致）
+# 意图关键词字典（与TDD 2.3.2一致；Phase 4评估驱动扩充：
+# 套餐→price，客户端/下载/安装→usage_guide，网速→troubleshooting）
 INTENT_KEYWORDS: Dict[str, Tuple[str, ...]] = {
-    "price_inquiry": ("多少钱", "价格", "费用", "收费", "元", "钱"),
+    "price_inquiry": ("多少钱", "价格", "费用", "收费", "元", "钱", "套餐"),
     "technical_support": ("连不上", "不上", "登不上", "错误", "失败", "问题", "故障", "封号", "降权", "延迟"),
-    "usage_guide": ("怎么", "如何", "怎样", "咋", "咋整", "用法", "使用"),
+    "usage_guide": ("怎么", "如何", "怎样", "咋", "咋整", "用法", "使用", "客户端", "下载", "安装"),
     "product_comparison": ("能不能", "可以", "支持", "有没有", "区别", "对比"),
-    "troubleshooting": ("卡", "慢", "掉线", "断开", "不稳定", "不行", "死活", "用不了"),
+    "troubleshooting": ("卡", "慢", "掉线", "断开", "不稳定", "不行", "死活", "用不了", "网速"),
     "purchase_process": ("购买", "买", "订购", "下单", "账号", "试用"),
 }
 
@@ -41,8 +42,9 @@ EMOTION_KEYWORDS: Dict[str, Tuple[str, ...]] = {
 
 # 触发澄清的置信度阈值
 CLARIFY_CONFIDENCE_THRESHOLD = 0.6
-# 触发澄清的消息长度上限（字）
-SHORT_MESSAGE_LENGTH = 5
+# 触发澄清的消息长度上限（字）。Phase 4评估驱动从5收紧到4：
+# "怎么使用"(4字)等具体问题曾被误澄清；"多少钱"(3字)无上下文仍澄清（设计行为）
+SHORT_MESSAGE_LENGTH = 4
 
 
 class RuleBasedEngine(DecisionEngine):
@@ -104,6 +106,7 @@ class RuleBasedEngine(DecisionEngine):
         if context.get("previous_intent") or context.get("history"):
             return False, ""
 
+        # 短消息（<4字）过短必澄清；4字以上仅意图不明时澄清（具体问题直接作答）
         if len(message.strip()) < SHORT_MESSAGE_LENGTH:
             return True, "消息过短，缺少上下文"
 

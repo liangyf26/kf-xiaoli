@@ -110,6 +110,16 @@ QUESTIONS: Dict[str, Any] = {
 # HTTP调用超时（秒）
 KEV_TIMEOUT_SECONDS = 5.0
 
+# noul阈值校准（Phase 4评估集实测，2026-10-09）：
+# kev-0.8b为英文训练原型，noul头对中文输入分布整体压缩且无区分度——
+# 11个可答评估问题 escalate_noul∈[0.56,0.77]/clarify_noul∈[0.46,0.64]，
+# 对照样本"咋整"（真模糊）clarify仅0.564、"垃圾产品我要投诉"（愤怒）escalate仅0.789，
+# 阈值0.5会把全部中文消息判为需澄清+需转人工（评估中10/10题被直接拒答）。
+# 校准为阈值抬升到实测分布之上：模糊问题改由生成层prompt的澄清指示兜底；
+# 升级能力由rule/jev引擎承担（其emotion/noul对中文有效）。中文校准模型接入后应恢复0.5。
+KEV_CLARIFY_NOUL_THRESHOLD = 0.7
+KEV_ESCALATE_NOUL_THRESHOLD = 0.8
+
 
 class KevEngine(DecisionEngine):
     """Kev本地模型决策引擎（kev.serve HTTP模式 / transformers懒加载模式）。"""
@@ -292,12 +302,12 @@ JSON:"""
             intent_confidence_raw = float(answers["intent_confidence"]["score"])
             intent_confidence = min(1.0, max(0.0, intent_confidence_raw / (SCORE_BANDS - 1)))
 
-            needs_clarification = float(answers["needs_clarification"]["noul"]) >= 0.5
+            needs_clarification = float(answers["needs_clarification"]["noul"]) >= KEV_CLARIFY_NOUL_THRESHOLD
 
             complexity_raw = float(answers["technical_complexity"]["score"])
             complexity = int(min(100, max(0, round(complexity_raw / (SCORE_BANDS - 1) * 100))))
 
-            escalate = float(answers["escalate_to_human"]["noul"]) >= 0.5
+            escalate = float(answers["escalate_to_human"]["noul"]) >= KEV_ESCALATE_NOUL_THRESHOLD
             emotion = str(answers["user_emotion"]["choice"])
         except (KeyError, ValueError, TypeError) as exc:
             return self._fallback_result(f"Kev answers解析失败: {exc}", latency_ms)

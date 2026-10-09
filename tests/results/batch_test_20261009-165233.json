@@ -1,0 +1,307 @@
+{
+  "metadata": {
+    "source_file": "test_questions_final.txt",
+    "engine_env": "",
+    "engine_class": "RuleBasedEngine",
+    "llm_model": "Qwen3.8-27B",
+    "total_questions": 20,
+    "passed": 20,
+    "failed": 0,
+    "pass_rate": 1.0,
+    "average_latency_ms": 3164,
+    "max_latency_ms": 12390,
+    "min_latency_ms": 0,
+    "wall_seconds": 63.28,
+    "timestamp": "2026-10-09 16:52:33"
+  },
+  "results": [
+    {
+      "question": "你好",
+      "answer": "请问您能补充一下问题的细节吗？例如：使用场景（直播/社媒运营）、设备类型，方便我更准确地帮助您。",
+      "sources": [],
+      "latency_ms": 0,
+      "engine": "rule",
+      "path": "clarification",
+      "intent": "unclear",
+      "need_clarification": true,
+      "status": "ok",
+      "is_refusal": false,
+      "error": ""
+    },
+    {
+      "question": "直播线路多少钱",
+      "answer": "问题1: 开场【price】\n120/月一条idc线路，独享，社媒TK，FB，5-10兆以上包稳。\n180/月一条ISP家庭IP线路，独享，主推，社媒TK，FB，对IP有要求选这个，5-10兆以上包稳。\n260/月一条ISP家庭ip直播优化线路，独享，专门针对TK直播优化。\n5人拼车共享IP，单人50元/月 ，适合看店、购物、Claude编程等。\n联通sdwan底层网络，联通代理商，付款千元可对公开发票签合同，大项目有资质参与招投标。\n长期稳定使用必须上sdwan路由器硬件300元/个，支持淘宝。短期可以用软件。\n\n\n网购，是买家，还是要登录商家后台发商品？直播？社媒？\n\n问题57: 有账号卖吗？【purchase】\n没有。我们是专业做线路的，账号请上淘宝、闲鱼问问。\n\n问题39: 你们的价格为什么那么低？外面常规都是10M 500元起步？【price】\n那个是电信目录价，现在联通抢市场，批发价就低。\n我们是联通核心代理，不仅仅做sdwan这业务，卖号卖套餐，搞营业厅，政企业务都做，渠道定级高，拿货折扣还可以。",
+      "sources": [
+        "问题1",
+        "问题57",
+        "问题39"
+      ],
+      "latency_ms": 0,
+      "engine": "rule",
+      "path": "faq_match",
+      "intent": "price_inquiry",
+      "need_clarification": false,
+      "status": "ok",
+      "is_refusal": false,
+      "error": ""
+    },
+    {
+      "question": "我想咨询价格",
+      "answer": "价格这块：IDC线路120/月，ISP家庭IP线路180/月，直播优化线路260/月，都是独享、5-10兆以上包稳。拼车共享IP的话单人50/月。另外长期用需要sdwan路由器硬件，300元/个。你主要用来干嘛的？我帮你看看哪条合适。",
+      "sources": [
+        "问题1"
+      ],
+      "latency_ms": 7360,
+      "engine": "rule",
+      "path": "llm_generation",
+      "intent": "price_inquiry",
+      "need_clarification": false,
+      "status": "ok",
+      "is_refusal": false,
+      "error": ""
+    },
+    {
+      "question": "IDC线路多少钱",
+      "answer": "问题1: 开场【price】\n120/月一条idc线路，独享，社媒TK，FB，5-10兆以上包稳。\n180/月一条ISP家庭IP线路，独享，主推，社媒TK，FB，对IP有要求选这个，5-10兆以上包稳。\n260/月一条ISP家庭ip直播优化线路，独享，专门针对TK直播优化。\n5人拼车共享IP，单人50元/月 ，适合看店、购物、Claude编程等。\n联通sdwan底层网络，联通代理商，付款千元可对公开发票签合同，大项目有资质参与招投标。\n长期稳定使用必须上sdwan路由器硬件300元/个，支持淘宝。短期可以用软件。\n\n\n网购，是买家，还是要登录商家后台发商品？直播？社媒？\n\n问题57: 有账号卖吗？【purchase】\n没有。我们是专业做线路的，账号请上淘宝、闲鱼问问。\n\n问题39: 你们的价格为什么那么低？外面常规都是10M 500元起步？【price】\n那个是电信目录价，现在联通抢市场，批发价就低。\n我们是联通核心代理，不仅仅做sdwan这业务，卖号卖套餐，搞营业厅，政企业务都做，渠道定级高，拿货折扣还可以。",
+      "sources": [
+        "问题1",
+        "问题57",
+        "问题39"
+      ],
+      "latency_ms": 0,
+      "engine": "rule",
+      "path": "faq_match",
+      "intent": "price_inquiry",
+      "need_clarification": false,
+      "status": "ok",
+      "is_refusal": false,
+      "error": ""
+    },
+    {
+      "question": "那家庭IP线路呢",
+      "answer": "家庭IP线路180/月，独享，5-10兆以上包稳，对IP有要求选这条。另外还有一条260/月的直播优化线路，专门针对TK直播调的。",
+      "sources": [
+        "问题1"
+      ],
+      "latency_ms": 7436,
+      "engine": "rule",
+      "path": "llm_generation",
+      "intent": "unclear",
+      "need_clarification": false,
+      "status": "ok",
+      "is_refusal": false,
+      "error": ""
+    },
+    {
+      "question": "tiktok登不上怎么办",
+      "answer": "按顺序排查一下：1.手机拔卡（千万别插卡）；2.地区切到美国、语言US英语、时区美国；3.不允许APP跟踪；4.清理APP后台；5.打开客户端线路开关；6.再重新打开tiktok登录。如果还登不上，大概率是卡没拔或地区没切对，再检查一遍。",
+      "sources": [
+        "问题6",
+        "问题11"
+      ],
+      "latency_ms": 6375,
+      "engine": "rule",
+      "path": "llm_generation",
+      "intent": "technical_support",
+      "need_clarification": false,
+      "status": "ok",
+      "is_refusal": false,
+      "error": ""
+    },
+    {
+      "question": "怎么使用",
+      "answer": "手机上装客户端，或者买我们深度定制的路由器网关。以苹果手机为例，使用顺序：拔卡→切地区为美国→连WiFi→登录美区apple id→装客户端→扫线路专属二维码→打开线路开关→装TikTok→登录使用。安卓和电脑端操作略有不同，需要的话我再细说。",
+      "sources": [
+        "问题3",
+        "问题10"
+      ],
+      "latency_ms": 12390,
+      "engine": "rule",
+      "path": "llm_generation",
+      "intent": "usage_guide",
+      "need_clarification": false,
+      "status": "ok",
+      "is_refusal": false,
+      "error": ""
+    },
+    {
+      "question": "客户端在哪里下载",
+      "answer": "看您用什么设备：\n苹果（iPhone/iPad/Mac）：https://docs.qq.com/doc/DRnZTRXZmaGZPRGVE\n安卓手机：https://docs.qq.com/doc/DRmpmSkJiSVpCUnBn\n电脑：https://docs.qq.com/doc/DRmhDSHhnT2daeWZh\n打开对应文档按步骤下载就行。",
+      "sources": [
+        "问题9",
+        "问题25",
+        "问题30"
+      ],
+      "latency_ms": 5625,
+      "engine": "rule",
+      "path": "llm_generation",
+      "intent": "usage_guide",
+      "need_clarification": false,
+      "status": "ok",
+      "is_refusal": false,
+      "error": ""
+    },
+    {
+      "question": "看视频有点卡怎么办",
+      "answer": "暂时无法回答，需要人工介入",
+      "sources": [],
+      "latency_ms": 4203,
+      "engine": "rule",
+      "path": "llm_generation",
+      "intent": "usage_guide",
+      "need_clarification": false,
+      "status": "ok",
+      "is_refusal": true,
+      "error": ""
+    },
+    {
+      "question": "支持YouTube吗",
+      "answer": "暂时无法回答，需要人工介入",
+      "sources": [],
+      "latency_ms": 6641,
+      "engine": "rule",
+      "path": "llm_generation",
+      "intent": "product_comparison",
+      "need_clarification": false,
+      "status": "ok",
+      "is_refusal": true,
+      "error": ""
+    },
+    {
+      "question": "咋整",
+      "answer": "请问您想了解哪方面的操作呢？例如：客户端安装、美区apple id注册、线路绑定，还是路由器设置？",
+      "sources": [],
+      "latency_ms": 0,
+      "engine": "rule",
+      "path": "clarification",
+      "intent": "usage_guide",
+      "need_clarification": true,
+      "status": "ok",
+      "is_refusal": false,
+      "error": ""
+    },
+    {
+      "question": "多少钱",
+      "answer": "请问您想了解哪条线路的价格呢？IDC线路120元/月、ISP家庭IP线路180元/月、直播优化线路260元/月，还是拼车共享IP（50元/月）？",
+      "sources": [],
+      "latency_ms": 0,
+      "engine": "rule",
+      "path": "clarification",
+      "intent": "price_inquiry",
+      "need_clarification": true,
+      "status": "ok",
+      "is_refusal": false,
+      "error": ""
+    },
+    {
+      "question": "能直播吗",
+      "answer": "请问您能补充一下问题的细节吗？例如：使用场景（直播/社媒运营）、设备类型，方便我更准确地帮助您。",
+      "sources": [],
+      "latency_ms": 0,
+      "engine": "rule",
+      "path": "clarification",
+      "intent": "unclear",
+      "need_clarification": true,
+      "status": "ok",
+      "is_refusal": false,
+      "error": ""
+    },
+    {
+      "question": "价格表",
+      "answer": "请问您想了解哪条线路的价格呢？IDC线路120元/月、ISP家庭IP线路180元/月、直播优化线路260元/月，还是拼车共享IP（50元/月）？",
+      "sources": [],
+      "latency_ms": 0,
+      "engine": "rule",
+      "path": "clarification",
+      "intent": "price_inquiry",
+      "need_clarification": true,
+      "status": "ok",
+      "is_refusal": false,
+      "error": ""
+    },
+    {
+      "question": "网速慢",
+      "answer": "请问具体现象是什么？例如：卡顿、网速慢、频繁掉线？",
+      "sources": [],
+      "latency_ms": 0,
+      "engine": "rule",
+      "path": "clarification",
+      "intent": "troubleshooting",
+      "need_clarification": true,
+      "status": "ok",
+      "is_refusal": false,
+      "error": ""
+    },
+    {
+      "question": "有没有便宜的",
+      "answer": "暂时无法回答，需要人工介入",
+      "sources": [],
+      "latency_ms": 5280,
+      "engine": "rule",
+      "path": "llm_generation",
+      "intent": "product_comparison",
+      "need_clarification": false,
+      "status": "ok",
+      "is_refusal": true,
+      "error": ""
+    },
+    {
+      "question": "怎么购买",
+      "answer": "问题16: 能不能开试用体验？【purchase】\n可以试用的。\n\n问题33: 你们的客户端看起来是翻墙的，不是sd wan。【purchase】\n我们是正规企业架设的sd wan，你现在没有拿我们的sdwan路由，临时试用只有客户端就只能先连到我们企业sd wan边缘节点，再通过我们企业sd wan出去。只有直接连出外面的服务器才是传统翻墙。\n\n问题57: 有账号卖吗？【purchase】\n没有。我们是专业做线路的，账号请上淘宝、闲鱼问问。",
+      "sources": [
+        "问题16",
+        "问题33",
+        "问题57"
+      ],
+      "latency_ms": 0,
+      "engine": "rule",
+      "path": "faq_match",
+      "intent": "purchase_process",
+      "need_clarification": false,
+      "status": "ok",
+      "is_refusal": false,
+      "error": ""
+    },
+    {
+      "question": "可以试用吗",
+      "answer": "可以试用的。",
+      "sources": [
+        "问题16"
+      ],
+      "latency_ms": 3219,
+      "engine": "rule",
+      "path": "llm_generation",
+      "intent": "product_comparison",
+      "need_clarification": false,
+      "status": "ok",
+      "is_refusal": false,
+      "error": ""
+    },
+    {
+      "question": "退款怎么办",
+      "answer": "暂时无法回答，需要人工介入",
+      "sources": [],
+      "latency_ms": 4750,
+      "engine": "rule",
+      "path": "llm_generation",
+      "intent": "usage_guide",
+      "need_clarification": false,
+      "status": "ok",
+      "is_refusal": true,
+      "error": ""
+    },
+    {
+      "question": "联系客服",
+      "answer": "请问您能补充一下问题的细节吗？例如：使用场景（直播/社媒运营）、设备类型，方便我更准确地帮助您。",
+      "sources": [],
+      "latency_ms": 0,
+      "engine": "rule",
+      "path": "clarification",
+      "intent": "unclear",
+      "need_clarification": true,
+      "status": "ok",
+      "is_refusal": false,
+      "error": ""
+    }
+  ]
+}

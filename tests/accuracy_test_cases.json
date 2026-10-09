@@ -1,0 +1,72 @@
+[
+  {
+    "question": "直播线路多少钱",
+    "expected_keywords": ["260", "元/月", "直播"],
+    "expected_sources": ["问题1"],
+    "should_answer": true,
+    "note": "KB问题1: 260/月ISP家庭ip直播优化线路"
+  },
+  {
+    "question": "IDC线路价格",
+    "expected_keywords": ["120", "元/月", "IDC"],
+    "expected_sources": ["问题1"],
+    "should_answer": true,
+    "note": "KB问题1: 120/月idc线路"
+  },
+  {
+    "question": "tiktok登不上",
+    "expected_keywords": ["拔卡", "地区", "美国", "清理", "后台"],
+    "expected_sources": ["问题11"],
+    "should_answer": true,
+    "note": "KB问题11: 清理后台/拔卡/改地区"
+  },
+  {
+    "question": "客户端下载地址",
+    "expected_keywords": ["docs.qq.com", "腾讯文档"],
+    "expected_sources": ["问题9", "问题25", "问题30", "问题51", "问题52", "问题53"],
+    "should_answer": true,
+    "note": "KB问题9/25/30/51/52/53均为客户端下载链接（苹果/电脑/安卓任一即可）"
+  },
+  {
+    "question": "支持YouTube吗",
+    "expected_keywords": ["无法回答", "人工"],
+    "expected_sources": [],
+    "should_answer": false,
+    "note": "知识库无YouTube相关内容，正确行为是拒答"
+  },
+  {
+    "question": "网速慢怎么办",
+    "expected_keywords": ["测速", "speedtest", "切换", "节点", "带宽", "设备"],
+    "expected_sources": ["问题49", "问题12", "问题50"],
+    "should_answer": true,
+    "note": "KB问题49(speedtest测速)/问题12(单设备带宽)/问题50(切换节点)任一"
+  },
+  {
+    "question": "可以试用吗",
+    "expected_keywords": ["试用"],
+    "expected_sources": ["问题16"],
+    "should_answer": true,
+    "note": "对任务书原稿的修正：任务书预期拒答，但KB问题16明确'可以试用的'，拒答才是错误行为"
+  },
+  {
+    "question": "路由器多少钱",
+    "expected_keywords": ["300", "元"],
+    "expected_sources": ["问题1", "问题29"],
+    "should_answer": true,
+    "note": "KB问题1: 路由器硬件300元/个；问题29: 有的。300元"
+  },
+  {
+    "question": "怎么使用",
+    "expected_keywords": ["客户端", "路由器", "拔卡", "地区", "安装"],
+    "expected_sources": ["问题3", "问题10"],
+    "should_answer": true,
+    "note": "KB问题3(装客户端或路由器)/问题10(使用顺序)任一"
+  },
+  {
+    "question": "有什么套餐",
+    "expected_keywords": ["120", "180", "260", "50"],
+    "expected_sources": ["问题1"],
+    "should_answer": true,
+    "note": "KB问题1: 120/180/260/50拼车四档价格"
+  }
+]

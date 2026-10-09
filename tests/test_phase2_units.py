@@ -232,10 +232,13 @@ def test_jev_answers_parsing():
     assert good.escalate_to_human is False
     assert good.latency_ms == 88
 
-    # noul>=0.5为真
-    clarify = engine._result_from_answers(make_answers(noul=0.85), 50)
+    # noul>=0.9为真（Phase 4校准：具体短问题clarify_noul实测0.40-0.89，真模糊"咋整"0.95）
+    clarify = engine._result_from_answers(make_answers(noul=0.95), 50)
     assert clarify.needs_clarification is True
     assert clarify.clarification_reason == "Jev判断需要澄清"
+
+    below_threshold = engine._result_from_answers(make_answers(noul=0.85), 50)
+    assert below_threshold.needs_clarification is False, "noul=0.85低于校准阈值0.9不应澄清"
 
     # 复杂度封顶100，escalate阈值
     extreme = engine._result_from_answers(
@@ -301,7 +304,8 @@ def test_kev_graceful_fallback():
 def test_kev_serve_answers_parsing():
     """kev.serve /v1/systemone的answers解析（与OpenRouter decisions同构）。
 
-    score为分档索引期望值按(档数-1)归一化；noul>=0.5为真；
+    score为分档索引期望值按(档数-1)归一化；noul按Phase 4校准阈值判定
+    （clarify>=0.7、escalate>=0.8，见kev_client阈值校准注释）；
     非法意图归unclear；answers缺失字段回退kev_failed。
     """
     engine = KevEngine()
@@ -327,10 +331,16 @@ def test_kev_serve_answers_parsing():
     clarify = engine._result_from_answers(make_answers(noul=0.85), 50)
     assert clarify.needs_clarification is True
 
-    extreme = engine._result_from_answers(make_answers(score=15.0, complexity=20.0, escalate=0.6), 10)
+    below_clarify = engine._result_from_answers(make_answers(noul=0.64), 50)
+    assert below_clarify.needs_clarification is False, "noul=0.64低于校准阈值0.7不应澄清（评估集实测良性消息最高0.641）"
+
+    extreme = engine._result_from_answers(make_answers(score=15.0, complexity=20.0, escalate=0.85), 10)
     assert extreme.intent_confidence == 1.0
     assert extreme.technical_complexity == 100
     assert extreme.escalate_to_human is True
+
+    over_fire = engine._result_from_answers(make_answers(escalate=0.6), 10)
+    assert over_fire.escalate_to_human is False, "noul=0.6低于校准阈值0.8不应升级（评估集实测良性消息最高0.771）"
 
     weird = engine._result_from_answers(make_answers(intent="hack"), 10)
     assert weird.intent == "unclear"

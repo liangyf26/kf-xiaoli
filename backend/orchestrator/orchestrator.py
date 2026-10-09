@@ -71,6 +71,7 @@ class Orchestrator:
 
         # 2. 路由（传入message供澄清判断：长问题不误澄清）
         path = self.router._determine_path(decision, orchestrator_context, message)
+        logger.info("路由路径选择: %s（intent=%s conf=%.2f）", path.value, decision.intent, decision.intent_confidence)
 
         # 3. 处理
         if path == ProcessingPath.CLARIFICATION:

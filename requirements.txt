@@ -18,7 +18,8 @@ pydantic-settings==2.2.1
 # 日志
 python-json-logger==2.0.7
 
-# Transformers（用于Kev模型）
+# Transformers（用于Kev模型——仅DECISION_ENGINE=kev的transformers模式需要；
+# Kev推荐走独立.venv-kev的kev.serve服务（见README FAQ），不需要本节依赖时可跳过安装
 transformers==4.37.2
 torch==2.2.0
 sentencepiece==0.1.99

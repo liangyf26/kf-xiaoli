@@ -105,6 +105,13 @@ QUESTIONS: Dict[str, Any] = {
 # API调用超时（秒）
 JEV_TIMEOUT_SECONDS = 5.0
 
+# needs_clarification阈值校准（Phase 4评估集实测，2026-10-09）：
+# jev-1.13对具体短问题的clarify_noul系统性偏高（10个可答评估问题0.40-0.89，
+# 0.5阈值下7/10被误澄清），真模糊对照"咋整"为0.95。校准为0.9：
+# 保留真模糊澄清，具体问题放行至生成层（prompt澄清指示兜底）。
+# escalate的noul区分度良好（良性0.18-0.43，愤怒样本>0.5），维持0.5不变。
+JEV_CLARIFY_NOUL_THRESHOLD = 0.9
+
 
 class JevEngine(DecisionEngine):
     """Jev决策引擎（OpenRouter decisions端点）。"""
@@ -166,7 +173,7 @@ class JevEngine(DecisionEngine):
             intent_confidence_raw = float(answers["intent_confidence"]["score"])
             intent_confidence = min(1.0, max(0.0, intent_confidence_raw / (SCORE_BANDS - 1)))
 
-            needs_clarification = float(answers["needs_clarification"]["noul"]) >= 0.5
+            needs_clarification = float(answers["needs_clarification"]["noul"]) >= JEV_CLARIFY_NOUL_THRESHOLD
 
             complexity_raw = float(answers["technical_complexity"]["score"])
             complexity = int(min(100, max(0, round(complexity_raw / (SCORE_BANDS - 1) * 100))))

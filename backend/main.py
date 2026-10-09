@@ -1,11 +1,12 @@
 """FastAPI入口：静态文件服务 + WebSocket端点。
 
-Phase 1为Echo mock：用户消息经等待汇总后返回"Echo: {汇总内容}"。
+编排流程：用户消息经等待汇总后交给Orchestrator完成决策→路由→生成。
+日志：控制台+文件双通道，文件按日期轮转（logs/app.log，午夜切割）。
 """
 import json
 import logging
 from datetime import datetime
-from logging.handlers import RotatingFileHandler
+from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -15,6 +16,7 @@ from fastapi.staticfiles import StaticFiles
 from backend.config import settings
 from backend.connection_manager import ConnectionManager
 from backend.knowledge import KnowledgeBase
+from backend.metrics import metrics
 from backend.models import Message
 from backend.orchestrator.orchestrator import Orchestrator
 from backend.wait_aggregator import WaitAggregator
@@ -23,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 def setup_logging() -> None:
-    """控制台 + 文件（logs/app.log轮转）双通道日志。"""
+    """控制台 + 文件（logs/app.log按日期轮转，保留14天）双通道日志。"""
     log_dir = BASE_DIR / "logs"
     log_dir.mkdir(exist_ok=True)
     level = getattr(logging, settings.LOG_LEVEL.upper(), logging.INFO)
@@ -33,8 +35,8 @@ def setup_logging() -> None:
     root.setLevel(level)
     console = logging.StreamHandler()
     console.setFormatter(formatter)
-    file_handler = RotatingFileHandler(
-        log_dir / "app.log", maxBytes=5 * 1024 * 1024, backupCount=3, encoding="utf-8"
+    file_handler = TimedRotatingFileHandler(
+        log_dir / "app.log", when="midnight", backupCount=14, encoding="utf-8"
     )
     file_handler.setFormatter(formatter)
     root.addHandler(console)
@@ -69,6 +71,19 @@ async def healthz() -> dict:
     }
 
 
+@app.get("/metrics")
+async def get_metrics() -> dict:
+    """运行时指标查询：请求数/引擎与路径分布/平均延迟/错误数。"""
+    return metrics.snapshot()
+
+
+@app.post("/metrics/reset")
+async def reset_metrics() -> dict:
+    """运行时指标重置。"""
+    metrics.reset()
+    return {"status": "reset", "metrics": metrics.snapshot()}
+
+
 manager = ConnectionManager()
 aggregator = WaitAggregator()
 # 编排器：决策层+路由+生成（Phase 3）；知识库随服务启动加载
@@ -92,7 +107,9 @@ async def handle_aggregated(session, combined: str) -> None:
         "clarification_count": session.context.clarification_count,
         "covered_topics": session.context.covered_topics,
     }
+    start = datetime.now()
     result = await orchestrator.process(combined, context)
+    latency_ms = int((datetime.now() - start).total_seconds() * 1000)
     logger.info(
         "session=%s 编排完成: path=%s intent=%s engine=%s sources=%s",
         session.session_id, result.get("path"), result.get("intent"),
@@ -124,6 +141,11 @@ async def handle_aggregated(session, combined: str) -> None:
             "need_clarification": result.get("need_clarification", False),
         },
     })
+    logger.info("session=%s 回复已发送: path=%s 延迟=%dms 长度=%d字", session.session_id, result.get("path"), latency_ms, len(answer))
+    metrics.record_request(
+        engine=result.get("engine", ""), path=result.get("path", ""),
+        latency_ms=latency_ms, error=False,
+    )
 
 
 @app.websocket("/ws")
@@ -151,6 +173,7 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
                 if not content:
                     logger.debug("session=%s 空消息已拦截", session_id)
                     continue
+                logger.info("session=%s 用户消息: %s", session_id, content[:50])
                 await aggregator.add_message(session, content, handle_aggregated)
 
             elif msg_type == "clear_conversation":
