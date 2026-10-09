@@ -85,7 +85,7 @@ def wait_until_ready(proc: subprocess.Popen, log_path: Path, timeout: float = 30
 
 
 async def recv_response(ws, timeout: float) -> dict:
-    """跳过waiting倒计时消息，等待response。"""
+    """跳过waiting倒计时与thinking状态消息，等待response。"""
     deadline = time.time() + timeout
     while True:
         remaining = deadline - time.time()
@@ -98,25 +98,27 @@ async def recv_response(ws, timeout: float) -> dict:
 
 
 async def scenario_single_message():
-    """任务书1.6验收：发消息→waiting→Echo回复。"""
+    """任务书1.6验收（Phase 3更新）：发消息→waiting→thinking→真实回复。"""
     async with websockets.connect(URI) as ws:
-        await ws.send(json.dumps({"type": "user_message", "content": "测试消息"}))
+        await ws.send(json.dumps({"type": "user_message", "content": "直播线路多少钱"}))
 
         first = json.loads(await asyncio.wait_for(ws.recv(), timeout=10))
         assert first["type"] == "waiting", f"预期waiting，收到: {first}"
         assert isinstance(first.get("remaining_seconds"), int), "倒计时秒数缺失"
 
-        data = await recv_response(ws, timeout=SLIDE_WAIT + 30)
+        data = await recv_response(ws, timeout=SLIDE_WAIT + 60)
         answer = data["data"]["answer"]
-        assert "Echo" in answer and "测试消息" in answer, f"回复内容错误: {answer!r}"
+        assert answer.strip(), "回复内容为空"
         assert "您好，我是SDWAN智能客服机器人" in answer, "首条回复缺问候语"
+        # Phase 3: 编排元数据
+        assert "intent" in data["data"], "缺少intent字段"
+        assert "path" in data["data"], "缺少path字段"
 
 
 async def scenario_three_messages_one_reply():
-    """暗卷第1项：3条连续消息（间隔2秒）只触发1次回复。
+    """暗卷第1项：3条连续消息（间隔2秒）只触发1次回复（真实LLM回复）。
 
-    重复回复检查持续到首条消息起 max_seconds 封顶窗口彻底结束后再留5秒缓冲，
-    避免较晚到达的重复回复漏检。
+    重复回复检查持续到首条消息起 max_seconds 封顶窗口彻底结束后再留5秒缓冲。
     """
     start = time.monotonic()
     async with websockets.connect(URI) as ws:
@@ -124,11 +126,9 @@ async def scenario_three_messages_one_reply():
             await ws.send(json.dumps({"type": "user_message", "content": text}))
             await asyncio.sleep(2)
 
-        data = await recv_response(ws, timeout=SLIDE_WAIT + 30)
+        data = await recv_response(ws, timeout=SLIDE_WAIT + 90)
         answer = data["data"]["answer"]
-        assert "Echo" in answer
-        for text in ("消息一", "消息二", "消息三"):
-            assert text in answer, f"汇总缺少 {text}: {answer!r}"
+        assert answer.strip(), "回复为空"
 
         horizon = start + MAX_WAIT + 5
         while True:
@@ -144,30 +144,29 @@ async def scenario_three_messages_one_reply():
 
 
 async def scenario_clear_conversation():
-    """任务书4.2验收（清空部分）：清空后回复重新携带问候语。"""
+    """任务书4.2验收（清空部分）：清空后首条回复重新携带问候语。"""
     async with websockets.connect(URI) as ws:
         await ws.send(json.dumps({"type": "user_message", "content": "清空前消息"}))
-        await recv_response(ws, timeout=SLIDE_WAIT + 30)
+        await recv_response(ws, timeout=SLIDE_WAIT + 90)
 
         await ws.send(json.dumps({"type": "clear_conversation"}))
         await ws.send(json.dumps({"type": "user_message", "content": "清空后再测"}))
-        data = await recv_response(ws, timeout=SLIDE_WAIT + 30)
+        data = await recv_response(ws, timeout=SLIDE_WAIT + 90)
         answer = data["data"]["answer"]
         assert "您好，我是SDWAN智能客服机器人" in answer, "清空后首条回复应重新携带问候语"
-        assert "Echo: 清空后再测" in answer, f"回复内容错误: {answer!r}"
+        assert answer.strip(), "回复内容为空"
 
 
 async def scenario_decision_meta():
-    """任务书5.3验收：决策引擎集成——回复payload携带决策元数据。"""
+    """任务书5.3验收：编排器集成——回复payload携带决策与路径元数据。"""
     async with websockets.connect(URI) as ws:
         await ws.send(json.dumps({"type": "user_message", "content": "多少钱"}))
-        data = await recv_response(ws, timeout=SLIDE_WAIT + 30)
+        data = await recv_response(ws, timeout=SLIDE_WAIT + 60)
         payload = data["data"]
         assert "intent" in payload and payload["intent"], "回复缺少决策意图字段"
         assert "engine" in payload and payload["engine"], "回复缺少决策引擎字段"
-        assert "intent_confidence" in payload and 0 <= payload["intent_confidence"] <= 1
-        assert "needs_clarification" in payload and "escalate_to_human" in payload
-        assert "Echo" in payload["answer"], "Phase 1 Echo行为被破坏"
+        assert "path" in payload and payload["path"], "回复缺少编排路径字段"
+        assert "sources" in payload, "回复缺少sources字段"
 
 
 WS_SCENARIOS = [

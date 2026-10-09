@@ -2,6 +2,7 @@
 
 Phase 1为Echo mock：用户消息经等待汇总后返回"Echo: {汇总内容}"。
 """
+import json
 import logging
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
@@ -13,9 +14,9 @@ from fastapi.staticfiles import StaticFiles
 
 from backend.config import settings
 from backend.connection_manager import ConnectionManager
-from backend.decision_layer import create_decision_engine
 from backend.knowledge import KnowledgeBase
 from backend.models import Message
+from backend.orchestrator.orchestrator import Orchestrator
 from backend.wait_aggregator import WaitAggregator
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -70,54 +71,57 @@ async def healthz() -> dict:
 
 manager = ConnectionManager()
 aggregator = WaitAggregator()
-# 决策引擎按DECISION_ENGINE配置创建（Phase 2）；真实路由在Phase 3接入
-decision_engine = create_decision_engine()
-logger.info("决策引擎已加载: %s", type(decision_engine).__name__)
+# 编排器：决策层+路由+生成（Phase 3）；知识库随服务启动加载
+orchestrator = Orchestrator()
+logger.info("编排器已加载: 决策引擎=%s, 知识库=%d问答对", type(orchestrator.decision_engine).__name__, len(orchestrator.knowledge_base.qa_pairs))
 
 
 async def handle_aggregated(session, combined: str) -> None:
-    """等待结束的回调：先经决策层识别意图，Phase 1仍返回Echo mock回复。"""
+    """等待结束的回调：编排器完成决策→路由→生成（Phase 3，替换Phase 1的Echo mock）。"""
     parts = []
     if session.is_first_message:
         parts.append(settings.FIRST_MESSAGE_GREETING)
         session.is_first_message = False
 
-    # 决策层意图识别（RuleBasedEngine<100ms；Jev/Kev视配置与可用性）
+    # 思考状态提示（前端显示"正在思考中..."）
+    await manager.send_message(session.session_id, {"type": "thinking"})
+
     context = {
         "history": [{"role": m.role, "content": m.content} for m in session.context.history[-10:]],
         "previous_intent": session.context.last_intent or None,
         "clarification_count": session.context.clarification_count,
         "covered_topics": session.context.covered_topics,
     }
-    decision = await decision_engine.decide(combined, context)
-    session.context.last_intent = decision.intent
-    if decision.needs_clarification:
-        session.context.clarification_count += 1
+    result = await orchestrator.process(combined, context)
     logger.info(
-        "session=%s 决策: intent=%s confidence=%.2f clarify=%s emotion=%s escalate=%s latency=%dms engine=%s",
-        session.session_id, decision.intent, decision.intent_confidence,
-        decision.needs_clarification, decision.user_emotion,
-        decision.escalate_to_human, decision.latency_ms, decision.engine,
+        "session=%s 编排完成: path=%s intent=%s engine=%s sources=%s",
+        session.session_id, result.get("path"), result.get("intent"),
+        result.get("engine"), result.get("sources"),
     )
 
-    parts.append(f"Echo: {combined}")
+    parts.append(result["answer"])
     answer = "\n".join(parts)
 
-    # 记录到对话历史（Phase 3上下文管理使用）
+    # 记录到对话历史与上下文
     now = datetime.now()
     session.context.history.append(Message(role="user", content=combined, timestamp=now))
-    session.context.history.append(Message(role="assistant", content=answer, timestamp=now, sources=[]))
+    session.context.history.append(Message(role="assistant", content=answer, timestamp=now, sources=result.get("sources", [])))
+    session.context.last_intent = result.get("intent", "")
+    if result.get("need_clarification"):
+        session.context.clarification_count += 1
+    for source in result.get("sources", []):
+        if source not in session.context.covered_topics:
+            session.context.covered_topics.append(source)
 
     await manager.send_message(session.session_id, {
         "type": "response",
         "data": {
             "answer": answer,
-            "sources": [],
-            "intent": decision.intent,
-            "intent_confidence": decision.intent_confidence,
-            "needs_clarification": decision.needs_clarification,
-            "escalate_to_human": decision.escalate_to_human,
-            "engine": decision.engine,
+            "sources": result.get("sources", []),
+            "intent": result.get("intent", ""),
+            "engine": result.get("engine", ""),
+            "path": result.get("path", ""),
+            "need_clarification": result.get("need_clarification", False),
         },
     })
 
@@ -128,7 +132,18 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
     session = manager.get_session(session_id)
     try:
         while True:
-            data = await websocket.receive_json()
+            # 兼容JSON与裸文本两种消息（裸文本视为用户消息）
+            raw = await websocket.receive_text()
+            try:
+                data = json.loads(raw)
+                if not isinstance(data, dict):
+                    data = {"type": "user_message", "content": str(data)}
+            except (ValueError, TypeError):
+                content = raw.strip()
+                if not content:
+                    continue
+                data = {"type": "user_message", "content": content}
+
             msg_type = data.get("type")
 
             if msg_type == "user_message":

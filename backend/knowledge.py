@@ -26,7 +26,7 @@ CATEGORY_KEYWORDS: list[tuple[str, tuple[str, ...]]] = [
                "顺序", "注册", "申请", "能用", "上网", "连接")),
 ]
 
-# 意图名 → 分类键的映射（决策层Phase 2使用意图名）
+# 意图名 → 分类键的映射（决策层Phase 2使用意图名；跨类别取并集）
 INTENT_CATEGORY_MAP: dict[str, str] = {
     "price_inquiry": "price",
     "usage_guide": "usage",
@@ -35,6 +35,15 @@ INTENT_CATEGORY_MAP: dict[str, str] = {
     "purchase": "purchase",
     "technical_support": "technical",
     "general": "general",
+}
+
+# 一个意图可能横跨多个知识类别（Phase 1分类器与意图命名不完全对齐）：
+# technical_support（技术支持）与troubleshooting（故障排查）的知识互相重叠；
+# purchase_process（购买流程）的付款/合同/淘宝信息在price类问答中
+INTENT_MULTI_CATEGORIES: dict[str, tuple[str, ...]] = {
+    "technical_support": ("technical", "troubleshooting"),
+    "troubleshooting": ("troubleshooting", "technical"),
+    "purchase_process": ("purchase", "price"),
 }
 
 # 全部分类（含可能为空的general）
@@ -116,11 +125,27 @@ class KnowledgeBase:
         return "general"
 
     def get_by_intent(self, intent: str) -> str:
-        """按意图（或分类键）返回该类别全部问答的拼接文本。"""
-        category = INTENT_CATEGORY_MAP.get(intent, intent)
-        pairs = self.category_index.get(category, [])
+        """按意图（或分类键）返回该类别全部问答的拼接文本。
+
+        支持跨类别：INTENT_MULTI_CATEGORIES中的意图取多个类别的并集
+        （如technical_support同时取technical与troubleshooting类知识）。
+        """
+        categories: tuple[str, ...]
+        if intent in INTENT_MULTI_CATEGORIES:
+            categories = INTENT_MULTI_CATEGORIES[intent]
+        else:
+            categories = (INTENT_CATEGORY_MAP.get(intent, intent),)
+
+        pairs: list[QAPair] = []
+        seen = set()
+        for category in categories:
+            for qa in self.category_index.get(category, []):
+                if qa.number not in seen:
+                    seen.add(qa.number)
+                    pairs.append(qa)
+
         if not pairs:
-            logger.warning("意图/分类 %s 无匹配问答（解析为 %s）", intent, category)
+            logger.warning("意图/分类 %s 无匹配问答", intent)
             return ""
         return "\n\n".join(self._format(qa) for qa in pairs)
 

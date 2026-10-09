@@ -13,7 +13,7 @@ INTENT_KEYWORDS: Dict[str, Tuple[str, ...]] = {
     "technical_support": ("连不上", "不上", "登不上", "错误", "失败", "问题", "故障"),
     "usage_guide": ("怎么", "如何", "怎样", "咋", "咋整", "用法", "使用"),
     "product_comparison": ("能不能", "可以", "支持", "有没有", "区别", "对比"),
-    "troubleshooting": ("卡", "慢", "掉线", "断开", "不稳定"),
+    "troubleshooting": ("卡", "慢", "掉线", "断开", "不稳定", "不行", "死活", "用不了"),
     "purchase_process": ("购买", "买", "订购", "下单"),
 }
 
@@ -59,7 +59,7 @@ class RuleBasedEngine(DecisionEngine):
         needs_clarification, clarify_reason = self._check_clarification(message, confidence, context)
         complexity = self._estimate_complexity(intent)
         emotion = self._detect_emotion(message)
-        escalate = self._should_escalate(emotion, complexity, context)
+        escalate = self._should_escalate(intent, emotion, complexity, context)
 
         return DecisionResult(
             intent=intent,
@@ -74,17 +74,22 @@ class RuleBasedEngine(DecisionEngine):
         )
 
     def _match_intent(self, message: str) -> Tuple[str, float]:
-        """关键词计分匹配，返回(意图, 置信度)。无命中返回unclear。"""
+        """关键词计分匹配，返回(意图, 置信度)。无命中返回unclear。
+
+        计分：命中关键词个数；平分时按命中关键词总长度裁决（更长的关键词更具体）。
+        """
         scores: Dict[str, int] = {}
+        lengths: Dict[str, int] = {}
         for intent, keywords in self.intent_keywords.items():
-            score = sum(1 for kw in keywords if kw and kw in message)
-            if score > 0:
-                scores[intent] = score
+            matched = [kw for kw in keywords if kw and kw in message]
+            if matched:
+                scores[intent] = len(matched)
+                lengths[intent] = sum(len(kw) for kw in matched)
 
         if not scores:
             return UNCLEAR_INTENT, UNCLEAR_CONFIDENCE
 
-        best_intent = max(scores, key=scores.get)
+        best_intent = max(scores, key=lambda k: (scores[k], lengths.get(k, 0)))
         # 命中越多关键词置信度越高，上限0.95
         confidence = min(0.95, 0.5 + scores[best_intent] * 0.2)
         return best_intent, confidence
@@ -118,12 +123,13 @@ class RuleBasedEngine(DecisionEngine):
                 return emotion
         return "neutral"
 
-    def _should_escalate(self, emotion: str, complexity: int, context: Dict[str, Any]) -> bool:
-        """转人工判断：负面情绪、紧急且高复杂度、反复澄清仍未识别。"""
-        if emotion == "negative":
-            return True
+    def _should_escalate(self, intent: str, emotion: str, complexity: int, context: Dict[str, Any]) -> bool:
+        """转人工判断：首问不升级（负面情绪但意图明确时仍先尝试回答），回复失败过才升级。"""
+        clarification_count = int(context.get("clarification_count", 0) or 0)
+        if clarification_count >= 3:
+            return True  # 反复澄清仍未解决
+        if emotion == "negative" and clarification_count >= 1:
+            return True  # 已答非所问一次且用户不满
         if emotion == "urgent" and complexity >= 60:
-            return True
-        if int(context.get("clarification_count", 0) or 0) >= 3:
             return True
         return False

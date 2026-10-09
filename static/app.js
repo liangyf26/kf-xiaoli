@@ -41,12 +41,12 @@
             handleMessage(data);
         };
 
-        ws.onclose = function () {
-            stopCountdown();
-            thinkingBar.classList.add("hidden");
-            waitingBar.classList.add("hidden");
-            disconnectTip.classList.remove("hidden");
-        };
+    ws.onclose = function () {
+        stopCountdown();
+        hideThinkingStatus();
+        waitingBar.classList.add("hidden");
+        disconnectTip.classList.remove("hidden");
+    };
 
         ws.onerror = function () {
             ws.close();
@@ -59,18 +59,17 @@
                 showCountdown(data.remaining_seconds || 0);
                 break;
             case "thinking":
-                stopCountdown();
-                thinkingBar.classList.remove("hidden");
+                showThinkingStatus();
                 break;
             case "response":
                 stopCountdown();
-                thinkingBar.classList.add("hidden");
+                hideThinkingStatus();
                 waitingBar.classList.add("hidden");
                 appendMessage("assistant", data.data ? data.data.answer : "", data.data ? data.data.sources : []);
                 break;
             case "error":
                 stopCountdown();
-                thinkingBar.classList.add("hidden");
+                hideThinkingStatus();
                 waitingBar.classList.add("hidden");
                 var msg = data.data && data.data.message ? data.data.message : "服务暂时不可用";
                 appendMessage("assistant", msg, []);
@@ -78,6 +77,17 @@
             default:
                 break;
         }
+    }
+
+    /* 思考状态（含点点点动画） */
+    function showThinkingStatus() {
+        stopCountdown();
+        thinkingBar.innerHTML = "💭 机器人正在思考中<span class=\"dots\"></span>";
+        thinkingBar.classList.remove("hidden");
+    }
+
+    function hideThinkingStatus() {
+        thinkingBar.classList.add("hidden");
     }
 
     /* 倒计时：服务端推送剩余秒数，前端本地每秒递减 */
@@ -109,9 +119,17 @@
         div.className = "message " + role;
         div.textContent = content;
         if (role === "assistant" && sources && sources.length > 0) {
+            // 答案来源（默认展开，点击折叠/展开）
             var src = document.createElement("span");
             src.className = "sources";
-            src.textContent = "来源：" + sources.join("、");
+            src.textContent = "📎 来源（点击折叠）：";
+            var list = document.createElement("span");
+            list.className = "source-list";
+            list.textContent = sources.join("、");
+            src.appendChild(list);
+            src.addEventListener("click", function () {
+                src.classList.toggle("collapsed");
+            });
             div.appendChild(src);
         }
         messageList.appendChild(div);
@@ -142,7 +160,7 @@
             ws.send(JSON.stringify({ type: "clear_conversation" }));
         }
         stopCountdown();
-        thinkingBar.classList.add("hidden");
+        hideThinkingStatus();
         waitingBar.classList.add("hidden");
         messageList.innerHTML = "";
     }

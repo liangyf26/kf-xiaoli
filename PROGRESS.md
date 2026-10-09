@@ -225,3 +225,58 @@ Kev GPU部署完成后，按任务书"完成条件"逐项重审：
 **暗卷3项（真实Kev复测）**: ①"咋整"→rule按任务书字典usage_guide、Jev/Kev均unclear+澄清（合理）；②1000字超长文本三引擎无崩溃（Kev GPU仅1280ms）；③切换3次全部正确
 
 **遗留**（继承）: Kev GPU<500ms需≥8GB显存卡（CUDA graphs才能开启）；模型英文训练原型，中文分布外，分类质量待真实案例校准
+
+## Phase 3 完成情况（2026-10-09）
+
+### 已实现功能
+- ✅ LLM客户端（Qwen3.8-27B集成，流式+非流式，60秒超时重试1次，backend/llm/client.py）
+- ✅ JSON解析器（容错：代码块/平衡花括号/降级原文，backend/llm/parser.py）
+- ✅ Few-shot示例库（9个意图块含clarification/general，示例 grounded 真实知识库，backend/orchestrator/few_shot_examples.py）
+- ✅ 示例选择器（≤3示例控制长度，澄清优先，backend/orchestrator/example_selector.py）
+- ✅ Prompt构建器（7部分组装，<8000字符硬上限+裁剪兜底，backend/orchestrator/prompt_builder.py）
+- ✅ 路由器（4路径：转人工>澄清>FAQ>LLM>降级人工，backend/orchestrator/router.py）
+- ✅ 处理器（澄清话术库/FAQ来源标注/LLM生成+空回复防御/转人工，backend/orchestrator/handlers.py）
+- ✅ 编排器（决策→路由→处理→统一格式，backend/orchestrator/orchestrator.py）
+- ✅ WebSocket集成（Echo mock退役；裸文本消息兼容；waiting→thinking→response状态推送）
+- ✅ 前端深色主题（design_sense：深色/圆角/滚动条/响应式）+思考点点点动画+来源可折叠展示
+
+### 技术指标
+- LLM响应: 1.1-1.4秒（Qwen3.8-27B内网）；端到端含15秒等待汇总约17-32秒（等待窗口为产品设计）
+- 编排器直连性能: FAQ路径0.00秒（性能测试10次全过，平均<10秒达标）
+- 验收命令: 任务1（3项）+任务2（2项）+任务3（4项）+任务4（8项）+任务5（4项）全过
+- pytest回归: 36项全过；E2E场景（Phase 1-2协议适配后）6/6
+
+### E2E测试结果（tests/run_e2e_tests.py，8用例最终轮）
+
+| 用例 | 通过 | 备注 |
+|------|------|------|
+| 首次对话 | ✅ | 问候语+引导补充 |
+| 价格咨询 | ✅ | FAQ命中知识库原文 |
+| 上下文理解 | ✅ | '多少钱'接'直播线路'后正确报价 |
+| 技术支持 | ✅ | tiktok排查步骤（多类别知识修复后） |
+| 知识库外 | ✅ | YouTube正确拒答（3连测稳定） |
+| 连续消息 | ✅ | 3条合并只回1次 |
+| 触发澄清 | ✅ | '咋整'→澄清问句 |
+| 多轮对话 | ✅ | 购买流程FAQ命中 |
+
+### 对抗性审查发现并修复（4项）
+1. 知识类别错位：technical_support意图只取technical类，tiktok登录问题在troubleshooting类→KnowledgeBase.get_by_intent支持跨类别（INTENT_MULTI_CATEGORIES），purchase_process加挂price（淘宝/合同信息在价格类）
+2. LLM空回复透传（温度0.3偶发）→处理器重试1次+降级标准拒答话术
+3. 负情绪无条件转人工（暗卷1期望排查方案）→校准为"首问不升级，已答非所问且用户不满才升级"；'不行/死活/用不了'补入troubleshooting关键词；平分按命中关键词总长度裁决
+4. 对比脚本过时note→动态生成
+
+### 验收官暗卷4项
+1. '咋整啊，这tk死活不行'（口语+中英混合）→troubleshooting意图→LLM拟人化澄清追问"具体啥症状？打不开、登录不上、还是老弹验证？" ✅
+2. 10条快速消息（间隔1秒）→汇总1次回复 ✅
+3. 'YouTube直播'→正确拒答不编造（3连测稳定） ✅
+4. 多轮对话后刷新→新会话问候语重新出现 ✅
+
+### 待Phase 4实现
+- 批量测试脚本（20+真实案例）
+- 准确率评估与标注
+- 性能优化与监控完善
+- 最终文档和交付
+
+### 遗留问题
+- 前端深色主题与来源展示为代码级验证+人工清单（任务书决策4），未做浏览器截图留证
+- LLM对知识库的理解依赖Qwen3.8提示词遵循度，个别场景（'要最便宜的'）可能偏向拒答，待真实案例调优
