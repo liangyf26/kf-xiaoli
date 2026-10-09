@@ -1,0 +1,66 @@
+{
+  "acceptance_object": "aa45db4eb9d77563b1fbe6104493f7fabcf502f0",
+  "date": "2026-10-10",
+  "verdict": "pass",
+  "baseline": {
+    "head": "aa45db4eb9d77563b1fbe6104493f7fabcf502f0",
+    "origin_master": "aa45db4eb9d77563b1fbe6104493f7fabcf502f0",
+    "working_tree_clean_at_start": true,
+    "commit_diff_check": true
+  },
+  "tests": {
+    "phase5": {
+      "command": ".venv/Scripts/python.exe -m pytest -q tests/test_phase5_units.py",
+      "passed": 17,
+      "failed": 0,
+      "skipped": 0,
+      "duration_seconds": 4.04
+    },
+    "full_pytest": {
+      "command": ".venv/Scripts/python.exe -m pytest tests -q",
+      "passed": 83,
+      "failed": 0,
+      "skipped": 1,
+      "duration_seconds": 45.74
+    },
+    "run_all": {
+      "phase1": "13/13",
+      "phase2": "23/23",
+      "e2e": "8/8",
+      "exit_code": 0
+    }
+  },
+  "emotion_contract": {
+    "valid_values": ["neutral", "positive", "urgent", "dissatisfied", "complaint_risk"],
+    "jev_illegal_negative_falls_back_to_neutral": true,
+    "jev_complaint_risk_forces_escalation": true,
+    "kev_answers_illegal_negative_falls_back_to_neutral": true,
+    "kev_answers_complaint_risk_forces_escalation": true,
+    "kev_text_illegal_negative_falls_back_to_neutral": true,
+    "kev_text_complaint_risk_forces_escalation": true,
+    "backend_negative_grep_empty": true
+  },
+  "e2e": {
+    "four_engine_switches": ["rule", "jev", "kev", "qwen"],
+    "engine_switch_ack_and_get_engine_checked": true,
+    "complaint_risk_path": "human_escalation",
+    "response_metadata_keys": ["engine", "decision_latency_ms", "intent", "intent_confidence", "emotion", "path", "sources"],
+    "total_scenarios": 8,
+    "passed_scenarios": 8
+  },
+  "data_integrity": {
+    "sdwan_md_sha256": "3757e194100527d10d93581d7157595b2c0d9825d106853748658e26ce36b0e1",
+    "sdwan_md_changed": false,
+    "sdwan_real_tracked": false,
+    "ignored_artifacts_committed": false
+  },
+  "limitations": [
+    "No live Jev API call was made in this remediation re-verification.",
+    "No Kev GPU service was started; Kev HTTP answers and transformers text parser contracts were unit-tested.",
+    "Single-process session numbering is serialized within an event loop; multi-process shared-file deployments still need external locking."
+  ],
+  "artifacts": {
+    "report": "docs/20261010-phase5-remediation-acceptance-report.md",
+    "evidence": "docs/acceptance-evidence/20261010-phase5-remediation-acceptance.json"
+  }
+}
