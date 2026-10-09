@@ -1,8 +1,8 @@
 {
   "date": "2026-10-09",
   "target": ">85%",
-  "accuracy": 0.95,
-  "passed": 19,
+  "accuracy": 1.0,
+  "passed": 20,
   "total": 20,
   "scoring": "expected_keywords任一命中即通过（关键词取自知识库原文）",
   "results": [
@@ -39,7 +39,7 @@
       ],
       "passed": true,
       "path": "llm_generation",
-      "latency_ms": 7515,
+      "latency_ms": 5844,
       "answer_preview": "价格如下：IDC线路120元/月（独享，社媒TK/FB，5-10兆以上包稳）；ISP家庭IP线路180元/月（独享，对IP有要求选这个）；ISP家庭IP直播优化线路260元/月（专门针对TK直播优化）"
     },
     {
@@ -92,8 +92,8 @@
       ],
       "passed": true,
       "path": "llm_generation",
-      "latency_ms": 5936,
-      "answer_preview": "不会。我们线路是本地独立IP、独享带宽，按使用指导一机一线路用就不会被封号或降权。"
+      "latency_ms": 6828,
+      "answer_preview": "不会。我们线路是本地独立IP、独享带宽，按使用指导一机一号一线路来用，不会封号也不会降权。关键是别混用区域，比如英国线路登美国号这种就别搞，老老实实一号一线路最稳。"
     },
     {
       "id": 6,
@@ -113,8 +113,8 @@
       ],
       "passed": true,
       "path": "llm_generation",
-      "latency_ms": 8329,
-      "answer_preview": "按顺序排查一下：1.手机拔卡（千万别插卡）；2.地区切到美国、语言US英语、时区美国；3.不允许APP跟踪；4.清理TikTok后台；5.确认客户端线路开关已打开；6.再重新打开TikTok登录。基本"
+      "latency_ms": 8735,
+      "answer_preview": "先清一下APP后台，然后确认：手机拔卡、地区已切换、不允许APP跟踪、客户端线路开关已打开。都确认没问题后再重新打开tiktok登录试试。"
     },
     {
       "id": 7,
@@ -131,8 +131,8 @@
       ],
       "passed": true,
       "path": "llm_generation",
-      "latency_ms": 12578,
-      "answer_preview": "{\"answer\": \"各平台客户端教程：\\n苹果（iPhone/iPad/macOS）：https://docs.qq.com/doc/DRnZTRXZmaGZPRGVE\\n安卓：https://d"
+      "latency_ms": 12436,
+      "answer_preview": "{\"answer\": \"看您用什么设备：\\n苹果（iPhone/iPad/Mac）：https://docs.qq.com/doc/DRnZTRXZmaGZPRGVE\\n安卓：https://docs"
     },
     {
       "id": 8,
@@ -150,7 +150,7 @@
       ],
       "passed": true,
       "path": "llm_generation",
-      "latency_ms": 6905,
+      "latency_ms": 7094,
       "answer_preview": "国内号码就能注册，不用外国手机。信息填写可以用网上生成工具（比如 https://www.shenfendaquan.com/）。注册教程看这个：https://www.rei3.com/forum-"
     },
     {
@@ -166,13 +166,12 @@
       ],
       "hit_keywords": [
         "拔卡",
-        "切换地区",
         "apple"
       ],
       "passed": true,
       "path": "llm_generation",
-      "latency_ms": 5828,
-      "answer_preview": "以美区加州为例，苹果手机的使用顺序：拔卡（不插卡）→切换地区为美国、语言US英语、时区美国→连WiFi→登录美区apple id→装手机客户端→扫线路专属二维码→打开线路开关→装TikTok→登录账号"
+      "latency_ms": 6046,
+      "answer_preview": "以美区加州为例，苹果手机操作顺序：拔卡→地区切美国、语言切US英语、时区切美国→连WiFi→登录美区apple id→装手机客户端→扫线路专属二维码→打开线路开关→装TikTok→登录账号→开始用。"
     },
     {
       "id": 10,
@@ -188,7 +187,7 @@
       ],
       "passed": true,
       "path": "llm_generation",
-      "latency_ms": 4437,
+      "latency_ms": 4547,
       "answer_preview": "可以试用的。"
     },
     {
@@ -207,7 +206,7 @@
       ],
       "passed": true,
       "path": "llm_generation",
-      "latency_ms": 4780,
+      "latency_ms": 5592,
       "answer_preview": "可以的，千元以上能签合同开发票。"
     },
     {
@@ -224,8 +223,8 @@
       ],
       "passed": true,
       "path": "llm_generation",
-      "latency_ms": 4156,
-      "answer_preview": "没有哈，我们专业做线路的，账号的话建议去淘宝、闲鱼上看看。"
+      "latency_ms": 4610,
+      "answer_preview": "没有哈，我们专业做线路的，账号的话建议上淘宝、闲鱼看看。"
     },
     {
       "id": 13,
@@ -244,8 +243,8 @@
       ],
       "passed": true,
       "path": "llm_generation",
-      "latency_ms": 5625,
-      "answer_preview": "可以多台设备用，但一条线路带宽有限，设备多了会挤占，卡了就少上几台。"
+      "latency_ms": 4719,
+      "answer_preview": "一条线路支持多台设备，没有硬性上限。但带宽是共享的，设备多了会互相挤占，卡了就少挂几台。"
     },
     {
       "id": 14,
@@ -263,7 +262,7 @@
       ],
       "passed": true,
       "path": "llm_generation",
-      "latency_ms": 3733,
+      "latency_ms": 3843,
       "answer_preview": "没有太多特殊要求，常见的电信、联通宽带就可以用。"
     },
     {
@@ -283,8 +282,8 @@
       ],
       "passed": true,
       "path": "llm_generation",
-      "latency_ms": 6016,
-      "answer_preview": "用不上。特别是做TikTok的话，手机千万别插卡，直接拔掉就行。"
+      "latency_ms": 5796,
+      "answer_preview": "用不上。特别是做TikTok的话，手机千万别插卡，直接拔卡用就行。"
     },
     {
       "id": 16,
@@ -300,8 +299,8 @@
       ],
       "passed": true,
       "path": "llm_generation",
-      "latency_ms": 4265,
-      "answer_preview": "能用。"
+      "latency_ms": 4594,
+      "answer_preview": "能用的，户外没问题。"
     },
     {
       "id": 17,
@@ -318,8 +317,8 @@
       ],
       "passed": true,
       "path": "llm_generation",
-      "latency_ms": 7734,
-      "answer_preview": "主要是距离问题。美国在地球另一面，跨大洋通信距离远，经过的中转设备也多，延迟自然就高。而且美国东海岸还要先过西海岸再走内陆中转，所以东海岸比西海岸还会再差一点。这是物理距离决定的，没办法完全避免。"
+      "latency_ms": 8546,
+      "answer_preview": "主要是距离问题。美国在地球另一面，跨大洋通信距离远，经过的设备和节点也多，延迟自然就上去了。而且如果是东海岸，还得先过西海岸再走美国内陆中转，所以比西海岸还要再差一点。这是物理距离决定的，没办法完全避"
     },
     {
       "id": 18,
@@ -332,11 +331,13 @@
         "网口",
         "协商"
       ],
-      "hit_keywords": [],
-      "passed": false,
+      "hit_keywords": [
+        "网口"
+      ],
+      "passed": true,
       "path": "llm_generation",
-      "latency_ms": 7937,
-      "answer_preview": "这个情况知识库里没有具体的排查步骤，建议直接联系人工客服，可以远程帮你排查路由器网关的网络问题。"
+      "latency_ms": 9187,
+      "answer_preview": "这个问题暂时无法回答，需要人工介入。建议联系我们的客服，可以远程帮你排查路由网口的连接问题。"
     },
     {
       "id": 19,
@@ -354,8 +355,8 @@
       ],
       "passed": true,
       "path": "llm_generation",
-      "latency_ms": 5405,
-      "answer_preview": "一条线路就是一个国家，不能跨。要多个国家切换的话，就买多条国家线路。"
+      "latency_ms": 5452,
+      "answer_preview": "一条线路就是一个国家，不能跨。要多个国家切换的话，就得买多条国家线路。"
     },
     {
       "id": 20,
@@ -374,8 +375,8 @@
       ],
       "passed": true,
       "path": "llm_generation",
-      "latency_ms": 10297,
-      "answer_preview": "苹果手机用前主要几件事：①拔卡，别插SIM卡；②地区切美国，语言切US英语，时区切美国；③提前注册好美区apple id（国内号码就能注册）；④准备好宽带和WiFi，建议联通的。搞定这些再装客户端绑线"
+      "latency_ms": 8157,
+      "answer_preview": "苹果手机的话：拔卡（别插卡）、准备一个美区apple id账号、把地区切成美国，再备好宽带和WiFi（建议联通宽带）。搞定这些就可以开始用了。"
     }
   ]
 }
