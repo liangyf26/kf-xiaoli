@@ -15,6 +15,7 @@ from fastapi.staticfiles import StaticFiles
 
 from backend.config import settings
 from backend.connection_manager import ConnectionManager
+from backend.decision_layer import create_decision_engine
 from backend.knowledge import KnowledgeBase
 from backend.metrics import metrics
 from backend.models import Message
@@ -82,6 +83,16 @@ async def reset_metrics() -> dict:
     """运行时指标重置。"""
     metrics.reset()
     return {"status": "reset", "metrics": metrics.snapshot()}
+
+
+# 当前决策引擎名（rule/jev/kev）；WebSocket switch_engine消息运行时切换
+current_engine_name = settings.DECISION_ENGINE
+
+
+@app.get("/engine")
+async def get_engine() -> dict:
+    """当前决策引擎查询（前端选择器初始化用）。"""
+    return {"engine": current_engine_name}
 
 
 manager = ConnectionManager()
@@ -175,6 +186,25 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
                     continue
                 logger.info("session=%s 用户消息: %s", session_id, content[:50])
                 await aggregator.add_message(session, content, handle_aggregated)
+
+            elif msg_type == "switch_engine":
+                # 运行时切换决策引擎（立即生效，无需重启；对所有会话全局生效）
+                global current_engine_name
+                engine_name = str(data.get("engine") or "").strip().lower()
+                try:
+                    orchestrator.decision_engine = create_decision_engine(engine_name)
+                except ValueError:
+                    await manager.send_message(session_id, {
+                        "type": "error",
+                        "data": {"message": f"无效的决策引擎: {engine_name}（可选 rule/jev/kev）"},
+                    })
+                else:
+                    current_engine_name = engine_name
+                    logger.info("session=%s 决策引擎已切换: %s", session_id, engine_name)
+                    await manager.send_message(session_id, {
+                        "type": "engine_switched",
+                        "data": {"engine": engine_name},
+                    })
 
             elif msg_type == "clear_conversation":
                 await aggregator.cancel(session)

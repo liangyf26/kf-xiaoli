@@ -50,6 +50,12 @@ body {
 
 .chat-header h1 { font-size: 17px; font-weight: 600; letter-spacing: 0.3px; }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
 #clear-btn {
     padding: 6px 14px;
     border: 1px solid var(--border);
@@ -61,6 +67,44 @@ body {
     transition: background 0.15s;
 }
 #clear-btn:hover { background: #2a313a; }
+
+/* 决策引擎选择器（分段按钮，选中高亮） */
+.engine-switcher {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-tertiary);
+}
+
+.engine-btn {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 12px;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+.engine-btn:hover { color: var(--text-primary); background: #2a313a; }
+.engine-btn.active {
+    background: var(--accent);
+    color: #fff;
+}
+
+/* 助手回复的决策引擎标记 */
+.msg-meta {
+    display: block;
+    margin-top: 6px;
+    font-size: 10px;
+    color: var(--text-secondary);
+    opacity: 0.85;
+    user-select: none;
+}
 
 .message-list {
     flex: 1;

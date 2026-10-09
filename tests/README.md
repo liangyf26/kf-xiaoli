@@ -34,10 +34,10 @@ python tests/e2e_test.py
 | test_phase3_units.py | Phase 3任务1-4 | LLM客户端结构/真实调用（API不可达时标准skip）/超时语义、JSON解析器4例、Few-shot结构+每意图示例数量(3-5)、示例选择器、Prompt构建器、路由决策5例、处理路径3例 |
 | test_phase4_units.py | Phase 4任务1-4 | 指标收集（记录/快照/重置/落盘）、报告生成器、批量问题文件解析、准确率严格评分口径（澄清不计作答）、LLM生成JSON残缺重试、知识库全库检索、QwenClient连接复用、性能分析器 |
 | run_e2e_tests.py | Phase 3任务5-7 | 8用例端到端（WebSocket全流程，顺序/连续两种模式）+ --perf性能模式（FAQ 10次+LLM路径3次采样） |
-| e2e_test.py | Phase 1任务1.6/4.2、暗卷1-3项；Phase 2任务5.3 | 单条消息回复（真实LLM）、3条连续消息仅1次回复、清空对话重置、回复携带编排元数据、启动失败暗卷2项 |
+| e2e_test.py | Phase 1任务1.6/4.2、暗卷1-3项；Phase 2任务5.3；Phase 4引擎切换 | 单条消息回复（真实LLM）、3条连续消息仅1次回复、清空对话重置、回复携带编排元数据、运行时切换决策引擎（switch_engine立即生效/无效名报错//engine端点）、启动失败暗卷2项 |
 
 预期结果：pytest四套合计67项（66 passed + 1 skipped，P1:13/P2:23/P3:20/P4:11），
-E2E 6/6，`run_all.py` 退出码为 0。
+E2E 7/7，`run_all.py` 退出码为 0。
 
 ## Phase 4 批量测试与评估工具
 

@@ -10,7 +10,14 @@
     <div class="chat-container">
         <header class="chat-header">
             <h1>SDWAN智能客服机器人 Demo</h1>
-            <button id="clear-btn" type="button">清空对话</button>
+            <div class="header-actions">
+                <div class="engine-switcher" id="engine-switcher" title="切换决策引擎（立即生效）">
+                    <button class="engine-btn" data-engine="rule" type="button">规则引擎</button>
+                    <button class="engine-btn" data-engine="jev" type="button">Jev引擎</button>
+                    <button class="engine-btn" data-engine="kev" type="button">Kev引擎</button>
+                </div>
+                <button id="clear-btn" type="button">清空对话</button>
+            </div>
         </header>
 
         <main id="message-list" class="message-list">

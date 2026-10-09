@@ -11,11 +11,44 @@
     var thinkingBar = document.getElementById("thinking-bar");
     var disconnectTip = document.getElementById("disconnect-tip");
     var reconnectBtn = document.getElementById("reconnect-btn");
+    var engineBtns = Array.prototype.slice.call(document.querySelectorAll(".engine-btn"));
+
+    var ENGINE_LABELS = {
+        rule: "规则引擎",
+        jev: "Jev引擎",
+        kev: "Kev引擎",
+        kev_failed: "Kev引擎（服务未就绪，已降级）",
+    };
 
     var ws = null;
     var countdownTimer = null;
     var reconnectDelay = 1000;
     var pendingMessages = []; // WebSocket未就绪时先排队，连接建立后补发
+
+    /* 决策引擎选择器 */
+    function setEngineActive(name) {
+        engineBtns.forEach(function (btn) {
+            btn.classList.toggle("active", btn.getAttribute("data-engine") === name);
+        });
+    }
+
+    function initEngineSelector() {
+        engineBtns.forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                var engine = btn.getAttribute("data-engine");
+                if (!ws || ws.readyState !== WebSocket.OPEN) {
+                    disconnectTip.classList.remove("hidden");
+                    return;
+                }
+                ws.send(JSON.stringify({ type: "switch_engine", engine: engine }));
+            });
+        });
+        // 初始化高亮服务端当前引擎
+        fetch("/engine")
+            .then(function (r) { return r.json(); })
+            .then(function (d) { if (d && d.engine) { setEngineActive(d.engine); } })
+            .catch(function () { /* 查询失败时保持默认无高亮 */ });
+    }
 
     function connect() {
         // 服务与本页面同源，按当前地址推导WebSocket地址
@@ -65,7 +98,16 @@
                 stopCountdown();
                 hideThinkingStatus();
                 waitingBar.classList.add("hidden");
-                appendMessage("assistant", data.data ? data.data.answer : "", data.data ? data.data.sources : []);
+                appendMessage(
+                    "assistant",
+                    data.data ? data.data.answer : "",
+                    data.data ? data.data.sources : [],
+                    data.data ? data.data.engine : ""
+                );
+                break;
+            case "engine_switched":
+                setEngineActive(data.data ? data.data.engine : "");
+                appendSystemTip("已切换决策引擎：" + (ENGINE_LABELS[data.data.engine] || data.data.engine));
                 break;
             case "error":
                 stopCountdown();
@@ -114,7 +156,7 @@
         }
     }
 
-    function appendMessage(role, content, sources) {
+    function appendMessage(role, content, sources, engine) {
         var div = document.createElement("div");
         div.className = "message " + role;
         div.textContent = content;
@@ -132,7 +174,22 @@
             });
             div.appendChild(src);
         }
+        if (role === "assistant" && engine) {
+            // 决策引擎标记（便于验证引擎切换已生效）
+            var meta = document.createElement("span");
+            meta.className = "msg-meta";
+            meta.textContent = "⚙ " + (ENGINE_LABELS[engine] || engine);
+            div.appendChild(meta);
+        }
         messageList.appendChild(div);
+        messageList.scrollTop = messageList.scrollHeight;
+    }
+
+    function appendSystemTip(text) {
+        var tip = document.createElement("div");
+        tip.className = "system-tip";
+        tip.textContent = text;
+        messageList.appendChild(tip);
         messageList.scrollTop = messageList.scrollHeight;
     }
 
@@ -177,5 +234,6 @@
         }
     });
 
+    initEngineSelector();
     connect();
 })();

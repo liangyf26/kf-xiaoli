@@ -10,6 +10,7 @@ SDWAN智能客服机器人对外接口：HTTP管理端点 + WebSocket对话通�
 | GET | `/healthz` | 健康检查：`{"app": "sdwan-kf-xiaoli", "status": "ok", "qa_pairs": 58}` |
 | GET | `/metrics` | 运行时指标快照（请求数/引擎分布/路径分布/平均延迟/错误数） |
 | POST | `/metrics/reset` | 重置运行时指标 |
+| GET | `/engine` | 当前决策引擎：`{"engine": "rule"}` |
 
 ### GET /metrics 返回示例
 
@@ -51,10 +52,26 @@ SDWAN智能客服机器人对外接口：HTTP管理端点 + WebSocket对话通�
 {"type": "error", "data": {"message": "服务暂时不可用，请稍后重试"}}
 ```
 
-- `waiting`/`countdown`：等待汇总窗口（滑动15秒，30秒封顶）的倒计时推送。
+- `waiting`/`countdown`：等待汇总窗口（滑动3秒，30秒封顶）的倒计时推送。
 - `thinking`：汇总结束、开始编排生成。
 - `response.data.sources`：知识库来源编号；`path` ∈ `clarification` / `faq_match` / `llm_generation` / `human_escalation`。
 - `error`：服务端异常兜底提示。
+
+### 运行时切换决策引擎
+
+客户端发送（立即生效，无需重启，全局生效）：
+
+```json
+{"type": "switch_engine", "engine": "rule"}
+```
+
+服务端确认（无效引擎名返回 `error` 类型消息）：
+
+```json
+{"type": "engine_switched", "data": {"engine": "rule"}}
+```
+
+当前引擎也可通过 `GET /engine` 查询（`{"engine": "rule"}`）。
 
 ### 处理路径说明
 

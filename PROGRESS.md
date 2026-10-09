@@ -367,3 +367,12 @@ Kev GPU部署完成后，按任务书"完成条件"逐项重审：
 2. 根据三引擎对比与延迟数据选择主力引擎（当前rule默认合理；jev需评估数据出境合规）
 3. 实现知识库热更新（当前重启生效）
 4. 对接微信/飞书平台
+
+## Phase 4验收后调整（2026-10-09，用户需求）
+
+1. **等待汇总15秒→3秒**: .env/.env.example的WAIT_SLIDE_SECONDS=3（WAIT_MAX_SECONDS=30封顶不变，README/api.md同步）；实测发送→回复总等待3.0秒
+2. **界面三引擎选择器（立即生效）**:
+   - 后端: WebSocket新增`switch_engine`消息（工厂create_decision_engine即时重建，无需重启；无效名返回error），新增GET /engine查询当前引擎
+   - 前端: 头部"规则引擎/Jev引擎/Kev引擎"分段按钮（选中高亮，/engine初始化），切换后消息列表显示"已切换决策引擎"系统提示；每次助手回复新增⚙引擎标记便于确认切换生效
+   - 说明: Kev引擎需本地kev.serve运行（未运行时决策自动降级kev_failed，回复标记会显示降级状态）
+3. **测试**: e2e新增scenario_switch_engine（切jev→ack+/engine核对→切回rule→FAQ回复engine=rule→无效名报错，不依赖外部API），E2E 7/7；pytest 66 passed+1 skipped
