@@ -134,10 +134,17 @@ def test_rule_technical_intent():
 
 
 def test_rule_negative_emotion():
-    """任务书2.1验收测试4：负面情绪识别。"""
+    """任务书2.1验收测试4（Phase 5五值化更新）：不满情绪识别。
+
+    "垃圾/不行"归dissatisfied（不满）；"投诉"归complaint_risk且一律转人工。
+    """
     engine = RuleBasedEngine()
     result = asyncio.run(engine.decide("你们这个垃圾产品不行", {}))
-    assert result.user_emotion == "negative"
+    assert result.user_emotion == "dissatisfied"
+
+    complaint = asyncio.run(engine.decide("我要投诉你们", {}))
+    assert complaint.user_emotion == "complaint_risk"
+    assert complaint.escalate_to_human is True, "投诉风险必须转人工"
 
 
 def test_rule_latency():

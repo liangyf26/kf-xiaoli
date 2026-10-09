@@ -13,8 +13,8 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RESULTS_DIR = PROJECT_ROOT / "tests" / "results"
-ENGINE_ORDER = ["rule", "jev", "kev"]
-ENGINE_LABELS = {"rule": "规则引擎", "jev": "Jev API (OpenRouter)", "kev": "Kev本地模型(GPU)"}
+ENGINE_ORDER = ["rule", "jev", "kev", "qwen"]
+ENGINE_LABELS = {"rule": "规则引擎", "jev": "Jev API (OpenRouter)", "kev": "Kev本地模型(GPU)", "qwen": "Qwen引擎(主LLM)"}
 
 
 def resolve_inputs(argv: list[str]) -> dict[str, Path]:

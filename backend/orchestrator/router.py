@@ -36,8 +36,8 @@ class CustomerServiceRouter:
         澄清仅针对短而模糊的问题（<8字符）；长但关键词未命中的问题交给LLM尝试
         （prompt含澄清指示兜底，避免误澄清具体问题）。
         """
-        # 1. 转人工（情绪负面/决策层明确要求）
-        if decision.escalate_to_human:
+        # 1. 转人工（情绪负面/决策层明确要求；complaint_risk投诉风险一律转人工）
+        if decision.escalate_to_human or decision.user_emotion == "complaint_risk":
             return ProcessingPath.HUMAN_ESCALATION
 
         # 2. 澄清（已澄清2次以上不再澄清，避免用户烦躁）

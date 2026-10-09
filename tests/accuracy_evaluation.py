@@ -152,7 +152,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="SDWAN客服准确率评估")
     parser.add_argument("cases_file", nargs="?", default="tests/accuracy_test_cases.json",
                         help="标注用例JSON文件")
-    parser.add_argument("--engine", choices=["rule", "jev", "kev"], default=None,
+    parser.add_argument("--engine", choices=["rule", "jev", "kev", "qwen"], default=None,
                         help="指定决策引擎（默认读环境变量/.env）")
     args = parser.parse_args()
 

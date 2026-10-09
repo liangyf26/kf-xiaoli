@@ -92,19 +92,26 @@ body {
 }
 .engine-btn:hover { color: var(--text-primary); background: #2a313a; }
 .engine-btn.active {
-    background: var(--accent);
     color: #fff;
 }
+/* 四引擎各自的高亮底色（一眼区分） */
+.engine-btn.active[data-engine="rule"] { background: #2f81f7; }   /* 蓝 */
+.engine-btn.active[data-engine="jev"] { background: #a371f7; }    /* 紫 */
+.engine-btn.active[data-engine="kev"] { background: #db6d28; }    /* 橙棕 */
+.engine-btn.active[data-engine="qwen"] { background: #3fb950; }   /* 绿 */
 
-/* 助手回复的决策引擎标记 */
+/* 助手回复的决策结果行 */
 .msg-meta {
     display: block;
     margin-top: 6px;
     font-size: 10px;
     color: var(--text-secondary);
-    opacity: 0.85;
+    opacity: 0.9;
     user-select: none;
 }
+.msg-meta .msg-emotion { font-weight: 600; }
+.msg-meta .msg-emotion-dissatisfied { color: #f0b72f; }       /* 不满：橙 */
+.msg-meta .msg-emotion-complaint_risk { color: #f85149; }     /* 投诉风险：红 */
 
 .message-list {
     flex: 1;

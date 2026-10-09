@@ -33,9 +33,10 @@ COMPLEXITY_BY_INTENT: Dict[str, int] = {
     UNCLEAR_INTENT: 10,
 }
 
-# 情绪关键词
+# 情绪关键词（五级：投诉风险 > 不满 > 紧急 > 积极 > 中性；投诉风险一律转人工）
 EMOTION_KEYWORDS: Dict[str, Tuple[str, ...]] = {
-    "negative": ("不行", "垃圾", "差", "坑", "骗", "退款", "投诉", "烦", "生气"),
+    "complaint_risk": ("投诉", "举报", "315", "工商", "曝光", "差评", "黑猫", "退钱"),
+    "dissatisfied": ("不行", "垃圾", "差", "坑", "骗", "烦", "生气", "失望", "不满", "无语"),
     "urgent": ("紧急", "赶紧", "快", "马上", "急"),
     "positive": ("好", "不错", "谢谢", "感谢", "棒"),
 }
@@ -120,18 +121,20 @@ class RuleBasedEngine(DecisionEngine):
         return COMPLEXITY_BY_INTENT.get(intent, 30)
 
     def _detect_emotion(self, message: str) -> str:
-        """情绪识别：negative > urgent > positive > neutral。"""
+        """情绪识别：complaint_risk > dissatisfied > urgent > positive > neutral。"""
         for emotion, keywords in self.emotion_keywords.items():
             if any(kw in message for kw in keywords):
                 return emotion
         return "neutral"
 
     def _should_escalate(self, intent: str, emotion: str, complexity: int, context: Dict[str, Any]) -> bool:
-        """转人工判断：首问不升级（负面情绪但意图明确时仍先尝试回答），回复失败过才升级。"""
+        """转人工判断：投诉风险一律转人工；首问不升级（不满但意图明确时仍先尝试回答），回复失败过才升级。"""
         clarification_count = int(context.get("clarification_count", 0) or 0)
+        if emotion == "complaint_risk":
+            return True  # 投诉风险一律转人工
         if clarification_count >= 3:
             return True  # 反复澄清仍未解决
-        if emotion == "negative" and clarification_count >= 1:
+        if emotion == "dissatisfied" and clarification_count >= 1:
             return True  # 已答非所问一次且用户不满
         if emotion == "urgent" and complexity >= 60:
             return True

@@ -3,6 +3,39 @@ import json
 from typing import Any, Dict
 
 
+def parse_json_object(text: str) -> Dict[str, Any] | None:
+    """从LLM回复中提取第一个可解析的JSON对象（不要求特定字段），失败返回None。
+
+    依次尝试：```json代码块 → 第一段平衡的{...} → 全文。供决策/提炼等
+    非answer语义的JSON提取使用（parse_json_response专用于answer结构）。
+    """
+    if not text or not text.strip():
+        return None
+
+    candidates = []
+    if "```" in text:
+        block = text.split("```json")[-1].split("```")[0].strip()
+        if block:
+            candidates.append(block)
+
+    start = text.find("{")
+    if start != -1:
+        end = _find_balanced_end(text, start)
+        if end != -1:
+            candidates.append(text[start:end + 1])
+
+    candidates.append(text.strip())
+
+    for candidate in candidates:
+        try:
+            data = json.loads(candidate)
+        except (ValueError, TypeError):
+            continue
+        if isinstance(data, dict):
+            return data
+    return None
+
+
 def parse_json_response(text: str) -> Dict[str, Any]:
     """解析LLM回复中的JSON决策/答案结构。
 

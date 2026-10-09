@@ -30,7 +30,7 @@ INTENT_OPTIONS = (
     "purchase_process",
     "unclear",
 )
-EMOTION_OPTIONS = ("neutral", "positive", "negative", "urgent")
+EMOTION_OPTIONS = ("neutral", "positive", "urgent", "dissatisfied", "complaint_risk")
 
 # score分档数：decisions契约限制最多10档；档索引∈[0, N-1]，归一化=score/(N-1)
 SCORE_BANDS = 10
@@ -81,8 +81,9 @@ QUESTIONS: Dict[str, Any] = {
         "criteria": {
             "neutral": "情绪平静，正常咨询",
             "positive": "满意、感谢等积极情绪",
-            "negative": "不满、抱怨、投诉倾向",
             "urgent": "着急、催促、强调紧急",
+            "dissatisfied": "不满、失望、抱怨（尚未要求投诉）",
+            "complaint_risk": "明确要投诉、举报、给差评或追责",
         },
     },
     "technical_complexity": {
@@ -254,7 +255,7 @@ class KevEngine(DecisionEngine):
   "needs_clarification": true或false,
   "clarification_reason": "原因",
   "technical_complexity": 0到100,
-  "user_emotion": "neutral/positive/negative/urgent之一",
+  "user_emotion": "neutral/positive/urgent/dissatisfied/complaint_risk之一",
   "escalate_to_human": true或false
 }}
 

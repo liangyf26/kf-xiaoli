@@ -17,7 +17,27 @@
         rule: "规则引擎",
         jev: "Jev引擎",
         kev: "Kev引擎",
+        qwen: "Qwen引擎",
         kev_failed: "Kev引擎（服务未就绪，已降级）",
+        qwen_failed: "Qwen引擎（决策失败，已降级）",
+    };
+
+    var INTENT_LABELS = {
+        price_inquiry: "价格咨询",
+        product_comparison: "产品对比",
+        technical_support: "技术支持",
+        usage_guide: "使用指导",
+        troubleshooting: "故障排查",
+        purchase_process: "购买流程",
+        unclear: "未识别",
+    };
+
+    var EMOTION_LABELS = {
+        neutral: "中性",
+        positive: "积极",
+        urgent: "紧急",
+        dissatisfied: "不满",
+        complaint_risk: "投诉风险",
     };
 
     var ws = null;
@@ -98,12 +118,7 @@
                 stopCountdown();
                 hideThinkingStatus();
                 waitingBar.classList.add("hidden");
-                appendMessage(
-                    "assistant",
-                    data.data ? data.data.answer : "",
-                    data.data ? data.data.sources : [],
-                    data.data ? data.data.engine : ""
-                );
+                appendMessage("assistant", data.data ? data.data.answer : "", data.data ? data.data.sources : [], data.data);
                 break;
             case "engine_switched":
                 setEngineActive(data.data ? data.data.engine : "");
@@ -156,7 +171,7 @@
         }
     }
 
-    function appendMessage(role, content, sources, engine) {
+    function appendMessage(role, content, sources, data) {
         var div = document.createElement("div");
         div.className = "message " + role;
         div.textContent = content;
@@ -174,11 +189,24 @@
             });
             div.appendChild(src);
         }
-        if (role === "assistant" && engine) {
-            // 决策引擎标记（便于验证引擎切换已生效）
+        if (role === "assistant" && data && data.engine) {
+            // 决策结果行（Phase 5任务4）：引擎 · 决策耗时 · 意图+置信度 · 情绪
             var meta = document.createElement("span");
             meta.className = "msg-meta";
-            meta.textContent = "⚙ " + (ENGINE_LABELS[engine] || engine);
+            var parts = ["⚙ " + (ENGINE_LABELS[data.engine] || data.engine)];
+            if (typeof data.decision_latency_ms === "number") {
+                parts.push("决策" + data.decision_latency_ms + "ms");
+            }
+            if (data.intent) {
+                parts.push((INTENT_LABELS[data.intent] || data.intent) + " " + data.intent_confidence);
+            }
+            meta.textContent = parts.join(" · ");
+            if (data.emotion && EMOTION_LABELS[data.emotion]) {
+                var emotion = document.createElement("span");
+                emotion.className = "msg-emotion msg-emotion-" + data.emotion;
+                emotion.textContent = " · 情绪：" + EMOTION_LABELS[data.emotion];
+                meta.appendChild(emotion);
+            }
             div.appendChild(meta);
         }
         messageList.appendChild(div);

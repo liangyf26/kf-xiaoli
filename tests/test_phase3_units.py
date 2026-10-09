@@ -200,7 +200,7 @@ def test_prompt_builder_structure():
 def test_router_escalation():
     """任务书4.1验收测试1。"""
     router = CustomerServiceRouter(None, None, None)
-    path = router._determine_path(_decision(user_emotion="negative", escalate_to_human=True), {})
+    path = router._determine_path(_decision(user_emotion="complaint_risk", escalate_to_human=True), {})
     assert path == ProcessingPath.HUMAN_ESCALATION
 
 

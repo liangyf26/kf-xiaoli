@@ -134,7 +134,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="SDWAN客服批量测试")
     parser.add_argument("question_file", nargs="?", default="tests/test_questions_final.txt",
                         help="测试问题文件（每行一个问题，空行分隔会话）")
-    parser.add_argument("--engine", choices=["rule", "jev", "kev"], default=None,
+    parser.add_argument("--engine", choices=["rule", "jev", "kev", "qwen"], default=None,
                         help="指定决策引擎（默认读环境变量/.env）")
     args = parser.parse_args()
 

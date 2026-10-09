@@ -48,13 +48,16 @@ SDWAN智能客服机器人对外接口：HTTP管理端点 + WebSocket对话通�
 {"type": "waiting", "data": {"remaining_seconds": 15, "message_count": 2}}
 {"type": "countdown", "data": {"remaining_seconds": 8}}
 {"type": "thinking"}
-{"type": "response", "data": {"answer": "...", "sources": ["问题1"], "intent": "price_inquiry", "engine": "rule", "path": "faq_match", "need_clarification": false}}
+{"type": "response", "data": {"answer": "...", "sources": ["问题1"], "intent": "price_inquiry", "engine": "rule", "path": "faq_match", "need_clarification": false, "emotion": "neutral", "intent_confidence": 0.9, "decision_latency_ms": 1}}
+{"type": "engine_switched", "data": {"engine": "rule"}}
 {"type": "error", "data": {"message": "服务暂时不可用，请稍后重试"}}
 ```
 
 - `waiting`/`countdown`：等待汇总窗口（滑动3秒，30秒封顶）的倒计时推送。
 - `thinking`：汇总结束、开始编排生成。
 - `response.data.sources`：知识库来源编号；`path` ∈ `clarification` / `faq_match` / `llm_generation` / `human_escalation`。
+- `response.data` 决策结果字段：`engine`（rule/jev/kev/qwen及*_failed降级态）、`emotion`（neutral/positive/urgent/dissatisfied/complaint_risk）、`intent_confidence`（0-1）、`decision_latency_ms`（决策耗时毫秒）。
+- `engine_switched`：运行时切换决策引擎的确认（见下）。
 - `error`：服务端异常兜底提示。
 
 ### 运行时切换决策引擎
@@ -65,7 +68,7 @@ SDWAN智能客服机器人对外接口：HTTP管理端点 + WebSocket对话通�
 {"type": "switch_engine", "engine": "rule"}
 ```
 
-服务端确认（无效引擎名返回 `error` 类型消息）：
+可选值：`rule` / `jev` / `kev` / `qwen`。服务端确认（无效引擎名返回 `error` 类型消息）：
 
 ```json
 {"type": "engine_switched", "data": {"engine": "rule"}}

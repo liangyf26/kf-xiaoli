@@ -19,7 +19,7 @@ class DecisionResult(BaseModel):
     needs_clarification: bool = Field(..., description="是否需要澄清")
     clarification_reason: str = Field(default="", description="澄清原因")
     technical_complexity: int = Field(..., ge=0, le=100, description="技术复杂度0-100")
-    user_emotion: str = Field(..., description="用户情绪 neutral/positive/negative/urgent")
+    user_emotion: str = Field(..., description="用户情绪 neutral/positive/urgent/dissatisfied/complaint_risk")
     escalate_to_human: bool = Field(..., description="是否转人工")
     latency_ms: int = Field(..., ge=0, description="推理耗时毫秒")
     engine: str = Field(..., description="使用的引擎名称")

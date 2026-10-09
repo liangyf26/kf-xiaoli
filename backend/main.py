@@ -20,6 +20,7 @@ from backend.knowledge import KnowledgeBase
 from backend.metrics import metrics
 from backend.models import Message
 from backend.orchestrator.orchestrator import Orchestrator
+from backend.session_distiller import SessionDistiller
 from backend.wait_aggregator import WaitAggregator
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -97,6 +98,8 @@ async def get_engine() -> dict:
 
 manager = ConnectionManager()
 aggregator = WaitAggregator()
+# 会话提炼器：会话静默结束后用Qwen把对话提炼成问答，追加到data/sdwan-real.md
+distiller = SessionDistiller()
 # 编排器：决策层+路由+生成（Phase 3）；知识库随服务启动加载
 orchestrator = Orchestrator()
 logger.info("编排器已加载: 决策引擎=%s, 知识库=%d问答对", type(orchestrator.decision_engine).__name__, len(orchestrator.knowledge_base.qa_pairs))
@@ -150,6 +153,10 @@ async def handle_aggregated(session, combined: str) -> None:
             "engine": result.get("engine", ""),
             "path": result.get("path", ""),
             "need_clarification": result.get("need_clarification", False),
+            # 决策结果展示（Phase 5任务4）：引擎/决策耗时/意图+置信度/情绪
+            "emotion": result["decision"].user_emotion,
+            "intent_confidence": round(float(result["decision"].intent_confidence), 2),
+            "decision_latency_ms": int(result["decision"].latency_ms),
         },
     })
     logger.info("session=%s 回复已发送: path=%s 延迟=%dms 长度=%d字", session.session_id, result.get("path"), latency_ms, len(answer))
@@ -157,6 +164,8 @@ async def handle_aggregated(session, combined: str) -> None:
         engine=result.get("engine", ""), path=result.get("path", ""),
         latency_ms=latency_ms, error=False,
     )
+    # 回复完成后重置会话结束计时（静默SESSION_END_SECONDS秒后触发提炼）
+    distiller.schedule(session, engine=result.get("engine", ""))
 
 
 @app.websocket("/ws")
@@ -185,6 +194,7 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
                     logger.debug("session=%s 空消息已拦截", session_id)
                     continue
                 logger.info("session=%s 用户消息: %s", session_id, content[:50])
+                distiller.cancel(session)  # 新消息到来：取消会话结束提炼计时
                 await aggregator.add_message(session, content, handle_aggregated)
 
             elif msg_type == "switch_engine":
@@ -208,6 +218,8 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
 
             elif msg_type == "clear_conversation":
                 await aggregator.cancel(session)
+                distiller.cancel(session)  # 清空对话：取消提炼计时并重置提炼标记
+                session.distilled = False
                 session.context.history.clear()
                 session.context.covered_topics.clear()
                 session.context.user_needs.clear()
@@ -231,6 +243,7 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
         except Exception:
             logger.exception("session=%s 错误消息发送失败", session_id)
     finally:
+        distiller.cancel(session)  # 断开连接：取消会话结束计时
         manager.disconnect(session_id)
 
 

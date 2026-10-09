@@ -376,3 +376,77 @@ Kev GPU部署完成后，按任务书"完成条件"逐项重审：
    - 前端: 头部"规则引擎/Jev引擎/Kev引擎"分段按钮（选中高亮，/engine初始化），切换后消息列表显示"已切换决策引擎"系统提示；每次助手回复新增⚙引擎标记便于确认切换生效
    - 说明: Kev引擎需本地kev.serve运行（未运行时决策自动降级kev_failed，回复标记会显示降级状态）
 3. **测试**: e2e新增scenario_switch_engine（切jev→ack+/engine核对→切回rule→FAQ回复engine=rule→无效名报错，不依赖外部API），E2E 7/7；pytest 66 passed+1 skipped
+
+## Phase 5 开工说明（2026-10-09）
+- 基线核对: pytest tests → 66 passed + 1 skipped，与任务书一致 ✓
+- 计划: 新增qwen引擎（复用QwenClient+容错解析，10秒超时降级qwen_failed）；情绪五值化
+  （neutral/positive/urgent/dissatisfied/complaint_risk，rule词表+jev/kev选项+qwen提示词同步，
+  complaint_risk在引擎与路由双重保证转人工）；界面四引擎彩色高亮+回复下方决策结果行；
+  会话提炼器（SESSION_END_SECONDS=20静默判结束，Qwen提炼一问一答追加data/sdwan-real.md，
+  新消息取消计时、同会话仅一次、失败只记日志）；sdwan.md不动、sdwan-real.md不进知识库
+- 测试: 新增test_phase5_units.py（假Qwen客户端，不依赖真模型），目标总数≥72
+
+## Phase 5 完成情况（2026-10-09）
+
+### 已实现功能
+- ✅ **第4种引擎Qwen意图识别**（backend/decision_layer/qwen_engine.py）：复用主LLM QwenClient，
+  Few-shot提示词约束只输出JSON（字段与DecisionResult一致），10秒超时/解析校验失败降级
+  qwen_failed（intent=unclear、置信度0），不抛异常；工厂与SUPPORTED_ENGINES加"qwen"；
+  批量/评估脚本--engine同步支持qwen
+- ✅ **五级情绪**：neutral/positive/urgent/dissatisfied(不满)/complaint_risk(投诉风险)；
+  rule词表（投诉/举报/315/曝光/差评/黑猫/退钱→complaint_risk；垃圾/失望/不满等→dissatisfied）、
+  jev/kev情绪选项、qwen提示词四处同步；complaint_risk三重保证转人工（rule引擎强制+qwen解析
+  强制+路由器保底`escalate or emotion==complaint_risk`）；grep -rn '"negative"' backend 无输出
+- ✅ **网页四引擎切换**：Qwen按钮；当前引擎按钮专属色高亮（规则=蓝/Jev=紫/Kev=橙/Qwen=绿，
+  其余灰色），刷新后经GET /engine同步
+- ✅ **决策结果展示**：每条回复下方"⚙ 引擎 · 决策Nms · 意图(置信度) · 情绪"，情绪值由后端
+  response携带（emotion/intent_confidence/decision_latency_ms），dissatisfied橙色、
+  complaint_risk红色
+- ✅ **会话提炼**（backend/session_distiller.py）：回复后静默SESSION_END_SECONDS（默认20秒，
+  进config.py与.env.example）判定会话结束→Qwen把整段对话提炼成一问一答→按sdwan.md格式
+  追加data/sdwan-real.md（新建自60=sdwan.md最大编号59+1，此后接续）；答案后带来源行；
+  新消息/清空/断开取消计时；同会话仅一次；失败只记日志不抛出。sdwan-real.md已gitignore
+  （运行时积累物），不加载进知识库，data/sdwan.md未动
+- ✅ 新增tests/test_phase5_units.py 14项（假Qwen客户端，不依赖真模型）
+
+### 测试结果
+- pytest五套 **81项 = 80 passed + 1 skipped**（基线66+1 → 新增14项P5单测+2项旧测试更新为五值契约），0 failed
+- E2E 7/7；真实Qwen引擎冒烟：直播线路多少钱→price_inquiry(0.90)/tiktok登不上→technical_support(0.85)/
+  "再不处理我就投诉了"→complaint_risk+转人工，决策耗时4.8-5.2秒
+- 反向验证（SESSION_END_SECONDS=1临时生效，验证后已恢复20并重启服务）：
+  - 发"直播线路多少钱"→回复后0.5s快照无提炼（静默未满1秒，不提前✓）→静默超1秒后sdwan-real.md
+    多出一条带来源行问答（首次编号60）✓
+  - 新会话发一句后**不等就继续发**第二条：第1条回复后0.2s、第2条回复后0.5s快照均无新会话条目
+    （计时被新消息取消、不提前提炼✓）；静默满1秒后提炼出编号61 ✓；期间一次Qwen瞬时网络
+    ConnectError→按设计只记日志、聊天不受影响（止损行为实测✓）
+
+### 反向验证文件内容（data/sdwan-real.md两次实测内容原样粘贴）
+第一次（场景A，单条消息，静默1秒后提炼，编号60）：
+```
+60. SDWAN直播线路的价格是多少？
+120元/月：一条IDC线路，独享，支持社媒TK、FB，5-10兆以上包稳。180元/月：一条ISP家庭IP线路，独享，主推，支持社媒TK、FB，对IP有要求选此线路，5-10兆以上包稳。260元/月：一条ISP家庭IP直播优化线路，独享，专门针对TK直播优化。5人拼车共享IP：单人50元/月，适合看店、购物、Claude编程等。联通SDWAN底层网络，联通代理商，付款千元可对公开发票签合同，大项目有资质参与招投标。长期稳定使用需搭配SDWAN路由器硬件300元/个（支持淘宝购买），短期可先用软件。
+（来源：会话ea645b05-03c7-4ef3-b1c9-d21b5e946386 2026-10-09 20:41 引擎rule）
+```
+第二次（新会话，"路由器硬件多少钱"，编号接续61）：
+```
+61. SDWAN路由器硬件的价格是多少？
+SDWAN路由器硬件价格为300元/个，长期稳定使用必须搭配路由器硬件，支持淘宝购买；短期使用可用软件替代。
+（来源：会话63a81463-85da-4b6f-9294-b02ccf3e38a7 2026-10-09 20:45 引擎rule）
+```
+
+### 建议采纳与偏差说明
+- 采纳"提炼与Qwen意图识别共用QwenClient"（各自实例、同一实现，连接按事件循环复用）
+- 新增backend/llm/parser.py的parse_json_object()：通用JSON对象提取（不要求answer字段）。
+  原因：parse_json_response强制要求answer字段（生成层语义），决策JSON（intent键）与提炼JSON
+  （question键）会被其整体降级为纯文本；新函数零改动复用平衡花括号扫描逻辑，
+  parse_json_response行为保持不变（P1-P4全部测试无回归）
+- 评估脚本--engine补"qwen"（任务书未要求，四引擎一致性补齐）
+- QwenEngine对intent_confidence>1的输出按0-100制归一化（提示词已约束0-1，双保险）
+- 任务书"负面情绪"的原negative取值语义拆分为dissatisfied（不满，先尝试回答）与
+  complaint_risk（投诉风险，一律转人工），原"negative+澄清1次才升级"规则映射到dissatisfied
+
+### 已知问题
+- Qwen引擎决策延迟约5秒/次（主LLM生成式决策的固有成本），任务书未设硬指标；demo演示可接受
+- 提炼依赖Qwen在线，瞬时网络故障会导致该会话不提炼（只记日志）；后续可加一次重试
+- 会话提炼无最短对话长度门槛：只有寒暄的会话也会提炼出低价值条目（任务书未要求过滤，
+  真实使用时可按需在_distill加门槛或由人工筛选sdwan-real.md）
