@@ -178,3 +178,28 @@ KevEngine HTTP模式（KEV_SERVE_URL）+解析测试；pytest两套36 passed。
   （正常机器0.5B CPU前向亚秒级，任务书CPU<1000ms在本机当前内存状态下无法达成，需释放内存后重启serve）
 - 模型为英文训练原型（banking77/agnews/MNLI等），中文属分布外：'多少钱'被判usage_guide，
   分类质量对中文不可靠，需真实案例评估（任务书决策5）
+
+## 2026-10-09 GPU配置：Kev迁移至RTX 2050（Kev-0.8B GPU实跑通过）
+
+**Kev-4B可行性结论（用户要求的第三步）**: Kev-4B=Qwen3.5-4B-Base基座+LoRA（jaredpalmer/kev-4b），
+bf16需≈10GB显存（4B×2字节×1.2开销），**超过RTX 2050的4GB**；kev包无量化支持（LoadOptions仅
+dtype/backend/attn/lora_scale/temperature/cuda_graphs，无bnb/4bit）→ 本卡物理不可行。
+**改用Kev-0.8B**（Qwen3.5-0.8B基座，需求≈2GB，且是新一代配方：transfer-v4准确率0.643 vs 0.5B的0.561）。
+Kev-4B链接：https://huggingface.co/jaredpalmer/kev-4b （需≥10GB显存的卡）
+
+**CUDA验证（用户要求的第一步）**:
+- 关键坑：驱动531.88（2023，CUDA 12.1时代）与torch 2.14.1+cu126新运行时不兼容——
+  is_available=True但上下文创建失败（cudaErrorDevicesUnavailable），已排除代理/DLL冲突/电源/HAGS/VBS
+- **解决：torch 2.6.0+cu124**（12.4运行时贴近驱动时代，且满足kev约束torch>=2.6,<2.9）→
+  GPU运算成功，3.2/4GB显存可用
+
+**GPU加载（第二步）与推理（第四步）脚本**: scripts/kev_gpu_check.py（环境+显存需求评估）、
+scripts/kev_gpu_serve.py（预检+错误处理+自动预热启动器）、scripts/kev_gpu_infer.py（单条/批量推理）
+
+**Kev-0.8B GPU实测（第三步替代执行）**:
+- 显存占用2.7/4GB；10问题批量全部分类成功，延迟719-1484ms（均值≈1.1s，超任务书<1000ms目标，
+  原因：4GB卡被迫禁用CUDA graphs（KEV_CUDA_GRAPHS=0，graphs预分配缓冲致OOM）+系统内存压力；
+  禁用后仍接近目标，稳态单条≈1秒）
+- 分类质量：10问题9个具体/合理意图（'能不能直播'判unclear可商榷）；escalate_to_human全部为True，
+  noul≥0.5阈值对该模型偏激进，待真实案例校准
+- 启动命令: .venv-kev/Scripts/python.exe scripts/kev_gpu_serve.py --model 0.8b --port 8009 --warmup
