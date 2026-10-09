@@ -15,7 +15,7 @@ from fastapi.staticfiles import StaticFiles
 
 from backend.config import settings
 from backend.connection_manager import ConnectionManager
-from backend.decision_layer import create_decision_engine
+from backend.decision_layer import SUPPORTED_ENGINES, create_decision_engine
 from backend.knowledge import KnowledgeBase
 from backend.metrics import metrics
 from backend.models import Message
@@ -86,7 +86,7 @@ async def reset_metrics() -> dict:
     return {"status": "reset", "metrics": metrics.snapshot()}
 
 
-# 当前决策引擎名（rule/jev/kev）；WebSocket switch_engine消息运行时切换
+# 当前决策引擎名（rule/jev/kev/qwen）；WebSocket switch_engine消息运行时切换
 current_engine_name = settings.DECISION_ENGINE
 
 
@@ -206,7 +206,7 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
                 except ValueError:
                     await manager.send_message(session_id, {
                         "type": "error",
-                        "data": {"message": f"无效的决策引擎: {engine_name}（可选 rule/jev/kev）"},
+                        "data": {"message": f"无效的决策引擎: {engine_name}（可选: {', '.join(SUPPORTED_ENGINES)}）"},
                     })
                 else:
                     current_engine_name = engine_name

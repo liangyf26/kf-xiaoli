@@ -1,8 +1,8 @@
 # SDWAN智能客服机器人 Demo
 
-基于大语言模型的智能客服系统，专为SDWAN专线产品咨询场景优化。支持3种决策引擎（规则/Jev API/Kev本地模型）可切换对比，答案全部基于知识库生成并标注来源，知识库外问题不编造、正确拒答。
+基于大语言模型的智能客服系统，专为SDWAN专线产品咨询场景优化。支持4种决策引擎（规则/Jev API/Kev本地模型/Qwen主LLM）即时切换对比，答案全部基于知识库生成并标注来源，知识库外问题不编造、正确拒答。
 
-**状态**：Demo开发完成（Phase 1-4全部交付），验收指标实测达标——批量测试通过率100%、答案准确率≥90%（严格口径）、平均响应3.2秒、3引擎可切换。
+**状态**：Demo开发完成（Phase 1-5全部交付），验收指标实测达标——批量测试通过率100%、答案准确率≥90%（严格口径）、平均响应3.2秒、4引擎可切换、五级情绪识别、会话自动提炼。
 
 ## 📋 功能特性
 
@@ -83,7 +83,7 @@ python -m backend.main
 | `kev` | 本地kev.serve GPU服务，需先启动（见FAQ第3条） | ~1s/次 |
 | `qwen` | 主LLM（Qwen3.8）Few-shot JSON意图识别，10秒超时/解析失败自动降级qwen_failed | ~5s/次 |
 
-三引擎对同一评估集的准确率对比见 `tests/results/engine_accuracy_report_*.md`。
+各引擎对同一评估集的准确率对比见 `tests/results/engine_accuracy_report_*.md`。
 
 ### 会话提炼（真实问答积累）
 
@@ -111,7 +111,7 @@ python tests/generate_report.py tests/results/batch_test_*.json    # 生成Markd
 # 准确率评估（10个知识库标注用例，严格口径：澄清不计作答）
 python tests/accuracy_evaluation.py tests/accuracy_test_cases.json --engine rule
 
-# 3引擎准确率对比报告
+# 多引擎准确率对比报告（rule/jev/kev/qwen任选）
 python tests/accuracy_evaluation.py tests/accuracy_test_cases.json --engine rule
 python tests/accuracy_evaluation.py tests/accuracy_test_cases.json --engine jev
 python tests/accuracy_evaluation.py tests/accuracy_test_cases.json --engine kev
@@ -202,9 +202,10 @@ py -3.13 -m venv .venv-kev
 ## 📝 开发计划
 
 - [x] Phase 1：FastAPI + WebSocket基础框架、知识库、Web界面
-- [x] Phase 2：决策层（规则/Jev/Kev三引擎真实可用）+ 工厂切换
+- [x] Phase 2：决策层（规则/Jev/Kev真实可用）+ 工厂切换
 - [x] Phase 3：LLM生成层（Few-shot/Prompt/路由/编排器）+ 深色主题前端
 - [x] Phase 4：批量测试、准确率评估、性能优化、日志监控、文档交付
+- [x] Phase 5：Qwen引擎（第4种）+ 五级情绪风险 + 决策结果展示 + 会话自动提炼
 
 ### 后续建议
 

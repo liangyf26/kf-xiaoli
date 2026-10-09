@@ -1,11 +1,28 @@
 """决策层统一接口：DecisionResult数据模型与DecisionEngine抽象基类。
 
-所有决策引擎（rule/jev/kev）的decide()都返回统一的DecisionResult。
+所有决策引擎（rule/jev/kev/qwen）的decide()都返回统一的DecisionResult。
 """
 from abc import ABC, abstractmethod
-from typing import Any, Dict
+from typing import Any, Dict, Tuple
 
 from pydantic import BaseModel, Field
+
+# 五级情绪契约（Phase 5）：所有引擎的user_emotion必须取值于此
+VALID_EMOTIONS = ("neutral", "positive", "urgent", "dissatisfied", "complaint_risk")
+
+
+def enforce_emotion_contract(user_emotion: str, escalate_to_human: bool) -> Tuple[str, bool]:
+    """统一情绪契约（各引擎解析层共用）：
+
+    - user_emotion不在五级枚举内（含旧值negative等非法值）→ 降级为neutral；
+    - complaint_risk（投诉风险）→ 强制escalate_to_human=True（一律转人工）。
+    """
+    emotion = str(user_emotion or "").strip().lower()
+    if emotion not in VALID_EMOTIONS:
+        emotion = "neutral"
+    if emotion == "complaint_risk":
+        escalate_to_human = True
+    return emotion, bool(escalate_to_human)
 
 
 class DecisionResult(BaseModel):

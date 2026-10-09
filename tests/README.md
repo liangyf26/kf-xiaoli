@@ -33,12 +33,12 @@ python tests/e2e_test.py
 | test_phase2_units.py | Phase 2任务1-5 | 决策层接口（创建/缺失字段/抽象类）、规则引擎6项测试+边界、Jev结构/超时回退/noul校准阈值、Kev配置/优雅回退/JSON容错/noul校准阈值、工厂切换与无效值、对比脚本（10+问题）、决策引擎集成main.py |
 | test_phase3_units.py | Phase 3任务1-4 | LLM客户端结构/真实调用（API不可达时标准skip）/超时语义、JSON解析器4例、Few-shot结构+每意图示例数量(3-5)、示例选择器、Prompt构建器、路由决策5例、处理路径3例 |
 | test_phase4_units.py | Phase 4任务1-4 | 指标收集（记录/快照/重置/落盘）、报告生成器、批量问题文件解析、准确率严格评分口径（澄清不计作答）、LLM生成JSON残缺重试、知识库全库检索、QwenClient连接复用、性能分析器 |
-| test_phase5_units.py | Phase 5任务1/2/5 | Qwen引擎（工厂创建/合法JSON解析/乱码降级/超时降级/complaint_risk强制转人工）、五级情绪（rule输出/Jev与Kev选项/路由complaint_risk保底）、会话提炼（默认20秒配置/计时被取消/编号60起/编号接续+sdwan.md不变/失败只记日志/同会话仅一次；Qwen一律用假客户端） |
+| test_phase5_units.py | Phase 5任务1/2/5 | Qwen引擎（工厂创建/合法JSON解析/乱码降级/超时降级/complaint_risk强制转人工）、五级情绪（rule输出/Jev与Kev选项/**Jev与Kev两条解析路径契约**：complaint_risk+escalate=false强制升级、非法negative降级neutral/路由complaint_risk保底）、会话提炼（默认20秒配置/计时被取消/编号60起/编号接续+sdwan.md不变/失败只记日志/同会话仅一次；Qwen一律用假客户端） |
 | run_e2e_tests.py | Phase 3任务5-7 | 8用例端到端（WebSocket全流程，顺序/连续两种模式）+ --perf性能模式（FAQ 10次+LLM路径3次采样） |
-| e2e_test.py | Phase 1任务1.6/4.2、暗卷1-3项；Phase 2任务5.3；Phase 4引擎切换 | 单条消息回复（真实LLM）、3条连续消息仅1次回复、清空对话重置、回复携带编排元数据、运行时切换决策引擎（switch_engine立即生效/无效名报错//engine端点）、启动失败暗卷2项 |
+| e2e_test.py | Phase 1任务1.6/4.2、暗卷1-3项；Phase 2任务5.3；Phase 4/5引擎切换与情绪契约 | 单条消息回复（真实LLM）、3条连续消息仅1次回复、清空对话重置、回复携带编排元数据、**四引擎逐一运行时切换**（ack+/engine核对）、**投诉风险黑盒转人工+七字段元数据完整性**、启动失败暗卷2项 |
 
-预期结果：pytest五套合计81项（80 passed + 1 skipped，P1:13/P2:23/P3:20/P4:11/P5:14），
-E2E 7/7，`run_all.py` 退出码为 0。
+预期结果：pytest五套合计84项（83 passed + 1 skipped，P1:13/P2:23/P3:20/P4:11/P5:17），
+E2E 8/8，`run_all.py` 退出码为 0。
 
 ## Phase 4 批量测试与评估工具
 
@@ -50,7 +50,7 @@ E2E 7/7，`run_all.py` 退出码为 0。
 | compare_engine_accuracy.py | `python tests/compare_engine_accuracy.py`（自动取各引擎最新结果） | tests/results/engine_accuracy_report_*.md |
 | performance_profile.py | `python tests/performance_profile.py [--repeats 2]` | tests/results/performance_profile_*.json |
 | eval_accuracy.py | Phase 3评估集（20题kb_refs口径）复核用 | docs/acceptance-evidence/ |
-| compare_engines.py | `python tests/compare_engines.py`（决策层3引擎对比，输出engine_comparison.json） | 项目根 |
+| compare_engines.py | `python tests/compare_engines.py`（决策层引擎对比，输出engine_comparison.json） | 项目根 |
 
 评估口径：accuracy_test_cases.json 的 expected_keywords 客观取自知识库原文；
 **严格口径**——澄清反问不计作答（澄清话术常罗列具体选项，会被关键词误判），

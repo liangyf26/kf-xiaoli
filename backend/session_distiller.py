@@ -82,16 +82,16 @@ class SessionDistiller:
             return
         session.distilled = True
         try:
-            entry = await self._distill(session)
-            self._append(entry)
-            logger.info("会话%s提炼完成，已追加到%s", session.session_id, self.output_path.name)
+            body = await self._distill(session)
+            number = self._append_distilled(body)
+            logger.info("会话%s提炼完成（编号%d），已追加到%s", session.session_id, number, self.output_path.name)
         except Exception:  # noqa: BLE001 提炼失败只记日志，不影响聊天
             logger.exception("会话%s提炼失败（已跳过，不影响对话）", session.session_id)
 
     # ---------- 提炼与落盘 ----------
 
     async def _distill(self, session: SessionState) -> str:
-        """调Qwen把整段对话提炼成一问一答，返回格式化条目文本。"""
+        """调Qwen把整段对话提炼成一问一答，返回不带编号的条目正文（问题\\n答案\\n来源行\\n）。"""
         history = [
             m for m in session.context.history if m.role in ("user", "assistant")
         ]
@@ -121,8 +121,7 @@ class SessionDistiller:
             f"（来源：会话{session.session_id} "
             f"{datetime.now().strftime('%Y-%m-%d %H:%M')} 引擎{session.distill_engine or 'unknown'}）"
         )
-        number = self._next_number()
-        return f"{number}. {question}\n{answer}\n{source_line}\n"
+        return f"{question}\n{answer}\n{source_line}\n"
 
     def _next_number(self) -> int:
         """下一个编号：提炼文件已有最大编号+1；文件为空时从sdwan.md最大编号之后继续。"""
@@ -131,8 +130,15 @@ class SessionDistiller:
             return existing + 1
         return _max_number_in_file(DEFAULT_BASE_NUMBER_PATH) + 1
 
-    def _append(self, entry: str) -> None:
-        """追加条目到sdwan-real.md（空行分隔），文件不存在则新建。"""
+    def _append_distilled(self, body: str) -> int:
+        """编号+落盘原子化：读最大编号与写文件在同一同步段内完成。
+
+        单事件循环内同步段之间不会被其他任务插入（无await间隙），
+        多会话同时结束时不会出现编号竞争（跨进程部署才需要文件锁）。
+        """
+        number = self._next_number()
+        entry = f"{number}. {body}"
         self.output_path.parent.mkdir(parents=True, exist_ok=True)
         with open(self.output_path, "a", encoding="utf-8") as f:
             f.write(entry + "\n")
+        return number

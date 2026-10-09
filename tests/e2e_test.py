@@ -181,18 +181,19 @@ async def _recv_until(ws, expected_type: str, timeout: float = 6.0) -> dict:
 
 
 async def scenario_switch_engine():
-    """运行时切换决策引擎：switch_engine消息立即生效（无需重启），无效名报错。
+    """运行时切换决策引擎：四引擎逐一切换（ack+GET /engine核对），无效名报错。
 
-    用GET /engine核对服务端状态；切回rule后发FAQ问题验证回复元数据engine=rule
-    （FAQ路径不依赖外部LLM/决策API，场景稳定）。
+    只验证切换状态，不发起决策调用（无外部API依赖）；切回rule后发FAQ问题验证
+    回复元数据engine=rule（FAQ路径不依赖外部LLM/决策API，场景稳定）。
     """
     async with websockets.connect(URI) as ws:
-        # 切到jev：确认ack + 服务端状态变更
-        await ws.send(json.dumps({"type": "switch_engine", "engine": "jev"}))
-        ack = await _recv_until(ws, "engine_switched")
-        assert ack["data"]["engine"] == "jev", f"切换ack异常: {ack}"
-        with urllib.request.urlopen(f"http://localhost:{PORT}/engine", timeout=5) as resp:
-            assert json.loads(resp.read().decode())["engine"] == "jev", "/engine未反映切换"
+        # 四引擎逐一切换：ack + 服务端状态核对
+        for engine in ("rule", "jev", "kev", "qwen"):
+            await ws.send(json.dumps({"type": "switch_engine", "engine": engine}))
+            ack = await _recv_until(ws, "engine_switched")
+            assert ack["data"]["engine"] == engine, f"切换{engine}ack异常: {ack}"
+            with urllib.request.urlopen(f"http://localhost:{PORT}/engine", timeout=5) as resp:
+                assert json.loads(resp.read().decode())["engine"] == engine, f"/engine未反映切换到{engine}"
 
         # 切回rule：ack后FAQ回复元数据携带rule引擎
         await ws.send(json.dumps({"type": "switch_engine", "engine": "rule"}))
@@ -212,12 +213,36 @@ async def scenario_switch_engine():
             assert json.loads(resp.read().decode())["engine"] == "rule", "无效切换不应改变当前引擎"
 
 
+async def scenario_emotion_contract_blackbox():
+    """Phase 5整改：投诉风险黑盒转人工 + 决策元数据字段完整性（rule引擎，确定性无外部依赖）。"""
+    # 投诉消息：rule判complaint_risk → 一律转人工（canned话术，不依赖LLM）
+    async with websockets.connect(URI) as ws:
+        await ws.send(json.dumps({"type": "user_message", "content": "再不处理我就投诉了"}))
+        data = await recv_response(ws, timeout=SLIDE_WAIT + 30)
+        payload = data["data"]
+        assert payload["path"] == "human_escalation", f"投诉风险应转人工: {payload['path']}"
+        assert payload["emotion"] == "complaint_risk", f"情绪应为complaint_risk: {payload.get('emotion')}"
+        assert payload["engine"] == "rule"
+
+    # FAQ问题：决策元数据七字段完整（引擎/耗时/意图/置信度/情绪/路径/来源）
+    async with websockets.connect(URI) as ws:
+        await ws.send(json.dumps({"type": "user_message", "content": "直播线路多少钱"}))
+        data = await recv_response(ws, timeout=SLIDE_WAIT + 60)
+        payload = data["data"]
+        for key in ("engine", "decision_latency_ms", "intent", "intent_confidence",
+                    "emotion", "path", "sources"):
+            assert key in payload, f"回复元数据缺少{key}: {payload.keys()}"
+        assert isinstance(payload["decision_latency_ms"], int) and payload["decision_latency_ms"] >= 0
+        assert payload["emotion"] in ("neutral", "positive", "urgent", "dissatisfied", "complaint_risk")
+
+
 WS_SCENARIOS = [
     scenario_single_message,
     scenario_three_messages_one_reply,
     scenario_clear_conversation,
     scenario_decision_meta,
     scenario_switch_engine,
+    scenario_emotion_contract_blackbox,
 ]
 
 

@@ -450,3 +450,17 @@ SDWAN路由器硬件价格为300元/个，长期稳定使用必须搭配路由�
 - 提炼依赖Qwen在线，瞬时网络故障会导致该会话不提炼（只记日志）；后续可加一次重试
 - 会话提炼无最短对话长度门槛：只有寒暄的会话也会提炼出低价值条目（任务书未要求过滤，
   真实使用时可按需在_distill加门槛或由人工筛选sdwan-real.md）
+
+## Phase 5 验收整改（2026-10-09，验收报告：docs/20261009-phase5-acceptance-report.md）
+
+针对报告未通过项逐条整改：
+
+| 报告发现 | 整改措施 | 结果 |
+|---------|---------|------|
+| P1：Jev/Kev解析层未校验情绪枚举（复现negative直传） | base.py新增统一契约enforce_emotion_contract：非五级枚举（含旧negative）降级neutral；jev_client._result_from_answers、kev_client._result_from_answers（HTTP路径）与kev_client._parse_output（transformers文本路径）全部应用；EMOTION_OPTIONS改为引用base.VALID_EMOTIONS单一来源 | ✅ 验收报告同类反例（complaint_risk+false、negative）新增3个解析级单测全部通过 |
+| P1：Jev/Kev解析层未强制complaint_risk转人工 | 同上统一契约：complaint_risk → escalate_to_human=True（引擎层结果契约自身满足"一律转人工"，路由器保底仍保留） | ✅ 同上单测断言 |
+| P2：四引擎黑盒自动化证据不完整 | e2e_test.py场景扩展：scenario_switch_engine改为rule→jev→kev→qwen四引擎逐一切换（各自engine_switched ack+GET /engine核对）；新增scenario_emotion_contract_blackbox（投诉消息→human_escalation+emotion=complaint_risk；FAQ回复七字段元数据完整性：engine/decision_latency_ms/intent/intent_confidence/emotion/path/sources）；rule路径确定性无外部依赖 | ✅ E2E 8/8 |
+| P2：旧文案仍写三引擎 | config.py DECISION_ENGINE描述、main.py无效引擎报错（改用SUPPORTED_ENGINES动态拼接）、main.py注释、base.py模块注释、README状态行/引擎数/对比命令注释/Phase清单、tests/README对比脚本行 全部同步四引擎表述 | ✅ grep复扫无"rule/jev/kev"单列三引擎表述 |
+| 建议：提炼编号读改无并发锁 | 重构session_distiller：_distill只返回不带编号正文，编号计算+写文件合并进_append_distilled同一同步段（单事件循环内同步段无await间隙，结构性无竞争；跨进程部署才需文件锁），并注释说明 | ✅ 既有提炼单测全部通过 |
+
+**整改后回归**：pytest五套84项=83 passed+1 skipped（P5由14→17项）；E2E 8/8；grep -rn '"negative"' backend 无输出；data/sdwan.md未动。

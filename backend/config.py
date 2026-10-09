@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     # 会话提炼：机器人回复后静默无新消息达到该秒数即判定会话结束，触发Qwen提炼
     SESSION_END_SECONDS: int = Field(default=20, description="会话结束静默判定秒数")
     KNOWLEDGE_BASE_PATH: str = Field(..., description="知识库文件路径")
-    DECISION_ENGINE: str = Field(..., description="决策引擎: rule/jev/kev")
+    DECISION_ENGINE: str = Field(..., description="决策引擎: rule/jev/kev/qwen")
 
     # 模型可选配置
     MODEL_API_KEY: str = ""

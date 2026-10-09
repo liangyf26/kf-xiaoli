@@ -17,7 +17,12 @@ from typing import Any, Dict
 import httpx
 
 from backend.config import settings
-from backend.decision_layer.base import DecisionEngine, DecisionResult
+from backend.decision_layer.base import (
+    VALID_EMOTIONS,
+    DecisionEngine,
+    DecisionResult,
+    enforce_emotion_contract,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +35,7 @@ INTENT_OPTIONS = (
     "purchase_process",
     "unclear",
 )
-EMOTION_OPTIONS = ("neutral", "positive", "urgent", "dissatisfied", "complaint_risk")
+EMOTION_OPTIONS = VALID_EMOTIONS
 
 # score分档数：decisions契约限制最多10档；档索引∈[0, N-1]，归一化=score/(N-1)
 SCORE_BANDS = 10
@@ -271,14 +276,19 @@ JSON:"""
                 intent = "unclear"
             confidence = float(result.get("intent_confidence", 0.5))
             confidence = min(1.0, max(0.0, confidence))
+            # 情绪契约：非法值（如旧negative）降级neutral；complaint_risk强制转人工
+            emotion, escalate = enforce_emotion_contract(
+                str(result.get("user_emotion", "neutral")),
+                bool(result.get("escalate_to_human", False)),
+            )
             return DecisionResult(
                 intent=intent,
                 intent_confidence=confidence,
                 needs_clarification=bool(result.get("needs_clarification", False)),
                 clarification_reason=str(result.get("clarification_reason", "")),
                 technical_complexity=int(result.get("technical_complexity", 50)),
-                user_emotion=str(result.get("user_emotion", "neutral")),
-                escalate_to_human=bool(result.get("escalate_to_human", False)),
+                user_emotion=emotion,
+                escalate_to_human=escalate,
                 raw_response=result,
                 latency_ms=latency_ms,
                 engine="kev",
@@ -309,9 +319,12 @@ JSON:"""
             complexity = int(min(100, max(0, round(complexity_raw / (SCORE_BANDS - 1) * 100))))
 
             escalate = float(answers["escalate_to_human"]["noul"]) >= KEV_ESCALATE_NOUL_THRESHOLD
-            emotion = str(answers["user_emotion"]["choice"])
+            raw_emotion = str(answers["user_emotion"]["choice"])
         except (KeyError, ValueError, TypeError) as exc:
             return self._fallback_result(f"Kev answers解析失败: {exc}", latency_ms)
+
+        # 情绪契约：非法值（如旧negative）降级neutral；complaint_risk强制转人工
+        emotion, escalate = enforce_emotion_contract(raw_emotion, escalate)
 
         return DecisionResult(
             intent=intent,

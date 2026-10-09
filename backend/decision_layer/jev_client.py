@@ -12,7 +12,12 @@ from typing import Any, Dict
 import httpx
 
 from backend.config import settings
-from backend.decision_layer.base import DecisionEngine, DecisionResult
+from backend.decision_layer.base import (
+    VALID_EMOTIONS,
+    DecisionEngine,
+    DecisionResult,
+    enforce_emotion_contract,
+)
 
 INTENT_OPTIONS = (
     "price_inquiry",
@@ -23,7 +28,7 @@ INTENT_OPTIONS = (
     "purchase_process",
     "unclear",
 )
-EMOTION_OPTIONS = ("neutral", "positive", "urgent", "dissatisfied", "complaint_risk")
+EMOTION_OPTIONS = VALID_EMOTIONS
 
 # score分档数：API限制最多10档；档索引∈[0, N-1]，归一化=score/(N-1)映射到0-1
 SCORE_BANDS = 10
@@ -180,8 +185,12 @@ class JevEngine(DecisionEngine):
             complexity = int(min(100, max(0, round(complexity_raw / (SCORE_BANDS - 1) * 100))))
 
             escalate = float(answers["escalate_to_human"]["noul"]) >= 0.5
+            raw_emotion = str(answers["user_emotion"]["choice"])
         except (KeyError, ValueError, TypeError) as exc:
             return self._fallback_result(f"Jev answers解析失败: {exc}", latency_ms)
+
+        # 情绪契约：非法值（如旧negative）降级neutral；complaint_risk强制转人工
+        emotion, escalate = enforce_emotion_contract(raw_emotion, escalate)
 
         return DecisionResult(
             intent=intent,
@@ -189,7 +198,7 @@ class JevEngine(DecisionEngine):
             needs_clarification=needs_clarification,
             clarification_reason="Jev判断需要澄清" if needs_clarification else "",
             technical_complexity=complexity,
-            user_emotion=str(answers["user_emotion"]["choice"]),
+            user_emotion=emotion,
             escalate_to_human=escalate,
             raw_response=raw or {},
             latency_ms=latency_ms,

@@ -17,7 +17,7 @@ from backend.config import settings
 from backend.decision_layer import SUPPORTED_ENGINES, create_decision_engine
 from backend.decision_layer.base import DecisionResult
 from backend.decision_layer.jev_client import EMOTION_OPTIONS as JEV_EMOTIONS
-from backend.decision_layer.kev_client import EMOTION_OPTIONS as KEV_EMOTIONS
+from backend.decision_layer.kev_client import EMOTION_OPTIONS as KEV_EMOTIONS, KevEngine
 from backend.decision_layer.qwen_engine import QwenEngine
 from backend.decision_layer.rule_engine import RuleBasedEngine
 from backend.models import Message, SessionState
@@ -134,6 +134,75 @@ def test_api_engines_emotion_options_updated():
     for options in (JEV_EMOTIONS, KEV_EMOTIONS):
         assert "dissatisfied" in options and "complaint_risk" in options
         assert "negative" not in options
+
+
+def test_jev_parse_enforces_emotion_contract():
+    """Jev解析层契约（验收P1反例复现）：complaint_risk+escalate=false强制True；非法negative降级neutral。"""
+    from backend.decision_layer.jev_client import JevEngine
+
+    engine = JevEngine("test-key")
+
+    def make_answers(emotion: str, escalate_noul: float):
+        return {
+            "intent": {"type": "choice", "choice": "unclear", "confidence": 0.9},
+            "needs_clarification": {"type": "noul", "noul": 0.1},
+            "intent_confidence": {"type": "score", "score": 4.0},
+            "user_emotion": {"type": "choice", "choice": emotion},
+            "technical_complexity": {"type": "score", "score": 2.0},
+            "escalate_to_human": {"type": "noul", "noul": escalate_noul},
+        }
+
+    risk = engine._result_from_answers(make_answers("complaint_risk", 0.1), 10)
+    assert risk.user_emotion == "complaint_risk"
+    assert risk.escalate_to_human is True, "complaint_risk必须在解析层强制转人工"
+
+    illegal = engine._result_from_answers(make_answers("negative", 0.1), 10)
+    assert illegal.user_emotion == "neutral", "非法情绪negative必须降级neutral"
+    assert illegal.escalate_to_human is False
+
+
+def test_kev_parse_enforces_emotion_contract():
+    """Kev解析层契约（HTTP answers路径）：同Jev——投诉强制升级、非法negative降级。"""
+    engine = KevEngine()
+
+    def make_answers(emotion: str, escalate_noul: float):
+        return {
+            "intent": {"type": "choice", "choice": "unclear", "confidence": 0.9},
+            "needs_clarification": {"type": "noul", "noul": 0.1},
+            "intent_confidence": {"type": "score", "score": 4.0},
+            "user_emotion": {"type": "choice", "choice": emotion},
+            "technical_complexity": {"type": "score", "score": 2.0},
+            "escalate_to_human": {"type": "noul", "noul": escalate_noul},
+        }
+
+    risk = engine._result_from_answers(make_answers("complaint_risk", 0.1), 10)
+    assert risk.user_emotion == "complaint_risk"
+    assert risk.escalate_to_human is True, "complaint_risk必须在解析层强制转人工"
+
+    illegal = engine._result_from_answers(make_answers("negative", 0.1), 10)
+    assert illegal.user_emotion == "neutral"
+    assert illegal.escalate_to_human is False
+
+
+def test_kev_text_parse_enforces_emotion_contract():
+    """Kev解析层契约（transformers文本路径）：投诉强制升级、非法negative降级。"""
+    engine = KevEngine()
+
+    def model_text(emotion: str, escalate: bool) -> str:
+        return json.dumps({
+            "intent": "unclear", "intent_confidence": 0.5,
+            "needs_clarification": False, "clarification_reason": "",
+            "technical_complexity": 30, "user_emotion": emotion,
+            "escalate_to_human": escalate,
+        }, ensure_ascii=False)
+
+    risk = engine._parse_output(model_text("complaint_risk", False), 10)
+    assert risk.user_emotion == "complaint_risk"
+    assert risk.escalate_to_human is True
+
+    illegal = engine._parse_output(model_text("negative", False), 10)
+    assert illegal.user_emotion == "neutral"
+    assert illegal.escalate_to_human is False
 
 
 def test_router_complaint_risk_always_escalates():
@@ -268,6 +337,9 @@ ALL_TESTS = [
     test_qwen_complaint_risk_forces_escalation,
     test_rule_engine_outputs_five_emotions,
     test_api_engines_emotion_options_updated,
+    test_jev_parse_enforces_emotion_contract,
+    test_kev_parse_enforces_emotion_contract,
+    test_kev_text_parse_enforces_emotion_contract,
     test_router_complaint_risk_always_escalates,
     test_config_session_end_default,
     test_session_timer_cancelled_by_new_message,
