@@ -1,0 +1,68 @@
+{
+  "acceptance_object": "ee9403029d7fcf117250abb2530a95b3c913b22e",
+  "date": "2026-10-09",
+  "verdict": "partial_pass",
+  "baseline": {
+    "head": "ee9403029d7fcf117250abb2530a95b3c913b22e",
+    "origin_master": "ee9403029d7fcf117250abb2530a95b3c913b22e",
+    "working_tree_clean_at_start": true,
+    "commit_diff_check": true
+  },
+  "tests": {
+    "phase5": {"command": ".venv/Scripts/python.exe -m pytest -q tests/test_phase5_units.py", "passed": 14, "failed": 0, "skipped": 0, "duration_seconds": 4.08},
+    "full_pytest": {"command": ".venv/Scripts/python.exe -m pytest tests -q", "passed": 80, "failed": 0, "skipped": 1, "duration_seconds": 52.06},
+    "legacy_run_all": {"phase1": "13/13", "phase2": "23/23", "e2e": "7/7"}
+  },
+  "static_checks": {
+    "backend_negative_grep_empty": true,
+    "supported_engines": ["rule", "jev", "kev", "qwen"],
+    "factory_creates_all_engines": true,
+    "knowledge_base_sha256_before": "3757e194100527d10d93581d7157595b2c0d9825d106853748658e26ce36b0e1",
+    "knowledge_base_sha256_after": "3757e194100527d10d93581d7157595b2c0d9825d106853748658e26ce36b0e1",
+    "sdwan_real_runtime_loaded": false,
+    "frontend_qwen_button": true,
+    "frontend_response_metadata": true,
+    "frontend_emotion_colors": true
+  },
+  "black_box": {
+    "port": 8001,
+    "healthz": {"app": "sdwan-kf-xiaoli", "status": "ok", "qa_pairs": 58},
+    "engine_initial": "rule",
+    "engine_switch_qwen": true,
+    "engine_switch_rule": true,
+    "websocket_states": ["waiting", "thinking", "response"],
+    "metrics_after_reset": {
+      "total_requests": 2,
+      "total_errors": 0,
+      "engine_counts": {"rule": 1, "qwen": 1},
+      "path_counts": {"faq_match": 1, "human_escalation": 1},
+      "avg_latency_ms": 2643.0
+    },
+    "complaint_risk": {
+      "emotion": "complaint_risk",
+      "path": "human_escalation",
+      "sources": [],
+      "engine": "qwen",
+      "decision_latency_ms": 5264
+    }
+  },
+  "distillation": {
+    "seconds": 1,
+    "success": true,
+    "entry_number": 60,
+    "has_source_line": true,
+    "output_isolated": true,
+    "new_message_cancelled": true,
+    "output_on_cancel_exists": false
+  },
+  "contract_gaps": [
+    "Jev/Kev parser accepts invalid emotion values such as negative",
+    "Jev/Kev parser does not force escalate_to_human for complaint_risk",
+    "Automated black-box coverage does not exercise all four engines end-to-end",
+    "Some configuration and error text still says three engines"
+  ],
+  "artifacts": {
+    "report": "docs/20261009-phase5-acceptance-report.md",
+    "evidence": "docs/acceptance-evidence/20261009-phase5-acceptance.json"
+  }
+}
