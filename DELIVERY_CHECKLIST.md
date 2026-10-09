@@ -1,4 +1,4 @@
-# Demo交付物检查清单（2026-10-09核验）
+# Demo交付物检查清单（2026-10-09核验，2026-10-10随Phase 5同步）
 
 ## 代码和配置
 - [x] backend/ 目录完整（所有模块：main/config/models/connection_manager/wait_aggregator/knowledge/metrics + decision_layer/orchestrator/llm子包）
@@ -12,7 +12,7 @@
 - [x] README.md 完整清晰（快速开始/使用说明/项目结构/测试/常见问题，6188字符）
 - [x] docs/产品需求文档-20261008.md
 - [x] docs/技术设计文档-20261008.md
-- [x] docs/Phase 1-4 任务书（4个文件，命名20261008-phaseN-*.md）
+- [x] docs/Phase 1-5 任务书（5个文件，命名yyyymmdd-phaseN-*-taskbook.md）
 - [x] docs/api.md（WebSocket协议/HTTP端点/配置项/决策引擎接口）
 - [x] docs/20261008~20261009-*.md 验收报告（P1两轮+第三轮/P2/P3两轮）
 
@@ -23,7 +23,7 @@
 - [x] tests/accuracy_test_cases.json 标注数据（10例，预期客观取自知识库）
 - [x] tests/generate_report.py / compare_engine_accuracy.py / performance_profile.py
 - [x] tests/results/ 目录包含测试结果和报告（JSON+Markdown）
-- [x] pytest四套单元验收 67项（66 passed + 1环境跳过）；E2E 6/6
+- [x] pytest五套单元验收 84项（83 passed + 1环境跳过，P1:13/P2:23/P3:20/P4:11/P5:17）；E2E 8/8
 
 ## 验收指标（实测）
 - [x] 批量测试通过率 ≥90% → **100%**（20/20正常回复）

@@ -8,7 +8,7 @@
 # 激活虚拟环境
 # Windows: .venv\Scripts\activate
 
-# 全量单元验收（pytest自动收集test_*.py，共67项）
+# 全量单元验收（pytest自动收集test_*.py，共84项）
 pytest tests/
 
 # 各阶段单元验收（两种方式等价）

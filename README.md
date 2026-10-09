@@ -130,7 +130,7 @@ python tests/performance_profile.py
 | 来源标注准确率 | — | 100%（9/9考核题） | ✅ |
 | 平均响应时间 | <10秒 | **3.16秒**（优化前4.40秒，-28%） | ✅ |
 | LLM路径延迟 | — | 6.3秒/次（优化前9.8秒，-35%） | ✅ |
-| 单元+端到端回归 | — | pytest 67项（66 passed + 1环境跳过），E2E 6/6 | ✅ |
+| 单元+端到端回归 | — | pytest 84项（83 passed + 1环境跳过，含Phase 5的17项），E2E 8/8 | ✅ |
 
 完整数据：`tests/results/`（batch_test_*.json、accuracy_eval_*.json、engine_accuracy_report_*.md、performance_profile_*.json、test_report_*.md）。阶段验收报告见 `docs/`。
 
