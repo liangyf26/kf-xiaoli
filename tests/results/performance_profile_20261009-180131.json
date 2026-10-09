@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "timestamp": "2026-10-09 18:01:31",
+    "engine_env": "",
+    "engine_class": "RuleBasedEngine",
+    "llm_model": "Qwen3.8-27B",
+    "questions": [
+      "直播线路多少钱",
+      "IDC线路多少钱",
+      "tiktok登不上怎么办",
+      "看视频有点卡怎么办"
+    ],
+    "repeats": 1,
+    "bottleneck": "llm_generate",
+    "bottleneck_avg_ms": 6195.5,
+    "suggestion": "瓶颈为LLM推理：建议控制Prompt长度（知识库只取相关度Top-N）、减少重试；模型侧优化（量化/更快服务）超出Demo低成本范围"
+  },
+  "average_times": {
+    "decision": 0.0,
+    "json_parse": 0.0,
+    "kb_retrieval": 0.0,
+    "llm_generate": 6195.5,
+    "prompt_build": 0.0
+  },
+  "per_question": [
+    {
+      "question": "直播线路多少钱",
+      "repeat": 1,
+      "path": "faq_match",
+      "wall_ms": 0.0
+    },
+    {
+      "question": "IDC线路多少钱",
+      "repeat": 1,
+      "path": "faq_match",
+      "wall_ms": 0.0
+    },
+    {
+      "question": "tiktok登不上怎么办",
+      "repeat": 1,
+      "path": "llm_generation",
+      "wall_ms": 7157.0
+    },
+    {
+      "question": "看视频有点卡怎么办",
+      "repeat": 1,
+      "path": "llm_generation",
+      "wall_ms": 5234.0
+    }
+  ]
+}

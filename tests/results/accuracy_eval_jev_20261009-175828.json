@@ -1,0 +1,360 @@
+{
+  "metadata": {
+    "source_file": "accuracy_test_cases.json",
+    "engine_env": "jev",
+    "engine_class": "JevEngine",
+    "llm_model": "Qwen3.8-27B",
+    "timestamp": "2026-10-09 17:58:28",
+    "scoring": "answer: should_answer=true时expected_keywords任一命中且非拒答非澄清；false时正确拒答。澄清反问不计作答（单列clarification_rate）。source: 预期来源任一命中。"
+  },
+  "accuracy_metrics": {
+    "answer_accuracy": 1.0,
+    "source_accuracy": 1.0,
+    "refusal_accuracy": 1.0,
+    "clarification_rate": 0.0,
+    "total_cases": 10,
+    "answer_passed": 10,
+    "source_passed": 9,
+    "source_scored": 9,
+    "refusal_cases": 1,
+    "clarified_cases": 0,
+    "average_latency_ms": 7854
+  },
+  "detailed_results": [
+    {
+      "question": "直播线路多少钱",
+      "answer": "直播优化线路260元/月，ISP家庭IP，独享，专门针对TK直播优化。",
+      "sources": [
+        "问题1"
+      ],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 5375,
+      "error": "",
+      "expected_keywords": [
+        "260",
+        "元/月",
+        "直播"
+      ],
+      "keyword_hit": [
+        "260",
+        "元/月",
+        "直播"
+      ],
+      "expected_sources": [
+        "问题1"
+      ],
+      "source_hit": [
+        "问题1"
+      ],
+      "should_answer": true,
+      "answer_pass": true,
+      "source_pass": true,
+      "refusal_pass": true,
+      "clarified": false
+    },
+    {
+      "question": "IDC线路价格",
+      "answer": "IDC线路120元/月，独享，适合社媒TK、FB，5-10兆以上包稳。",
+      "sources": [
+        "问题1"
+      ],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 5906,
+      "error": "",
+      "expected_keywords": [
+        "120",
+        "元/月",
+        "IDC"
+      ],
+      "keyword_hit": [
+        "120",
+        "元/月",
+        "IDC"
+      ],
+      "expected_sources": [
+        "问题1"
+      ],
+      "source_hit": [
+        "问题1"
+      ],
+      "should_answer": true,
+      "answer_pass": true,
+      "source_pass": true,
+      "refusal_pass": true,
+      "clarified": false
+    },
+    {
+      "question": "tiktok登不上",
+      "answer": "按顺序排查一下：1.手机拔卡，别插卡；2.地区改成美国、语言US英语；3.关掉APP跟踪权限；4.清理tiktok后台；5.确认客户端线路开关是打开的。都确认完再重新打开tiktok登录试试。",
+      "sources": [
+        "问题6",
+        "问题11"
+      ],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 9968,
+      "error": "",
+      "expected_keywords": [
+        "拔卡",
+        "地区",
+        "美国",
+        "清理",
+        "后台"
+      ],
+      "keyword_hit": [
+        "拔卡",
+        "地区",
+        "美国",
+        "清理",
+        "后台"
+      ],
+      "expected_sources": [
+        "问题11"
+      ],
+      "source_hit": [
+        "问题11"
+      ],
+      "should_answer": true,
+      "answer_pass": true,
+      "source_pass": true,
+      "refusal_pass": true,
+      "clarified": false
+    },
+    {
+      "question": "客户端下载地址",
+      "answer": "给你三个平台的：\n苹果（iPhone/iPad/Mac）：https://docs.qq.com/doc/DRnZTRXZmaGZPRGVE\n安卓手机：https://docs.qq.com/doc/DRmpmSkJiSVpCUnBn\n电脑：https://docs.qq.com/doc/DRmhDSHhnT2daeWZh\n\n打开对应文档就能下载，有问题再问我。",
+      "sources": [
+        "问题9",
+        "问题25",
+        "问题30"
+      ],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 8735,
+      "error": "",
+      "expected_keywords": [
+        "docs.qq.com",
+        "腾讯文档"
+      ],
+      "keyword_hit": [
+        "docs.qq.com"
+      ],
+      "expected_sources": [
+        "问题9",
+        "问题25",
+        "问题30",
+        "问题51",
+        "问题52",
+        "问题53"
+      ],
+      "source_hit": [
+        "问题9",
+        "问题25",
+        "问题30"
+      ],
+      "should_answer": true,
+      "answer_pass": true,
+      "source_pass": true,
+      "refusal_pass": true,
+      "clarified": false
+    },
+    {
+      "question": "支持YouTube吗",
+      "answer": "暂时无法回答，需要人工介入",
+      "sources": [],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 9093,
+      "error": "",
+      "expected_keywords": [
+        "无法回答",
+        "人工"
+      ],
+      "keyword_hit": [
+        "无法回答",
+        "人工"
+      ],
+      "expected_sources": [],
+      "source_hit": [],
+      "should_answer": false,
+      "answer_pass": true,
+      "source_pass": true,
+      "refusal_pass": true,
+      "clarified": false
+    },
+    {
+      "question": "网速慢怎么办",
+      "answer": "先打开 https://speedtest.net 测个速，截图发我看一下。另外每条线路带宽有限，尽量只一台设备在用，别多台同时跑，会分带宽。",
+      "sources": [
+        "问题49",
+        "问题12"
+      ],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 7688,
+      "error": "",
+      "expected_keywords": [
+        "测速",
+        "speedtest",
+        "切换",
+        "节点",
+        "带宽",
+        "设备"
+      ],
+      "keyword_hit": [
+        "speedtest",
+        "带宽",
+        "设备"
+      ],
+      "expected_sources": [
+        "问题49",
+        "问题12",
+        "问题50"
+      ],
+      "source_hit": [
+        "问题49",
+        "问题12"
+      ],
+      "should_answer": true,
+      "answer_pass": true,
+      "source_pass": true,
+      "refusal_pass": true,
+      "clarified": false
+    },
+    {
+      "question": "可以试用吗",
+      "answer": "可以试用的，短期先用软件客户端就行，不用买路由器。",
+      "sources": [
+        "问题16",
+        "问题1"
+      ],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 5311,
+      "error": "",
+      "expected_keywords": [
+        "试用"
+      ],
+      "keyword_hit": [
+        "试用"
+      ],
+      "expected_sources": [
+        "问题16"
+      ],
+      "source_hit": [
+        "问题16"
+      ],
+      "should_answer": true,
+      "answer_pass": true,
+      "source_pass": true,
+      "refusal_pass": true,
+      "clarified": false
+    },
+    {
+      "question": "路由器多少钱",
+      "answer": "sdwan路由器硬件300元/个，长期稳定使用建议上硬件，短期可以先用软件。",
+      "sources": [
+        "问题1"
+      ],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 5328,
+      "error": "",
+      "expected_keywords": [
+        "300",
+        "元"
+      ],
+      "keyword_hit": [
+        "300",
+        "元"
+      ],
+      "expected_sources": [
+        "问题1",
+        "问题29"
+      ],
+      "source_hit": [
+        "问题1"
+      ],
+      "should_answer": true,
+      "answer_pass": true,
+      "source_pass": true,
+      "refusal_pass": true,
+      "clarified": false
+    },
+    {
+      "question": "怎么使用",
+      "answer": "手机上装客户端，或买我们定制的路由器网关。以苹果手机为例，大致顺序：拔卡→切地区到美国→连WiFi→登录美区apple id→装客户端→扫线路二维码→开线路开关→装TikTok登录使用。安卓的话客户端文档在这：https://docs.qq.com/doc/DRmpmSkJiSVpCUnBn",
+      "sources": [
+        "问题3",
+        "问题10",
+        "问题30"
+      ],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 12093,
+      "error": "",
+      "expected_keywords": [
+        "客户端",
+        "路由器",
+        "拔卡",
+        "地区",
+        "安装"
+      ],
+      "keyword_hit": [
+        "客户端",
+        "路由器",
+        "拔卡",
+        "地区"
+      ],
+      "expected_sources": [
+        "问题3",
+        "问题10"
+      ],
+      "source_hit": [
+        "问题3",
+        "问题10"
+      ],
+      "should_answer": true,
+      "answer_pass": true,
+      "source_pass": true,
+      "refusal_pass": true,
+      "clarified": false
+    },
+    {
+      "question": "有什么套餐",
+      "answer": "目前这几档：IDC线路120元/月（独享，社媒TK/FB，5-10兆包稳）；ISP家庭IP线路180元/月（独享，对IP有要求选这个）；直播优化线路260元/月（独享，专门针对TK直播）；还有5人拼车共享IP，单人50元/月，适合看店、购物、编程这类。长期用需要配个sdwan路由器，300元/个。你主要用来干嘛？我帮你看看哪个合适。",
+      "sources": [
+        "问题1"
+      ],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 9046,
+      "error": "",
+      "expected_keywords": [
+        "120",
+        "180",
+        "260",
+        "50"
+      ],
+      "keyword_hit": [
+        "120",
+        "180",
+        "260",
+        "50"
+      ],
+      "expected_sources": [
+        "问题1"
+      ],
+      "source_hit": [
+        "问题1"
+      ],
+      "should_answer": true,
+      "answer_pass": true,
+      "source_pass": true,
+      "refusal_pass": true,
+      "clarified": false
+    }
+  ]
+}
