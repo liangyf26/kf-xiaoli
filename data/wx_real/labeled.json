@@ -222,17 +222,6 @@
       "source": "biz_wx_message2.sql 2026-09-04 16:31:06"
     },
     {
-      "question": "什么登录了？春艺琳的二维码又变了",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "usage_guide",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S179",
-      "source": "biz_wx_message2.sql 2026-09-04 16:31:06"
-    },
-    {
       "question": "登录了",
       "expected_keywords": [],
       "expected_sources": [],
@@ -1100,6 +1089,17 @@
       "reviewed": false,
       "session_id": "S006",
       "source": "biz_wx_message.sql 2026-09-29 10:20:36"
+    },
+    {
+      "question": "那应该是你没理解 透，乱推了",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "unclear",
+      "expected_emotion": "dissatisfied",
+      "reviewed": false,
+      "session_id": "S002",
+      "source": "biz_wx_message2.sql 2026-07-30 17:11:37"
     }
   ]
 }

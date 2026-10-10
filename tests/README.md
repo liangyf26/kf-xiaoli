@@ -38,7 +38,7 @@ python tests/e2e_test.py
 | run_e2e_tests.py | Phase 3任务5-7 | 8用例端到端（WebSocket全流程，顺序/连续两种模式）+ --perf性能模式（FAQ 10次+LLM路径3次采样） |
 | e2e_test.py | Phase 1任务1.6/4.2、暗卷1-3项；Phase 2任务5.3；Phase 4/5引擎切换与情绪契约 | 单条消息回复（真实LLM）、3条连续消息仅1次回复、清空对话重置、回复携带编排元数据、**四引擎逐一运行时切换**（ack+/engine核对）、**投诉风险黑盒转人工+七字段元数据完整性**、启动失败暗卷2项 |
 
-预期结果：pytest六套合计98项（97 passed + 1 skipped，P1:13/P2:23/P3:20/P4:11/P5:17/P6:14），
+预期结果：pytest六套合计105项（104 passed + 1 skipped，P1:13/P2:23/P3:20/P4:11/P5:17/P6:21），
 E2E 8/8，`run_all.py` 退出码为 0。
 
 ## Phase 4 批量测试与评估工具

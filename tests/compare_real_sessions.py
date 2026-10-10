@@ -59,7 +59,7 @@ def pct(part: int, total: int) -> str:
 
 
 async def run_engine(engine: str, sessions: list[dict]) -> tuple[list[dict], str]:
-    """对一个引擎跑全部对齐会话；返回 (逐题结果含会话号, 引擎类名)。"""
+    """对一个引擎跑全部对齐会话；返回 (逐题结果含会话号与题内序号, 引擎类名)。"""
     os.environ["DECISION_ENGINE"] = engine
     orchestrator = Orchestrator()
     engine_class = type(orchestrator.decision_engine).__name__
@@ -69,12 +69,23 @@ async def run_engine(engine: str, sessions: list[dict]) -> tuple[list[dict], str
         questions = [t["text"] for t in s["turns"] if t["speaker"] == "customer"]
         batch = []
         await run_session(orchestrator, questions, batch)
-        for r in batch:
+        for i, r in enumerate(batch):
             r["session_id"] = s["session_id"]
+            r["q_index"] = i  # 题内序号：同一会话重复问题靠(session_id, q_index)区分，不靠问题文本
         results.extend(batch)
         print(f"  [{engine}] {s['session_id']} 完成（{len(questions)}问，累计{len(results)}）")
     print(f"[{engine}] 全部完成，墙钟{time.monotonic() - start:.0f}秒")
     return results, engine_class
+
+
+def md_cell(text: str) -> str:
+    """Markdown表格单元格转义：竖线与换行会拆列/断行。"""
+    return str(text).replace("|", "\\|").replace("\r", " ").replace("\n", " ")
+
+
+def norm_intent(raw: str | None) -> str:
+    """意图归一化：None/空串统一为unclear（全报告单一口径）。"""
+    return raw or "unclear"
 
 
 def dist_table(results: list[dict], field: str, labels: dict, order: list[str] | None = None) -> list[str]:
@@ -153,7 +164,7 @@ def build_section6(refs_by_sid: dict[str, list[dict]], new_by_sid: dict[str, lis
     lines.append("| 会话 | 问题 | 旧机器人回复 | 当前系统回复 |")
     lines.append("|---|---|---|---|")
     for sid, q, old, new in pairs[:max_rows]:
-        esc = lambda s: s[:60].replace("|", "\\|").replace("\n", " ")
+        esc = lambda s: md_cell(s[:60])
         lines.append(f"| {sid} | {esc(q)} | {esc(old)} | {esc(new)} |")
     lines.append("")
     lines.append("### 重复回答比例（相邻两次回复内容完全相同）")
@@ -199,7 +210,7 @@ def generate_report(runs: dict[str, list[dict]], engine_classes: dict[str, str],
         for engine in runs:
             vals = [r for r in runs[engine]]
             if name == "intent":
-                count = sum(1 for r in vals if r.get("intent") not in ("", "unclear"))
+                count = sum(1 for r in vals if norm_intent(r.get("intent")) != "unclear")
             else:
                 count = sum(1 for r in vals if r.get(name))
             row.append(f"{count}（{pct(count, len(vals))}）")
@@ -238,24 +249,26 @@ def generate_report(runs: dict[str, list[dict]], engine_classes: dict[str, str],
         lines.append(f"| {EMOTION_LABELS[emotion]} | " + " | ".join(cells) + " |")
     lines.append("")
 
-    # 4. 意图不一致清单
+    # 4. 意图不一致清单（按(session_id, q_index)序号对齐——同会话重复问题不互相覆盖）
     lines.append("## 4. 各引擎意图不一致的问题清单")
     lines.append("")
     mismatches = 0
     by_q: dict[tuple, dict] = {}
+    question_of: dict[tuple, str] = {}
     for engine in runs:
         for r in runs[engine]:
-            key = (r["session_id"], r["question"])
-            by_q.setdefault(key, {})[engine] = r.get("intent") or "unclear"
+            key = (r["session_id"], r.get("q_index", 0))
+            by_q.setdefault(key, {})[engine] = norm_intent(r.get("intent"))
+            question_of.setdefault(key, r.get("question", ""))
     lines.append("| 会话 | 问题 | " + " | ".join(runs) + " |")
     lines.append("|---|---|" + "---|" * len(runs))
-    for (sid, q), intents in by_q.items():
+    for (sid, qi), intents in by_q.items():
         if len(set(intents.values())) > 1:
             mismatches += 1
             cells = [INTENT_LABELS.get(intents.get(e, "?"), intents.get(e, "?")) for e in runs]
-            lines.append(f"| {sid} | {q[:40]} | " + " | ".join(cells) + " |")
+            lines.append(f"| {sid} | {md_cell(question_of[(sid, qi)][:40])} | " + " | ".join(cells) + " |")
     if mismatches == 0:
-        lines.append("（无——所有问题四引擎意图一致）")
+        lines.append("（无——所有问题各引擎意图一致）")
     lines.append("")
     lines.append(f"不一致问题共 **{mismatches}** 条（占 {pct(mismatches, total_q)}）。")
     lines.append("")

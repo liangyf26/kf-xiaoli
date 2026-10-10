@@ -72,7 +72,7 @@ def test_parse_non_insert_and_bad():
 # ---------- 文本提取与噪声 ----------
 
 def test_extract_text_roles_and_group_prefix():
-    """角色判定：bot_/human_前缀；群消息前缀解析出发言人与正文。"""
+    """角色判定：bot_/human_前缀；群消息前缀解析出发言人与正文；群键用chatroom_id。"""
     bot = msg_of(fake_line("bot_abc", 2, "亲，想咨询SDWAN吗"))
     assert bot["role"] == "bot"
     human = msg_of(fake_line("human_abc", 2, "稍等，帮您查一下"))
@@ -86,7 +86,44 @@ def test_extract_text_roles_and_group_prefix():
     assert group["is_chatroom"] is True
     assert group["speaker_name"] == "小王" and group["speaker_wxid"] == "wxid_wang1"
     assert group["content"] == "路由器多少钱"
-    assert session_key_of(group) == "G:SDWAN交流群|wxid_wang1"
+    assert session_key_of(group) == "G:38732879177@chatroom"
+
+
+def test_group_prefix_variant_without_spaces():
+    """无空格+时间:前缀的群前缀变体（验收发现的昵称泄漏源）也能解析出发言人。"""
+    msg = msg_of(fake_line("888", 1, "晋晋|时间:09-14 07:21|wxid_jinjin|问一下资费",
+                           peer="38732879177", nickname="SDWAN交流群", chatroom=1,
+                           from_wxid="wxid_jinjin"))
+    assert msg["speaker_name"] == "晋晋"
+    assert msg["speaker_wxid"] == "wxid_jinjin"
+    assert msg["content"] == "问一下资费"
+
+
+def test_null_direction_bot_recovered():
+    """direction=NULL但msg_id为bot_/human_的行恢复为参考回复；llm_等遗留行仍丢弃。"""
+    bot = msg_of(fake_line("bot_null1", None, "你好，想咨询什么"))
+    assert bot["role"] == "bot"
+    legacy = fake_line("llm_null1", None, "你好呀", seq=9)
+    assert extract_text(parse_insert_line(legacy)) is None
+
+
+def test_group_outbound_merges_by_chatroom():
+    """群出站消息（@chatroom在to_wxid）与群内客户消息按chatroom_id归并同一会话键。"""
+    customer = msg_of(fake_line("901", 1, "1 | 小王 | 09-14 07:21 | wxid_wang1 | 多少钱",
+                                peer="38732879177", nickname="SDWAN交流群", chatroom=1,
+                                from_wxid="wxid_wang1"))
+    bot = msg_of(fake_line("bot_out1", 2, "120/180/260", peer="38732879177",
+                           nickname="SDWAN交流群", chatroom=1, seq=902))
+    assert bot["is_chatroom"] is True and bot["chatroom_id"] == "38732879177@chatroom"
+    assert session_key_of(customer) == session_key_of(bot), "群出站回复必须与客户消息同会话"
+
+
+def test_status_and_test_command_are_noise():
+    """状态/测试指令噪声：心跳状态行、测试指令行；业务@提及不误杀。"""
+    assert is_noise("正常心跳")
+    assert is_noise("雅诗|时间:09-06 16:06|正常心跳")
+    assert is_noise("6小时测试测试测试指令|xiechao993|伴飞书童|wxid_x")
+    assert not is_noise("@蟹助理 我们用一个节点、")
 
 
 def test_extract_skips_non_text_xml_and_legacy():
@@ -229,11 +266,55 @@ def test_desensitized_output_has_no_leak_pattern():
     assert not re.search(r"wxid_|1[3-9][0-9]{9}", payload)
 
 
+def test_operator_alias_and_registered_nickname_masked():
+    """运营者别名（正文提及、元数据无行）替换为'客服'；已注册昵称在正文替换中被覆盖。"""
+    from extract_wx_sessions import OPERATOR_ALIASES
+
+    d = Desensitizer()
+    d.identity("晋晋", "U")  # 模拟全局注册（群发言人昵称）
+    masked_alias = d.text("@蟹助理 我们用一个节点、")
+    assert all(alias not in masked_alias for alias in OPERATOR_ALIASES), "运营者别名必须替换"
+    assert "客服" in masked_alias
+    masked_nick = d.text("晋晋说的对")
+    assert "晋晋" not in masked_nick, "已注册昵称必须在正文替换中覆盖"
+
+
+# ---------- 对比脚本：转义与序号对齐 ----------
+
+def test_compare_md_cell_and_norm_intent():
+    """Markdown单元格转义（竖线/换行不拆列）与意图None归一化统一口径。"""
+    from compare_real_sessions import md_cell, norm_intent
+
+    assert md_cell("带|竖线\n带换行") == "带\\|竖线 带换行"
+    assert norm_intent(None) == "unclear" and norm_intent("") == "unclear"
+    assert norm_intent("price_inquiry") == "price_inquiry"
+
+
+def test_compare_ordinal_alignment_keeps_duplicate_questions():
+    """同会话重复问题按(session_id, q_index)对齐——不互相覆盖（验收发现的口径缺陷）。"""
+    from compare_real_sessions import md_cell  # noqa: F401 占位确保模块可导入
+    by_q: dict[tuple, dict] = {}
+    runs = {"rule": [{"session_id": "S1", "q_index": 0, "question": "多少钱", "intent": "price_inquiry"},
+                     {"session_id": "S1", "q_index": 1, "question": "多少钱", "intent": "unclear"}],
+            "kev": [{"session_id": "S1", "q_index": 0, "question": "多少钱", "intent": "price_inquiry"},
+                    {"session_id": "S1", "q_index": 1, "question": "多少钱", "intent": "price_inquiry"}]}
+    for engine in runs:
+        for r in runs[engine]:
+            key = (r["session_id"], r.get("q_index", 0))
+            by_q.setdefault(key, {})[engine] = r["intent"]
+    assert len(by_q) == 2, "重复问题必须按序号区分"
+    assert by_q[("S1", 1)]["rule"] != by_q[("S1", 1)]["kev"], "第二问的不一致不能被第一问覆盖"
+
+
 ALL_TESTS = [
     test_parse_basic_and_types,
     test_parse_escapes,
     test_parse_non_insert_and_bad,
     test_extract_text_roles_and_group_prefix,
+    test_group_prefix_variant_without_spaces,
+    test_null_direction_bot_recovered,
+    test_group_outbound_merges_by_chatroom,
+    test_status_and_test_command_are_noise,
     test_extract_skips_non_text_xml_and_legacy,
     test_is_noise_patterns,
     test_dedupe_same_content_within_window,
@@ -244,6 +325,9 @@ ALL_TESTS = [
     test_desensitize_masks_pii,
     test_desensitize_identity_mapping_stable,
     test_desensitized_output_has_no_leak_pattern,
+    test_operator_alias_and_registered_nickname_masked,
+    test_compare_md_cell_and_norm_intent,
+    test_compare_ordinal_alignment_keeps_duplicate_questions,
 ]
 
 if __name__ == "__main__":

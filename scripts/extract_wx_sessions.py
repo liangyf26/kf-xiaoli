@@ -35,16 +35,21 @@ BUSINESS_KEYWORDS = (
     "youtube", "YouTube", "运营", "网关", "机场", "梯子", "翻墙", "延迟", "上传", "下载",
 )
 
-# 噪声模式（整条或提取群前缀后匹配）
+# 噪声模式（整条或提取群前缀后匹配）：心跳/掉线/上下线/命令/系统测试指令
 NOISE_PATTERNS = (
-    re.compile(r"^正常\d+(\.\d+)?:\d+$"),      # 心跳：正常29.26:8097
+    re.compile(r"^正常\d+(\.\d+)?:\d+$"),
+    re.compile(r"正常心跳"),                    # "雅诗|U012|时间:09-06 16:06|正常心跳"类状态行
+    re.compile(r"心跳$"),
+    re.compile(r"测试指令"),                    # "6小时测试测试测试指令|别名|昵称|wxid"类系统测试
     re.compile(r"^掉线"),
     re.compile(r"^首次上线"),
     re.compile(r"^下线"),
     re.compile(r"^/"),
 )
-# 群消息content前缀："1 | 昵称 | 09-14 07:21 | 微信号 | 正文"
-GROUP_PREFIX = re.compile(r"^\d+\s*\|\s*(.+?)\s*\|\s*[\d-]+\s+[\d:]+\s*\|\s*(.*?)\s*\|\s*(.*)$", re.S)
+# 群消息content前缀统一解析：支持 "N | 昵称 | 时间 | wxid | 正文" 与 "昵称|wxid|时间:MM-DD HH:MM|正文"
+# （空格可有可无；时间部分带不带"时间:"前缀均可）；解析失败返回None（正文原样保留）
+TIME_PART = re.compile(r"(时间[:：])?\s*\d{1,2}-\d{1,2}\s+\d{1,2}:\d{2}\s*$")
+HEARTBEAT_IN_TEXT = re.compile(r"正常\d+(\.\d+)?:\d+")
 
 # 脱敏模式（在写出任何文件之前应用）
 RE_PHONE = re.compile(r"(?<!\d)1[3-9]\d{9}(?!\d)")
@@ -56,6 +61,13 @@ RE_URL_QUERY = re.compile(r"(https?://\S+?)\?\S*")
 RE_WXID = re.compile(r"wxid_[A-Za-z0-9]+")
 RE_HEX_RUN = re.compile(r"[0-9a-fA-F]{24,}")  # 语音/文件消息内嵌XML的十六进制串（会被误判为手机号）
 RE_LONG_DIGITS = re.compile(r"(?<!\d)\d{12,}(?!\d)")  # 银行账号/订单号等长数字串（子串会撞手机号正则）
+
+# 运营者人设别名：只出现在客户正文里、元数据无对应行的昵称（客服自称/别称）。
+# 替换为"客服"（非编号——它们是运营者角色而非客户身份），并纳入泄露自检。
+OPERATOR_ALIASES = ("蟹助理", "小李客服")
+# 人工姓名黑名单：正文中提及、但元数据无对应行的真实人名（无法自动穷举，
+# 由泄露自检/人工复核发现后登记于此）；替换为***姓名***并纳入泄露自检。
+MANUAL_NAME_BLOCKLIST = ("谢超", "韦肖悦", "肖悦", "春艺琳")
 
 
 # ---------- SQL解析 ----------
@@ -126,40 +138,88 @@ def _to_value(raw: str):
 
 # ---------- 消息模型与清洗 ----------
 
-def extract_text(fields: list) -> dict | None:
-    """一行SQL → 消息dict（含群前缀解析）；非文本/空文本/direction为NULL（早期AI遗留行）返回None。"""
-    msg_id, direction, content, is_chatroom = fields[1], fields[3], fields[7], fields[9]
-    if direction is None:  # 早期AI助手遗留行（llm_/report_等前缀），非客服业务流
+def parse_group_prefix(content: str) -> tuple[str, str, str] | None:
+    """群消息前缀通用解析：按'|'切分，锚定时间片段定位昵称与微信号。
+
+    支持变体："N | 昵称 | 09-14 07:21 | wxid | 正文"、"昵称|时间:09-14 07:21|wxid|正文"
+    （空格可有可无，时间可带"时间:"前缀）。返回 (昵称, 微信号, 正文)；非前缀格式返回None。
+    """
+    parts = [p.strip() for p in content.split("|")]
+    if len(parts) < 3:
         return None
+    time_idx = next((i for i, p in enumerate(parts)
+                     if TIME_PART.search(p) or p.startswith("时间:") or p.startswith("时间：")), None)
+    if time_idx is None or time_idx < 1 or time_idx >= len(parts) - 1:
+        return None
+    nickname = parts[time_idx - 1]
+    # "N | 昵称 | 时间 | wxid | 正文"五段式：时间前一段是昵称，若其为纯数字则再往前取
+    if re.fullmatch(r"\d*", nickname) and time_idx >= 2:
+        nickname = parts[time_idx - 2]
+    wxid = parts[time_idx + 1] if time_idx + 1 <= len(parts) - 2 else ""
+    body = "|".join(parts[time_idx + 2:]) if time_idx + 2 < len(parts) else ""
+    if not nickname or nickname.startswith(("掉线微信号", "微信号")):
+        return None  # 系统状态行（如"掉线微信号：xxx | 昵称 | 心跳"），交由噪声过滤
+    return nickname, wxid, body.strip()
+
+
+def extract_text(fields: list) -> dict | None:
+    """一行SQL → 消息dict；非文本/空文本返回None。
+
+    direction为NULL的行按msg_id前缀判定角色：bot_/human_是旧系统正常回复（早期导出缺direction），
+    恢复为参考答案；llm_/report_等更早期AI遗留行丢弃。
+    """
+    msg_id, direction, content, is_chatroom = fields[1], fields[3], fields[7], fields[9]
+    msg_id = str(msg_id or "")
     if str(fields[10]) != "1" or not content or not str(content).strip():
         return None
     content = str(content).strip()
     if "<?xml" in content or "<msg>" in content or "voicemd5" in content:
         return None  # 语音/文件消息内嵌XML元数据，非文本问答
-    speaker_wxid = str(fields[8] or "")    # 群消息发信人wxid（常为空）
+
+    # 群会话判定：收件方或发件方带@chatroom（群出站消息的@chatroom在to_wxid）
+    chatroom_id = ""
+    if "@chatroom" in str(fields[5] or ""):
+        chatroom_id = str(fields[5])
+    elif "@chatroom" in str(fields[6] or ""):
+        chatroom_id = str(fields[6])
+    is_chat = is_chatroom == 1 or bool(chatroom_id)
+
+    speaker_wxid = str(fields[8] or "")
     speaker_name = ""
-    if is_chatroom == 1 or "@chatroom" in str(fields[5] or ""):
-        match = GROUP_PREFIX.match(content)
-        if match:
-            speaker_name = match.group(1).strip()
-            speaker_wxid = speaker_wxid or match.group(2).strip()
-            content = match.group(3).strip()
+    if is_chat:
+        parsed = parse_group_prefix(content)
+        if parsed:
+            speaker_name, prefix_wxid, content = parsed
+            speaker_wxid = speaker_wxid or prefix_wxid
         else:  # 无标准前缀的群消息按peer_nickname兜底
-            speaker_name = str(fields[4] or "")
+            speaker_name = str(fields[4] or "") if is_chatroom == 1 else ""
+
+    if direction is None:
+        if msg_id.startswith("bot_"):
+            role = "bot"
+        elif msg_id.startswith("human_"):
+            role = "human"
+        else:
+            return None  # llm_/report_等更早期AI遗留行，非客服业务流
+    else:
+        role = ("bot" if msg_id.startswith("bot_") else
+                "human" if msg_id.startswith("human_") else
+                "customer" if int(direction) == 1 else "agent")
+
     return {
-        "msg_id": str(msg_id or ""),
-        "direction": int(direction),
+        "msg_id": msg_id,
+        "direction": int(direction) if direction is not None else 2,
         "content": content,
-        "is_chatroom": bool(is_chatroom == 1 or "@chatroom" in str(fields[5] or "")),
-        "group_name": str(fields[4] or "") if (is_chatroom == 1 or "@chatroom" in str(fields[5] or "")) else "",
+        "is_chatroom": is_chat,
+        "chatroom_id": chatroom_id or (str(fields[5] or "") if is_chatroom == 1 else ""),
+        "group_name": str(fields[4] or "") if is_chat else "",
         # 私聊会话对手方归一化：客户行(direction=1)对手=sender_id，机器人/人工行(direction=2)对手=to_wxid
-        "peer": str(fields[5] or "") if int(direction) == 1 else str(fields[6] or ""),
+        "peer": str(fields[5] or "") if (direction is not None and int(direction) == 1) else str(fields[6] or ""),
+        "peer_name": str(fields[4] or "") if not is_chat else "",  # 私聊对方昵称（正文@提及需脱敏）
         "speaker_wxid": speaker_wxid,
         "speaker_name": speaker_name,
         "time": str(fields[12] or ""),
-        "role": ("bot" if str(msg_id or "").startswith("bot_") else
-                 "human" if str(msg_id or "").startswith("human_") else
-                 "customer" if int(direction) == 1 else "agent"),
+        "role": role,
     }
 
 
@@ -184,10 +244,14 @@ def dedupe(messages: list, window_seconds: int) -> list:
 
 
 def session_key_of(m: dict) -> str:
-    """会话键：私聊=对方；群=群+发言人（wxid优先，无则昵称）。"""
+    """会话键：私聊=对手方；群=chatroom_id（30分钟内全群消息为一个会话）。
+
+    对任务书"群+发言人"的偏离及原因：机器人/人工回复的发言人≠客户，若按发言人拆键，
+    群内参考回复永远无法与客户问题归并（验收确认的缺口）；改用纯群键，
+    发言人逐条记录在消息上，group_turns把紧随客户消息的回复挂为参考答案。
+    """
     if m["is_chatroom"]:
-        speaker = m["speaker_wxid"] or m["speaker_name"] or "(未知发言人)"
-        return f"G:{m['group_name']}|{speaker}"
+        return f"G:{m['chatroom_id']}"
     return f"P:{m['peer']}"
 
 
@@ -241,7 +305,11 @@ class Desensitizer:
         return self.id_map[raw]
 
     def text(self, content: str) -> str:
-        """内容打码：结构化PII正则 → 已注册身份（昵称/别名，长者优先）→ 长号码/长十六进制串。"""
+        """内容打码：运营者别名 → 人工姓名黑名单 → 结构化PII正则 → 已注册身份（长者优先）→ 长号码/长十六进制串。"""
+        for alias in OPERATOR_ALIASES:
+            content = content.replace(alias, "客服")
+        for name in MANUAL_NAME_BLOCKLIST:
+            content = content.replace(name, "***姓名***")
         content = RE_PHONE.sub("***手机号***", content)
         content = RE_EMAIL.sub("***邮箱***", content)
         content = RE_IP_PORT.sub("***IP***", content)
@@ -325,12 +393,37 @@ def main() -> None:
     stats["raw_inserts"] = raw_counts
 
     d = Desensitizer()
+    # 全局身份注册（第一遍）：跨会话身份（A会话发言人被B会话正文提及）也必须可替换，
+    # 因此先对全部会话注册完所有身份，再做第二遍脱敏
+    for session in sessions:
+        for m in session:
+            if m["is_chatroom"]:
+                if m.get("chatroom_id"):
+                    d.identity(m["chatroom_id"], "G")
+                if m.get("group_name"):
+                    d.identity(m["group_name"], "G")
+                if m.get("speaker_wxid"):
+                    d.identity(m["speaker_wxid"], "U")
+                if m.get("speaker_name"):
+                    d.identity(m["speaker_name"], "U")
+            else:
+                if m.get("peer"):
+                    d.identity(m["peer"], "U")
+                if m.get("peer_name"):
+                    d.identity(m["peer_name"], "U")
     out_sessions = []
     for idx, session in enumerate(sessions, 1):
         turns = group_turns(session)
         customer_turns = [t for t in turns if t["speaker"] == "customer"]
         if not customer_turns:
             continue
+        key = session[0]["session_key"]
+        if key.startswith("G:"):
+            d.identity(key[2:], "G")
+            anon_key = f"G:{d.id_map[key[2:]]}"
+        else:
+            d.identity(key[2:], "U")
+            anon_key = f"P:{d.id_map[key[2:]]}"
         desensitized_turns = []
         for t in turns:
             entry = {"speaker": t["speaker"], "text": d.text(t["text"]), "time": t["time"]}
@@ -339,12 +432,6 @@ def main() -> None:
                 entry["human_reply"] = d.text(t["human_reply"]) if t["human_reply"] else ""
                 entry["source_file"] = t["source_file"]
             desensitized_turns.append(entry)
-        key = session[0]["session_key"]
-        if key.startswith("G:"):
-            group, speaker = key[2:].split("|", 1)
-            anon_key = f"G:{d.identity(group, 'G')}|{d.identity(speaker, 'U')}"
-        else:
-            anon_key = f"P:{d.identity(key[2:], 'U')}"
         out_sessions.append({
             "session_id": f"S{idx:03d}",
             "session_key": anon_key,
@@ -354,6 +441,23 @@ def main() -> None:
             "customer_count": len(customer_turns),
             "turns": desensitized_turns,
         })
+
+    # 泄露自检硬门：任何已知真实身份/微信ID样式/手机号样式/运营者别名残留 → 中止不写文件
+    # （昵称类泄漏靠身份全注册+替换循环覆盖；此门是最后防线，防未知变体带毒出库）
+    leak_patterns = [RE_PHONE, RE_WXID] + [re.compile(re.escape(a)) for a in OPERATOR_ALIASES] \
+        + [re.compile(re.escape(n)) for n in MANUAL_NAME_BLOCKLIST] \
+        + [re.compile(re.escape(raw)) for raw in d.id_map]
+    leaks: list[str] = []
+    for s in out_sessions:
+        for t in s["turns"]:
+            for p in leak_patterns:
+                if p.search(t["text"]) or p.search(t.get("bot_reply", "")) or p.search(t.get("human_reply", "")):
+                    leaks.append(f"{s['session_id']}: {t['text'][:60]!r}")
+    if leaks:
+        print(f"[泄露自检失败] {len(leaks)}处残留真实身份，未写任何文件。样例：")
+        for sample in leaks[:5]:
+            print(" ", sample)
+        sys.exit(1)
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     # 会话txt（batch_test格式：客户消息每行一条，空行分隔会话；消息内换行折叠为空格防拆块）
