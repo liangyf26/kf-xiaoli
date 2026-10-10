@@ -114,6 +114,10 @@
             case "thinking":
                 showThinkingStatus();
                 break;
+            case "greeting":
+                // 开场语（会话建立/清空时由服务端推送，内容来自FIRST_MESSAGE_GREETING配置）
+                appendMessage("assistant", data.data ? data.data.text : "", []);
+                break;
             case "response":
                 stopCountdown();
                 hideThinkingStatus();

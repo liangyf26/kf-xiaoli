@@ -45,6 +45,7 @@ SDWAN智能客服机器人对外接口：HTTP管理端点 + WebSocket对话通�
 ### 服务端 → 客户端（4种消息类型）
 
 ```json
+{"type": "greeting", "data": {"text": "您好，我是SDWAN智能客服机器人，很高兴为您服务。"}}
 {"type": "waiting", "data": {"remaining_seconds": 15, "message_count": 2}}
 {"type": "countdown", "data": {"remaining_seconds": 8}}
 {"type": "thinking"}
@@ -53,6 +54,7 @@ SDWAN智能客服机器人对外接口：HTTP管理端点 + WebSocket对话通�
 {"type": "error", "data": {"message": "服务暂时不可用，请稍后重试"}}
 ```
 
+- `greeting`：会话建立/清空对话时主动推送的开场语，文本来自 `FIRST_MESSAGE_GREETING` 配置（支持多行，.env 中值用英文双引号包住）。
 - `waiting`/`countdown`：等待汇总窗口（滑动3秒，30秒封顶）的倒计时推送。
 - `thinking`：汇总结束、开始编排生成。
 - `response.data.sources`：知识库来源编号；`path` ∈ `clarification` / `faq_match` / `llm_generation` / `human_escalation`。

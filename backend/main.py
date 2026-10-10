@@ -106,12 +106,7 @@ logger.info("编排器已加载: 决策引擎=%s, 知识库=%d问答对", type(o
 
 
 async def handle_aggregated(session, combined: str) -> None:
-    """等待结束的回调：编排器完成决策→路由→生成（Phase 3，替换Phase 1的Echo mock）。"""
-    parts = []
-    if session.is_first_message:
-        parts.append(settings.FIRST_MESSAGE_GREETING)
-        session.is_first_message = False
-
+    """等待结束的回调：编排器完成决策→路由→生成（开场语已由连接/清空时主动推送）。"""
     # 思考状态提示（前端显示"正在思考中..."）
     await manager.send_message(session.session_id, {"type": "thinking"})
 
@@ -130,8 +125,7 @@ async def handle_aggregated(session, combined: str) -> None:
         result.get("engine"), result.get("sources"),
     )
 
-    parts.append(result["answer"])
-    answer = "\n".join(parts)
+    answer = result["answer"]
 
     # 记录到对话历史与上下文
     now = datetime.now()
@@ -172,6 +166,14 @@ async def handle_aggregated(session, combined: str) -> None:
 async def websocket_endpoint(websocket: WebSocket) -> None:
     session_id = await manager.connect(websocket)
     session = manager.get_session(session_id)
+    # 会话建立即推送开场语（.env FIRST_MESSAGE_GREETING，支持多行）
+    try:
+        await manager.send_message(session_id, {
+            "type": "greeting",
+            "data": {"text": settings.FIRST_MESSAGE_GREETING},
+        })
+    except Exception:  # noqa: BLE001 推送失败不阻断会话
+        logger.exception("session=%s 开场语推送失败", session_id)
     try:
         while True:
             # 兼容JSON与裸文本两种消息（裸文本视为用户消息）
@@ -227,6 +229,10 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
                 session.context.clarification_count = 0
                 session.is_first_message = True
                 logger.info("session=%s 对话已清空", session_id)
+                await manager.send_message(session_id, {
+                    "type": "greeting",
+                    "data": {"text": settings.FIRST_MESSAGE_GREETING},
+                })
 
             else:
                 logger.warning("session=%s 未知消息类型: %r", session_id, msg_type)

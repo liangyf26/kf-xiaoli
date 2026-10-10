@@ -3,10 +3,10 @@
 运行方式（使用项目虚拟环境）:
     python tests/e2e_test.py
 
-运行场景（对应任务书任务1.6/4.2验收、Phase 2任务5.3验收、"验收官暗卷"与Phase 4追加）:
-    1. 单条消息 → waiting倒计时 → response（Echo+首条问候语）
+运行场景（对应任务书任务1.6/4.2验收、Phase 2任务5.3验收、"验收官暗卷"与Phase 4/5追加）:
+    1. 连接即推开场语（FIRST_MESSAGE_GREETING）→ 发消息 → waiting倒计时 → response
     2. 3条连续消息（间隔2秒） → 仅1次回复且汇总完整（滑动窗口，检查窗口覆盖到max_seconds封顶）
-    3. 清空对话 → 再次回复重新携带问候语（会话状态重置）
+    3. 清空对话 → 重新推送开场语（会话状态重置）
     4. 回复payload携带决策元数据（intent/engine等，Phase 2集成验证）
     5. 运行时切换决策引擎（switch_engine立即生效/无效名报错//engine端点，Phase 4）
     6. 暗卷第2项：服务启动时知识库文件缺失 → 报错退出而非静默失败
@@ -86,7 +86,7 @@ def wait_until_ready(proc: subprocess.Popen, log_path: Path, timeout: float = 30
 
 
 async def recv_response(ws, timeout: float) -> dict:
-    """跳过waiting倒计时与thinking状态消息，等待response。"""
+    """跳过greeting开场语/waiting倒计时/thinking状态消息，等待response。"""
     deadline = time.time() + timeout
     while True:
         remaining = deadline - time.time()
@@ -98,9 +98,23 @@ async def recv_response(ws, timeout: float) -> dict:
             return data
 
 
+async def recv_greeting(ws, timeout: float = 6.0) -> dict:
+    """接收开场语消息（跳过其他类型）；找不到则超时。"""
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        msg = json.loads(await asyncio.wait_for(ws.recv(), timeout=deadline - time.time()))
+        if msg.get("type") == "greeting":
+            return msg
+    raise TimeoutError("等待greeting开场语超时")
+
+
 async def scenario_single_message():
-    """任务书1.6验收（Phase 3更新）：发消息→waiting→thinking→真实回复。"""
+    """任务书1.6验收（Phase 5.1更新）：连接即推开场语→发消息→waiting→thinking→真实回复。"""
     async with websockets.connect(URI) as ws:
+        # 连接后开场语主动推送（内容来自FIRST_MESSAGE_GREETING）
+        greeting = await recv_greeting(ws)
+        assert greeting["data"]["text"].strip(), "开场语文本为空"
+
         await ws.send(json.dumps({"type": "user_message", "content": "直播线路多少钱"}))
 
         first = json.loads(await asyncio.wait_for(ws.recv(), timeout=10))
@@ -110,7 +124,6 @@ async def scenario_single_message():
         data = await recv_response(ws, timeout=SLIDE_WAIT + 60)
         answer = data["data"]["answer"]
         assert answer.strip(), "回复内容为空"
-        assert "您好，我是SDWAN智能客服机器人" in answer, "首条回复缺问候语"
         # Phase 3: 编排元数据
         assert "intent" in data["data"], "缺少intent字段"
         assert "path" in data["data"], "缺少path字段"
@@ -145,16 +158,19 @@ async def scenario_three_messages_one_reply():
 
 
 async def scenario_clear_conversation():
-    """任务书4.2验收（清空部分）：清空后首条回复重新携带问候语。"""
+    """任务书4.2验收（清空部分）：清空后重新推送开场语（会话状态重置）。"""
     async with websockets.connect(URI) as ws:
+        await recv_greeting(ws)  # 连接即收开场语
         await ws.send(json.dumps({"type": "user_message", "content": "清空前消息"}))
         await recv_response(ws, timeout=SLIDE_WAIT + 90)
 
         await ws.send(json.dumps({"type": "clear_conversation"}))
+        greeting = await recv_greeting(ws)  # 清空后重新推送开场语
+        assert greeting["data"]["text"].strip(), "清空后开场语文本为空"
+
         await ws.send(json.dumps({"type": "user_message", "content": "清空后再测"}))
         data = await recv_response(ws, timeout=SLIDE_WAIT + 90)
         answer = data["data"]["answer"]
-        assert "您好，我是SDWAN智能客服机器人" in answer, "清空后首条回复应重新携带问候语"
         assert answer.strip(), "回复内容为空"
 
 
