@@ -1,0 +1,104 @@
+{
+  "phase": 6,
+  "title": "微信真实聊天数据到脱敏测试集与四引擎评测",
+  "verdict": "fail",
+  "verdict_label": "不通过",
+  "commit": "fb479d3fbfdf43d8f25b9beefa9ebc7789a9afc1",
+  "parent_commit": "c48c13f19054a19994e0e9d304c17397b67be003",
+  "origin_master_at_check": "fb479d3fbfdf43d8f25b9beefa9ebc7789a9afc1",
+  "workspace": {
+    "clean": false,
+    "untracked": ["data/sdwan-new.md"]
+  },
+  "tests": {
+    "phase6_command": ".venv/Scripts/python.exe -m pytest tests/test_phase6_units.py -q",
+    "phase6_passed": 14,
+    "phase6_failed": 0,
+    "phase6_skipped": 0,
+    "full_command": ".venv/Scripts/python.exe -m pytest tests -q",
+    "full_passed": 97,
+    "full_failed": 0,
+    "full_skipped": 1,
+    "full_duration_seconds": 69.06,
+    "meets_taskbook_test_threshold": true
+  },
+  "artifacts": {
+    "session_count": 461,
+    "customer_question_count": 1784,
+    "questions_with_old_bot_reply": 54,
+    "labeled_count": 100,
+    "labeled_reviewed_true": 0,
+    "emotion_prelabel_counts": {
+      "neutral": 82,
+      "positive": 0,
+      "urgent": 0,
+      "dissatisfied": 18,
+      "complaint_risk": 0
+    },
+    "report": "tests/results/real_compare_20261010-130459.md",
+    "report_question_count": 150,
+    "report_session_count": 30,
+    "report_engines": ["rule", "kev", "qwen"],
+    "jev_result_present": false,
+    "report_sections_present": {
+      "engine_comparison": true,
+      "emotion_special": true,
+      "new_old_comparison": true,
+      "repeat_rate": true
+    }
+  },
+  "security": {
+    "taskbook_git_wxid_phone_scan_output": [],
+    "taskbook_git_sql_mapping_scan_output": [],
+    "semantic_identity_leak_found": true,
+    "identity_leak_files": [
+      "data/wx_real/sessions.json:1730",
+      "data/wx_real/sessions.json:1774",
+      "data/wx_real/sessions.json:1934",
+      "data/wx_real/sessions.json:1960",
+      "data/wx_real/sessions.json:3218",
+      "data/wx_real/sessions.txt:205",
+      "data/wx_real/sessions.txt:210",
+      "data/wx_real/sessions.txt:228",
+      "data/wx_real/sessions.txt:231",
+      "data/wx_real/sessions.txt:373"
+    ],
+    "data_sdwan_sha256_current": "3757e194100527d10d93581d7157595b2c0d9825d106853748658e26ce36b0e1",
+    "data_sdwan_sha256_parent": "3757e194100527d10d93581d7157595b2c0d9825d106853748658e26ce36b0e1",
+    "knowledge_base_unchanged": true
+  },
+  "stats_documented": {
+    "stats_md": {
+      "raw_inserts": 26232,
+      "parsed_text": 23718,
+      "after_denoise": 13534,
+      "after_dedupe": 8514,
+      "raw_sessions": 3953,
+      "business_sessions": 461
+    },
+    "progress_md": {
+      "raw_inserts": 26232,
+      "parsed_text": 23719,
+      "after_denoise": 13535,
+      "after_dedupe": 8507,
+      "raw_sessions": 4010,
+      "business_sessions": 461
+    },
+    "consistent_across_docs": false
+  },
+  "known_gaps": [
+    "direction=NULL bot replies can be dropped",
+    "group outbound messages use to_wxid but extraction primarily checks sender_id",
+    "non-standard group prefixes leave names and status text in output",
+    "status messages contaminate business sessions",
+    "emotion hit rate has no human ground truth",
+    "intent mismatch table does not escape pipes",
+    "duplicate questions overwrite by (session_id, question)",
+    "None and unclear intent normalization differs"
+  ],
+  "external_dependencies_not_verified": [
+    "Kev local service availability and repeatable latency",
+    "Qwen API availability and model output stability",
+    "Jev was intentionally not run against real messages; no Jev result was submitted"
+  ]
+}
