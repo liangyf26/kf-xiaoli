@@ -1,0 +1,92 @@
+{
+  "phase": 6,
+  "round": 2,
+  "verdict": "partial_pass",
+  "verdict_label": "部分通过",
+  "commit": "983150c768193ded6b691e019b82120d08e2d6a5",
+  "parent_commit": "db801516f5cfdc7191437588fa75b3bdcea554be",
+  "origin_master_at_check": "983150c768193ded6b691e019b82120d08e2d6a5",
+  "workspace_clean": true,
+  "tests": {
+    "phase6_command": ".venv/Scripts/python.exe -m pytest tests/test_phase6_units.py -q",
+    "phase6_passed": 21,
+    "phase6_failed": 0,
+    "phase6_skipped": 0,
+    "full_command": ".venv/Scripts/python.exe -m pytest tests -q",
+    "full_passed": 104,
+    "full_failed": 0,
+    "full_skipped": 1,
+    "full_duration_seconds": 51.0,
+    "meets_taskbook_threshold": true
+  },
+  "commit_quality": {
+    "diff_check": "failed",
+    "diff_check_findings": [
+      "data/sdwan-new.md:227 trailing whitespace",
+      "data/sdwan-new.md:238 trailing whitespace",
+      "data/sdwan-new.md:288 trailing whitespace",
+      "data/sdwan-new.md:289 trailing whitespace",
+      "data/sdwan-new.md:287 new blank line at EOF"
+    ]
+  },
+  "artifacts": {
+    "session_count": 450,
+    "customer_question_count": 1939,
+    "old_bot_questions": 97,
+    "human_reply_questions": 26,
+    "labeled_count": 100,
+    "reviewed_true": 0,
+    "non_neutral_emotion_labels": 19,
+    "emotion_requirement_at_least_20": false,
+    "report": "tests/results/real_compare_20261010-175346.md",
+    "report_sessions": 30,
+    "report_questions": 79,
+    "report_engines": ["rule", "kev", "qwen", "jev"],
+    "report_emotion_candidates": 25,
+    "report_mismatch_count": 45,
+    "old_repeat": "4/66=6.1%",
+    "new_repeat": "7/66=10.6%",
+    "required_sections": {
+      "engine_comparison": true,
+      "emotion_special": true,
+      "new_old_comparison": true,
+      "repeat_rate": true
+    }
+  },
+  "security": {
+    "taskbook_wxid_phone_scan_output": [],
+    "taskbook_sql_mapping_scan_output": [],
+    "extended_sensitive_content_found": true,
+    "sensitive_categories": [
+      "plaintext credentials",
+      "test passwords",
+      "real person mention",
+      "company and financial information",
+      "fixed phone numbers",
+      "external links or possible access tokens"
+    ],
+    "status_noise_occurrences_in_sessions": 99,
+    "status_noise_in_report": true,
+    "knowledge_base_sha256_current": "3757e194100527d10d93581d7157595b2c0d9825d106853748658e26ce36b0e1",
+    "knowledge_base_sha256_parent": "3757e194100527d10d93581d7157595b2c0d9825d106853748658e26ce36b0e1",
+    "knowledge_base_unchanged": true
+  },
+  "behavior_checks": {
+    "null_direction_bot_recovered": true,
+    "to_wxid_only_chatroom_detected": true,
+    "declared_nickname_wxid_time_body_variant_correct": false,
+    "tested_nickname_time_wxid_body_variant_correct": true,
+    "real_status_line_is_noise": false,
+    "duplicate_alignment_uses_q_index": true,
+    "four_engine_report_present": true
+  },
+  "documentation": {
+    "stale_numbers_found": true,
+    "stale_locations": ["README.md", "tests/README.md", "PROGRESS.md", "docs/20261010-phase6-acceptance-report.md"]
+  },
+  "external_dependencies_not_reverified": [
+    "Kev local service success versus fallback",
+    "Qwen API output stability",
+    "Jev API was not rerun with real messages in this acceptance"
+  ]
+}
