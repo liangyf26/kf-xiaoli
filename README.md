@@ -121,6 +121,23 @@ python tests/compare_engine_accuracy.py
 python tests/performance_profile.py
 ```
 
+### 真实数据评测（微信聊天记录，Phase 6）
+
+用两个微信群的真实客户提问检验四条决策路线：
+
+```bash
+# 1. 提取+脱敏（读gitignore的真实SQL，输出到data/wx_real/；映射只进mapping.json不入库）
+python scripts/extract_wx_sessions.py                # --gap-minutes 30 --dedup-seconds 60 可调
+
+# 2. 四引擎对比（同一批脱敏会话；jev默认关闭——真实数据不出境，--include-jev仅对脱敏文本）
+python tests/compare_real_sessions.py --sessions 30  # kev本机慢，拍板取前30个会话对齐队列
+
+# 3. 标注集（100条客户单句，qwen预标意图+情绪，reviewed=false待人工复核）
+python scripts/prelabel_labeled.py
+```
+
+产物：`data/wx_real/sessions.txt|sessions.json|stats.md|labeled.json`（均脱敏后入库）+ `tests/results/real_compare_*.md`（引擎对比总表/意图与情绪分布/决策耗时P50P95/意图不一致清单/情绪专项命中率/新旧机器人对比与重复回答比例）。真实微信号、昵称、手机号只存在于被 gitignore 的原始 SQL 与 mapping.json。
+
 ## 📊 测试结果摘要（2026-10-09实测）
 
 | 指标 | 要求 | 实测 | 结论 |

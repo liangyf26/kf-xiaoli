@@ -58,6 +58,7 @@ async def run_session(orchestrator: Orchestrator, questions: list[str], results:
         latency_ms = int((time.monotonic() - start) * 1000)
 
         answer = result.get("answer", "")
+        decision = result.get("decision")
         results.append({
             "question": question,
             "answer": answer,
@@ -70,6 +71,9 @@ async def run_session(orchestrator: Orchestrator, questions: list[str], results:
             "status": status,
             "is_refusal": "暂时无法回答" in answer or "人工" in answer[:20],
             "error": error,
+            # 决策层细分（Phase 6真实数据对比评测用）
+            "emotion": getattr(decision, "user_emotion", ""),
+            "decision_latency_ms": getattr(decision, "latency_ms", 0),
         })
 
         # 与 main.py 相同的上下文更新逻辑，保证多轮行为与线上一致
