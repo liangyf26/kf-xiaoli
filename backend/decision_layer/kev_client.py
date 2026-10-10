@@ -124,7 +124,11 @@ KEV_TIMEOUT_SECONDS = 5.0
 # 校准为阈值抬升到实测分布之上：模糊问题改由生成层prompt的澄清指示兜底；
 # 升级能力由rule/jev引擎承担（其emotion/noul对中文有效）。中文校准模型接入后应恢复0.5。
 KEV_CLARIFY_NOUL_THRESHOLD = 0.7
-KEV_ESCALATE_NOUL_THRESHOLD = 0.8
+# escalate noul头对中文同样无区分度（Phase 5复验发现：良性"电脑能用吗"实测noul≥0.8仍误触发，
+# 此前良性样本分布0.56-0.77、"垃圾产品投诉"仅0.789——任何阈值都挡不住随机越线）。
+# 处置：禁用该头（恒False），升级判定交给情绪契约（complaint_risk强制升级）与
+# 路由器多轮降级（澄清≥3次+极低置信度）。中文校准模型接入后恢复0.5阈值。
+KEV_ESCALATE_NOUL_THRESHOLD = float("inf")
 
 
 class KevEngine(DecisionEngine):

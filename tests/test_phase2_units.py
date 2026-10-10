@@ -344,7 +344,10 @@ def test_kev_serve_answers_parsing():
     extreme = engine._result_from_answers(make_answers(score=15.0, complexity=20.0, escalate=0.85), 10)
     assert extreme.intent_confidence == 1.0
     assert extreme.technical_complexity == 100
-    assert extreme.escalate_to_human is True
+    assert extreme.escalate_to_human is False, (
+        "Kev的escalate noul头已禁用（对中文无区分度，良性问题也随机越线）；"
+        "升级由情绪契约complaint_risk与路由器多轮降级承担"
+    )
 
     over_fire = engine._result_from_answers(make_answers(escalate=0.6), 10)
     assert over_fire.escalate_to_human is False, "noul=0.6低于校准阈值0.8不应升级（评估集实测良性消息最高0.771）"

@@ -183,6 +183,11 @@ def test_kev_parse_enforces_emotion_contract():
     assert illegal.user_emotion == "neutral"
     assert illegal.escalate_to_human is False
 
+    # escalate noul头已禁用：即使noul极高，非complaint_risk也不升级（Phase 5复验：
+    # 良性"电脑能用吗"实测noul≥0.8误触发转人工）
+    head_disabled = engine._result_from_answers(make_answers("neutral", 0.95), 10)
+    assert head_disabled.escalate_to_human is False, "Kev escalate头已禁用，noul再高也不升级"
+
 
 def test_kev_text_parse_enforces_emotion_contract():
     """Kev解析层契约（transformers文本路径）：投诉强制升级、非法negative降级。"""
