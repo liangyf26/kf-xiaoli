@@ -9,7 +9,7 @@ from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -55,6 +55,22 @@ if not _kb_path.is_absolute():
 knowledge_base = KnowledgeBase(_kb_path)
 
 app = FastAPI(title="SDWAN智能客服机器人")
+
+
+@app.middleware("http")
+async def no_cache_ui(request: Request, call_next):
+    """HTML与静态资源每次强制浏览器重新验证（ETag协商缓存，未变仍304）。
+
+    避免前端升级后用户停留在旧版app.js/index.html（无Cache-Control时浏览器
+    按启发式缓存直接用本地副本，刷新也不更新）。
+    """
+    response = await call_next(request)
+    path = request.url.path
+    if path == "/" or path.startswith("/static"):
+        response.headers["Cache-Control"] = "no-cache"
+    return response
+
+
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 
 
