@@ -63,3 +63,9 @@ kev_gpu_infer_results.json
 e2e_results.json
 .zcode/
 data/sdwan-real.md
+
+# 微信聊天原始导出（含真实微信号/手机号），只留本地，不入库
+scripts/*.sql
+*.sql
+# 脱敏映射表（可还原真实身份），不入库
+data/wx_real/mapping*.json
