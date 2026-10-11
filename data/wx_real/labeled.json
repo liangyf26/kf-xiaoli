@@ -2,6 +2,17 @@
   "description": "微信真实客户问题标注集（qwen预标，reviewed=false表示尚未人工复核，复核后方可用于准确率/意图考核）",
   "cases": [
     {
+      "question": "如果合适价格能不能商量",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "price_inquiry",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S009",
+      "source": "biz_wx_message.sql 2026-09-29 12:36:34"
+    },
+    {
       "question": "180就是社媒套餐，只是偶尔能兼顾直播，但并不是直播优化的线路，建议你买260的直播套餐",
       "expected_keywords": [],
       "expected_sources": [],
@@ -9,8 +20,8 @@
       "expected_intent": "product_comparison",
       "expected_emotion": "neutral",
       "reviewed": false,
-      "session_id": "S001",
-      "source": "biz_wx_message.sql 2026-09-27 22:23:00"
+      "session_id": "S010",
+      "source": "biz_wx_message.sql 2026-09-27 22:16:37"
     },
     {
       "question": "260太贵了",
@@ -20,8 +31,8 @@
       "expected_intent": "price_inquiry",
       "expected_emotion": "dissatisfied",
       "reviewed": false,
-      "session_id": "S004",
-      "source": "biz_wx_message.sql 2026-09-27 22:16:41"
+      "session_id": "S010",
+      "source": "biz_wx_message.sql 2026-09-27 22:16:37"
     },
     {
       "question": "太贵了",
@@ -31,7 +42,7 @@
       "expected_intent": "price_inquiry",
       "expected_emotion": "dissatisfied",
       "reviewed": false,
-      "session_id": "S006",
+      "session_id": "S012",
       "source": "biz_wx_message.sql 2026-09-29 10:20:36"
     },
     {
@@ -42,7 +53,7 @@
       "expected_intent": "price_inquiry",
       "expected_emotion": "neutral",
       "reviewed": false,
-      "session_id": "S006",
+      "session_id": "S012",
       "source": "biz_wx_message.sql 2026-09-29 10:20:36"
     },
     {
@@ -53,30 +64,8 @@
       "expected_intent": "price_inquiry",
       "expected_emotion": "dissatisfied",
       "reviewed": false,
-      "session_id": "S006",
+      "session_id": "S012",
       "source": "biz_wx_message.sql 2026-09-29 10:20:36"
-    },
-    {
-      "question": "目前我们没有这样的套餐",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "unclear",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S013",
-      "source": "biz_wx_message.sql 2026-09-29 18:41:21"
-    },
-    {
-      "question": "如果合适价格能不能商量",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "price_inquiry",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S014",
-      "source": "biz_wx_message.sql 2026-09-29 12:37:21"
     },
     {
       "question": "多少钱",
@@ -86,8 +75,19 @@
       "expected_intent": "price_inquiry",
       "expected_emotion": "neutral",
       "reviewed": false,
-      "session_id": "S018",
-      "source": "biz_wx_message.sql 2026-09-28 15:11:18"
+      "session_id": "S013",
+      "source": "biz_wx_message.sql 2026-09-29 08:43:46"
+    },
+    {
+      "question": "东西多少钱",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "price_inquiry",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S013",
+      "source": "biz_wx_message.sql 2026-09-29 08:43:46"
     },
     {
       "question": "是怎么回事",
@@ -97,8 +97,8 @@
       "expected_intent": "unclear",
       "expected_emotion": "neutral",
       "reviewed": false,
-      "session_id": "S004",
-      "source": "biz_wx_message.sql 2026-09-27 22:16:41"
+      "session_id": "S010",
+      "source": "biz_wx_message.sql 2026-09-27 22:16:37"
     },
     {
       "question": "怎么可能拿真正的号去测",
@@ -108,7 +108,7 @@
       "expected_intent": "technical_support",
       "expected_emotion": "dissatisfied",
       "reviewed": false,
-      "session_id": "S006",
+      "session_id": "S012",
       "source": "biz_wx_message.sql 2026-09-29 10:20:36"
     },
     {
@@ -116,33 +116,11 @@
       "expected_keywords": [],
       "expected_sources": [],
       "should_answer": true,
-      "expected_intent": "technical_support",
+      "expected_intent": "unclear",
       "expected_emotion": "neutral",
       "reviewed": false,
-      "session_id": "S006",
+      "session_id": "S012",
       "source": "biz_wx_message.sql 2026-09-29 10:20:36"
-    },
-    {
-      "question": "前期我们先用一个节点    你们看看怎么弄鞥",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "usage_guide",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S011",
-      "source": "biz_wx_message.sql 2026-09-22 19:24:46"
-    },
-    {
-      "question": "我们如何用一个节点",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "usage_guide",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S011",
-      "source": "biz_wx_message.sql 2026-09-22 19:24:46"
     },
     {
       "question": "怎么测",
@@ -153,7 +131,7 @@
       "expected_emotion": "neutral",
       "reviewed": false,
       "session_id": "S015",
-      "source": "biz_wx_message.sql 2026-09-29 16:22:27"
+      "source": "biz_wx_message.sql 2026-09-29 16:21:07"
     },
     {
       "question": "怎么开始",
@@ -167,14 +145,36 @@
       "source": "biz_wx_message.sql 2026-09-29 17:57:06"
     },
     {
+      "question": "前期我们先用一个节点    你们看看怎么弄鞥",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "usage_guide",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S017",
+      "source": "biz_wx_message.sql 2026-09-22 18:55:50"
+    },
+    {
+      "question": "我们如何用一个节点",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "usage_guide",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S017",
+      "source": "biz_wx_message.sql 2026-09-22 18:55:50"
+    },
+    {
       "question": "这个平台可以怎么放？",
       "expected_keywords": [],
       "expected_sources": [],
       "should_answer": true,
-      "expected_intent": "unclear",
+      "expected_intent": "usage_guide",
       "expected_emotion": "neutral",
       "reviewed": false,
-      "session_id": "S139",
+      "session_id": "S031",
       "source": "biz_wx_message2.sql 2026-09-04 08:27:41"
     },
     {
@@ -185,7 +185,7 @@
       "expected_intent": "troubleshooting",
       "expected_emotion": "neutral",
       "reviewed": false,
-      "session_id": "S150",
+      "session_id": "S042",
       "source": "biz_wx_message2.sql 2026-08-04 16:31:59"
     },
     {
@@ -196,7 +196,7 @@
       "expected_intent": "usage_guide",
       "expected_emotion": "neutral",
       "reviewed": false,
-      "session_id": "S166",
+      "session_id": "S058",
       "source": "biz_wx_message2.sql 2026-08-27 09:00:24"
     },
     {
@@ -207,7 +207,7 @@
       "expected_intent": "troubleshooting",
       "expected_emotion": "neutral",
       "reviewed": false,
-      "session_id": "S168",
+      "session_id": "S060",
       "source": "biz_wx_message2.sql 2026-08-27 18:32:52"
     },
     {
@@ -218,7 +218,18 @@
       "expected_intent": "usage_guide",
       "expected_emotion": "neutral",
       "reviewed": false,
-      "session_id": "S179",
+      "session_id": "S071",
+      "source": "biz_wx_message2.sql 2026-09-04 16:31:06"
+    },
+    {
+      "question": "什么登录了？***姓名***的二维码又变了",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "usage_guide",
+      "expected_emotion": "dissatisfied",
+      "reviewed": false,
+      "session_id": "S071",
       "source": "biz_wx_message2.sql 2026-09-04 16:31:06"
     },
     {
@@ -229,7 +240,7 @@
       "expected_intent": "unclear",
       "expected_emotion": "neutral",
       "reviewed": false,
-      "session_id": "S179",
+      "session_id": "S071",
       "source": "biz_wx_message2.sql 2026-09-04 16:31:06"
     },
     {
@@ -240,7 +251,7 @@
       "expected_intent": "troubleshooting",
       "expected_emotion": "dissatisfied",
       "reviewed": false,
-      "session_id": "S191",
+      "session_id": "S083",
       "source": "biz_wx_message2.sql 2026-08-05 14:36:16"
     },
     {
@@ -251,8 +262,19 @@
       "expected_intent": "troubleshooting",
       "expected_emotion": "neutral",
       "reviewed": false,
-      "session_id": "S199",
+      "session_id": "S091",
       "source": "biz_wx_message2.sql 2026-08-21 17:33:07"
+    },
+    {
+      "question": "慢慢找",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "unclear",
+      "expected_emotion": "dissatisfied",
+      "reviewed": false,
+      "session_id": "S002",
+      "source": "biz_wx_message2.sql 2026-07-30 17:11:37"
     },
     {
       "question": "昨天播了下 中间突然断掉了",
@@ -260,10 +282,10 @@
       "expected_sources": [],
       "should_answer": true,
       "expected_intent": "troubleshooting",
-      "expected_emotion": "neutral",
+      "expected_emotion": "dissatisfied",
       "reviewed": false,
-      "session_id": "S004",
-      "source": "biz_wx_message.sql 2026-09-27 22:16:41"
+      "session_id": "S010",
+      "source": "biz_wx_message.sql 2026-09-27 22:16:37"
     },
     {
       "question": "就是中途突然断播了",
@@ -273,8 +295,8 @@
       "expected_intent": "troubleshooting",
       "expected_emotion": "neutral",
       "reviewed": false,
-      "session_id": "S004",
-      "source": "biz_wx_message.sql 2026-09-27 22:16:41"
+      "session_id": "S010",
+      "source": "biz_wx_message.sql 2026-09-27 22:16:37"
     },
     {
       "question": "波动还好 就是突然断播了3-5分钟",
@@ -282,43 +304,10 @@
       "expected_sources": [],
       "should_answer": true,
       "expected_intent": "troubleshooting",
-      "expected_emotion": "dissatisfied",
-      "reviewed": false,
-      "session_id": "S004",
-      "source": "biz_wx_message.sql 2026-09-27 22:16:41"
-    },
-    {
-      "question": "只卡画面不卡声音",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "troubleshooting",
       "expected_emotion": "neutral",
       "reviewed": false,
-      "session_id": "S008",
-      "source": "biz_wx_message.sql 2026-09-29 09:23:28"
-    },
-    {
-      "question": "每天早上都要卡",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "troubleshooting",
-      "expected_emotion": "dissatisfied",
-      "reviewed": false,
-      "session_id": "S009",
-      "source": "biz_wx_message.sql 2026-09-29 09:21:59"
-    },
-    {
-      "question": "先用一个节点  如果卡了到时候不行再加",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "usage_guide",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S011",
-      "source": "biz_wx_message.sql 2026-09-22 19:24:46"
+      "session_id": "S010",
+      "source": "biz_wx_message.sql 2026-09-27 22:16:37"
     },
     {
       "question": "主管你好 我这边有客户问 能不能买断按流量计费",
@@ -343,6 +332,39 @@
       "source": "biz_wx_message.sql 2026-09-29 17:57:06"
     },
     {
+      "question": "先用一个节点  如果卡了到时候不行再加",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "usage_guide",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S017",
+      "source": "biz_wx_message.sql 2026-09-22 18:55:50"
+    },
+    {
+      "question": "每天早上都要卡",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "troubleshooting",
+      "expected_emotion": "dissatisfied",
+      "reviewed": false,
+      "session_id": "S018",
+      "source": "biz_wx_message.sql 2026-09-29 09:21:56"
+    },
+    {
+      "question": "你现在来，我跟你再讲一次业务流，你做一次记录，看能不能理解。",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "usage_guide",
+      "expected_emotion": "dissatisfied",
+      "reviewed": false,
+      "session_id": "S006",
+      "source": "biz_wx_message2.sql 2026-09-09 16:35:36"
+    },
+    {
       "question": "是不是我手机的问题",
       "expected_keywords": [],
       "expected_sources": [],
@@ -350,8 +372,8 @@
       "expected_intent": "troubleshooting",
       "expected_emotion": "neutral",
       "reviewed": false,
-      "session_id": "S004",
-      "source": "biz_wx_message.sql 2026-09-27 22:16:41"
+      "session_id": "S010",
+      "source": "biz_wx_message.sql 2026-09-27 22:16:37"
     },
     {
       "question": "180这个300g 你可以少点流量50块 100g 可以吗？ 因为后期还要拿别的国家线路  还是用180这个线路 就是流量少点",
@@ -361,7 +383,7 @@
       "expected_intent": "price_inquiry",
       "expected_emotion": "neutral",
       "reviewed": false,
-      "session_id": "S006",
+      "session_id": "S012",
       "source": "biz_wx_message.sql 2026-09-29 10:20:36"
     },
     {
@@ -370,9 +392,9 @@
       "expected_sources": [],
       "should_answer": true,
       "expected_intent": "unclear",
-      "expected_emotion": "neutral",
+      "expected_emotion": "positive",
       "reviewed": false,
-      "session_id": "S131",
+      "session_id": "S023",
       "source": "biz_wx_message2.sql 2026-08-20 17:30:40"
     },
     {
@@ -381,9 +403,9 @@
       "expected_sources": [],
       "should_answer": true,
       "expected_intent": "price_inquiry",
-      "expected_emotion": "neutral",
+      "expected_emotion": "dissatisfied",
       "reviewed": false,
-      "session_id": "S140",
+      "session_id": "S032",
       "source": "biz_wx_message2.sql 2026-08-13 16:23:15"
     },
     {
@@ -394,7 +416,7 @@
       "expected_intent": "troubleshooting",
       "expected_emotion": "neutral",
       "reviewed": false,
-      "session_id": "S158",
+      "session_id": "S050",
       "source": "biz_wx_message2.sql 2026-08-11 17:52:16"
     },
     {
@@ -402,10 +424,10 @@
       "expected_keywords": [],
       "expected_sources": [],
       "should_answer": true,
-      "expected_intent": "usage_guide",
+      "expected_intent": "technical_support",
       "expected_emotion": "neutral",
       "reviewed": false,
-      "session_id": "S159",
+      "session_id": "S051",
       "source": "biz_wx_message2.sql 2026-08-12 23:23:13"
     },
     {
@@ -416,85 +438,8 @@
       "expected_intent": "unclear",
       "expected_emotion": "neutral",
       "reviewed": false,
-      "session_id": "S163",
+      "session_id": "S055",
       "source": "biz_wx_message2.sql 2026-08-25 08:49:47"
-    },
-    {
-      "question": "现在支持多球场接入。支付流水有原始记录。",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "unclear",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S166",
-      "source": "biz_wx_message2.sql 2026-08-27 09:00:24"
-    },
-    {
-      "question": "老板，你这号到处试用，换IP，不会被风控吗",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "technical_support",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S003",
-      "source": "biz_wx_message.sql 2026-09-29 10:23:26"
-    },
-    {
-      "question": "我买线路一年多了 你这个也是自己搭建的我找专业的朋友看过你这个ip",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "technical_support",
-      "expected_emotion": "dissatisfied",
-      "reviewed": false,
-      "session_id": "S006",
-      "source": "biz_wx_message.sql 2026-09-29 10:20:36"
-    },
-    {
-      "question": "老板，你最近不是买了一个线路吗？现在是要新开还是有什么问题？",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "unclear",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S010",
-      "source": "biz_wx_message.sql 2026-09-22 19:37:19"
-    },
-    {
-      "question": "试用就只有美国新加坡",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "usage_guide",
-      "expected_emotion": "dissatisfied",
-      "reviewed": false,
-      "session_id": "S013",
-      "source": "biz_wx_message.sql 2026-09-29 18:41:21"
-    },
-    {
-      "question": "正式购买，新加坡、澳洲、美国，哪里都有",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "purchase_process",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S013",
-      "source": "biz_wx_message.sql 2026-09-29 18:41:21"
-    },
-    {
-      "question": "千元以上订单，签合同，走公账，开发票",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "purchase_process",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S013",
-      "source": "biz_wx_message.sql 2026-09-29 18:41:21"
     },
     {
       "question": "可以试用吗",
@@ -504,8 +449,30 @@
       "expected_intent": "purchase_process",
       "expected_emotion": "neutral",
       "reviewed": false,
-      "session_id": "S014",
-      "source": "biz_wx_message.sql 2026-09-29 12:37:21"
+      "session_id": "S009",
+      "source": "biz_wx_message.sql 2026-09-29 12:36:34"
+    },
+    {
+      "question": "老板，你这号到处试用，换IP，不会被风控吗",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "usage_guide",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S012",
+      "source": "biz_wx_message.sql 2026-09-29 10:20:36"
+    },
+    {
+      "question": "我买线路一年多了 你这个也是自己搭建的我找专业的朋友看过你这个ip",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "troubleshooting",
+      "expected_emotion": "dissatisfied",
+      "reviewed": false,
+      "session_id": "S012",
+      "source": "biz_wx_message.sql 2026-09-29 10:20:36"
     },
     {
       "question": "可以试用多久",
@@ -516,32 +483,109 @@
       "expected_emotion": "neutral",
       "reviewed": false,
       "session_id": "S015",
-      "source": "biz_wx_message.sql 2026-09-29 16:22:27"
+      "source": "biz_wx_message.sql 2026-09-29 16:21:07"
     },
     {
-      "question": "昨天？！我看你这两天流量都用不少啊",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "usage_guide",
-      "expected_emotion": "dissatisfied",
-      "reviewed": false,
-      "session_id": "S001",
-      "source": "biz_wx_message.sql 2026-09-27 22:23:00"
-    },
-    {
-      "question": "你选择哪个节点",
+      "question": "试用就只有美国新加坡",
       "expected_keywords": [],
       "expected_sources": [],
       "should_answer": true,
       "expected_intent": "usage_guide",
       "expected_emotion": "neutral",
       "reviewed": false,
-      "session_id": "S001",
-      "source": "biz_wx_message.sql 2026-09-27 22:23:00"
+      "session_id": "S016",
+      "source": "biz_wx_message.sql 2026-09-29 17:57:06"
     },
     {
-      "question": "老板，流量的问题你不用担心，正常不是拿来下电影下模型，或者24小时无人直播，一般正常做社媒做电商是完全沟通，这个我们测算过。",
+      "question": "正式购买，新加坡、澳洲、美国，哪里都有",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "purchase_process",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S016",
+      "source": "biz_wx_message.sql 2026-09-29 17:57:06"
+    },
+    {
+      "question": "能开发票？",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "purchase_process",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S016",
+      "source": "biz_wx_message.sql 2026-09-29 17:57:06"
+    },
+    {
+      "question": "千元以上订单，签合同，走公账，开发票",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "purchase_process",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S016",
+      "source": "biz_wx_message.sql 2026-09-29 17:57:06"
+    },
+    {
+      "question": "@***姓名*** ***姓名***，爬虫当前做的进度，可以分享一下出来， @***姓名*** 超哥会跟你对接需求",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "unclear",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S001",
+      "source": "biz_wx_message2.sql 2026-07-30 14:10:53"
+    },
+    {
+      "question": "好的",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "unclear",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S001",
+      "source": "biz_wx_message2.sql 2026-07-30 14:10:53"
+    },
+    {
+      "question": "那应该是你没理解 透，乱推了",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "technical_support",
+      "expected_emotion": "dissatisfied",
+      "reviewed": false,
+      "session_id": "S002",
+      "source": "biz_wx_message2.sql 2026-07-30 17:11:37"
+    },
+    {
+      "question": "U150",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "unclear",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S002",
+      "source": "biz_wx_message2.sql 2026-07-30 17:11:37"
+    },
+    {
+      "question": "查这个被推送的wxid",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "technical_support",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S002",
+      "source": "biz_wx_message2.sql 2026-07-30 17:11:37"
+    },
+    {
+      "question": "查代码吗",
       "expected_keywords": [],
       "expected_sources": [],
       "should_answer": true,
@@ -549,62 +593,29 @@
       "expected_emotion": "neutral",
       "reviewed": false,
       "session_id": "S002",
-      "source": "biz_wx_message.sql 2026-09-27 23:00:44"
+      "source": "biz_wx_message2.sql 2026-07-30 17:11:37"
     },
     {
-      "question": "老板，公司的定价",
+      "question": "发起推送的地方，把整个链路搞清楚。",
       "expected_keywords": [],
       "expected_sources": [],
       "should_answer": true,
-      "expected_intent": "price_inquiry",
-      "expected_emotion": "neutral",
+      "expected_intent": "troubleshooting",
+      "expected_emotion": "dissatisfied",
       "reviewed": false,
-      "session_id": "S003",
-      "source": "biz_wx_message.sql 2026-09-29 10:23:26"
+      "session_id": "S002",
+      "source": "biz_wx_message2.sql 2026-07-30 17:11:37"
     },
     {
-      "question": "我看你一下发了好几个信息",
+      "question": "我查看代码看到的发送api地址是***链接***\n发送账号野生节操菌\n默认的接收对象也是超森实习群",
       "expected_keywords": [],
       "expected_sources": [],
       "should_answer": true,
-      "expected_intent": "unclear",
+      "expected_intent": "technical_support",
       "expected_emotion": "neutral",
       "reviewed": false,
-      "session_id": "S004",
-      "source": "biz_wx_message.sql 2026-09-27 22:16:41"
-    },
-    {
-      "question": "我这个是小火箭倒入的",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "unclear",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S004",
-      "source": "biz_wx_message.sql 2026-09-27 22:16:41"
-    },
-    {
-      "question": "系统群发的身边",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "unclear",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S004",
-      "source": "biz_wx_message.sql 2026-09-27 22:16:41"
-    },
-    {
-      "question": "你这个信息",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "unclear",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S004",
-      "source": "biz_wx_message.sql 2026-09-27 22:16:41"
+      "session_id": "S002",
+      "source": "biz_wx_message2.sql 2026-07-30 17:11:37"
     },
     {
       "question": "机器人刷屏好麻烦",
@@ -615,461 +626,208 @@
       "expected_emotion": "dissatisfied",
       "reviewed": false,
       "session_id": "S015",
-      "source": "biz_wx_message.sql 2026-09-29 16:22:27"
+      "source": "biz_wx_message.sql 2026-09-29 16:21:07"
     },
     {
-      "question": "全部在线，没有掉线微信 |05-08-26 00:56:10",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "technical_support",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S021",
-      "source": "biz_wx_message2.sql 2026-08-05 00:55:56"
-    },
-    {
-      "question": "全部在线，没有掉线微信 |05-08-26 21:56:57",
+      "question": "只卡画面不卡声音",
       "expected_keywords": [],
       "expected_sources": [],
       "should_answer": true,
       "expected_intent": "troubleshooting",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S018",
+      "source": "biz_wx_message.sql 2026-09-29 09:21:56"
+    },
+    {
+      "question": "现在是有8月份的物业费和垃圾费没有支付，7月份的水电公摊还没有出账单，6月份的水费也没有出账单",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "price_inquiry",
       "expected_emotion": "neutral",
       "reviewed": false,
       "session_id": "S022",
-      "source": "biz_wx_message2.sql 2026-08-05 21:56:42"
+      "source": "biz_wx_message2.sql 2026-08-14 14:28:42"
     },
     {
-      "question": "全部在线，没有掉线微信 |06-08-26 21:57:51",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "technical_support",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S023",
-      "source": "biz_wx_message2.sql 2026-08-06 21:57:36"
-    },
-    {
-      "question": "全部在线，没有掉线微信 |07-08-26 12:58:25",
+      "question": "不知道这个手机卡",
       "expected_keywords": [],
       "expected_sources": [],
       "should_answer": true,
       "expected_intent": "unclear",
       "expected_emotion": "neutral",
       "reviewed": false,
-      "session_id": "S024",
-      "source": "biz_wx_message2.sql 2026-08-07 12:58:10"
+      "session_id": "S046",
+      "source": "biz_wx_message2.sql 2026-08-09 15:26:31"
     },
     {
-      "question": "全部在线，没有掉线微信 |08-08-26 09:59:13",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "technical_support",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S025",
-      "source": "biz_wx_message2.sql 2026-08-08 09:58:56"
-    },
-    {
-      "question": "全部在线，没有掉线微信 |08-08-26 18:59:33",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "technical_support",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S026",
-      "source": "biz_wx_message2.sql 2026-08-08 18:59:16"
-    },
-    {
-      "question": "全部在线，没有掉线微信 |08-08-26 21:59:39",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "troubleshooting",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S027",
-      "source": "biz_wx_message2.sql 2026-08-08 21:59:23"
-    },
-    {
-      "question": "全部在线，没有掉线微信 |09-08-26 16:00:20",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "technical_support",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S028",
-      "source": "biz_wx_message2.sql 2026-08-09 16:00:03"
-    },
-    {
-      "question": "全部在线，没有掉线微信 |10-08-26 04:00:48",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "technical_support",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S029",
-      "source": "biz_wx_message2.sql 2026-08-10 04:00:30"
-    },
-    {
-      "question": "全部在线，没有掉线微信 |10-08-26 21:06:08",
+      "question": "亮机卡，没错吧",
       "expected_keywords": [],
       "expected_sources": [],
       "should_answer": true,
       "expected_intent": "unclear",
       "expected_emotion": "neutral",
       "reviewed": false,
-      "session_id": "S030",
-      "source": "biz_wx_message2.sql 2026-08-10 21:05:50"
+      "session_id": "S066",
+      "source": "biz_wx_message2.sql 2026-09-03 09:41:00"
     },
     {
-      "question": "全部在线，没有掉线微信 |11-08-26 05:05:06",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "technical_support",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S031",
-      "source": "biz_wx_message2.sql 2026-08-11 05:04:48"
-    },
-    {
-      "question": "全部在线，没有掉线微信 |11-08-26 19:37:04",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "troubleshooting",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S032",
-      "source": "biz_wx_message2.sql 2026-08-11 19:36:46"
-    },
-    {
-      "question": "全部在线，没有掉线微信 |05-09-26 19:12:41",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "technical_support",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S033",
-      "source": "biz_wx_message2.sql 2026-09-05 19:12:09"
-    },
-    {
-      "question": "系统群发的是吗",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "unclear",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S004",
-      "source": "biz_wx_message.sql 2026-09-27 22:16:41"
-    },
-    {
-      "question": "昨天晚上也播了的",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "unclear",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S004",
-      "source": "biz_wx_message.sql 2026-09-27 22:16:41"
-    },
-    {
-      "question": "不知道咋回事",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "unclear",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S004",
-      "source": "biz_wx_message.sql 2026-09-27 22:16:41"
-    },
-    {
-      "question": "ss2",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "unclear",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S004",
-      "source": "biz_wx_message.sql 2026-09-27 22:16:41"
-    },
-    {
-      "question": "后来我切换了下sg217",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "troubleshooting",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S004",
-      "source": "biz_wx_message.sql 2026-09-27 22:16:41"
-    },
-    {
-      "question": "我12点多开播 再测下",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "troubleshooting",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S004",
-      "source": "biz_wx_message.sql 2026-09-27 22:16:41"
-    },
-    {
-      "question": "刚那个别撤回",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "unclear",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S004",
-      "source": "biz_wx_message.sql 2026-09-27 22:16:41"
-    },
-    {
-      "question": "我看下",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "unclear",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S004",
-      "source": "biz_wx_message.sql 2026-09-27 22:16:41"
-    },
-    {
-      "question": "这流量用不完也清零？",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "usage_guide",
-      "expected_emotion": "dissatisfied",
-      "reviewed": false,
-      "session_id": "S004",
-      "source": "biz_wx_message.sql 2026-09-27 22:16:41"
-    },
-    {
-      "question": "我现在是刚开始创业所以要考虑下成本",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "price_inquiry",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S004",
-      "source": "biz_wx_message.sql 2026-09-27 22:16:41"
-    },
-    {
-      "question": "流量肯定是够的",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "unclear",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S005",
-      "source": "biz_wx_message.sql 2026-09-27 23:57:59"
-    },
-    {
-      "question": "我等下在开下直播",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "unclear",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S005",
-      "source": "biz_wx_message.sql 2026-09-27 23:57:59"
-    },
-    {
-      "question": "爽倒没有 还是有一些问题",
+      "question": "不加。柳州拆回来的那批频率低、速度低，容量还减一半。加上去更慢，混插还有奇奇怪怪的问题，不折腾",
       "expected_keywords": [],
       "expected_sources": [],
       "should_answer": true,
       "expected_intent": "troubleshooting",
       "expected_emotion": "dissatisfied",
       "reviewed": false,
-      "session_id": "S006",
-      "source": "biz_wx_message.sql 2026-09-29 10:20:36"
+      "session_id": "S067",
+      "source": "biz_wx_message2.sql 2026-09-03 10:53:34"
     },
     {
-      "question": "180这个我真用不起",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "price_inquiry",
-      "expected_emotion": "dissatisfied",
-      "reviewed": false,
-      "session_id": "S006",
-      "source": "biz_wx_message.sql 2026-09-29 10:20:36"
-    },
-    {
-      "question": "美区 还有 澳洲 新加坡",
+      "question": "投诉了",
       "expected_keywords": [],
       "expected_sources": [],
       "should_answer": true,
       "expected_intent": "unclear",
+      "expected_emotion": "complaint_risk",
+      "reviewed": false,
+      "session_id": "S073",
+      "source": "biz_wx_message2.sql 2026-09-06 22:16:50"
+    },
+    {
+      "question": "21111，麻烦。要改阿里云防火墙、系统防火墙、内网穿透全部一起。简单的方案是60017映射到21111，如果你兼容的话",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "technical_support",
       "expected_emotion": "neutral",
       "reviewed": false,
-      "session_id": "S006",
-      "source": "biz_wx_message.sql 2026-09-29 10:20:36"
+      "session_id": "S074",
+      "source": "biz_wx_message2.sql 2026-09-07 09:01:13"
     },
     {
-      "question": "我这算下来真用不起",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "price_inquiry",
-      "expected_emotion": "dissatisfied",
-      "reviewed": false,
-      "session_id": "S006",
-      "source": "biz_wx_message.sql 2026-09-29 10:20:36"
-    },
-    {
-      "question": "我测试都拿",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "unclear",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S006",
-      "source": "biz_wx_message.sql 2026-09-29 10:20:36"
-    },
-    {
-      "question": "费号测试",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "unclear",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S006",
-      "source": "biz_wx_message.sql 2026-09-29 10:20:36"
-    },
-    {
-      "question": "用你180那个线路 流量一个ip 100g 按照50一条算",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "price_inquiry",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S006",
-      "source": "biz_wx_message.sql 2026-09-29 10:20:36"
-    },
-    {
-      "question": "现在确实预算有限",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "price_inquiry",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S006",
-      "source": "biz_wx_message.sql 2026-09-29 10:20:36"
-    },
-    {
-      "question": "其实正规操作线路都是按流量计算",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "price_inquiry",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S006",
-      "source": "biz_wx_message.sql 2026-09-29 10:20:36"
-    },
-    {
-      "question": "vps",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "unclear",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S006",
-      "source": "biz_wx_message.sql 2026-09-29 10:20:36"
-    },
-    {
-      "question": "一条isp 加上一个中专vps",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "unclear",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S006",
-      "source": "biz_wx_message.sql 2026-09-29 10:20:36"
-    },
-    {
-      "question": "你这个也是一样的",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "unclear",
-      "expected_emotion": "neutral",
-      "reviewed": false,
-      "session_id": "S006",
-      "source": "biz_wx_message.sql 2026-09-29 10:20:36"
-    },
-    {
-      "question": "啥公司啊 都是个人搭建的",
-      "expected_keywords": [],
-      "expected_sources": [],
-      "should_answer": true,
-      "expected_intent": "unclear",
-      "expected_emotion": "dissatisfied",
-      "reviewed": false,
-      "session_id": "S006",
-      "source": "biz_wx_message.sql 2026-09-29 10:20:36"
-    },
-    {
-      "question": "又不是电信联通公司 都是个人线路",
+      "question": "改了，网卡重启，重新获取IP试试",
       "expected_keywords": [],
       "expected_sources": [],
       "should_answer": true,
       "expected_intent": "troubleshooting",
-      "expected_emotion": "dissatisfied",
+      "expected_emotion": "neutral",
       "reviewed": false,
-      "session_id": "S006",
-      "source": "biz_wx_message.sql 2026-09-29 10:20:36"
+      "session_id": "S075",
+      "source": "biz_wx_message2.sql 2026-09-07 12:10:59"
     },
     {
-      "question": "正规都是按照流量计费",
+      "question": "我问问，卡在姚姚那里",
       "expected_keywords": [],
       "expected_sources": [],
       "should_answer": true,
-      "expected_intent": "price_inquiry",
+      "expected_intent": "unclear",
       "expected_emotion": "neutral",
       "reviewed": false,
-      "session_id": "S006",
-      "source": "biz_wx_message.sql 2026-09-29 10:20:36"
+      "session_id": "S080",
+      "source": "biz_wx_message2.sql 2026-08-21 16:20:57"
     },
     {
-      "question": "180那个线路 你给我100g就可以了 一条50算 我先拿一条 我长期用 不像有的人用一个月",
+      "question": "也不用啥返回，就是为明年准备，不过要重新立项，因为现在审计在场，所以各个流程卡得严",
       "expected_keywords": [],
       "expected_sources": [],
       "should_answer": true,
       "expected_intent": "purchase_process",
       "expected_emotion": "neutral",
       "reviewed": false,
-      "session_id": "S006",
-      "source": "biz_wx_message.sql 2026-09-29 10:20:36"
+      "session_id": "S086",
+      "source": "biz_wx_message2.sql 2026-08-10 10:02:33"
     },
     {
-      "question": "我之前那个都用了一年半",
+      "question": "超哥，您昨天不是说那个手机卡教程吗，麻烦发我下吧，我研究一下去[呲牙][呲牙][呲牙]",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "usage_guide",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S090",
+      "source": "biz_wx_message2.sql 2026-08-10 16:50:44"
+    },
+    {
+      "question": "实在是查不到资料了，才来麻烦您[破涕为笑]",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "unclear",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S091",
+      "source": "biz_wx_message2.sql 2026-08-21 17:33:07"
+    },
+    {
+      "question": "现在用的笔记本2018年的，真的超级慢，完全没法用，给公司IT专家看，就说配置太低，内存太小。\n再加上女儿的学姐说用的苹果本带不动那些专业软件……",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "product_comparison",
+      "expected_emotion": "dissatisfied",
+      "reviewed": false,
+      "session_id": "S096",
+      "source": "biz_wx_message2.sql 2026-08-15 19:59:30"
+    },
+    {
+      "question": "@***姓名*** @黄东伟 检查系统的任务，给这个小伙子",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "technical_support",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S004",
+      "source": "biz_wx_message2.sql 2026-08-31 09:02:10"
+    },
+    {
+      "question": "晚点，我先发资料在这里",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "unclear",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S004",
+      "source": "biz_wx_message2.sql 2026-08-31 09:02:10"
+    },
+    {
+      "question": "先看，等下来说",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "unclear",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S004",
+      "source": "biz_wx_message2.sql 2026-08-31 09:02:10"
+    },
+    {
+      "question": "我叫",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "unclear",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S004",
+      "source": "biz_wx_message2.sql 2026-08-31 09:02:10"
+    },
+    {
+      "question": "有谁用VIVO 或 oppo的手机吗，做测试",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "usage_guide",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S006",
+      "source": "biz_wx_message2.sql 2026-09-09 16:35:36"
+    },
+    {
+      "question": "有oppo旗下的真我",
       "expected_keywords": [],
       "expected_sources": [],
       "should_answer": true,
@@ -1077,29 +835,271 @@
       "expected_emotion": "neutral",
       "reviewed": false,
       "session_id": "S006",
-      "source": "biz_wx_message.sql 2026-09-29 10:20:36"
+      "source": "biz_wx_message2.sql 2026-09-09 16:35:36"
     },
     {
-      "question": "180那个我勉强可以兼顾业务做 也不是最优解",
+      "question": "让梁同学试一下呼了么的录音。",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "usage_guide",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S006",
+      "source": "biz_wx_message2.sql 2026-09-09 16:35:36"
+    },
+    {
+      "question": "oppo旗下的一加",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "unclear",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S006",
+      "source": "biz_wx_message2.sql 2026-09-09 16:35:36"
+    },
+    {
+      "question": "一样，让梁同学试一下呼。",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "technical_support",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S006",
+      "source": "biz_wx_message2.sql 2026-09-09 16:35:36"
+    },
+    {
+      "question": "如果没录音，就得把手机给我做开发级调试。",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "troubleshooting",
+      "expected_emotion": "dissatisfied",
+      "reviewed": false,
+      "session_id": "S006",
+      "source": "biz_wx_message2.sql 2026-09-09 16:35:36"
+    },
+    {
+      "question": "oppo真我12pro+，可以录音并上传，另一个一加还没试。",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "unclear",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S006",
+      "source": "biz_wx_message2.sql 2026-09-09 16:35:36"
+    },
+    {
+      "question": "oppo真我12pro+、一加13，都可以录音并上传",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "usage_guide",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S006",
+      "source": "biz_wx_message2.sql 2026-09-09 16:35:36"
+    },
+    {
+      "question": "好，非常好。好消息。",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "unclear",
+      "expected_emotion": "positive",
+      "reviewed": false,
+      "session_id": "S006",
+      "source": "biz_wx_message2.sql 2026-09-09 16:35:36"
+    },
+    {
+      "question": "【腾讯文档】运动视界需求理解\n***链接***",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "unclear",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S006",
+      "source": "biz_wx_message2.sql 2026-09-09 16:35:36"
+    },
+    {
+      "question": "***链接***\n租户用户名 ***凭据***凭据***\n客户用户名 ***凭据***凭据***\n\n不要用文档里的地址和APP，用这个测试地址。 @鲁永明",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "technical_support",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S007",
+      "source": "biz_wx_message.sql 2026-09-16 14:56:49"
+    },
+    {
+      "question": "APP用这个。",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "usage_guide",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S007",
+      "source": "biz_wx_message.sql 2026-09-16 14:56:49"
+    },
+    {
+      "question": "收到请回复，要用我发的安卓APP和测试地址来做测试。",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "troubleshooting",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S007",
+      "source": "biz_wx_message.sql 2026-09-16 14:56:49"
+    },
+    {
+      "question": "收到",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "unclear",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S007",
+      "source": "biz_wx_message.sql 2026-09-16 14:56:49"
+    },
+    {
+      "question": "我做TK的。",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "unclear",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S008",
+      "source": "biz_wx_message.sql 2026-09-22 17:39:50"
+    },
+    {
+      "question": "你推荐哪个",
       "expected_keywords": [],
       "expected_sources": [],
       "should_answer": true,
       "expected_intent": "product_comparison",
-      "expected_emotion": "dissatisfied",
+      "expected_emotion": "neutral",
       "reviewed": false,
-      "session_id": "S006",
-      "source": "biz_wx_message.sql 2026-09-29 10:20:36"
+      "session_id": "S008",
+      "source": "biz_wx_message.sql 2026-09-22 17:39:50"
     },
     {
-      "question": "那应该是你没理解 透，乱推了",
+      "question": "安卓能用吗",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "usage_guide",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S008",
+      "source": "biz_wx_message.sql 2026-09-22 17:39:50"
+    },
+    {
+      "question": "我有 3 台设备，都可以用吗",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "usage_guide",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S008",
+      "source": "biz_wx_message.sql 2026-09-22 17:39:50"
+    },
+    {
+      "question": "嗯嗯，你们是正规的吗",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "purchase_process",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S008",
+      "source": "biz_wx_message.sql 2026-09-22 17:39:50"
+    },
+    {
+      "question": "你们是什么公司？",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "unclear",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S008",
+      "source": "biz_wx_message.sql 2026-09-22 17:39:50"
+    },
+    {
+      "question": "公司叫啥？",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "unclear",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S008",
+      "source": "biz_wx_message.sql 2026-09-22 17:39:50"
+    },
+    {
+      "question": "你们是什么公司",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "unclear",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S008",
+      "source": "biz_wx_message.sql 2026-09-22 17:39:50"
+    },
+    {
+      "question": "公司名字",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "unclear",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S008",
+      "source": "biz_wx_message.sql 2026-09-22 17:39:50"
+    },
+    {
+      "question": "180那个",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "unclear",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S009",
+      "source": "biz_wx_message.sql 2026-09-29 12:36:34"
+    },
+    {
+      "question": "2天有点短",
       "expected_keywords": [],
       "expected_sources": [],
       "should_answer": true,
       "expected_intent": "unclear",
       "expected_emotion": "dissatisfied",
       "reviewed": false,
-      "session_id": "S002",
-      "source": "biz_wx_message2.sql 2026-07-30 17:11:37"
+      "session_id": "S009",
+      "source": "biz_wx_message.sql 2026-09-29 12:36:34"
+    },
+    {
+      "question": "能试4-5天吗",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "should_answer": true,
+      "expected_intent": "purchase_process",
+      "expected_emotion": "neutral",
+      "reviewed": false,
+      "session_id": "S009",
+      "source": "biz_wx_message.sql 2026-09-29 12:36:34"
     }
   ]
 }

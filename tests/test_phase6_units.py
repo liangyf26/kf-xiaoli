@@ -225,20 +225,68 @@ def test_group_turns_attaches_replies():
 # ---------- 脱敏 ----------
 
 def test_desensitize_masks_pii():
-    """手机号/邮箱/IP:端口/长号码/证件号/独立十六进制串/网址参数 全部打码。"""
+    """手机号/邮箱/IP:端口/凭据/证件号/长串 全部打码（第二轮验收新增凭据/链接/座机/企业掩码）。"""
     d = Desensitizer()
     text = d.text("打13813813868找他，邮箱a@b.com，连1.2.3.4:8080，账号6222021234567890123，"
                   "凭证91450100MA5NUT5A30，校验码41313761623439623864323337386500")
     assert "13813813868" not in text and "***手机号***" in text
     assert "a@b.com" not in text and "***邮箱***" in text
     assert "1.2.3.4" not in text and "***IP***" in text
-    assert "6222021234567890123" not in text and "***长号码***" in text
+    assert "6222021234567890123" not in text and "***凭据***" in text, "账号标签值按凭据掩码"
     assert "91450100MA5NUT5A30" not in text and "***证件号***" in text
     assert "41313761623439623864323337386500" not in text
     assert "***编码串***" in text or "***长号码***" in text, "纯数字长串至少被长号码/编码串掩码之一覆盖"
 
     url_text = d.text("看https://x.com/p?uid=12345和参数token=abc")
-    assert "uid=12345" not in url_text and "token=abc" not in url_text and "?***" in url_text
+    assert "uid=12345" not in url_text and "token=abc" not in url_text
+    assert "https://" not in url_text and "***链接***" in url_text, "链接整体打码（含凭据链接）"
+
+
+def test_desensitize_credentials_landline_company():
+    """第二轮验收场景：明文账号密码、测试口令、固定电话、企业全称、地址、开户行。"""
+    d = Desensitizer()
+    cred = d.text("后台：http://10.0.0.1/\n管理员账号：admin\n密码：admin123")
+    assert "admin" not in cred and "admin123" not in cred and "10.0.0.1" not in cred
+    assert "***凭据***" in cred and "***链接***" in cred
+
+    tenant = d.text("租户用户名tt3 / 123456")
+    assert "tt3" not in tenant and "123456" not in tenant and "***凭据***" in tenant
+
+    invoice = d.text("公司名称：中国—东盟信息港股份有限公司\n税号：***证件号***\n"
+                     "单位地址：南宁市良庆区某路18号\n电话号码：0771-2500111\n开户银行：某银行某支行")
+    assert "股份有限公司" not in invoice and "***企业名***" in invoice
+    assert "0771-2500111" not in invoice and "***电话***" in invoice, "固定电话打码"
+    assert "南宁市良庆区" not in invoice and "***地址***" in invoice
+    assert "某银行某支行" not in invoice and "***开户行***" in invoice
+
+
+def test_status_noise_blocked_from_outputs():
+    """状态汇报文本（验收发现的99次污染源）必须判为噪声，不允许进入产物。"""
+    assert is_noise("全部在线，没有掉线微信 |04-08-26 15:55:45")
+    assert is_noise("全部在线，没有掉线微信 |时间:04-08-26 15:55:45|补充")
+
+
+def test_report_generation_counts_fallback_and_mismatch():
+    """回归保护：调用真实generate_report——回退引擎计数行、序号对齐的不一致清单都在报告里。"""
+    import types
+
+    from compare_real_sessions import generate_report
+
+    def rec(engine, intent, q_index, fallback=False):
+        return {"session_id": "S1", "q_index": q_index, "question": "多少钱",
+                "answer": "120", "latency_ms": 5, "engine": "kev_failed" if fallback else engine,
+                "path": "llm_generation", "intent": intent, "need_clarification": False,
+                "status": "ok", "is_refusal": False, "error": "",
+                "emotion": "neutral", "decision_latency_ms": 5}
+
+    runs = {"rule": [rec("rule", "price_inquiry", 0), rec("rule", "unclear", 1)],
+            "kev": [rec("kev", "price_inquiry", 0, fallback=True), rec("kev", "price_inquiry", 1)]}
+    report = generate_report(
+        runs, {"rule": "RuleBasedEngine", "kev": "KevEngine"}, [],
+        types.SimpleNamespace(include_jev=True), new_old=((0, 0), {}, {}, (0, 0)))
+    assert "服务回退数" in report and "| 0 | 1 |" in report, "kev_failed必须显式计数"
+    assert "kev_failed" in report, "回退说明必须出现在报告中"
+    assert "各引擎意图不一致" in report and "| S1 |" in report, "第二问不一致要按序号列出"
 
 
 def test_desensitize_identity_mapping_stable():
@@ -325,6 +373,9 @@ ALL_TESTS = [
     test_desensitize_masks_pii,
     test_desensitize_identity_mapping_stable,
     test_desensitized_output_has_no_leak_pattern,
+    test_desensitize_credentials_landline_company,
+    test_status_noise_blocked_from_outputs,
+    test_report_generation_counts_fallback_and_mismatch,
     test_operator_alias_and_registered_nickname_masked,
     test_compare_md_cell_and_norm_intent,
     test_compare_ordinal_alignment_keeps_duplicate_questions,

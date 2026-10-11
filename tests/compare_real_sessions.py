@@ -222,7 +222,16 @@ def generate_report(runs: dict[str, list[dict]], engine_classes: dict[str, str],
     rows.append("| " + " | ".join(lat_row) + " |")
     err_row = ["异常数"]
     rows.append("| " + " | ".join(err_row + [str(sum(1 for r in runs[e] if r['status'] != 'ok')) for e in runs]) + " |")
+    fb_row = ["服务回退数(*_failed)"]
+    rows.append("| " + " | ".join(fb_row + [str(sum(1 for r in runs[e] if str(r.get('engine', '')).endswith('_failed'))) for e in runs]) + " |")
     lines.extend(rows)
+    fb_engines = [e for e in runs if any(str(r.get("engine", "")).endswith("_failed") for r in runs[e])]
+    if fb_engines:
+        lines.append(f"- **检测到回退引擎: {', '.join(f'{e}（{e}_failed）' for e in fb_engines)}**——"
+                     "对应题目的意图/情绪为降级结果（unclear/neutral），不代表引擎真实判定")
+    lines.append("")
+    lines.append("> 回退说明：服务回退数>0表示该引擎当时依赖的外部服务（kev.serve/LLM API）不可用或超时，")
+    lines.append("> 对应题目的意图/情绪为降级结果；异常数=单题抛异常。")
     lines.append("")
 
     # 2. 意图分布

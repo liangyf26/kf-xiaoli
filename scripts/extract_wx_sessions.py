@@ -41,6 +41,9 @@ NOISE_PATTERNS = (
     re.compile(r"正常心跳"),                    # "雅诗|U012|时间:09-06 16:06|正常心跳"类状态行
     re.compile(r"心跳$"),
     re.compile(r"测试指令"),                    # "6小时测试测试测试指令|别名|昵称|wxid"类系统测试
+    re.compile(r"全部在线"),                    # "全部在线，没有掉线微信 |时间"类状态汇报（复验发现的99次污染源）
+    re.compile(r"没有掉线"),
+    re.compile(r"掉线微信"),
     re.compile(r"^掉线"),
     re.compile(r"^首次上线"),
     re.compile(r"^下线"),
@@ -61,6 +64,15 @@ RE_URL_QUERY = re.compile(r"(https?://\S+?)\?\S*")
 RE_WXID = re.compile(r"wxid_[A-Za-z0-9]+")
 RE_HEX_RUN = re.compile(r"[0-9a-fA-F]{24,}")  # 语音/文件消息内嵌XML的十六进制串（会被误判为手机号）
 RE_LONG_DIGITS = re.compile(r"(?<!\d)\d{12,}(?!\d)")  # 银行账号/订单号等长数字串（子串会撞手机号正则）
+# 第二轮验收新增：链接整体（含文档/凭据链接）、凭据标签值、固定电话、企业全称、地址/开户行标签
+RE_URL_ANY = re.compile(r"https?://[^\s\u4e00-\u9fa5]+")
+RE_QUERY_TOKEN = re.compile(r"(?:token|uid|key|sign|appid)=[A-Za-z0-9_\-\.]+")  # 散落的查询参数
+RE_CREDENTIAL = re.compile(r"((?:管理|租户|客户|后台)?(?:账号|帐号|用户名)|密码|口令|账密)\s*[:：＝=]?\s*[A-Za-z0-9_@!#$%&*+./^-]{2,32}")
+RE_USER_PASS = re.compile(r"((?:租户|客户)?用户名)\s*([A-Za-z0-9_-]+)\s*/\s*([0-9]{4,8})")
+RE_LANDLINE = re.compile(r"(?<!\d)0\d{2,3}-?\d{7,8}(?!\d)")
+RE_COMPANY = re.compile(r"[\u4e00-\u9fa5A-Za-z0-9—\-()（）]{2,20}(?:股份有限公司|有限责任公司|有限公司|集团公司)")
+RE_ADDR_LABEL = re.compile(r"(单位地址|公司地址|地址)\s*[:：]\s*[^\n]{4,40}")
+RE_BANK_LABEL = re.compile(r"(开户银行|开户行)\s*[:：]\s*[^\n]{2,30}")
 
 # 运营者人设别名：只出现在客户正文里、元数据无对应行的昵称（客服自称/别称）。
 # 替换为"客服"（非编号——它们是运营者角色而非客户身份），并纳入泄露自检。
@@ -151,11 +163,15 @@ def parse_group_prefix(content: str) -> tuple[str, str, str] | None:
                      if TIME_PART.search(p) or p.startswith("时间:") or p.startswith("时间：")), None)
     if time_idx is None or time_idx < 1 or time_idx >= len(parts) - 1:
         return None
-    nickname = parts[time_idx - 1]
-    # "N | 昵称 | 时间 | wxid | 正文"五段式：时间前一段是昵称，若其为纯数字则再往前取
-    if re.fullmatch(r"\d*", nickname) and time_idx >= 2:
-        nickname = parts[time_idx - 2]
-    wxid = parts[time_idx + 1] if time_idx + 1 <= len(parts) - 2 else ""
+    # 时间前一段通常是昵称；但它如果是微信号/别名（"昵称|wxid|时间|正文"四段变体，
+    # 验收指出的解析错位源），则昵称取再前一段，微信号取本段
+    prev = parts[time_idx - 1]
+    if time_idx >= 2 and ("wxid" in prev or re.fullmatch(r"[A-Za-z][A-Za-z0-9_]{3,}", prev)):
+        nickname, wxid = parts[time_idx - 2], prev
+    elif re.fullmatch(r"\d*", prev) and time_idx >= 2:  # "N | 昵称 | 时间 | wxid | 正文"五段式
+        nickname, wxid = parts[time_idx - 2], parts[time_idx + 1] if time_idx + 1 <= len(parts) - 2 else ""
+    else:
+        nickname, wxid = prev, parts[time_idx + 1] if time_idx + 1 <= len(parts) - 2 else ""
     body = "|".join(parts[time_idx + 2:]) if time_idx + 2 < len(parts) else ""
     if not nickname or nickname.startswith(("掉线微信号", "微信号")):
         return None  # 系统状态行（如"掉线微信号：xxx | 昵称 | 心跳"），交由噪声过滤
@@ -305,17 +321,25 @@ class Desensitizer:
         return self.id_map[raw]
 
     def text(self, content: str) -> str:
-        """内容打码：运营者别名 → 人工姓名黑名单 → 结构化PII正则 → 已注册身份（长者优先）→ 长号码/长十六进制串。"""
+        """内容打码：运营者别名 → 人工姓名黑名单 → 链接/凭据/座机/企业/地址/开户行 →
+        结构化PII正则 → 已注册身份（长者优先）→ 长号码/长十六进制串。"""
         for alias in OPERATOR_ALIASES:
             content = content.replace(alias, "客服")
         for name in MANUAL_NAME_BLOCKLIST:
             content = content.replace(name, "***姓名***")
+        content = RE_URL_ANY.sub("***链接***", content)          # 含文档链接/带凭据链接，整体打码
+        content = RE_QUERY_TOKEN.sub("***参数***", content)        # 链接打码后散落的查询参数
+        content = RE_USER_PASS.sub(r"\1 ***凭据***", content)      # "用户名tt3 / 123456"式（先于标签式，整段吞掉）
+        content = RE_CREDENTIAL.sub(r"\1 ***凭据***", content)     # 账号/密码/用户名/口令标签值
+        content = RE_LANDLINE.sub("***电话***", content)          # 固定电话（含区号-号码）
+        content = RE_COMPANY.sub("***企业名***", content)          # 企业全称
+        content = RE_ADDR_LABEL.sub(r"\1 ***地址***", content)     # 单位地址/地址标签值
+        content = RE_BANK_LABEL.sub(r"\1 ***开户行***", content)   # 开户银行标签值
         content = RE_PHONE.sub("***手机号***", content)
         content = RE_EMAIL.sub("***邮箱***", content)
         content = RE_IP_PORT.sub("***IP***", content)
         content = RE_ID_CARD.sub("***证件号***", content)
         content = RE_CREDIT_CODE.sub("***证件号***", content)
-        content = RE_URL_QUERY.sub(r"\1?***", content)
         content = RE_WXID.sub(lambda m: self.identity(m.group(0), "U"), content)
         for raw in sorted(self.id_map, key=len, reverse=True):
             pseudonym = self.id_map[raw]
@@ -456,6 +480,15 @@ def main() -> None:
     if leaks:
         print(f"[泄露自检失败] {len(leaks)}处残留真实身份，未写任何文件。样例：")
         for sample in leaks[:5]:
+            print(" ", sample)
+        sys.exit(1)
+
+    # 状态噪声断言：状态汇报类文本不允许进入任何产物（第二轮验收发现的99次污染）
+    status_leaks = [t["text"][:60] for s in out_sessions for t in s["turns"]
+                    if is_noise(t["text"]) or is_noise(t.get("bot_reply", "")) or is_noise(t.get("human_reply", ""))]
+    if status_leaks:
+        print(f"[状态噪声断言失败] {len(status_leaks)}条状态文本进入会话，未写任何文件。样例：")
+        for sample in status_leaks[:5]:
             print(" ", sample)
         sys.exit(1)
 

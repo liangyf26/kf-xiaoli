@@ -100,6 +100,27 @@ def stratified_sample(candidates: list[dict], count: int) -> list[dict]:
     return picked[:count]
 
 
+async def label_one(client: QwenClient, question: str) -> dict:
+    """单条标注（含重试）；返回 {intent, emotion}，失败降级unclear/neutral。"""
+    prompt = (
+        "你是SDWAN专线客服的标注助手。对客户消息标注意图与情绪，严格只输出JSON："
+        '{"intent": "...", "emotion": "..."} intent ∈ ' + "、".join(INTENTS) +
+        " emotion ∈ " + "、".join(EMOTIONS) +
+        "（dissatisfied=不满，complaint_risk=明确要投诉举报）" + "\n消息：" + question + "\n输出："
+    )
+    for attempt in range(6):  # LLM服务偶发空回复（实测约1/3成功率），重试到拿到为止
+        try:
+            result = await client.generate([{"role": "user", "content": prompt}])
+            data = parse_json_object(result.get("response", "")) or {}
+            if data.get("intent") in INTENTS:
+                return {"intent": data["intent"], "emotion": data.get("emotion") if data.get("emotion") in EMOTIONS else "neutral"}
+            print(f"    第{attempt + 1}次无有效intent（响应{len(result.get('response', ''))}字），重试")
+        except Exception as exc:  # noqa: BLE001 单条失败重试
+            print(f"    第{attempt + 1}次异常: {str(exc)[:80]}")
+        await asyncio.sleep(2)
+    return {"intent": "unclear", "emotion": "neutral"}
+
+
 async def prelabel(items: list[dict], batch_size: int = 1) -> None:
     """qwen逐条预标注意图与情绪（每条一次LLM调用，最多重试6次）。
 
@@ -107,37 +128,14 @@ async def prelabel(items: list[dict], batch_size: int = 1) -> None:
     单条输出≈40token成功率最高；服务端修复后可改回批量提效。
     """
     client = QwenClient()
-    intent_list = "、".join(INTENTS)
-    emotion_list = "、".join(EMOTIONS)
     done = 0
-    for start in range(0, len(items), batch_size):
-        batch = items[start:start + batch_size]
-        listing = "\n".join(f"{i + 1}. {it['question']}" for i, it in enumerate(batch))
-        prompt = (
-            "你是SDWAN专线客服的标注助手。对下列每条客户消息标注意图与情绪，严格只输出JSON：\n"
-            f'{{"labels": [{{"id": 1, "intent": "...", "emotion": "..."}}, ...]}}\n'
-            f"intent ∈ {intent_list}\n"
-            f"emotion ∈ {emotion_list}（dissatisfied=不满，complaint_risk=明确要投诉举报）\n\n"
-            f"{listing}\n\n输出："
-        )
-        labels: dict[int, dict] = {}
-        for attempt in range(6):  # LLM服务偶发空回复（实测约1/3成功率），重试到拿到为止
-            try:
-                result = await client.generate([{"role": "user", "content": prompt}])
-                data = parse_json_object(result.get("response", "")) or {}
-                labels = {int(l.get("id", 0)): l for l in data.get("labels", []) if isinstance(l, dict)}
-                if labels:
-                    break
-                print(f"  批{start // batch_size + 1}第{attempt + 1}次：无labels（响应{len(result.get('response', ''))}字），重试")
-            except Exception as exc:  # noqa: BLE001 单批失败重试
-                print(f"  批{start // batch_size + 1}第{attempt + 1}次异常: {str(exc)[:80]}")
-            await asyncio.sleep(2)
-        for i, it in enumerate(batch):
-            label = labels.get(i + 1, {})
-            it["expected_intent"] = label.get("intent") if label.get("intent") in INTENTS else "unclear"
-            it["expected_emotion"] = label.get("emotion") if label.get("emotion") in EMOTIONS else "neutral"
-        done += len(batch)
-        print(f"预标进度: {done}/{len(items)}（本批命中{len(labels)}条）")
+    for it in items:
+        label = await label_one(client, it["question"])
+        it["expected_intent"] = label["intent"]
+        it["expected_emotion"] = label["emotion"]
+        done += 1
+        if done % 10 == 0:
+            print(f"预标进度: {done}/{len(items)}")
     # 标注失败的条目补默认值
     for it in items:
         it.setdefault("expected_intent", "unclear")
@@ -156,6 +154,31 @@ def main() -> None:
 
     import asyncio
     asyncio.run(prelabel(picked))
+
+    # 非中性情绪补齐：任务书要求情绪类≥20条（第二轮验收按expected_emotion≠neutral直接口径）。
+    # 预标后不足时，从情绪关键词桶按序补标，直到非中性≥20或候选耗尽。
+    client = QwenClient()
+
+    async def topup() -> None:
+        non_neutral = sum(1 for it in picked if it["expected_emotion"] != "neutral")
+        if non_neutral >= 20:
+            return
+        existing = {it["question"] for it in picked}
+        emotion_pool = [c for c in candidates
+                        if c["question"] not in existing
+                        and any(kw in c["question"] for kw in EMOTION_BUCKET_KEYWORDS)]
+        for c in emotion_pool:
+            if non_neutral >= 20:
+                return
+            label = await label_one(client, c["question"])
+            c.update(label)
+            picked.append(c)
+            if label["emotion"] != "neutral":
+                non_neutral += 1
+            existing.add(c["question"])
+            print(f"情绪补齐: 非中性{non_neutral}/20（+{c['question'][:20]}）")
+
+    asyncio.run(topup())
 
     labeled = [{
         "question": it["question"],

@@ -147,7 +147,7 @@ python scripts/prelabel_labeled.py
 | 来源标注准确率 | — | 100%（9/9考核题） | ✅ |
 | 平均响应时间 | <10秒 | **3.16秒**（优化前4.40秒，-28%） | ✅ |
 | LLM路径延迟 | — | 6.3秒/次（优化前9.8秒，-35%） | ✅ |
-| 单元+端到端回归 | — | pytest 84项（83 passed + 1环境跳过，含Phase 5的17项），E2E 8/8 | ✅ |
+| 单元+端到端回归 | — | pytest 108项（107 passed + 1环境跳过），E2E 8/8 | ✅ |
 
 完整数据：`tests/results/`（batch_test_*.json、accuracy_eval_*.json、engine_accuracy_report_*.md、performance_profile_*.json、test_report_*.md）。阶段验收报告见 `docs/`。
 
@@ -223,6 +223,7 @@ py -3.13 -m venv .venv-kev
 - [x] Phase 3：LLM生成层（Few-shot/Prompt/路由/编排器）+ 深色主题前端
 - [x] Phase 4：批量测试、准确率评估、性能优化、日志监控、文档交付
 - [x] Phase 5：Qwen引擎（第4种）+ 五级情绪风险 + 决策结果展示 + 会话自动提炼
+- [x] Phase 6：微信真实数据（461→353会话脱敏提取、四引擎对比评测、100条预标标注集）
 
 ### 后续建议
 
