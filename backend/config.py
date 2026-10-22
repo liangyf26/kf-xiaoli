@@ -23,7 +23,38 @@ class Settings(BaseSettings):
     # 模型可选配置
     MODEL_API_KEY: str = ""
     TEMPERATURE: float = 0.3
+    # 兼容保留：已按路径拆分为 DECISION_MAX_TOKENS / GEN_MAX_TOKENS，本值不再单独生效
     MAX_TOKENS: int = 512
+
+    # 思考模式与 max_tokens 按路径拆分（Qwen3.8-27B 实测 2026-10-22）：
+    # 思考开关必须走 chat_template_kwargs（顶层 enable_thinking 无效）；
+    # 思考开 + max_tokens<512 会把 token 全花在思考上导致正文为空。
+    DECISION_MAX_TOKENS: int = 256      # 意图快判（关思考，JSON 约 56 tokens）
+    GEN_MAX_TOKENS: int = 1024          # 文字答复生成（思考开）
+    DECISION_ENABLE_THINKING: bool = False
+    GEN_ENABLE_THINKING: bool = True
+
+    # Jev 渠道链（2026-10-22 用户定案）：逗号分隔渠道名，按序降级，全挂才回退。
+    # 每渠道 4 项 JEV_<NAME大写>_BASE_URL/_ENDPOINT/_MODEL/_API_KEY，
+    # 任一为空跳过该渠道。endpoint 路径不同：官方/OpenCode 走 /v1/systemone，
+    # OpenRouter 走 /alpha/decisions，别混用。
+    JEV_CHANNELS: str = "typesafe,opencode_free,opencode_pay,openrouter"
+    JEV_TYPESAFE_BASE_URL: str = "https://api.typesafe.ai"
+    JEV_TYPESAFE_ENDPOINT: str = "/v1/systemone"
+    JEV_TYPESAFE_MODEL: str = "jev-latest"   # 官方 /v1/models 实查只有 jev-latest/jev-preview，jev-1.13 会 400
+    JEV_TYPESAFE_API_KEY: str = ""
+    JEV_OPENCODE_FREE_BASE_URL: str = "https://opencode.ai/inference"
+    JEV_OPENCODE_FREE_ENDPOINT: str = "/v1/systemone"
+    JEV_OPENCODE_FREE_MODEL: str = "jev-1.13-free"
+    JEV_OPENCODE_FREE_API_KEY: str = ""
+    JEV_OPENCODE_PAY_BASE_URL: str = "https://opencode.ai/inference"
+    JEV_OPENCODE_PAY_ENDPOINT: str = "/v1/systemone"
+    JEV_OPENCODE_PAY_MODEL: str = "jev-1.13"
+    JEV_OPENCODE_PAY_API_KEY: str = ""
+    JEV_OPENROUTER_BASE_URL: str = "https://openrouter.ai/api"
+    JEV_OPENROUTER_ENDPOINT: str = "/alpha/decisions"
+    JEV_OPENROUTER_MODEL: str = "typesafe/jev-1.13"
+    JEV_OPENROUTER_API_KEY: str = ""
 
     # 话术配置
     FIRST_MESSAGE_GREETING: str = "您好，我是SDWAN智能客服机器人，很高兴为您服务。"

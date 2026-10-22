@@ -62,9 +62,15 @@ class QwenEngine(DecisionEngine):
     """Qwen主LLM决策引擎（Few-shot JSON输出，超时/解析失败降级qwen_failed）。"""
 
     def __init__(self, llm_client: QwenClient | None = None, timeout_seconds: float | None = None):
-        """llm_client可注入替身（测试用）；timeout_seconds默认10秒。"""
+        """llm_client可注入替身（测试用）；timeout_seconds默认10秒。
+
+        意图快判走关思考+小 max_tokens（DECISION_*）：实测关思考 2.8-3.1s 出合法
+        JSON，思考开要 5.5-11.2s 且 token 大半花在思考上。
+        """
         self.llm_client = llm_client or QwenClient(
-            base_url=settings.MODEL_API_BASE, model=settings.MODEL_NAME
+            base_url=settings.MODEL_API_BASE, model=settings.MODEL_NAME,
+            enable_thinking=settings.DECISION_ENABLE_THINKING,
+            max_tokens=settings.DECISION_MAX_TOKENS,
         )
         self.timeout_seconds = timeout_seconds if timeout_seconds is not None else DEFAULT_TIMEOUT_SECONDS
 

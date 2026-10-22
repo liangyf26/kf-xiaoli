@@ -9,7 +9,7 @@
     - engine_comparison.json: {"results": [{"question", "engines": {...}}], "summary"}
 
 说明:
-    - 未配置真实JEV_API_KEY时跳过Jev真实调用（任务书决策3），记录skipped原因
+    - 未配置任何真实Jev渠道key（渠道链/legacy均占位）时跳过Jev真实调用，记录skipped原因
     - Kev模型不可用（依赖未装/模型无法下载）时记录kev_failed回退结果
 """
 import asyncio
@@ -23,7 +23,8 @@ sys.path.insert(0, str(ROOT))
 
 from backend.config import settings  # noqa: E402
 from backend.decision_layer import create_decision_engine  # noqa: E402
-from backend.decision_layer.jev_client import JevEngine  # noqa: E402
+from backend.decision_layer.jev_client import (  # noqa: E402
+    JevEngine, _build_channels)
 
 OUTPUT_PATH = ROOT / "engine_comparison.json"
 PLACEHOLDER_KEYS = ("", "your-jev-api-key-here")
@@ -66,11 +67,15 @@ async def main() -> int:
     rule_engine = create_decision_engine("rule")
     kev_engine = create_decision_engine("kev")
 
+    # 审查 P2-4：走生产工厂的无参渠道链（JevEngine()），不再用 legacy 单渠道，
+    # 保证对比脚本与线上路径一致。skip 判定：组出的渠道（含 legacy 回退）里
+    # 没有任何一把真实 key（占位符/空）→ 跳过真实调用
     jev_skipped_reason = ""
-    if settings.JEV_API_KEY in PLACEHOLDER_KEYS:
-        jev_skipped_reason = "未配置真实JEV_API_KEY，按任务书决策3跳过真实调用"
+    channels = _build_channels()
+    if not any(ch.api_key and ch.api_key not in PLACEHOLDER_KEYS for ch in channels):
+        jev_skipped_reason = "未配置任何真实Jev渠道key（渠道链/legacy均为空或占位符），跳过真实调用"
     else:
-        jev_engine = JevEngine(settings.JEV_API_KEY)
+        jev_engine = JevEngine()
 
     results = []
     for question in questions:

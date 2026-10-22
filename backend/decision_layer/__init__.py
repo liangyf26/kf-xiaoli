@@ -28,7 +28,7 @@ def create_decision_engine(engine_name: Optional[str] = None) -> DecisionEngine:
     if name == "rule":
         return RuleBasedEngine()
     if name == "jev":
-        return JevEngine(settings.JEV_API_KEY)
+        return JevEngine()          # 无参：启用 JEV_CHANNELS 渠道链（按序降级）
     if name == "kev":
         return KevEngine(model_path=settings.KEV_MODEL_PATH, device=settings.KEV_DEVICE)
     if name == "qwen":

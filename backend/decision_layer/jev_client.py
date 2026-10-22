@@ -1,11 +1,11 @@
-"""Jev API决策引擎：经OpenRouter /api/alpha/decisions端点访问TypeSafe Jev结构化决策模型。
+"""Jev API决策引擎：按 JEV_CHANNELS 渠道链访问 TypeSafe Jev（System One）结构化决策。
 
 Jev是System One结构化决策模型（返回typed choice），不走chat/completions。
-契约（实测确认）：POST {base}/alpha/decisions，body含model/state/questions；
-question判别键为type（noul/choice/score），choice与score需instructions+criteria，
-noul仅需instructions。score返回criteria分档索引值（0~档数-1）。
-调用失败（超时/认证/网络/解析）时回退低置信度结果，保证任何输入都有输出。
+渠道链（2026-10-22 用户定案）：TypeSafe 官方(/v1/systemone) → OpenCode 免费 →
+OpenCode 付费 → OpenRouter(/alpha/decisions)；某渠道超时/401/402/429/5xx/解析失败
+记日志（渠道名+错误）换下一个，全挂才回退低置信度结果（不抛异常）。
 """
+import logging
 import time
 from typing import Any, Dict
 
@@ -18,6 +18,8 @@ from backend.decision_layer.base import (
     DecisionResult,
     enforce_emotion_contract,
 )
+
+logger = logging.getLogger(__name__)
 
 INTENT_OPTIONS = (
     "price_inquiry",
@@ -111,6 +113,81 @@ QUESTIONS: Dict[str, Any] = {
 # API调用超时（秒）
 JEV_TIMEOUT_SECONDS = 5.0
 
+# 渠道健康计数（进程内）：{渠道名: {"ok": n, "fail": n, "last_error": str}}，/metrics 暴露
+_CHANNEL_STATS: Dict[str, Dict[str, Any]] = {}
+
+
+def _record_channel(name: str, ok: bool, error: str | None) -> None:
+    stats = _CHANNEL_STATS.setdefault(name, {"ok": 0, "fail": 0, "last_error": ""})
+    if ok:
+        stats["ok"] += 1
+    else:
+        stats["fail"] += 1
+        stats["last_error"] = (error or "")[:200]
+
+
+def channel_stats() -> Dict[str, Dict[str, Any]]:
+    """只读副本：渠道名 → {ok, fail, last_error, configured}，供 /metrics 输出。
+
+    configured=False 表示该渠道在 JEV_CHANNELS 里但配置不全被跳过（未发过请求）。
+    """
+    return {name: dict(stats) for name, stats in _CHANNEL_STATS.items()}
+
+
+def reset_channel_stats() -> None:
+    """清零渠道健康计数（/metrics/reset 一并清；configured 标记保留）。"""
+    for stats in _CHANNEL_STATS.values():
+        stats["ok"] = 0
+        stats["fail"] = 0
+        stats["last_error"] = ""
+
+
+class JevChannel:
+    """单个 Jev 渠道：独立 base_url / endpoint / model / api_key。"""
+
+    def __init__(self, name: str, base_url: str, endpoint: str, model: str, api_key: str):
+        self.name = name
+        self.base_url = base_url.rstrip("/")
+        self.endpoint = endpoint
+        self.model = model
+        self.api_key = api_key
+
+    def url(self) -> str:
+        return self.base_url + self.endpoint
+
+
+def _build_channels() -> list:
+    """按 JEV_CHANNELS 顺序从 settings 组渠道链；任一配置项为空则跳过该渠道。
+
+    向后兼容（审查 P1-1）：一个渠道都组不出来且旧 JEV_API_KEY 非空时，回退
+    legacy OpenRouter 单渠道（/alpha/decisions），避免老 .env 静默失去 jev。
+    """
+    channels = []
+    for name in [c.strip() for c in (settings.JEV_CHANNELS or "").split(",") if c.strip()]:
+        prefix = "JEV_%s_" % name.upper()
+        base = getattr(settings, prefix + "BASE_URL", "")
+        endpoint = getattr(settings, prefix + "ENDPOINT", "")
+        model = getattr(settings, prefix + "MODEL", "")
+        key = getattr(settings, prefix + "API_KEY", "")
+        # 配置过的渠道（含因配置不全跳过的）都登记健康计数，/metrics 才能看出
+        # 「配置缺失被跳过」而不是「没这个渠道」（审查 P2-2）；configured 每次
+        # 组链都刷新，运行时切换引擎重建渠道后标记与当前配置保持一致
+        configured = bool(base and endpoint and model and key)
+        stats = _CHANNEL_STATS.setdefault(name, {"ok": 0, "fail": 0, "last_error": ""})
+        stats["configured"] = configured
+        if base and endpoint and model and key:
+            channels.append(JevChannel(name, base, endpoint, model, key))
+        else:
+            logger.warning("Jev 渠道 %s 配置不全（base/endpoint/model/key），跳过", name)
+    if not channels and settings.JEV_API_KEY:
+        logger.warning(
+            "Jev 渠道链组不出任何渠道，回退 legacy 单渠道（%s，已废弃，建议迁移到 JEV_CHANNELS 渠道链）",
+            settings.JEV_API_BASE)
+        channels.append(JevChannel(
+            "legacy", settings.JEV_API_BASE, "/alpha/decisions",
+            settings.JEV_MODEL, settings.JEV_API_KEY))
+    return channels
+
 # needs_clarification阈值校准（Phase 4评估集实测，2026-10-09）：
 # jev-1.13对具体短问题的clarify_noul系统性偏高（10个可答评估问题0.40-0.89，
 # 0.5阈值下7/10被误澄清），真模糊对照"咋整"为0.95。校准为0.9：
@@ -120,17 +197,31 @@ JEV_CLARIFY_NOUL_THRESHOLD = 0.9
 
 
 class JevEngine(DecisionEngine):
-    """Jev决策引擎（OpenRouter decisions端点）。"""
+    """Jev决策引擎：按 JEV_CHANNELS 渠道链依次尝试，全挂才回退低置信度。
 
-    def __init__(self, api_key: str, base_url: str | None = None, model: str | None = None):
-        self.api_key = api_key
-        self.base_url = base_url or settings.JEV_API_BASE
-        self.model = model or settings.JEV_MODEL
+    兼容旧用法：显式传 api_key/base_url/model 时走单渠道（base_url + /alpha/decisions，
+    与 2026-10-22 前行为一致，单测注入用）；无参构造才启用渠道链（生产路径）。
+    """
+
+    def __init__(self, api_key: str | None = None, base_url: str | None = None,
+                 model: str | None = None):
         self.questions = QUESTIONS
+        if api_key is None and base_url is None:
+            self.channels = _build_channels()
+            self.base_url = self.channels[0].base_url if self.channels else ""
+            self.model = self.channels[0].model if self.channels else settings.JEV_MODEL
+            self._legacy = False
+        else:
+            # 旧签名：单渠道，路径固定 /alpha/decisions（现有已实测可用的 OpenRouter 契约）
+            self.channels = [JevChannel(
+                "legacy", base_url or settings.JEV_API_BASE,
+                "/alpha/decisions", model or settings.JEV_MODEL, api_key or "")]
+            self.base_url = self.channels[0].base_url
+            self.model = self.channels[0].model
+            self._legacy = True
 
     async def decide(self, message: str, context: Dict[str, Any]) -> DecisionResult:
         start = time.monotonic()
-
         state: Dict[str, Any] = {
             "message": message,
             "context": "SDWAN专线产品客服对话",
@@ -141,27 +232,51 @@ class JevEngine(DecisionEngine):
                 for m in context.get("history", [])[-10:]
             ],
         }
+        errors = []
+        for channel in self.channels:
+            result = await self._try_channel(channel, state, start, errors)
+            if result is not None:
+                return result
+        reason = ("Jev 全渠道失败: " + "；".join(errors)) if errors else "Jev 无可用渠道"
+        return self._fallback_result(reason, int((time.monotonic() - start) * 1000))
 
+    async def _try_channel(self, channel: JevChannel, state: Dict[str, Any],
+                           start: float, errors: list) -> DecisionResult | None:
+        """单渠道一次尝试：成功返回结果，失败记录健康计数后返回 None 换下一个。"""
         try:
             async with httpx.AsyncClient(timeout=JEV_TIMEOUT_SECONDS) as client:
                 response = await client.post(
-                    f"{self.base_url}/alpha/decisions",
-                    json={"model": self.model, "state": state, "questions": self.questions},
+                    channel.url(),
+                    json={"model": channel.model, "state": state, "questions": self.questions},
                     headers={
-                        "Authorization": f"Bearer {self.api_key}",
+                        "Authorization": f"Bearer {channel.api_key}",
                         "Content-Type": "application/json",
                         # HTTP头仅允许ASCII，应用名用英文
                         "X-Title": "SDWAN-Customer-Service-Bot",
                     },
                 )
-                if response.status_code >= 400:
-                    # 带上响应体便于定位契约问题（zod校验错误在body里）
-                    raise RuntimeError(f"HTTP {response.status_code}: {response.text[:400]}")
-                data = response.json()
-
-            return self._result_from_answers(data.get("answers", {}), int((time.monotonic() - start) * 1000), raw=data)
-        except Exception as exc:  # noqa: BLE001 超时/认证/网络/解析失败统一回退
-            return self._fallback_result(f"Jev API错误: {exc}", int((time.monotonic() - start) * 1000))
+            if response.status_code >= 400:
+                # 带上响应体便于定位契约问题（zod校验错误在body里）
+                raise RuntimeError(f"HTTP {response.status_code}: {response.text[:400]}")
+            data = response.json()
+            latency_ms = int((time.monotonic() - start) * 1000)
+            result = self._result_from_answers(data.get("answers", {}), latency_ms, raw=data)
+            if result.engine == "jev_failed":
+                # answers 结构解析失败视同渠道失败：换下一个渠道
+                raise RuntimeError(f"answers 解析失败: {result.clarification_reason[:160]}")
+            _record_channel(channel.name, True, None)
+            return result
+        except Exception as exc:  # noqa: BLE001 超时/认证/额度/5xx/解析失败都换下一个渠道
+            detail = str(exc)[:300]
+            _record_channel(channel.name, False, detail)
+            if "HTTP 401" in detail or "HTTP 403" in detail:
+                # 审查 P1-2：认证失败单列 ERROR（渠道名+原因），不与超时/5xx混成一句
+                logger.error("Jev 渠道 %s 认证失败（401/403，key无效或过期，需到对应平台重新签发）: %s",
+                             channel.name, detail)
+            else:
+                logger.warning("Jev 渠道 %s 失败，换下一个: %s", channel.name, detail)
+            errors.append("%s: %s" % (channel.name, detail[:80]))
+            return None
 
     def _result_from_answers(self, answers: Dict[str, Any], latency_ms: int, raw: Dict[str, Any] | None = None) -> DecisionResult:
         """解析TypeSafe answers结构为DecisionResult。

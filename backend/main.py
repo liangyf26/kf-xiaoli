@@ -18,6 +18,8 @@ from backend.connection_manager import ConnectionManager
 from backend.decision_layer import SUPPORTED_ENGINES, create_decision_engine
 from backend.knowledge import KnowledgeBase
 from backend.metrics import metrics
+from backend.decision_layer.jev_client import channel_stats as jev_channel_stats
+from backend.decision_layer.jev_client import reset_channel_stats as jev_reset_channel_stats
 from backend.models import Message
 from backend.orchestrator.orchestrator import Orchestrator
 from backend.session_distiller import SessionDistiller
@@ -91,14 +93,26 @@ async def healthz() -> dict:
 
 @app.get("/metrics")
 async def get_metrics() -> dict:
-    """运行时指标查询：请求数/引擎与路径分布/平均延迟/错误数。"""
-    return metrics.snapshot()
+    """运行时指标查询：请求数/引擎与路径分布/平均延迟/错误数 + jev 渠道健康。
+
+    jev 渠道输出 ok/fail/last_error（截断200字符）；configured=false 表示该渠道
+    配置不全被跳过（没发过请求）。单次快照读取，counts/fails 同源一致。
+    """
+    snapshot = metrics.snapshot()
+    stats = jev_channel_stats()
+    snapshot["jev_channels"] = stats
+    snapshot["jev_channel_counts"] = {
+        name: channel["ok"] for name, channel in stats.items()}
+    snapshot["jev_channel_fails"] = {
+        name: channel["fail"] for name, channel in stats.items()}
+    return snapshot
 
 
 @app.post("/metrics/reset")
 async def reset_metrics() -> dict:
-    """运行时指标重置。"""
+    """运行时指标重置（jev 渠道健康计数一并清零，configured 标记保留）。"""
     metrics.reset()
+    jev_reset_channel_stats()
     return {"status": "reset", "metrics": metrics.snapshot()}
 
 

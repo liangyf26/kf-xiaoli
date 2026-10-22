@@ -79,7 +79,7 @@ python -m backend.main
 | 引擎 | 说明 | 实测延迟 |
 |---|---|---|
 | `rule` | 关键词词典匹配，无需外部依赖 | <1ms |
-| `jev` | OpenRouter Jev结构化决策API，需 `JEV_API_KEY` | ~1s/次 |
+| `jev` | Jev结构化决策API（渠道链：TypeSafe官方→OpenCode免费→OpenCode付费→OpenRouter，按 `JEV_CHANNELS`+`JEV_<渠道>_{BASE_URL,ENDPOINT,MODEL,API_KEY}` 配置；全空回退 legacy `JEV_API_KEY`） | ~0.2-1s/次 |
 | `kev` | 本地kev.serve GPU服务，需先启动（见FAQ第3条） | ~1s/次 |
 | `qwen` | 主LLM（Qwen3.8）Few-shot JSON意图识别，10秒超时/解析失败自动降级qwen_failed | ~5s/次 |
 

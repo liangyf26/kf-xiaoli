@@ -1,7 +1,9 @@
 """Qwen LLM客户端：封装OpenAI兼容API的对话生成调用。
 
 - 支持流式（generate_stream）与非流式（generate）
-- 配置从settings读取（MODEL_API_BASE/MODEL_NAME/TEMPERATURE/MAX_TOKENS/MODEL_API_KEY）
+- 配置从settings读取（MODEL_API_BASE/MODEL_NAME/TEMPERATURE/MODEL_API_KEY；
+  max_tokens按路径拆分：默认GEN_MAX_TOKENS/GEN_ENABLE_THINKING，意图快判由
+  QwenEngine显式传DECISION_MAX_TOKENS/DECISION_ENABLE_THINKING）
 - 60秒超时，失败自动重试1次
 - generate返回 {response, usage, latency_ms}
 - 持久连接复用（Phase 4性能优化）：AsyncClient按事件循环惰性创建并缓存，
@@ -23,13 +25,27 @@ logger = logging.getLogger(__name__)
 class QwenClient:
     """Qwen主LLM客户端（OpenAI兼容chat/completions）。"""
 
-    def __init__(self, base_url: str | None = None, model: str | None = None):
-        """初始化客户端，配置默认来自settings，可显式覆盖。"""
+    def __init__(self, base_url: str | None = None, model: str | None = None,
+                 enable_thinking: bool | None = None, max_tokens: int | None = None):
+        """初始化客户端，配置默认来自settings，可显式覆盖。
+
+        enable_thinking/max_tokens 缺省取生成路径配置（GEN_*）；意图快判路径由
+        QwenEngine 显式传 DECISION_*。思考开关经 chat_template_kwargs 传递
+        （Qwen3.8-27B 实测：顶层 enable_thinking 无效，chat_template_kwargs 才生效；
+        思考开时 max_tokens<512 会出空正文，这里统一抬到 512）。
+        """
         self.base_url = base_url or settings.MODEL_API_BASE
         self.model = model or settings.MODEL_NAME
         self.api_key = settings.MODEL_API_KEY
         self.temperature = settings.TEMPERATURE
-        self.max_tokens = settings.MAX_TOKENS
+        self.max_tokens = max_tokens if max_tokens is not None else settings.GEN_MAX_TOKENS
+        self.enable_thinking = (settings.GEN_ENABLE_THINKING
+                                if enable_thinking is None else enable_thinking)
+        if self.enable_thinking and self.max_tokens < 512:
+            logger.warning(
+                "enable_thinking=True 且 max_tokens=%d < 512（实测思考会吃光 token 出空正文），抬到 512",
+                self.max_tokens)
+            self.max_tokens = 512
         self.timeout = 60.0  # 任务书决策5：平衡体验与复杂问题处理
         self.max_retries = 1
         self._clients: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()
@@ -51,13 +67,17 @@ class QwenClient:
         return headers
 
     def _payload(self, messages: List[Dict[str, str]], stream: bool) -> Dict[str, Any]:
-        """构造chat/completions请求体。"""
+        """构造chat/completions请求体。
+
+        思考开关走 chat_template_kwargs（Qwen3.8 实测唯一生效写法）。
+        """
         return {
             "model": self.model,
             "messages": messages,
             "temperature": self.temperature,
             "max_tokens": self.max_tokens,
             "stream": stream,
+            "chat_template_kwargs": {"enable_thinking": self.enable_thinking},
         }
 
     async def generate(self, messages: List[Dict[str, str]]) -> Dict[str, Any]:
