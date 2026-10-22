@@ -270,6 +270,8 @@ class JevEngine(DecisionEngine):
                 # answers 结构解析失败视同渠道失败：换下一个渠道
                 raise RuntimeError(f"answers 解析失败: {result.clarification_reason[:160]}")
             _record_channel(channel.name, True, None)
+            # 评测要逐题归因到渠道：raw_response 是调试字段，不进模型契约
+            result.raw_response = {**(result.raw_response or {}), "channel": channel.name}
             return result
         except Exception as exc:  # noqa: BLE001 超时/认证/额度/5xx/解析失败都换下一个渠道
             detail = str(exc)[:300]

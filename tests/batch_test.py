@@ -59,6 +59,7 @@ async def run_session(orchestrator: Orchestrator, questions: list[str], results:
 
         answer = result.get("answer", "")
         decision = result.get("decision")
+        raw = getattr(decision, "raw_response", None) or {}
         results.append({
             "question": question,
             "answer": answer,
@@ -74,6 +75,11 @@ async def run_session(orchestrator: Orchestrator, questions: list[str], results:
             # 决策层细分（Phase 6真实数据对比评测用）
             "emotion": getattr(decision, "user_emotion", ""),
             "decision_latency_ms": getattr(decision, "latency_ms", 0),
+            # 转人工归因：路由前的决策字段 + 本轮已发生的澄清次数（本条消息处理前）
+            "escalate_to_human": bool(getattr(decision, "escalate_to_human", False)),
+            "intent_confidence": getattr(decision, "intent_confidence", None),
+            "clarification_count": int(context.get("clarification_count", 0) or 0),
+            "engine_used": raw.get("channel") or result.get("engine", ""),
         })
 
         # 与 main.py 相同的上下文更新逻辑，保证多轮行为与线上一致

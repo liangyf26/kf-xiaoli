@@ -64,7 +64,21 @@ NON_CUSTOMER_PATTERNS = (
     re.compile(r"^【.*(通知|公告|成交|失败)"),
     re.compile(r"招标|采购项目"),
     re.compile(r"爬虫|对接需求|分享.{0,6}进度"),
+    # 2026-10-22 基线复审：前 30 会话仍有 5 条坐席/群发被标成 customer。
+    # 群发套话（账号升级通知、新服务伙伴自我介绍）与坐席推销口吻（建议你买）。
+    re.compile(r"尊敬的客户|亲爱的用户"),
+    re.compile(r"线上客服账号进行升级|我是您的新服务伙伴"),
+    re.compile(r"建议你买"),
 )
+
+
+def is_non_customer_text(text: str) -> bool:
+    """非客户文本的唯一判据：命中 NON_CUSTOMER_PATTERNS 任一模式即为真。
+
+    提取脚本用它把 direction=1 的坐席/群发改判 other；评测脚本用同一函数在
+    选队列时过滤。不要在报告层再写一套。
+    """
+    return any(p.search(text or "") for p in NON_CUSTOMER_PATTERNS)
 
 # 脱敏模式（在写出任何文件之前应用）
 RE_PHONE = re.compile(r"(?<!\d)1[3-9]\d{9}(?!\d)")
@@ -234,7 +248,7 @@ def extract_text(fields: list) -> dict | None:
         role = ("bot" if msg_id.startswith("bot_") else
                 "human" if msg_id.startswith("human_") else
                 "customer" if int(direction) == 1 else "agent")
-    if role == "customer" and any(p.search(content) for p in NON_CUSTOMER_PATTERNS):
+    if role == "customer" and is_non_customer_text(content):
         role = "other"  # 坐席发言/群发通知/内部运维：保留上下文，但不作为客户问题进入评测
 
     return {
