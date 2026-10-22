@@ -592,3 +592,15 @@ pytest六套108项=107 passed+1 skipped（P6由21→24项）；泄露终检git�
 - 默认引擎=rule不受影响；Web页即使误切"Kev引擎"也会优雅降级（kev_failed→其他路径兜底，不崩溃）
 - 恢复方法：释放内存后 `.venv-kev\Scripts\python.exe scripts\kev_gpu_serve.py --model 0.8b --port 8009 --warmup`
   （预检已含提交内存检查，不足时会明确报错而非无声崩溃）
+
+### 第三轮验收意见整改（2026-10-11，报告口径五项问题的修复）
+1. **逐题结果落盘**：compare_real_sessions.py现同时写出`real_compare_<时间戳>_results.json`（cohort/回退数/四引擎全部逐题记录），报告总表数字可逐题核对
+2. **回退分离**：qwen 60题超时降级不再混入总表——总表新增"有效题数（剔除回退）"行，意图/澄清/无法回答指标全部按有效题计算
+3. **无法回答path分解**：新增"3.1处理路径分布（按引擎）"表——转人工（引擎判升级）与LLM生成内拒答（知识库未覆盖）分别可见
+4. **坐席/群发/运维消息误入客户集**：新增NON_CUSTOMER_PATTERNS排除（"老板，"运营者称呼13条/【招标公告】广播329条/比地招标网推销126条/内部运维7条——逐类实证零误杀），改判role=other保留上下文但不进客户轮
+5. **口径披露**：数据集重提取后队列变化79→**206问**（本轮以新口径为准），报告与PROGRESS同步
+
+**环境阻塞（如实记录）**：机器重启后内网LLM API（172.28.50.9:30030）不可达（ping 100%丢包），
+labeled.json补标3条与四引擎重跑被迫暂停——内网/VPN恢复后继续：跑`scripts/prelabel_labeled.py`补齐
+至100条，再跑`tests/compare_real_sessions.py --sessions 30 --include-jev`出正式报告。
+当前labeled.json=97条（移除3条失配/含名条目，待补）。

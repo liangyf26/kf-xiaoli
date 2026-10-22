@@ -197,18 +197,26 @@ def generate_report(runs: dict[str, list[dict]], engine_classes: dict[str, str],
     total_q = len(next(iter(runs.values())))
     lines.append(f"对齐队列共 **{len(sessions)}** 个会话 / **{total_q}** 条客户问题。")
     lines.append("")
+    lines.append("> 队列口径说明：本轮数据集经状态噪声清除与角色修正后重新提取，对齐队列问题数与")
+    lines.append("> 上一轮报告（79问）不同属预期；会话版本以 data/wx_real/stats.md 漏斗为准。")
+    lines.append("")
+
+    # 回退分离：*_failed降级题不计入意图/澄清/无法回答指标（否则压低该引擎口径）
+    valid = {e: [r for r in runs[e] if not str(r.get("engine", "")).endswith("_failed")] for e in runs}
+    fallback_counts = {e: len(runs[e]) - len(valid[e]) for e in runs}
 
     # 1. 引擎对比总表
     lines.append("## 1. 引擎对比总表")
     lines.append("")
     lines.append("| 指标 | " + " | ".join(runs) + " |")
     lines.append("|---|" + "---|" * len(runs))
-    rows = []
-    for name, label in (("intent", "意图≠未识别"), ("need_clarification", "澄清比例"),
-                        ("is_refusal", "无法回答比例")):
+    rows = [["题数（含回退）"] + [str(len(runs[e])) for e in runs],
+            ["有效题数（剔除回退）"] + [str(len(valid[e])) for e in runs]]
+    for name, label in (("intent", "意图≠未识别（有效题内）"), ("need_clarification", "澄清比例（有效题内）"),
+                        ("is_refusal", "无法回答比例（有效题内）")):
         row = [label]
         for engine in runs:
-            vals = [r for r in runs[engine]]
+            vals = valid[engine]
             if name == "intent":
                 count = sum(1 for r in vals if norm_intent(r.get("intent")) != "unclear")
             else:
@@ -217,69 +225,94 @@ def generate_report(runs: dict[str, list[dict]], engine_classes: dict[str, str],
         rows.append("| " + " | ".join(row) + " |")
     lat_row = ["决策耗时P50/P95"]
     for engine in runs:
-        lats = [r["decision_latency_ms"] for r in runs[engine] if r["status"] == "ok"]
+        lats = [r["decision_latency_ms"] for r in valid[engine] if r["status"] == "ok"]
         lat_row.append(f"{percentile(lats, 0.5)}ms / {percentile(lats, 0.95)}ms")
     rows.append("| " + " | ".join(lat_row) + " |")
+    fb_row = ["服务回退数(*_failed)"]
+    rows.append("| " + " | ".join(fb_row + [str(fallback_counts[e]) for e in runs]) + " |")
     err_row = ["异常数"]
     rows.append("| " + " | ".join(err_row + [str(sum(1 for r in runs[e] if r['status'] != 'ok')) for e in runs]) + " |")
-    fb_row = ["服务回退数(*_failed)"]
-    rows.append("| " + " | ".join(fb_row + [str(sum(1 for r in runs[e] if str(r.get('engine', '')).endswith('_failed'))) for e in runs]) + " |")
     lines.extend(rows)
-    fb_engines = [e for e in runs if any(str(r.get("engine", "")).endswith("_failed") for r in runs[e])]
+    fb_engines = [e for e in runs if fallback_counts[e] > 0]
     if fb_engines:
-        lines.append(f"- **检测到回退引擎: {', '.join(f'{e}（{e}_failed）' for e in fb_engines)}**——"
-                     "对应题目的意图/情绪为降级结果（unclear/neutral），不代表引擎真实判定")
+        lines.append(f"- **检测到回退引擎: {', '.join(f'{e}（{e}_failed×{fallback_counts[e]}）' for e in fb_engines)}**——"
+                     "对应题目的意图/情绪为降级结果（unclear/neutral），**已从有效题指标中剔除**，不代表引擎真实判定")
     lines.append("")
-    lines.append("> 回退说明：服务回退数>0表示该引擎当时依赖的外部服务（kev.serve/LLM API）不可用或超时，")
-    lines.append("> 对应题目的意图/情绪为降级结果；异常数=单题抛异常。")
+    lines.append("> 回退说明：服务回退数>0表示该引擎当时依赖的外部服务（kev.serve/LLM API）不可用或超时；")
+    lines.append("> 异常数=单题抛异常。逐题原始数据见同目录 `real_compare_<时间戳>_results.json`。")
     lines.append("")
 
-    # 2. 意图分布
-    lines.append("## 2. 意图分布（按引擎）")
+    # 2. 意图分布（有效题：剔除*_failed回退——回退题的unclear会压低引擎真实口径）
+    lines.append("## 2. 意图分布（按引擎，有效题）")
     lines.append("")
     lines.append("| 意图 | " + " | ".join(runs) + " |")
     lines.append("|---|" + "---|" * len(runs))
-    intent_counters = {e: Counter(r.get("intent") or "unclear" for r in runs[e]) for e in runs}
+    intent_counters = {e: Counter(norm_intent(r.get("intent")) for r in valid[e]) for e in runs}
+    valid_totals = {e: len(valid[e]) for e in runs}
     for intent in INTENT_ORDER:
-        cells = [f"{intent_counters[e].get(intent, 0)}（{pct(intent_counters[e].get(intent, 0), total_q)}）"
+        cells = [f"{intent_counters[e].get(intent, 0)}（{pct(intent_counters[e].get(intent, 0), valid_totals[e])}）"
                  for e in runs]
         lines.append(f"| {INTENT_LABELS[intent]} | " + " | ".join(cells) + " |")
     lines.append("")
 
-    # 3. 情绪分布
-    lines.append("## 3. 情绪分布（按引擎）")
+    # 3. 情绪分布（有效题）
+    lines.append("## 3. 情绪分布（按引擎，有效题）")
     lines.append("")
     lines.append("| 情绪 | " + " | ".join(runs) + " |")
     lines.append("|---|" + "---|" * len(runs))
-    emotion_counters = {e: Counter(r.get("emotion") or "neutral" for r in runs[e]) for e in runs}
+    emotion_counters = {e: Counter(r.get("emotion") or "neutral" for r in valid[e]) for e in runs}
     for emotion in ("neutral", "positive", "urgent", "dissatisfied", "complaint_risk"):
-        cells = [f"{emotion_counters[e].get(emotion, 0)}（{pct(emotion_counters[e].get(emotion, 0), total_q)}）"
+        cells = [f"{emotion_counters[e].get(emotion, 0)}（{pct(emotion_counters[e].get(emotion, 0), valid_totals[e])}）"
                  for e in runs]
         lines.append(f"| {EMOTION_LABELS[emotion]} | " + " | ".join(cells) + " |")
     lines.append("")
 
-    # 4. 意图不一致清单（按(session_id, q_index)序号对齐——同会话重复问题不互相覆盖）
-    lines.append("## 4. 各引擎意图不一致的问题清单")
+    # 3.1 处理路径分布（全部题，含回退）——无法回答比例的分解视图
+    lines.append("## 3.1 处理路径分布（按引擎，全部题）")
+    lines.append("")
+    lines.append("| 路径 | " + " | ".join(runs) + " |")
+    lines.append("|---|" + "---|" * len(runs))
+    PATH_LABELS = {"clarification": "澄清", "faq_match": "FAQ直连", "llm_generation": "LLM生成",
+                   "human_escalation": "转人工", "error": "异常", "unknown": "未知"}
+    path_counters = {e: Counter(r.get("path") or "unknown" for r in runs[e]) for e in runs}
+    for path in ("clarification", "faq_match", "llm_generation", "human_escalation", "error"):
+        cells = [f"{path_counters[e].get(path, 0)}（{pct(path_counters[e].get(path, 0), total_q)}）"
+                 for e in runs]
+        lines.append(f"| {PATH_LABELS[path]} | " + " | ".join(cells) + " |")
+    lines.append("")
+    lines.append("> 读法：无法回答比例=转人工+LLM生成内拒答；转人工高=引擎判升级多，")
+    lines.append("> LLM生成内拒答高=知识库未覆盖而拒答——两者性质不同。")
+    lines.append("")
+
+    # 4. 意图不一致清单（仅四引擎全部有效的题参与比较；回退题不产生虚假不一致）
+    lines.append("## 4. 各引擎意图不一致的问题清单（仅四引擎全部有效的题）")
     lines.append("")
     mismatches = 0
+    comparable = 0
     by_q: dict[tuple, dict] = {}
     question_of: dict[tuple, str] = {}
     for engine in runs:
         for r in runs[engine]:
+            if str(r.get("engine", "")).endswith("_failed"):
+                continue
             key = (r["session_id"], r.get("q_index", 0))
             by_q.setdefault(key, {})[engine] = norm_intent(r.get("intent"))
             question_of.setdefault(key, r.get("question", ""))
     lines.append("| 会话 | 问题 | " + " | ".join(runs) + " |")
     lines.append("|---|---|" + "---|" * len(runs))
     for (sid, qi), intents in by_q.items():
+        if len(intents) < len(runs):
+            continue  # 有引擎回退的题不参与不一致比较
+        comparable += 1
         if len(set(intents.values())) > 1:
             mismatches += 1
             cells = [INTENT_LABELS.get(intents.get(e, "?"), intents.get(e, "?")) for e in runs]
             lines.append(f"| {sid} | {md_cell(question_of[(sid, qi)][:40])} | " + " | ".join(cells) + " |")
     if mismatches == 0:
-        lines.append("（无——所有问题各引擎意图一致）")
+        lines.append("（无——可比较的题各引擎意图一致）")
     lines.append("")
-    lines.append(f"不一致问题共 **{mismatches}** 条（占 {pct(mismatches, total_q)}）。")
+    lines.append(f"可比较题（四引擎全部有效）{comparable} 条，不一致 **{mismatches}** 条（{pct(mismatches, comparable)}）。")
+    lines.append("")
     lines.append("")
 
     # 5. 情绪专项（任务6）
@@ -349,11 +382,23 @@ def main() -> None:
     new_by_sid = asyncio.run(run_new_answers(refs_by_sid))
     new_stat = repeat_rate(new_by_sid)
 
+    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    # 逐题原始结果落盘：报告数字的可核对来源（验收要求）
+    results_path = RESULTS_DIR / f"real_compare_{stamp}_results.json"
+    results_path.write_text(json.dumps({
+        "cohort": {"sessions": len(sessions), "questions": sum(len(r) for r in runs.values())},
+        "engine_classes": engine_classes,
+        "fallback_counts": {e: len(runs[e]) - len([r for r in runs[e] if not str(r.get("engine", "")).endswith("_failed")]) for e in runs},
+        "runs": runs,
+    }, ensure_ascii=False, indent=2), encoding="utf-8")
     report = generate_report(runs, engine_classes, sessions, args,
                              (old_stat, refs_by_sid, new_by_sid, new_stat))
-    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    out = RESULTS_DIR / f"real_compare_{datetime.now().strftime('%Y%m%d-%H%M%S')}.md"
+    out = RESULTS_DIR / f"real_compare_{stamp}.md"
+    report = report.replace("逐题原始数据见同目录 `real_compare_<时间戳>_results.json`",
+                            f"逐题原始数据见同目录 `{results_path.name}`")
     out.write_text(report, encoding="utf-8")
+    print(f"逐题结果已落盘: {results_path}")
     print(f"报告已生成: {out}")
 
 

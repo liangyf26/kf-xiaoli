@@ -54,6 +54,18 @@ NOISE_PATTERNS = (
 TIME_PART = re.compile(r"(时间[:：])?\s*\d{1,2}-\d{1,2}\s+\d{1,2}:\d{2}\s*$")
 HEARTBEAT_IN_TEXT = re.compile(r"正常\d+(\.\d+)?:\d+")
 
+# 非客户消息排除（第二轮验收发现：坐席发言/群发通知/内部运维被误判为客户问题进入评测）：
+# direction=1客户消息命中任一模式即改判为"other"（保留在会话中作上下文，但不进客户轮次）
+# 逐类实证：老板称呼13条（运营者私号在群内对客户说话/第三方广告）、
+# 群发通知329条（另一业务线的招标/公告广播）、招标采购126条（比地招标网推销话术，含问号的全是促销反问）、
+# 内部运维7条（爬虫进度/对接需求）
+NON_CUSTOMER_PATTERNS = (
+    re.compile(r"^老板[，,：:]"),
+    re.compile(r"^【.*(通知|公告|成交|失败)"),
+    re.compile(r"招标|采购项目"),
+    re.compile(r"爬虫|对接需求|分享.{0,6}进度"),
+)
+
 # 脱敏模式（在写出任何文件之前应用）
 RE_PHONE = re.compile(r"(?<!\d)1[3-9]\d{9}(?!\d)")
 RE_EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
@@ -221,6 +233,8 @@ def extract_text(fields: list) -> dict | None:
         role = ("bot" if msg_id.startswith("bot_") else
                 "human" if msg_id.startswith("human_") else
                 "customer" if int(direction) == 1 else "agent")
+    if role == "customer" and any(p.search(content) for p in NON_CUSTOMER_PATTERNS):
+        role = "other"  # 坐席发言/群发通知/内部运维：保留上下文，但不作为客户问题进入评测
 
     return {
         "msg_id": msg_id,
