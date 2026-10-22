@@ -180,3 +180,53 @@ print([c.name for c in _build_channels()], len(JevEngine().channels))"
 - **Chief：4/5。** 验收点（从零部署、反验、reset、distiller）提得准；扣 1 分给「真实 key」表述与「交接写清」没有落到仓库文件。
 
 **同意 commit。** 范围：上轮 9 个 tracked 文件 + 新增 `tests/test_model_config.py`；`handlers.py`/`orchestrator.py` 不在 diff，`docs/审查报告-*`（我的报告）和 `projects/` 不要带进这次 commit。`.env` 未跟踪，含真实 key，不提交。
+
+---
+
+# 第三轮复核：收尾批次（2026-10-22 19:0x）
+
+**结论：通过，同意 commit。** 5 文件 +84/−14；`handlers.py`/`orchestrator.py` 仍不在 diff。新增 3 条用例后全量 **122 passed + 1 failed**（同一个 `test_config_load`），`test_model_config` **15/15**。
+
+## 重点核实
+
+### 1. P2-1 两侧：模板不发请求、真实 key 回退仍在
+
+- 模板 env（`ENV_FILE=.env.example`）：`_build_channels()` 返回 `[]`，`JevEngine().channels==[]`；我把 `jc.httpx.AsyncClient` 换成「一实例化就抛 AssertionError」的替身，再调 `decide()` → 正常返回 `jev_failed`、**没有触发 HTTP**。不是「发出去再 401」。
+- 注入真实 key（`JEV_API_KEY=legacy-real-key-for-build`）：`_build_channels()` 返回 `[('legacy', '/alpha/decisions', 'real')]`，回退仍在。
+- 反验：把 `if not channels and settings.JEV_API_KEY not in PLACEHOLDER_KEYS` 恢复成只判非空 → `test_placeholder_legacy_key_not_used` 红（`['legacy'] != []`）；恢复后 sha256 一致、15/15。
+
+### 2. `PLACEHOLDER_KEYS` 判据：可接受，但不是强判据
+
+- 只认 `""` 和 `"your-jev-api-key-here"` 两个字面值。我用 `JEV_API_KEY=sk-xxx` 实测，仍会被当成真实 key → 触发 legacy。也就是说，**以后 `.env.example` 换一种占位符写法会漏过去**。
+- 取舍可接受：当前模板用的就是 `your-jev-api-key-here`，漏过去的后果是带假 key 发一次 401 后回退，不崩溃；真正要防的是「静默使用模板值」。建议把常量收敛到 `jev_client.PLACEHOLDER_KEYS` 单一来源（`compare_engines.py` 现在自己复制了一份），并在换模板写法时同步；若想更稳，可加「包含 xxx/your- 或长度过短视为占位符」的启发式，但要小心误伤真实 key。
+
+### 3. README 那段：现在是准确的，但会过时
+
+- README L88 与 `.env.example` L50-51 都带 `2026-10-22` 日期，写「实际可用 typesafe + openrouter、opencode 两把 key 过期待重发、渠道保留在链上、以 `/metrics` 的 `jev_channels` 为准」；我核对与当前 `.env`/实测一致。
+- 这是**时点状态**，OpenCode key 重发后就会变成错误陈述；建议在该段加一句「key 恢复后更新/删除本段，实时状态以 `/metrics` 为准」。现在作为交接快照可接受（P3）。
+
+### 4. P3 三项落实
+
+- `_record_channel` 的 setdefault 已带 `configured: True`；legacy 条目字段齐（15/15 里的 `test_legacy_channel_entry_has_configured_flag`）。
+- `compare_engines.py` 改成先 `JevEngine()` 再读 `jev_engine.channels`，只组一次链；skip 时置 `None`，循环走 `if jev_skipped_reason`，不会对 `None` 决策；不再重复 4 条 WARNING。
+- 新增 `test_distiller_parses_json_with_gen_client`：假客户端、`tmp_path` 输出，不调真实模型；真实 `data/sdwan.md` SHA-256 仍为 `3757e194…`，`git status data/` 干净。
+
+## 其他核实
+
+- 8000 当前进程于 **18:58:58** 重启，晚于本轮文件 mtime（18:52-18:56），跑的是最终代码；`/metrics` 仍有 `jev_channels` 字段（引擎 qwen，所以为空）。
+- 8010 无监听/残留（上一轮验证的从零部署已清理）。
+- `git diff --check` 无输出；`git status` 只有这 5 个文件；`.env` 未跟踪、含真实 key，不提交。
+
+## P3（不阻断）
+
+1. `PLACEHOLDER_KEYS` 两个字面值不是强判据；换模板写法需同步，建议单一来源 + 测试。
+2. README/.env.example 的过期 key 状态是时点信息，key 恢复后要更新/删除。
+3. `test_placeholder_legacy_key_not_used` 只断言 `channels==[]`，没有锁「不发 HTTP」；建议在用例里 mock `httpx.AsyncClient` 抛错（我做的是外部验证）。
+4. `compare_engines.py` 复制了 `PLACEHOLDER_KEYS`；import 复用避免漂移（P3）。
+
+## 评分与提交
+
+- **Coder：5/5。** 两侧都实测到位，反验能真红，P3 三项落实，范围干净。
+- **Chief：5/5。** 复核点（不发请求而非 401、占位符判据、README 过时、反验）都问在关键处。
+
+**同意 commit。** 就这 5 个文件：`.env.example`、`README.md`、`backend/decision_layer/jev_client.py`、`tests/compare_engines.py`、`tests/test_model_config.py`；`.env` 不提交，`docs/审查报告-*` 已在 6ba7783 提交、本轮不要再带。
