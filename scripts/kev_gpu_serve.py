@@ -72,6 +72,32 @@ def main():
     print(f"Kev GPU启动预检: Kev-{args.model} ({spec['base']})")
     print("=" * 60)
 
+    # 系统提交内存预检（物理内存+页面文件）：必须在import torch之前执行——
+    # 提交内存耗尽时torch的CUDA DLL加载报WinError 1455甚至进程无声崩溃（仅查显存查不出这个坑）
+    try:
+        import ctypes
+
+        class MEMORYSTATUSEX(ctypes.Structure):
+            _fields_ = [("dwLength", ctypes.c_ulong), ("dwMemoryLoad", ctypes.c_ulong),
+                        ("ullTotalPhys", ctypes.c_ulonglong), ("ullAvailPhys", ctypes.c_ulonglong),
+                        ("ullTotalPageFile", ctypes.c_ulonglong), ("ullAvailPageFile", ctypes.c_ulonglong),
+                        ("ullTotalVirtual", ctypes.c_ulonglong), ("ullAvailVirtual", ctypes.c_ulonglong),
+                        ("ullAvailExtendedVirtual", ctypes.c_ulonglong)]
+
+        st = MEMORYSTATUSEX()
+        st.dwLength = ctypes.sizeof(st)
+        ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(st))
+        commit_free_gb = st.ullAvailPageFile / 1024**3
+        print(f"系统提交内存预检: 可用{commit_free_gb:.1f}GB（物理占用{st.dwMemoryLoad}%）")
+        if commit_free_gb < 4.0:
+            fail(
+                f"系统提交内存不足：剩余{commit_free_gb:.1f}GB，加载Kev需约4GB。"
+                "请关闭大内存程序（如浏览器多标签页、IDE）后重试；"
+                "或调大页面文件：系统设置→高级系统设置→性能→高级→虚拟内存→自定义大小（建议初始8192MB/最大16384MB）。"
+            )
+    except OSError as exc:  # noqa: BLE001 预检失败不阻断（非Windows或API异常时跳过）
+        print(f"提交内存预检跳过: {exc}")
+
     device_name, free_gb = check_cuda()
 
     if spec["vram"] > free_gb:
