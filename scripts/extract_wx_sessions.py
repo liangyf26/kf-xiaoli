@@ -88,10 +88,11 @@ RE_BANK_LABEL = re.compile(r"(开户银行|开户行)\s*[:：]\s*[^\n]{2,30}")
 
 # 运营者人设别名：只出现在客户正文里、元数据无对应行的昵称（客服自称/别称）。
 # 替换为"客服"（非编号——它们是运营者角色而非客户身份），并纳入泄露自检。
-OPERATOR_ALIASES = ("蟹助理", "小李客服")
-# 人工姓名黑名单：正文中提及、但元数据无对应行的真实人名（无法自动穷举，
-# 由泄露自检/人工复核发现后登记于此）；替换为***姓名***并纳入泄露自检。
-MANUAL_NAME_BLOCKLIST = ("谢超", "韦肖悦", "肖悦", "春艺琳")
+OPERATOR_ALIASES = ("蟹助理", "小李客服", "小莉")
+# 人工姓名/昵称黑名单：正文中提及、但元数据无对应行的真实身份（无法自动穷举，
+# 由泄露自检/第三轮审查/人工复核发现后登记于此）；替换为***姓名***/***昵称***并纳入泄露自检。
+MANUAL_NAME_BLOCKLIST = ("谢超", "韦肖悦", "肖悦", "春艺琳", "陈女士", "谢总")
+MANUAL_NICKNAME_BLOCKLIST = ("野生节操菌",)
 
 
 # ---------- SQL解析 ----------
@@ -341,6 +342,8 @@ class Desensitizer:
             content = content.replace(alias, "客服")
         for name in MANUAL_NAME_BLOCKLIST:
             content = content.replace(name, "***姓名***")
+        for nick in MANUAL_NICKNAME_BLOCKLIST:
+            content = content.replace(nick, "***昵称***")
         content = RE_URL_ANY.sub("***链接***", content)          # 含文档链接/带凭据链接，整体打码
         content = RE_QUERY_TOKEN.sub("***参数***", content)        # 链接打码后散落的查询参数
         content = RE_USER_PASS.sub(r"\1 ***凭据***", content)      # "用户名tt3 / 123456"式（先于标签式，整段吞掉）
@@ -483,7 +486,7 @@ def main() -> None:
     # 泄露自检硬门：任何已知真实身份/微信ID样式/手机号样式/运营者别名残留 → 中止不写文件
     # （昵称类泄漏靠身份全注册+替换循环覆盖；此门是最后防线，防未知变体带毒出库）
     leak_patterns = [RE_PHONE, RE_WXID] + [re.compile(re.escape(a)) for a in OPERATOR_ALIASES] \
-        + [re.compile(re.escape(n)) for n in MANUAL_NAME_BLOCKLIST] \
+        + [re.compile(re.escape(n)) for n in MANUAL_NAME_BLOCKLIST + MANUAL_NICKNAME_BLOCKLIST] \
         + [re.compile(re.escape(raw)) for raw in d.id_map]
     leaks: list[str] = []
     for s in out_sessions:

@@ -283,7 +283,8 @@ def test_report_generation_counts_fallback_and_mismatch():
             "kev": [rec("kev", "price_inquiry", 0, fallback=True), rec("kev", "price_inquiry", 1)]}
     report = generate_report(
         runs, {"rule": "RuleBasedEngine", "kev": "KevEngine"}, [],
-        types.SimpleNamespace(include_jev=True), new_old=((0, 0), {}, {}, (0, 0)))
+        types.SimpleNamespace(include_jev=True), anchor={"llm_base": "http://test", "llm_model": "test"},
+        new_old=((0, 0), {}, {}, (0, 0)), git_sha="0" * 40, sdwan_sha="1" * 64)
     assert "服务回退数" in report and "| 0 | 1 |" in report, "kev_failed必须显式计数"
     assert "kev_failed" in report, "回退说明必须出现在报告中"
     assert "各引擎意图不一致" in report and "| S1 |" in report, "第二问不一致要按序号列出"

@@ -181,8 +181,9 @@ def build_section6(refs_by_sid: dict[str, list[dict]], new_by_sid: dict[str, lis
 
 
 def generate_report(runs: dict[str, list[dict]], engine_classes: dict[str, str],
-                    sessions: list[dict], args,
-                    new_old: tuple[tuple[int, int], dict[str, list[dict]], dict[str, list[str]], tuple[int, int]]) -> str:
+                    sessions: list[dict], args, anchor: dict,
+                    new_old: tuple[tuple[int, int], dict[str, list[dict]], dict[str, list[str]], tuple[int, int]],
+                    git_sha: str = "", sdwan_sha: str = "") -> str:
     """汇总为Markdown报告。new_old: (old_stat, refs_by_sid, new_by_sid, new_stat)。"""
     lines: list[str] = []
     lines.append("# 微信真实会话四引擎对比报告")
@@ -192,10 +193,24 @@ def generate_report(runs: dict[str, list[dict]], engine_classes: dict[str, str],
     lines.append(f"- **引擎**: {', '.join(f'{k}({engine_classes[k]})' for k in runs)}")
     if not args.include_jev:
         lines.append("- **Jev未参与**（数据出境红线，默认关闭；如需评估请用--include-jev，仅限脱敏文本）")
-    lines.append("- **kev限速说明**: kev本机推理慢（4GB卡禁用CUDA graphs），按拍板取前30个会话对齐队列")
+    lines.append("- **对齐口径**: 四引擎均取前30个会话（kev本机推理慢，4GB卡禁用CUDA graphs，拍板限制）；"
+                 "回答由共享生成层产生，四引擎只交换决策层")
     lines.append("")
     total_q = len(next(iter(runs.values())))
     lines.append(f"对齐队列共 **{len(sessions)}** 个会话 / **{total_q}** 条客户问题。")
+    fallback_counts = {e: sum(1 for r in runs[e] if str(r.get("engine", "")).endswith("_failed")) for e in runs}
+    fb_all = "、".join(f"{e} {fallback_counts[e]}题" for e in runs if fallback_counts[e] > 0)
+    lines.append(f"- **结论**: 四引擎只交换决策层，回答由共享生成层产生；意图/澄清/无法回答指标均按"
+                 f"有效题（剔除服务回退{('：' + fb_all) if fb_all else '：本轮无回退'}）计算，"
+                 "用于同批同口径下的引擎横向对比，不构成跨数据集的准确率结论。")
+    lines.append(f"- **复现元数据**: 代码提交 `{git_sha}`；知识库 SHA-256 `{sdwan_sha[:16]}…`；"
+                 f"对齐会话 {', '.join(s['session_id'] for s in sessions)}；"
+                 f"LLM端点 `{anchor.get('llm_base', '')}` 模型 `{anchor.get('llm_model', '')}`；"
+                 f"决策超时 qwen 10s / kev 5s / jev 5s；"
+                 f"命令 `python tests/compare_real_sessions.py --sessions 30 --include-jev`。")
+    lines.append("- **指标口径**: 澄清比例=最终path为clarification的题占比；"
+                 "无法回答=回复文本匹配（含前20字出现人工，口径偏宽）；"
+                 "决策耗时=decision_latency_ms（决策层，非端到端）。")
     lines.append("")
     lines.append("> 队列口径说明：本轮数据集经状态噪声清除与角色修正后重新提取，对齐队列问题数与")
     lines.append("> 上一轮报告（79问）不同属预期；会话版本以 data/wx_real/stats.md 漏斗为准。")
@@ -210,8 +225,8 @@ def generate_report(runs: dict[str, list[dict]], engine_classes: dict[str, str],
     lines.append("")
     lines.append("| 指标 | " + " | ".join(runs) + " |")
     lines.append("|---|" + "---|" * len(runs))
-    rows = [["题数（含回退）"] + [str(len(runs[e])) for e in runs],
-            ["有效题数（剔除回退）"] + [str(len(valid[e])) for e in runs]]
+    rows = ["| 题数（含回退） | " + " | ".join(str(len(runs[e])) for e in runs) + " |",
+            "| 有效题数（剔除回退） | " + " | ".join(str(len(valid[e])) for e in runs) + " |"]
     for name, label in (("intent", "意图≠未识别（有效题内）"), ("need_clarification", "澄清比例（有效题内）"),
                         ("is_refusal", "无法回答比例（有效题内）")):
         row = [label]
@@ -324,6 +339,10 @@ def generate_report(runs: dict[str, list[dict]], engine_classes: dict[str, str],
                       for e in runs}
     anchor = next(iter(emotion_subset.values()))
     lines.append(f"命中关键词的问题共 **{len(anchor)}** 条（按问题文本统计，与引擎无关）。")
+    kw_detail = {kw: sum(1 for r in anchor if kw in r["question"]) for kw in EMOTION_KEYWORDS}
+    lines.append("按关键词命中明细（单字'退'会命中退款/退货/退役等词，明细供判读）：")
+    lines.append("".join(f"{kw}×{n}  " for kw, n in kw_detail.items() if n))
+    lines.append("")
     lines.append("")
     lines.append("| 引擎 | 判为不满/投诉风险 | 命中率 | 误判为中性/其他 |")
     lines.append("|---|---|---|---|")
@@ -372,11 +391,16 @@ def main() -> None:
 
     runs: dict[str, list[dict]] = {}
     engine_classes: dict[str, str] = {}
+    anchor: dict = {}
     for engine in engines:
         print(f"=== 引擎 {engine} ===")
         results, engine_class = asyncio.run(run_engine(engine, sessions))
         runs[engine] = results
         engine_classes[engine] = engine_class
+        if not anchor:
+            os.environ["DECISION_ENGINE"] = engine
+            _orch = Orchestrator()
+            anchor = {"llm_base": _orch.llm_client.base_url, "llm_model": _orch.llm_client.model}
 
     print(f"=== 新旧对比pass（{ref_count}条带旧回复问题） ===")
     new_by_sid = asyncio.run(run_new_answers(refs_by_sid))
@@ -392,8 +416,14 @@ def main() -> None:
         "fallback_counts": {e: len(runs[e]) - len([r for r in runs[e] if not str(r.get("engine", "")).endswith("_failed")]) for e in runs},
         "runs": runs,
     }, ensure_ascii=False, indent=2), encoding="utf-8")
-    report = generate_report(runs, engine_classes, sessions, args,
-                             (old_stat, refs_by_sid, new_by_sid, new_stat))
+    import hashlib
+    import subprocess
+    git_sha = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True,
+                            cwd=str(PROJECT_ROOT)).stdout.strip()
+    sdwan_sha = hashlib.sha256((PROJECT_ROOT / "data" / "sdwan.md").read_bytes()).hexdigest()
+    report = generate_report(runs, engine_classes, sessions, args, anchor,
+                             (old_stat, refs_by_sid, new_by_sid, new_stat),
+                             git_sha=git_sha, sdwan_sha=sdwan_sha)
     out = RESULTS_DIR / f"real_compare_{stamp}.md"
     report = report.replace("逐题原始数据见同目录 `real_compare_<时间戳>_results.json`",
                             f"逐题原始数据见同目录 `{results_path.name}`")
