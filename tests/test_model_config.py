@@ -202,3 +202,63 @@ def test_metrics_reset_clears_channel_stats():
     asyncio.run(main_mod.reset_metrics())
     assert channel_stats()["tmp-ch"]["ok"] == 0
     assert channel_stats()["tmp-ch"]["fail"] == 0
+
+
+# ---------- 收尾批次（P2-1 / P3-1 / P3-3） ----------
+
+def test_placeholder_legacy_key_not_used():
+    """审查 P2-1：legacy 回退只认真实 key，模板占位符不触发回退、不发请求。"""
+    reset_channel_stats()
+    with mock.patch.object(settings, "JEV_CHANNELS", "typesafe"), \
+         mock.patch.object(settings, "JEV_TYPESAFE_API_KEY", ""), \
+         mock.patch.object(settings, "JEV_API_KEY", "your-jev-api-key-here"):
+        assert _build_channels() == []
+        engine = JevEngine()
+        assert engine.channels == []
+        result = asyncio.run(engine.decide("直播线路多少钱", {}))
+    assert result.engine == "jev_failed"
+    assert "无可用渠道" in result.clarification_reason
+
+
+def test_legacy_channel_entry_has_configured_flag():
+    """审查 P3-1：legacy 渠道被调用后 /metrics 条目也要有 configured 字段。"""
+    reset_channel_stats()
+    jc._record_channel("legacy", False, "HTTP 401: placeholder")
+    entry = channel_stats()["legacy"]
+    assert entry["configured"] is True
+    assert entry["fail"] == 1
+
+
+def test_distiller_parses_json_with_gen_client(tmp_path):
+    """审查 P3-3：会话提炼 JSON 解析路径（mock 客户端，不调真实模型）。
+
+    提炼客户端是 QwenClient() 默认 = GEN_*（思考开/1024），解析路径与本测一致。
+    """
+    from backend.models import Message, SessionState
+    from backend.session_distiller import SessionDistiller
+
+    seen = {}
+
+    class FakeDistillClient:
+        max_tokens = settings.GEN_MAX_TOKENS
+        enable_thinking = settings.GEN_ENABLE_THINKING
+
+        async def generate(self, messages):
+            seen["prompt"] = messages[0]["content"]
+            return {"response": '{"question": "直播线路多少钱一个月", '
+                                '"answer": "120/180/260 三档，硬件300元/个。"}',
+                    "usage": {}, "latency_ms": 1}
+
+    distiller = SessionDistiller(
+        llm_client=FakeDistillClient(), output_path=tmp_path / "out.md")
+    session = SessionState(session_id="distill-test")
+    session.distill_engine = "qwen"
+    session.context.history = [
+        Message(role="user", content="直播线路多少钱", timestamp=1),
+        Message(role="assistant", content="120/月一条idc线路", timestamp=2),
+    ]
+    body = asyncio.run(distiller._distill(session))
+    assert "直播线路多少钱一个月" in body
+    assert "120/180/260 三档" in body
+    assert "来源：会话distill-test" in body and "引擎qwen" in body
+    assert "用户：直播线路多少钱" in seen["prompt"]       # 对话确实进入了 prompt

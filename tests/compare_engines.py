@@ -23,8 +23,7 @@ sys.path.insert(0, str(ROOT))
 
 from backend.config import settings  # noqa: E402
 from backend.decision_layer import create_decision_engine  # noqa: E402
-from backend.decision_layer.jev_client import (  # noqa: E402
-    JevEngine, _build_channels)
+from backend.decision_layer.jev_client import JevEngine  # noqa: E402
 
 OUTPUT_PATH = ROOT / "engine_comparison.json"
 PLACEHOLDER_KEYS = ("", "your-jev-api-key-here")
@@ -68,14 +67,14 @@ async def main() -> int:
     kev_engine = create_decision_engine("kev")
 
     # 审查 P2-4：走生产工厂的无参渠道链（JevEngine()），不再用 legacy 单渠道，
-    # 保证对比脚本与线上路径一致。skip 判定：组出的渠道（含 legacy 回退）里
-    # 没有任何一把真实 key（占位符/空）→ 跳过真实调用
+    # 保证对比脚本与线上路径一致。skip 判定用引擎实例自己的渠道（只组一次链，
+    # 避免重复 WARNING）：渠道（含 legacy 回退）里没有任何真实 key → 跳过真实调用
     jev_skipped_reason = ""
-    channels = _build_channels()
-    if not any(ch.api_key and ch.api_key not in PLACEHOLDER_KEYS for ch in channels):
+    jev_engine = JevEngine()
+    if not any(ch.api_key and ch.api_key not in PLACEHOLDER_KEYS
+               for ch in jev_engine.channels):
         jev_skipped_reason = "未配置任何真实Jev渠道key（渠道链/legacy均为空或占位符），跳过真实调用"
-    else:
-        jev_engine = JevEngine()
+        jev_engine = None
 
     results = []
     for question in questions:

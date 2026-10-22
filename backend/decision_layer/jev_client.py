@@ -116,9 +116,13 @@ JEV_TIMEOUT_SECONDS = 5.0
 # 渠道健康计数（进程内）：{渠道名: {"ok": n, "fail": n, "last_error": str}}，/metrics 暴露
 _CHANNEL_STATS: Dict[str, Dict[str, Any]] = {}
 
+# 占位符 key（.env.example 模板值）：不算已配置，不触发 legacy 回退、不发请求
+PLACEHOLDER_KEYS = ("", "your-jev-api-key-here")
+
 
 def _record_channel(name: str, ok: bool, error: str | None) -> None:
-    stats = _CHANNEL_STATS.setdefault(name, {"ok": 0, "fail": 0, "last_error": ""})
+    stats = _CHANNEL_STATS.setdefault(
+        name, {"ok": 0, "fail": 0, "last_error": "", "configured": True})
     if ok:
         stats["ok"] += 1
     else:
@@ -159,8 +163,9 @@ class JevChannel:
 def _build_channels() -> list:
     """按 JEV_CHANNELS 顺序从 settings 组渠道链；任一配置项为空则跳过该渠道。
 
-    向后兼容（审查 P1-1）：一个渠道都组不出来且旧 JEV_API_KEY 非空时，回退
-    legacy OpenRouter 单渠道（/alpha/decisions），避免老 .env 静默失去 jev。
+    向后兼容（审查 P1-1）：一个渠道都组不出来且旧 JEV_API_KEY 是真实 key 时，
+    回退 legacy OpenRouter 单渠道（/alpha/decisions），避免老 .env 静默失去 jev。
+    占位符（模板值）不算真实 key，不触发回退、不发请求（审查 P2-1）。
     """
     channels = []
     for name in [c.strip() for c in (settings.JEV_CHANNELS or "").split(",") if c.strip()]:
@@ -179,7 +184,7 @@ def _build_channels() -> list:
             channels.append(JevChannel(name, base, endpoint, model, key))
         else:
             logger.warning("Jev 渠道 %s 配置不全（base/endpoint/model/key），跳过", name)
-    if not channels and settings.JEV_API_KEY:
+    if not channels and settings.JEV_API_KEY not in PLACEHOLDER_KEYS:
         logger.warning(
             "Jev 渠道链组不出任何渠道，回退 legacy 单渠道（%s，已废弃，建议迁移到 JEV_CHANNELS 渠道链）",
             settings.JEV_API_BASE)

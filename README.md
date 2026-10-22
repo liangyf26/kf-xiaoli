@@ -85,6 +85,9 @@ python -m backend.main
 
 各引擎对同一评估集的准确率对比见 `tests/results/engine_accuracy_report_*.md`。
 
+> **jev 渠道状态（2026-10-22 时点快照）**：四渠道中当前实际可用为 **typesafe + openrouter**；opencode_free / opencode_pay 两把 key 已过期（401 `api_key_expired`），待在 OpenCode Console 重发后恢复，渠道保留在链上。渠道健康实时看 `/metrics` 的 `jev_channels`（configured=false = 配置缺失被跳过）。
+> 本段会随 key 重发而过时——**恢复后请更新或删除本段，以 `/metrics` 的实时结果为准**。
+
 ### 会话提炼（真实问答积累）
 
 机器人回复后静默 `SESSION_END_SECONDS`（默认20秒）无新消息即判定会话结束，Qwen自动把整段对话提炼成一问一答，按知识库格式追加到 `data/sdwan-real.md`（含来源行"会话id 时间 引擎"，编号接已有最大编号）。该文件仅作知识库迭代素材，**不会**被加载进运行时知识库。提炼失败只记日志，不影响聊天。
