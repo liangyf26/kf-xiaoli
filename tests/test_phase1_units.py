@@ -83,14 +83,41 @@ def _new_session(session_id="test", connection=None):
 
 
 def test_config_load():
-    """任务书1.2验收：配置加载正常。"""
-    assert settings.MODEL_API_BASE == "http://test"
-    assert settings.CONTEXT_TURNS == 10
-    assert settings.WAIT_SLIDE_SECONDS == 15
-    assert settings.WAIT_MAX_SECONDS == 30
-    assert settings.DECISION_ENGINE == "rule"
-    assert settings.FIRST_MESSAGE_GREETING == "测试问候"
-    assert settings.NO_ANSWER_MESSAGE == "测试拒答"
+    """任务书1.2验收：配置加载正常。
+
+    pytest-asyncio 0.23.3 在收集期访问 collector.obj 会提前导入 backend.config
+    （早于本模块顶部的 ENV_FILE 设置），settings 单例已按真实 .env 构建并进了
+    sys.modules 缓存——全量运行时 `from backend.config import settings` 拿到的是
+    缓存对象。这里显式 importlib.reload 强制按 _ENV_TEST 重建后断言，finally 里
+    还原 ENV_FILE 并 reload 回去：单文件与全量两种跑法都确定性通过，且不改变
+    其他用例看到的 settings 内容。
+    """
+    import importlib
+
+    import backend.config as config_module
+
+    original_settings = config_module.settings      # 先留档：断言后原样装回
+    saved_env_file = os.environ.get("ENV_FILE")
+    os.environ["ENV_FILE"] = str(_ENV_TEST)
+    try:
+        importlib.reload(config_module)
+        fresh = config_module.settings
+        assert fresh.MODEL_API_BASE == "http://test"
+        assert fresh.CONTEXT_TURNS == 10
+        assert fresh.WAIT_SLIDE_SECONDS == 15
+        assert fresh.WAIT_MAX_SECONDS == 30
+        assert fresh.DECISION_ENGINE == "rule"
+        assert fresh.FIRST_MESSAGE_GREETING == "测试问候"
+        assert fresh.NO_ANSWER_MESSAGE == "测试拒答"
+    finally:
+        # 不能用第二次 reload 还原：后面 phase6 等用例会惰性 `from backend.config
+        # import settings`，拿到的是重载后的新对象。直接把原单例装回属性位，
+        # 后续用例看到的对象与改动前完全一致
+        config_module.settings = original_settings
+        if saved_env_file is None:
+            os.environ.pop("ENV_FILE", None)
+        else:
+            os.environ["ENV_FILE"] = saved_env_file
 
 
 def test_config_missing_required_field_raises():
