@@ -1,0 +1,28 @@
+{
+  "id": "D2-tupianyufa",
+  "family": "S",
+  "type": "usage",
+  "name": "图片语法泄漏（![[ ]] 原样进答案）",
+  "expected_failure_stage": "knowledge",
+  "turns": [
+    {
+      "turn": 1,
+      "user_template": "客户端问题怎么解决，有截图教程吗？",
+      "judge_point": {
+        "forbid_regex": ["!\\[\\["],
+        "route": null
+      }
+    }
+  ],
+  "mutation_axes": {
+    "persona": ["小白用户"],
+    "typo_asr": false,
+    "omission": false,
+    "emotion": ["中性"],
+    "lang_mix": ["纯中文"]
+  },
+  "evidence": {
+    "kb_lines": ["旧库:问题35/38 content 含 ![[]] 实测2条目（grep 3 行中 2 行同属问题35）", "新库:0 条（已满足）"],
+    "note": "防回归用例：新库必须保持 0 条"
+  }
+}

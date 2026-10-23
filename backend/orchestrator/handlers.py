@@ -19,6 +19,19 @@ logger = logging.getLogger(__name__)
 _SOURCE_HEADER_PATTERN = re.compile(r"^(?:【(?P<section>[^】]+)】)?问题(?P<num>\d+):", re.M)
 
 
+def _customer_view(qa) -> str:
+    """客户可读正文（#035 D4）：去掉 _format 的【章节】头/问题N: 前缀/【category】标签。
+
+    title 是库作者写的可读标题，保留为首行；content 原文照发（含【腾讯文档】
+    等合法内容，judge D4 的 forbid 已按实测收窄不误伤）。来源标注「章节 / 问题N」
+    只在 sources，不进 answer。内部结构（_format）仍供 prompt/LLM 引用使用。
+    """
+    parts = [qa.title.strip()] if qa.title.strip() else []
+    if qa.content.strip():
+        parts.append(qa.content.strip())
+    return "\n".join(parts)
+
+
 def _extract_sources(knowledge: str) -> list[str]:
     """从检索文本提取来源串（保序去重）。
 
@@ -61,30 +74,36 @@ async def handle_faq_match(decision: DecisionResult, knowledge_base: KnowledgeBa
     池子受类别映射误判影响（如流量题映射到 price/purchase，product 类的
     流量条目根本不进候选池）。query 为空或全库零相关时回退原意图→类别路径
     （既有兜底保留）；get_by_intent 不动，LLM 生成层仍按意图取知识。
+    两条路径（query 优先/回退）的 answer 都走 _customer_view 客户可读化（#036 D4）：
+    修前只改了主路径、回退分支仍直发 _format 串——校准也只测主路径，属假绿。
     """
     top = knowledge_base.search_top(message, limit=3) if message else []
     if top:
+        # D4（#035）：answer 只给客户可读正文——_format 的【章节】头/问题N: 前缀/
+        # 【category】标签是内部结构，直发客户即泄漏；sources 保留「章节 / 问题N」标注。
+        answer = "\n\n".join(v for v in (_customer_view(qa) for qa in top) if v)
         return {
-            "answer": "\n\n".join(knowledge_base._format(qa) for qa in top),
+            "answer": answer,
             "sources": [source_label(qa.section, qa.number) for qa in top],
             "path": "faq_match",
         }
 
-    # 回退：意图→类别池子（query 为空或全库零相关）
-    knowledge = knowledge_base.get_by_intent(decision.intent, query=message, limit=3)
-    if not knowledge:
+    # 回退：意图→类别池子（query 为空或全库零相关）——与主路径同一套组装（#036 D4）：
+    # get_by_intent_pairs 拿条目对象（内部与 get_by_intent 共用 _intent_pairs，不复制逻辑），
+    # answer 走 _customer_view 客户可读正文、sources 用 source_label；
+    # 不再把 get_by_intent 的 _format 拼接串（【章节】问题N: …【price】内部结构）直发客户。
+    pairs = knowledge_base.get_by_intent_pairs(decision.intent, query=message, limit=3)
+    if not pairs:
         return {
             "answer": settings.NO_ANSWER_MESSAGE,
             "sources": [],
             "path": "faq_match",
         }
 
-    # 提取来源（相关度排序后的前3条）：「章节名 / 问题N」或「问题N」（#022）
-    sources = _extract_sources(knowledge)[:3]
-
+    answer = "\n\n".join(v for v in (_customer_view(qa) for qa in pairs) if v)
     return {
-        "answer": knowledge,
-        "sources": sources,
+        "answer": answer,
+        "sources": [source_label(qa.section, qa.number) for qa in pairs],
         "path": "faq_match",
     }
 

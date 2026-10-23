@@ -1,0 +1,30 @@
+{
+  "id": "D3-liuliangloudiao",
+  "family": "C",
+  "type": "traffic",
+  "name": "流量题意图池漏题",
+  "expected_failure_stage": "retrieval",
+  "turns": [
+    {
+      "turn": 1,
+      "user_template": "套餐包含流量吗?",
+      "judge_point": {
+        "expect_hit": ["有多少流量"],
+        "forbid_regex": ["【售前问题", "【product"],
+        "route": null
+      }
+    }
+  ],
+  "mutation_axes": {
+    "persona": ["小白用户"],
+    "typo_asr": false,
+    "omission": true,
+    "emotion": ["中性"],
+    "lang_mix": ["纯中文"]
+  },
+  "evidence": {
+    "code": "INTENT_MULTI_CATEGORIES['price_inquiry'] 仅 price+purchase，product 类问题18 不在池",
+    "real_fail_cases": ["F1旧库0/3"],
+    "fix": "扩 ('price','purchase','product')（knowledge.py 一行，#035）"
+  }
+}

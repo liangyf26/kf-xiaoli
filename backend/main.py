@@ -6,6 +6,7 @@
 import hmac
 import json
 import logging
+import os
 from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
@@ -198,8 +199,9 @@ async def get_engine() -> dict:
 
 manager = ConnectionManager()
 aggregator = WaitAggregator()
-# 会话提炼器：会话静默结束后用Qwen把对话提炼成问答，追加到data/sdwan-real.md
-distiller = SessionDistiller()
+# 会话提炼器：会话静默结束后用Qwen把对话提炼成问答，追加到 data/sdwan-real.md。
+# 攻防演练隔离（#035）：DISTILLER_OUTPUT_PATH 显式指向 /tmp 副本，避免写生产 data/。
+distiller = SessionDistiller(output_path=os.getenv("DISTILLER_OUTPUT_PATH") or None)
 # 编排器：决策层+路由+生成（Phase 3）；知识库随服务启动加载。
 # 单实例归一（任务书-kf知识库热更新 v1.2）：显式传入全局 knowledge_base，
 # orchestrator.knowledge_base is knowledge_base 恒成立——reload 只需换一处。

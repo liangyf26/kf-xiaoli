@@ -167,3 +167,19 @@ class TestStats:
         kb.reload(lib_b)
         kb.reload(lib_a)
         assert kb.stats() == first
+
+
+def test_distiller_output_path_override():
+    """#035 安全门禁锁：DISTILLER_OUTPUT_PATH 显式传参生效、默认仍指生产路径。
+
+    演练时 start_isolated.py 传 /tmp 路径，蒸馏产物不得写生产 data/sdwan-real.md。
+    """
+    import tempfile
+    from backend.session_distiller import SessionDistiller, DEFAULT_OUTPUT_PATH
+
+    with tempfile.TemporaryDirectory() as td:
+        d = SessionDistiller(output_path=Path(td) / "distilled.md")
+        assert d.output_path == Path(td) / "distilled.md"
+        assert d.output_path != DEFAULT_OUTPUT_PATH
+    d_default = SessionDistiller()
+    assert d_default.output_path == DEFAULT_OUTPUT_PATH

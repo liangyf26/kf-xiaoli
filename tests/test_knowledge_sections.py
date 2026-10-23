@@ -105,9 +105,25 @@ def test_new_kb_per_category_retrieval_counts_match_index():
 
 
 def test_multi_intent_merge_keeps_all_items():
-    """多类别并集（price_inquiry = price+purchase）合并后不因同号丢条目。"""
+    """多类别并集（price_inquiry = price+purchase，#038 裁定撤销 #035 扩池）合并后不因同号丢条目。
+
+    流量条目属 product、不在回退池是 #038 裁定下的正确行为（D3a 由 query 优先负责，
+    D3b 只要求回退同意图一致）；本用例只锁「并集内不因跨章节同号丢条目」。
+    """
     merged = len(_extract_sources(NEW_KB.get_by_intent("price_inquiry")))
-    assert merged == len(NEW_KB.category_index["price"]) + len(NEW_KB.category_index["purchase"]) == 11
+    assert merged == (len(NEW_KB.category_index["price"]) + len(NEW_KB.category_index["purchase"])) == 11
+
+
+def test_price_intent_pool_intent_consistent():
+    """#038 裁定锁：price_inquiry 回退池=price+purchase（#035 扩 product 撤销）。
+
+    零相关时回退给同意图条目是合理行为（D3b，回退一致性）；流量题由
+    query 优先（D3a，#023）负责——回退池不再需要 product 类条目。
+    """
+    cats = {qa.category for qa in NEW_KB.get_by_intent_pairs("price_inquiry")}
+    assert cats == {"price", "purchase"}, f"回退池类别应恰为 price+purchase: {cats}"
+    assert "有多少流量" not in NEW_KB.get_by_intent("price_inquiry"), \
+        "product 类流量条目不应出现在回退池（#038 撤销扩池）"
 
 
 def test_price_query_hits_third_price_option():

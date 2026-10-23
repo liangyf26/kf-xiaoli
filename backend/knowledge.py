@@ -77,7 +77,8 @@ INTENT_MULTI_CATEGORIES: dict[str, tuple[str, ...]] = {
     "purchase_process": ("purchase", "price"),
     "product_comparison": ("product", "purchase", "usage"),
     "usage_guide": ("usage", "product"),
-    "price_inquiry": ("price", "purchase"),
+    "price_inquiry": ("price", "purchase"),   # #038 裁定：撤销 #035 扩池——回退给意图池条目是合理行为，
+                                              # 流量题由 query 优先（#023 D3a）负责，不靠扩池
 }
 
 # 全部分类（含可能为空的general）
@@ -174,8 +175,8 @@ class KnowledgeBase:
                 return category
         return "general"
 
-    def get_by_intent(self, intent: str, query: str = "", limit: int = 0) -> str:
-        """按意图（或分类键）返回相关问答的拼接文本。
+    def _intent_pairs(self, intent: str, query: str = "", limit: int = 0) -> list[QAPair]:
+        """按意图收集条目（get_by_intent / get_by_intent_pairs 共用，不复制逻辑）。
 
         支持跨类别：INTENT_MULTI_CATEGORIES中的意图取多个类别的并集
         （如technical_support同时取technical与troubleshooting类知识）。
@@ -201,14 +202,28 @@ class KnowledgeBase:
 
         if not pairs:
             logger.warning("意图/分类 %s 无匹配问答", intent)
-            return ""
+            return []
 
         if query:
             pairs = sorted(pairs, key=lambda qa: -self._relevance(qa, query))
 
         if limit > 0:
             pairs = pairs[:limit]
-        return "\n\n".join(self._format(qa) for qa in pairs)
+        return pairs
+
+    def get_by_intent_pairs(self, intent: str, query: str = "", limit: int = 0) -> list[QAPair]:
+        """按意图返回结构化条目列表（#036 D4：FAQ 回退路径组装客户可读 answer 用）。
+
+        与 get_by_intent 共用 _intent_pairs（同去重/相关度排序/limit 语义）；
+        get_by_intent 保留给 prompt 生成层（行为不变），回退路径拿条目对象后
+        用 _customer_view 出客户可读正文、source_label 出来源标注——
+        不再把 _format 拼接串直发客户。
+        """
+        return self._intent_pairs(intent, query, limit)
+
+    def get_by_intent(self, intent: str, query: str = "", limit: int = 0) -> str:
+        """按意图（或分类键）返回相关问答的拼接文本（prompt 生成层用，行为不变）。"""
+        return "\n\n".join(self._format(qa) for qa in self._intent_pairs(intent, query, limit))
 
     @staticmethod
     def _build_shingle_df(pairs: list[QAPair]) -> dict[str, int]:

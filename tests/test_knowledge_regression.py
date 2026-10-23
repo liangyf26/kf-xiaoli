@@ -24,8 +24,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from backend.decision_layer.base import DecisionResult
-from backend.knowledge import KnowledgeBase
-from backend.orchestrator.handlers import _extract_sources, _knowledge_section_text, handle_faq_match
+from backend.knowledge import KnowledgeBase, source_label
+from backend.orchestrator.handlers import (_customer_view, _extract_sources,
+                                           _knowledge_section_text, handle_faq_match)
 from backend.orchestrator.prompt_builder import PromptBuilder
 
 NEW_KB = KnowledgeBase(PROJECT_ROOT / "data" / "sdwan-new.md")
@@ -205,9 +206,53 @@ def test_faq_query_priority_beats_category_pool():
     result = _faq("120 元套餐每月多少流量？")
     keys = _source_keys(result["sources"])
     assert ("售前问题 · 咨询和顾虑", 18) in keys, f"流量题目标不在 Top-3: {keys}"
-    # 对照：旧路径（意图→类别）下该目标不在候选（price/purchase 池子无此条目）
     legacy_pool = NEW_KB.get_by_intent("price_inquiry", query="120 元套餐每月多少流量？", limit=3)
-    assert "有多少流量" not in legacy_pool.split("\n\n")[0], "对照失效：旧路径竟命中流量条目？"
+    # 对照（#038 裁定恢复原语义）：回退池=price+purchase、不含流量题——这正是 D3a
+    # 的反向红点基础（关掉 query 优先流量题就丢）；#035 的扩池方案已撤销。
+    assert "有多少流量" not in legacy_pool, "回退池不应含流量题（#038 撤销扩池）"
+
+
+def test_faq_answer_is_customer_readable():
+    """#035 D4 锁：客户可见 answer 不得含内部结构（_format 头/分类标签/英文字段名）。
+
+    修复前 answer=_format 产物（【章节】问题N: …【price】）直发客户即泄漏；
+    反向：answer 改回 _format 拼接本用例红。来源标注（sources）不算泄漏；
+    库内容【腾讯文档】是合法正文，forbid 收窄口径不误伤（见 judge.py docstring）。
+    """
+    result = asyncio.run(handle_faq_match(
+        _decision(), NEW_KB, "180 元和 260 元有什么区别"))
+    answer, sources = result["answer"], result["sources"]
+    assert not re.search(r"【[^】]*】\s*问题\d+\s*:", answer), f"章节头+编号前缀泄漏: {answer[:60]!r}"
+    assert not re.search(r"【(?:price|usage|troubleshooting|product|purchase|technical|general)】", answer), "分类标签泄漏"
+    assert not re.search(r"\b(?:product|troubleshooting|usage)\b", answer), "英文字段名泄漏"
+    assert sources and all(" / 问题" in s for s in sources), "来源标注须保留在 sources"
+    assert "120" in answer and "260" in answer, "价格正文缺失（D4 不得丢内容）"
+
+
+def test_faq_fallback_answer_customer_readable():
+    """#036 D4 锁（回退分支）：query 为空/全库零相关时 answer 同样客户可读。
+
+    修前只改了 query 优先主路径，回退分支仍直发 get_by_intent 的 _format 拼接串
+    （【章节】问题N: …【price】内部结构），校准也只测主路径——假绿（Chief #036
+    复核打回）。本用例锁「回退分支与主路径同一套组装」；反向：回退分支改回
+    _format 串，本用例红在「回退路径 answer 含章节头」。
+    """
+    for query in ("", "zzz"):   # 空 query 与全库零相关，两条都真实落入回退分支
+        result = _faq(query)
+        assert result["path"] == "faq_match"
+        pairs = NEW_KB.get_by_intent_pairs("price_inquiry", query=query, limit=3)
+        assert pairs, f"query={query!r}: 回退池为空，用例前提不成立"
+        # 红点对准 Chief 点名的问题：回退路径直发 _format 串 = 章节头泄漏
+        assert not re.search(r"【[^】]*】\s*问题\d+\s*:", result["answer"]), \
+            f"回退路径 answer 含章节头+编号前缀泄漏: {result['answer'][:60]!r}"
+        assert not re.search(r"【(?:price|usage|troubleshooting|product|purchase|technical|general)】", result["answer"]), \
+            "回退路径分类标签泄漏"
+        # 与主路径同一套组装：条目级 _customer_view + source_label（顺序=池内稳定序）
+        expected = "\n\n".join(v for v in (_customer_view(qa) for qa in pairs) if v)
+        assert result["answer"] == expected, \
+            f"query={query!r}: 回退分支未按条目组装（answer 与 _customer_view 拼接不一致）: {result['answer'][:60]!r}"
+        assert result["sources"] == [source_label(qa.section, qa.number) for qa in pairs], \
+            f"query={query!r}: 回退路径 sources 须为条目来源标注: {result['sources']}"
 
 
 SEARCH_ALL_IDF_BASELINE_SHA256 = {

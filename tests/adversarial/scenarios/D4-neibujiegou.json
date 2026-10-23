@@ -1,0 +1,29 @@
+{
+  "id": "D4-neibujiegou",
+  "family": "C",
+  "type": "structure",
+  "name": "内部结构泄漏（【章节】问题N:【category】直发客户）",
+  "expected_failure_stage": "generation",
+  "turns": [
+    {
+      "turn": 1,
+      "user_template": "你们有什么套餐?",
+      "judge_point": {
+        "forbid_regex": ["【[^】]*】\\s*问题\\d+\\s*:", "【(?:price|usage|troubleshooting|product|purchase|technical|general)】", "\\b(?:product|troubleshooting|usage)\\b"],
+        "route": null
+      }
+    }
+  ],
+  "mutation_axes": {
+    "persona": ["小白用户"],
+    "typo_asr": false,
+    "omission": false,
+    "emotion": ["中性"],
+    "lang_mix": ["纯中文"]
+  },
+  "evidence": {
+    "real_output": "【售前问题 · 价格】问题1: 基础产品【price】…（_format 产物直发，实测形态）",
+    "real_fail_cases": ["P4", "F1", "F2", "F3", "C1", "C3", "TAX3"],
+    "note": "forbid 为实测收窄口径：库内容【腾讯文档】是合法正文不误伤；来源标注在 sources 不在 answer"
+  }
+}
