@@ -297,7 +297,7 @@ def generate_report(runs: dict[str, list[dict]], engine_classes: dict[str, str],
         cmd += " --include-jev"
     if getattr(args, "skip_kev", False):
         cmd += " --skip-kev"
-    kb = f"{sdwan_sha[:16]}…" if sdwan_sha else "（未取）"
+    kb = sdwan_sha if sdwan_sha else "（未取）"   # P3：打全 64 位 sha256，不截断
     meta = (f"- **复现元数据**: 代码提交 `{git_sha or '（未取）'}`；"
             f"知识库 SHA-256 `{kb}`；"
             f"sessions.json SHA-256 `{sessions_sha or '（未取）'}`；")
@@ -338,6 +338,17 @@ def generate_report(runs: dict[str, list[dict]], engine_classes: dict[str, str],
         if offline:
             lines.append("")
             lines.append("整段下线（剔完客户轮为 0，不进对齐会话）：" + "、".join(offline) + "。")
+            if any(x.startswith("S021") for x in offline):
+                # P3（审查报告-kf基线20261022-v3 §7-4）：写清 S021 的判定依据，防止被当成漏判
+                lines.append(
+                    "S021 是人工判定整段为坐席语境（物业/租赁）：不是 `is_non_customer_text` "
+                    "模式命中，依据是整段对话语境——整段是坐席在替业主查物业费/水电公摊、"
+                    "报租赁方案、谈带看与佣金，属于坐席视角的连续工作记录，不是单条文本特征判定。")
+                lines.append(
+                    "S021 q0/q9/q10 是短句（「您好，我现在看下」「好的」"
+                    "「嗯嗯，您看哪里合适就找哪里嘛，主要是划算嘛」），单看文本角色不够硬——"
+                    "顾客也可能说类似的话；这三条归坐席的依据是整段语境（该会话从头到尾都是"
+                    "坐席在办事），随整段一起下线，不是漏判。")
     lines.append("")
 
     # 回退分离：*_failed降级题不计入意图/澄清/无法回答指标（否则压低该引擎口径）
