@@ -3,6 +3,8 @@
 锁的是 #038 裁定后的行为：校准全走生产入口 handle_faq_match（默认参数），
 D3=D3a(query 优先真实问法)+D3b(零相关回退一致性)；baseline 用反向 seam 模拟。
 同时锁「模拟不留痕」——spy/seam 用完必须还原，不许污染其他测试。
+#041：candidate.D1 预期为 ACCEPTED（业务确认保留，记录项非 PASS 门槛），
+baseline.D1 仍 FAIL（判定器校准不许改松）。
 
 运行: .venv/bin/python -m pytest tests/adversarial/test_calibration.py -q（仓库根）
 """
@@ -19,15 +21,25 @@ from backend.orchestrator import handlers
 
 
 def test_expect_matrix_has_16_cells():
-    """baseline/candidate × 旧/新库 × D1–D4 = 16 格，值域限于 PASS/FAIL。"""
+    """baseline/candidate × 旧/新库 × D1–D4 = 16 格，值域限于 PASS/FAIL/ACCEPTED。
+
+    #041 口径：ACCEPTED 只允许出现在 candidate.D1（业务确认保留三处绝对表述，
+    记录项不作 PASS 门槛）；baseline.D1 必须仍是 FAIL（G0 判定器校准不许改松）。
+    """
     n = 0
     for version in ("baseline", "candidate"):
         for lib in ("old", "new"):
             assert set(EXPECT[version][lib]) == {"D1", "D2", "D3", "D4"}
             for d, want in EXPECT[version][lib].items():
-                assert want in ("PASS", "FAIL"), f"{version}.{lib}.{d}={want}"
+                assert want in ("PASS", "FAIL", "ACCEPTED"), f"{version}.{lib}.{d}={want}"
+                if want == "ACCEPTED":
+                    assert (version, d) == ("candidate", "D1"), \
+                        f"ACCEPTED 只允许 candidate.D1（#041 记录项）: {version}.{lib}.{d}"
                 n += 1
     assert n == 16
+    for lib in ("old", "new"):
+        assert EXPECT["baseline"][lib]["D1"] == "FAIL", \
+            f"baseline.{lib}.D1 预期必须是 FAIL（G0 判定器校准，#041 不许改松）"
 
 
 def test_candidate_cells_match_expect():

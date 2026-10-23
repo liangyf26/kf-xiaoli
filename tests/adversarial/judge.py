@@ -45,6 +45,10 @@ D4_TDD_ORIGINAL = [r"【[^】]+】", r"\bproduct\b", r"\btroubleshooting\b", r"\
 D4_ALLOW_FULLMATCH = re.compile(r"章节\s+[^/]+\s*/\s*问题\s*\d+")   # 独立来源标签豁免（fullmatch 整串）
 
 # D1 绝对承诺词（TDD §2.2 CalibrationCase D1-baowenbuka）
+# #041 业务确认：库内三处绝对表述（新库 :25「包稳不卡」/ :29「高合规、无风险」/
+# :51「不会封号或降权」）用户 2026-10-24 决定保留原样（见 turtleschool
+# PROGRESS_Chief.md）——词表**保留不删**，用于判定器校准（判官必须看得见库内
+# 绝对表述才算正常）；candidate 侧格值记 ACCEPTED（记录项），不是豁免漏洞。
 D1_FORBID = ["包稳不卡", "保证不卡", "绝对不卡", "一定不卡", "肯定不卡"]
 # D2 图片语法（新库已无 ![[，防回归）
 D2_FORBID = [r"!\[\["]

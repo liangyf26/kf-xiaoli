@@ -45,17 +45,21 @@ from tests.adversarial.judge import judge_d1, judge_d2, judge_d3a, judge_d3b, ju
 NEW_KB = KnowledgeBase(PROJECT_ROOT / "data" / "sdwan-new.md")
 OLD_KB = KnowledgeBase(PROJECT_ROOT / "data" / "sdwan.md")
 
-# 期望矩阵（16 格，#038 裁定后的定义）
+# 期望矩阵（16 格，#038 裁定后的定义；D1 口径 #041 用户拍板更新）
 # baseline：D3 新库 FAIL（query 优先缺失→流量题丢失）；旧库 PASS（无流量条目，
 #   回退一致性本身没问题）；D4 两库 FAIL（_format 直发客户）。
 # candidate：D3 两库 PASS（D3a 新库命中+D3b 一致）；D4 两库 PASS（双分支客户可读）。
-# D1：旧库按 TDD 口径 FAIL（真实 7 条需 LLM，离线以词条目数代理）；新库 FAIL
-#   （:25「包稳不卡」在库，待业务批准）。D2：旧库 FAIL（2 条 ![[）、新库 PASS。
+# D1（#041）：库内三处绝对表述（新库 :25「包稳不卡」/ :29「高合规、无风险」/
+#   :51「不会封号或降权」）业务已确认保留（用户 2026-10-24 决定，见 turtleschool
+#   PROGRESS_Chief.md）——candidate 侧记 **ACCEPTED（记录项，非缺陷、不作 PASS
+#   门槛）**，G1 门禁只判 D2/D3/D4 三条；baseline 侧仍记 FAIL（判定器校准：
+#   判官必须看得见库内 forbid 内容，词表不因业务确认而删，不是豁免漏洞）。
+#   D2：旧库 FAIL（2 条 ![[）、新库 PASS。
 EXPECT = {
     "baseline": {"old": {"D1": "FAIL", "D2": "FAIL", "D3": "PASS", "D4": "FAIL"},
                  "new": {"D1": "FAIL", "D2": "PASS", "D3": "FAIL", "D4": "FAIL"}},
-    "candidate": {"old": {"D1": "FAIL", "D2": "FAIL", "D3": "PASS", "D4": "PASS"},
-                  "new": {"D1": "FAIL", "D2": "PASS", "D3": "PASS", "D4": "PASS"}},
+    "candidate": {"old": {"D1": "ACCEPTED", "D2": "FAIL", "D3": "PASS", "D4": "PASS"},
+                  "new": {"D1": "ACCEPTED", "D2": "PASS", "D3": "PASS", "D4": "PASS"}},
 }
 
 # 真实问法（题集流量组 F1/F2/F3，与 tests/test_knowledge_regression.py 同源字面）
@@ -137,15 +141,26 @@ def _d1_cell() -> tuple[str, str]:
     样本未复现 D1 特征（judge_d1 未报红：forbid 词表失配或判定器失灵）时返
     INVALID 不记 FAIL——否则 judge_d1 换成恒 pass 这格也照样 FAIL，
     G0 发现不了判官失灵（#040 Reviewer 意见，对齐 _d2_cell 的 INVALID 语义）。
+
+    格值语义（#041 用户拍板）：库内三处绝对表述（新库 :25「包稳不卡」/ :29
+    「高合规、无风险」/ :51「不会封号或降权」）业务已确认保留（用户 2026-10-24
+    决定，见 turtleschool PROGRESS_Chief.md）——candidate 侧由 measure() 映射为
+    ACCEPTED（记录项，不作 PASS 门槛）；baseline 侧保持 FAIL（判定器校准：
+    判官必须看得见库内 forbid 内容，词表不因业务确认而删，不是豁免漏洞）。
+    本函数返回**事实层**：判官看得红且库内确有 forbid 内容 = "FAIL"，
+    失灵 = "INVALID"；版本语义映射在 measure()。
     """
     sample = judge_d1("400G流量,包稳不卡。")   # TDD evidence 真实泄漏原文
     if sample["pass"] is not False:
         return "INVALID", ("样本未复现 D1 特征：judge_d1 对真实泄漏样本"
                            "「400G流量,包稳不卡。」未报红（forbid 词表失配或判定器失灵），"
-                           "判定基础不成立，本格不得记 FAIL/PASS")
+                           "判定基础不成立，本格不得记 FAIL/PASS/ACCEPTED")
     n_old, n_new = _kb_forbid_count(OLD_KB, D1_WORDS), _kb_forbid_count(NEW_KB, D1_WORDS)
     note = (f"judge_d1 对真实泄漏样本看得红；"
-            f"库内词条目数 旧={n_old} 新={n_new}（旧库无「包稳不卡」原文，TDD 的 7 条是"
+            f"库内词条目数 旧={n_old} 新={n_new}（新库 3 处：:25「包稳不卡」/"
+            ":29「高合规、无风险」/:51「不会封号或降权」，业务已确认保留——"
+            "用户 2026-10-24 决定，见 turtleschool PROGRESS_Chief.md，"
+            "candidate 侧记 ACCEPTED、非豁免漏洞；旧库无「包稳不卡」原文，TDD 的 7 条是"
             "真实 LLM 失败题数、离线不可复现，本周暂缓）——库内容维度，与代码版本无关；"
             "生产入口是 LLM 生成层，离线校准只能到库内容口径")
     return "FAIL", note
@@ -239,6 +254,9 @@ def _d4_cell(kb: KnowledgeBase, baseline: bool) -> tuple[str, str]:
 def measure() -> dict:
     """实测 16 格 + 逐格 note（生产入口/参数/代表性见各 note）。"""
     d1_val, d1_note = _d1_cell()
+    # #041：candidate 侧 D1 记录项——判官看得红（事实层 FAIL）即记 ACCEPTED
+    # （业务确认保留，不作 PASS 门槛）；失灵（INVALID）原样透传，两侧都报。
+    d1_for_candidate = "ACCEPTED" if d1_val == "FAIL" else d1_val
     cells = {"baseline": {}, "candidate": {}}
     notes: dict[str, str] = {}
     for version in ("baseline", "candidate"):
@@ -246,7 +264,8 @@ def measure() -> dict:
             d2_val, d2_note = _d2_cell(kb)
             d3_val, d3_note = _d3_cell(kb, baseline=(version == "baseline"))
             d4_val, d4_note = _d4_cell(kb, baseline=(version == "baseline"))
-            cells[version][lib] = {"D1": d1_val, "D2": d2_val, "D3": d3_val, "D4": d4_val}
+            d1_here = d1_val if version == "baseline" else d1_for_candidate
+            cells[version][lib] = {"D1": d1_here, "D2": d2_val, "D3": d3_val, "D4": d4_val}
             notes[f"{version}.{lib}.D1"] = d1_note
             notes[f"{version}.{lib}.D2"] = d2_note
             notes[f"{version}.{lib}.D3"] = f"[{lib} 库] {d3_note}"
@@ -276,7 +295,9 @@ def main() -> int:
                 got = m["cells"][version][lib][d]
                 want = EXPECT[version][lib][d]
                 mark = "OK " if got == want else "BAD"
-                print(f"  {mark} {version}.{lib}.{d}: 实测={got} 预期={want}")
+                tag = ("【记录项：业务确认保留（#041 用户拍板），不作 PASS 门槛】"
+                       if version == "candidate" and d == "D1" else "")
+                print(f"  {mark} {version}.{lib}.{d}: 实测={got} 预期={want}{tag}")
                 print(f"      note: {m['notes'][f'{version}.{lib}.{d}']}")
     bad = 0
     if run_g0:
@@ -285,7 +306,8 @@ def main() -> int:
         bad += n
     if run_g1:
         n, details = _judge_stage(m, "candidate")
-        print(f"G1（candidate 8 格，修复门禁）: {'PASS' if n == 0 else f'{n} 格不符: ' + '; '.join(details)}")
+        print(f"G1（candidate 8 格，修复门禁：D2/D3/D4 三条门禁 + D1 记录项）: "
+              f"{'PASS' if n == 0 else f'{n} 格不符: ' + '; '.join(details)}")
         bad += n
     return 1 if bad else 0
 
