@@ -5,12 +5,29 @@ from typing import Any, Dict
 
 from backend.config import settings
 from backend.decision_layer.base import DecisionResult
-from backend.knowledge import KnowledgeBase
+from backend.knowledge import KnowledgeBase, source_label
 from backend.llm.client import QwenClient
 from backend.llm.parser import parse_json_response
 from backend.orchestrator.prompt_builder import PromptBuilder
 
 logger = logging.getLogger(__name__)
+
+# 来源标识头（#022）：_format 输出的条目首行形如
+#   有章节：「【售前问题 · 价格】问题1: 标题【price】」
+#   无章节（旧库）：「问题1: 标题【price】」
+# 须整行锚定（^）：正文里的「（1）【腾讯文档】…」等行不会被误提。
+_SOURCE_HEADER_PATTERN = re.compile(r"^(?:【(?P<section>[^】]+)】)?问题(?P<num>\d+):", re.M)
+
+
+def _extract_sources(knowledge: str) -> list[str]:
+    """从检索文本提取来源串（保序去重）。
+
+    有章节为「章节名 / 问题N」——跨章节复用题号时来源串两两不同（#022）；
+    无章节保持「问题N」（旧库格式不变）。
+    """
+    labels = [source_label(m.group("section") or "", int(m.group("num")))
+              for m in _SOURCE_HEADER_PATTERN.finditer(knowledge)]
+    return list(dict.fromkeys(labels))
 
 # 按意图的澄清话术（提问句式，不猜测答案）
 CLARIFICATION_QUESTIONS: Dict[str, str] = {
@@ -38,7 +55,22 @@ async def handle_clarification(message: str, decision: DecisionResult, context: 
 
 
 async def handle_faq_match(decision: DecisionResult, knowledge_base: KnowledgeBase, message: str = "") -> Dict[str, Any]:
-    """知识库直接命中：返回原文与来源（问题编号），按与问题的相关度排序取前3条。"""
+    """知识库直接命中：query 优先全库相关度 Top-3（#023），回退意图→类别池子。
+
+    query 优先：全库相关度排序取前3条——库内自命中实测 69/69，而意图→类别
+    池子受类别映射误判影响（如流量题映射到 price/purchase，product 类的
+    流量条目根本不进候选池）。query 为空或全库零相关时回退原意图→类别路径
+    （既有兜底保留）；get_by_intent 不动，LLM 生成层仍按意图取知识。
+    """
+    top = knowledge_base.search_top(message, limit=3) if message else []
+    if top:
+        return {
+            "answer": "\n\n".join(knowledge_base._format(qa) for qa in top),
+            "sources": [source_label(qa.section, qa.number) for qa in top],
+            "path": "faq_match",
+        }
+
+    # 回退：意图→类别池子（query 为空或全库零相关）
     knowledge = knowledge_base.get_by_intent(decision.intent, query=message, limit=3)
     if not knowledge:
         return {
@@ -47,9 +79,8 @@ async def handle_faq_match(decision: DecisionResult, knowledge_base: KnowledgeBa
             "path": "faq_match",
         }
 
-    # 提取来源编号（相关度排序后的前3条）
-    sources = re.findall(r"问题(\d+)", knowledge)
-    sources = [f"问题{n}" for n in dict.fromkeys(sources)][:3]
+    # 提取来源（相关度排序后的前3条）：「章节名 / 问题N」或「问题N」（#022）
+    sources = _extract_sources(knowledge)[:3]
 
     return {
         "answer": knowledge,
@@ -106,13 +137,42 @@ async def handle_llm_generation(
     }
 
 
+# 【知识库】段之后可能出现的段标记（与 backend/orchestrator/prompt_builder.py 的
+# 段结构同步：knowledge 段后依次是 history/intent；few-shot 示例段在 intent 之后，
+# 无【段名】头，故不在终点集合内。新增早于示例段的段时须同步此表）。
+_KB_FOLLOWING_SECTIONS = ("【对话历史】", "【意图识别】")
+
+
+def _knowledge_section_text(prompt: str) -> str:
+    """截取 prompt 的【知识库】段正文（不含段名行）。
+
+    旧实现用 (.*?)(?=\n\\n【|\\Z) 截段：条目头「【章节】问题N: …」与 content 中的
+    行首【腾讯文档】都会触发「\\n\\n【」提前截断——白名单只剩第一条（新库下
+    每条边界都截，#022 发现）。改为按已知段名找终点，段内【…】行不再误断。
+    """
+    start = prompt.find("【知识库】\n")
+    if start == -1:
+        return ""
+    body_start = start + len("【知识库】\n")
+    ends = [i for i in (prompt.find(m, body_start) for m in _KB_FOLLOWING_SECTIONS) if i != -1]
+    body_end = min(ends) if ends else len(prompt)
+    return prompt[body_start:body_end]
+
+
 def _resolve_sources(llm_sources: Any, prompt: str) -> list[str]:
     """来源校验与回填：以prompt【知识库】段实际提供的条目为白名单。"""
-    match = re.search(r"【知识库】\n(.*?)(?=\n\n【|\Z)", prompt, re.S)
-    refs = [f"问题{n}" for n in dict.fromkeys(re.findall(r"问题(\d+)", match.group(1)))] if match else []
+    refs = _extract_sources(_knowledge_section_text(prompt))
     if not refs:
         return []
     valid = [s for s in (llm_sources or []) if isinstance(s, str) and s in refs]
+    if not valid:
+        # LLM按「问题N」自报时（prompt指引仍是旧格式）：仅当该号在白名单里
+        # 唯一命中一条才映射（#022：新库题号跨章节复用，歧义时不猜，走回填）。
+        for s in (llm_sources or []):
+            if isinstance(s, str) and re.fullmatch(r"问题\d+", s):
+                cands = [r for r in refs if r == s or r.endswith(f"/ {s}")]
+                if len(cands) == 1:
+                    valid.append(cands[0])
     return valid or refs[:3]
 
 

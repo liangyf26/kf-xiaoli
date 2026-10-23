@@ -60,19 +60,26 @@ class PromptBuilder:
         )
 
     def _knowledge_section(self, decision: DecisionResult, knowledge_base: KnowledgeBase, message: str = "") -> str:
-        """按意图筛选知识库内容（按与问题的相关度排序，目标问答不会被截断丢弃）。
+        """生成层的知识库注入：query 优先全库相关度 Top-N（#024），回退意图→类别。
 
-        unclear意图或意图类别无命中时，回退全库相关度检索，避免无法归类的问题失去知识支撑。
-        只取相关度Top-6条（Phase 4性能优化：LLM推理占端到端>99%，缩短prompt直接加速
-        prefill；相关度排序保证目标问答排在最前不会被Top-N截断丢弃）。
+        query 优先与 FAQ 层同一套规则（search_top）：意图→类别池子受类别映射
+        误判影响（旧库价格内容在 general 类，product_comparison 池子没有 →
+        价格题直接拒答）；query 为空或全库零相关时回退原意图→类别路径；
+        unclear/空意图的 search_all 兜底与 general 兜底保留。只改知识选取，
+        不动 FAQ 路由阈值与系统提示拒答规则。
         """
         if decision.escalate_to_human:
             return ""
-        knowledge = knowledge_base.get_by_intent(decision.intent, query=message, limit=KNOWLEDGE_TOP_N)
-        if not knowledge and decision.intent in ("unclear", ""):
-            knowledge = knowledge_base.search_all(query=message, limit=KNOWLEDGE_TOP_N)
-        if not knowledge:
-            knowledge = knowledge_base.get_by_intent("general", query=message) or ""
+        top = knowledge_base.search_top(message, limit=KNOWLEDGE_TOP_N) if message else []
+        if top:
+            knowledge = "\n\n".join(knowledge_base._format(qa) for qa in top)
+        else:
+            # 回退：意图→类别池子（query 为空或全库零相关）
+            knowledge = knowledge_base.get_by_intent(decision.intent, query=message, limit=KNOWLEDGE_TOP_N)
+            if not knowledge and decision.intent in ("unclear", ""):
+                knowledge = knowledge_base.search_all(query=message, limit=KNOWLEDGE_TOP_N)
+            if not knowledge:
+                knowledge = knowledge_base.get_by_intent("general", query=message) or ""
         if not knowledge:
             return ""
         if len(knowledge) > KNOWLEDGE_MAX_CHARS:

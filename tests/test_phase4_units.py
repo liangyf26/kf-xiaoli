@@ -195,7 +195,11 @@ def test_handle_llm_generation_retries_on_broken_json():
         "怎么使用", _decision(intent="usage_guide"), {}, llm, PromptBuilder(), kb))
     assert llm.calls == 2, "JSON残缺应触发1次重试"
     assert result["answer"] == "手机上可以装客户端"
-    assert result["sources"] == ["问题3"]
+    # #024 后知识段 query 优先（全库相关度 Top-6）+ #023 IDF 加权：「怎么使用」的
+    # Top-3 是 问题10「使用顺序」/问题30「安卓怎么用」（rel 5.27）与 问题8（3.29），
+    # 均比桩自报的 问题3「如何使用安装」（rel 1.99）更贴题——来源回填到新白名单，
+    # 差异是命中更准，不是答案变了。
+    assert result["sources"] == ["问题10", "问题30", "问题8"]
 
 
 # ---------- 知识库全库检索 ----------

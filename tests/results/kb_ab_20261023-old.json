@@ -1,0 +1,497 @@
+{
+ "label": "old",
+ "results": [
+  {
+   "id": "P1",
+   "question": "120 元/月的线路是什么类型，适合什么用途？",
+   "ms": 11324,
+   "answer": "120那条是IDC独享线路，主要跑社媒TK和FB，5-10兆以上包稳。",
+   "sources": [
+    "问题1"
+   ],
+   "intent": "product_comparison",
+   "engine": "qwen",
+   "path": "llm_generation",
+   "need_clarification": false,
+   "emotion": "neutral",
+   "intent_confidence": 0.85,
+   "decision_latency_ms": 3104
+  },
+  {
+   "id": "P2",
+   "question": "180 元/月和 260 元/月分别有什么区别？",
+   "ms": 6426,
+   "answer": "问题1: 开场【price】\n120/月一条idc线路，独享，社媒TK，FB，5-10兆以上包稳。\n180/月一条ISP家庭IP线路，独享，主推，社媒TK，FB，对IP有要求选这个，5-10兆以上包稳。\n260/月一条ISP家庭ip直播优化线路，独享，专门针对TK直播优化。\n5人拼车共享IP，单人50元/月 ，适合看店、购物、Claude编程等。\n联通sdwan底层网络，联通代理商，付款千元可对公开发票签合同，大项目有资质参与招投标。\n长期稳定使用必须上sdwan路由器硬件300元/个，支持淘宝。短期可以用软件。\n\n\n网购，是买家，还是要登录商家后台发商品？直播？社媒？\n\n问题35: windows老版客户端如何使用？v2rayn【usage】\n![[sdwan FQA_assets/Exported image 20260405232935-3.jpeg]]\n![[sdwan FQA_assets/Exported image 20260405232941-4.jpeg]]\n\n问题58: 有外国手机卡吗？【troubleshooting】\n有英国的实体手机卡，国内可以激活。50元一张实体卡。激活、话费套餐和养号要自己操作和支付。介绍和激活教程：https://www.laosji.net/p/%E6%88%91%E4%BB%8E%E8%8B%B1%E5%9B%BD%E8%BD%AC%E8%BF%90%E5%9B%9E%E6%9D%A5%E7%9A%84%E6%B2%83%E8%BE%BE%E4%B8%B0vodafone%E6%89%8B%E6%9C%BA%E5%8D%A1%E7%94%B3%E8%AF%B7%E5%8F%8A%E6%BF%80%E6%B4%BB%E6%94%BB%E7%95%A5/",
+   "sources": [
+    "问题1",
+    "问题35",
+    "问题58"
+   ],
+   "intent": "product_comparison",
+   "engine": "qwen",
+   "path": "faq_match",
+   "need_clarification": false,
+   "emotion": "neutral",
+   "intent_confidence": 0.95,
+   "decision_latency_ms": 3386
+  },
+  {
+   "id": "P3",
+   "question": "五人拼车多少钱，适合什么场景？",
+   "ms": 10243,
+   "answer": "5人拼车共享IP，单人50元/月，适合看店、购物、Claude编程这类对IP要求不高的场景。",
+   "sources": [
+    "问题1"
+   ],
+   "intent": "price_inquiry",
+   "engine": "qwen",
+   "path": "llm_generation",
+   "need_clarification": false,
+   "emotion": "neutral",
+   "intent_confidence": 0.85,
+   "decision_latency_ms": 2633
+  },
+  {
+   "id": "P4",
+   "question": "SDWAN 路由器多少钱，长期用建议什么？",
+   "ms": 6461,
+   "answer": "问题47: sdwan设备（sdwan路由）能否用无线网桥或者手机热点？【technical】\nSD-WAN专线对网络稳定性要求极高，非常不建议采用“无线转无线”（即接收手机热点再发射Wi-Fi或者无线网桥）的架构。这种模式损耗极大，二次桥接会成倍放大延迟和丢包，极易受环境干扰，导致专线频繁掉线和卡顿，严重影响体验。\n\n如果您有户外移动需求，建议采用目前标准的成熟方案：购买一台大品牌（如华为、中兴）的5G/4G插卡路由器（CPE），用CPE专门接收信号，然后通过一根网线接入SD-WAN设备。这样“无线接收”与“专线处理”各司其职，既方便携带，又能通过物理网线保障专线的稳定性。\n\n问题1: 开场【price】\n120/月一条idc线路，独享，社媒TK，FB，5-10兆以上包稳。\n180/月一条ISP家庭IP线路，独享，主推，社媒TK，FB，对IP有要求选这个，5-10兆以上包稳。\n260/月一条ISP家庭ip直播优化线路，独享，专门针对TK直播优化。\n5人拼车共享IP，单人50元/月 ，适合看店、购物、Claude编程等。\n联通sdwan底层网络，联通代理商，付款千元可对公开发票签合同，大项目有资质参与招投标。\n长期稳定使用必须上sdwan路由器硬件300元/个，支持淘宝。短期可以用软件。\n\n\n网购，是买家，还是要登录商家后台发商品？直播？社媒？\n\n问题44: 路由功耗是多少？【technical】\n日常使用5-8w",
+   "sources": [
+    "问题47",
+    "问题1",
+    "问题44"
+   ],
+   "intent": "price_inquiry",
+   "engine": "qwen",
+   "path": "faq_match",
+   "need_clarification": false,
+   "emotion": "neutral",
+   "intent_confidence": 0.95,
+   "decision_latency_ms": 3455
+  },
+  {
+   "id": "F1",
+   "question": "120 元套餐每月多少流量？",
+   "ms": 5634,
+   "answer": "问题1: 开场【price】\n120/月一条idc线路，独享，社媒TK，FB，5-10兆以上包稳。\n180/月一条ISP家庭IP线路，独享，主推，社媒TK，FB，对IP有要求选这个，5-10兆以上包稳。\n260/月一条ISP家庭ip直播优化线路，独享，专门针对TK直播优化。\n5人拼车共享IP，单人50元/月 ，适合看店、购物、Claude编程等。\n联通sdwan底层网络，联通代理商，付款千元可对公开发票签合同，大项目有资质参与招投标。\n长期稳定使用必须上sdwan路由器硬件300元/个，支持淘宝。短期可以用软件。\n\n\n网购，是买家，还是要登录商家后台发商品？直播？社媒？\n\n问题39: 你们的价格为什么那么低？外面常规都是10M 500元起步？【price】\n那个是电信目录价，现在联通抢市场，批发价就低。\n我们是联通核心代理，不仅仅做sdwan这业务，卖号卖套餐，搞营业厅，政企业务都做，渠道定级高，拿货折扣还可以。\n\n问题58: 有外国手机卡吗？【troubleshooting】\n有英国的实体手机卡，国内可以激活。50元一张实体卡。激活、话费套餐和养号要自己操作和支付。介绍和激活教程：https://www.laosji.net/p/%E6%88%91%E4%BB%8E%E8%8B%B1%E5%9B%BD%E8%BD%AC%E8%BF%90%E5%9B%9E%E6%9D%A5%E7%9A%84%E6%B2%83%E8%BE%BE%E4%B8%B0vodafone%E6%89%8B%E6%9C%BA%E5%8D%A1%E7%94%B3%E8%AF%B7%E5%8F%8A%E6%BF%80%E6%B4%BB%E6%94%BB%E7%95%A5/",
+   "sources": [
+    "问题1",
+    "问题39",
+    "问题58"
+   ],
+   "intent": "price_inquiry",
+   "engine": "qwen",
+   "path": "faq_match",
+   "need_clarification": false,
+   "emotion": "neutral",
+   "intent_confidence": 0.95,
+   "decision_latency_ms": 2630
+  },
+  {
+   "id": "F2",
+   "question": "180 元、260 元套餐各有多少流量？",
+   "ms": 5625,
+   "answer": "问题1: 开场【price】\n120/月一条idc线路，独享，社媒TK，FB，5-10兆以上包稳。\n180/月一条ISP家庭IP线路，独享，主推，社媒TK，FB，对IP有要求选这个，5-10兆以上包稳。\n260/月一条ISP家庭ip直播优化线路，独享，专门针对TK直播优化。\n5人拼车共享IP，单人50元/月 ，适合看店、购物、Claude编程等。\n联通sdwan底层网络，联通代理商，付款千元可对公开发票签合同，大项目有资质参与招投标。\n长期稳定使用必须上sdwan路由器硬件300元/个，支持淘宝。短期可以用软件。\n\n\n网购，是买家，还是要登录商家后台发商品？直播？社媒？\n\n问题58: 有外国手机卡吗？【troubleshooting】\n有英国的实体手机卡，国内可以激活。50元一张实体卡。激活、话费套餐和养号要自己操作和支付。介绍和激活教程：https://www.laosji.net/p/%E6%88%91%E4%BB%8E%E8%8B%B1%E5%9B%BD%E8%BD%AC%E8%BF%90%E5%9B%9E%E6%9D%A5%E7%9A%84%E6%B2%83%E8%BE%BE%E4%B8%B0vodafone%E6%89%8B%E6%9C%BA%E5%8D%A1%E7%94%B3%E8%AF%B7%E5%8F%8A%E6%BF%80%E6%B4%BB%E6%94%BB%E7%95%A5/\n\n问题35: windows老版客户端如何使用？v2rayn【usage】\n![[sdwan FQA_assets/Exported image 20260405232935-3.jpeg]]\n![[sdwan FQA_assets/Exported image 20260405232941-4.jpeg]]",
+   "sources": [
+    "问题1",
+    "问题58",
+    "问题35"
+   ],
+   "intent": "price_inquiry",
+   "engine": "qwen",
+   "path": "faq_match",
+   "need_clarification": false,
+   "emotion": "neutral",
+   "intent_confidence": 0.95,
+   "decision_latency_ms": 2622
+  },
+  {
+   "id": "F3",
+   "question": "50 元拼车流量多少，不够怎么办？",
+   "ms": 5547,
+   "answer": "问题1: 开场【price】\n120/月一条idc线路，独享，社媒TK，FB，5-10兆以上包稳。\n180/月一条ISP家庭IP线路，独享，主推，社媒TK，FB，对IP有要求选这个，5-10兆以上包稳。\n260/月一条ISP家庭ip直播优化线路，独享，专门针对TK直播优化。\n5人拼车共享IP，单人50元/月 ，适合看店、购物、Claude编程等。\n联通sdwan底层网络，联通代理商，付款千元可对公开发票签合同，大项目有资质参与招投标。\n长期稳定使用必须上sdwan路由器硬件300元/个，支持淘宝。短期可以用软件。\n\n\n网购，是买家，还是要登录商家后台发商品？直播？社媒？\n\n问题46: iphone直播有点卡怎么办？【troubleshooting】\n一是确保iphone是13标准版以上。二是不要装手机壳，装散热背夹。三是装扩展坞和插网线。\n\n问题39: 你们的价格为什么那么低？外面常规都是10M 500元起步？【price】\n那个是电信目录价，现在联通抢市场，批发价就低。\n我们是联通核心代理，不仅仅做sdwan这业务，卖号卖套餐，搞营业厅，政企业务都做，渠道定级高，拿货折扣还可以。",
+   "sources": [
+    "问题1",
+    "问题46",
+    "问题39"
+   ],
+   "intent": "price_inquiry",
+   "engine": "qwen",
+   "path": "faq_match",
+   "need_clarification": false,
+   "emotion": "neutral",
+   "intent_confidence": 0.95,
+   "decision_latency_ms": 2542
+  },
+  {
+   "id": "T1",
+   "question": "能免费试用吗，能试几天？",
+   "ms": 15245,
+   "answer": "可以试用的。不过具体免费几天我这边没有明确信息，需要人工帮你确认一下。",
+   "sources": [
+    "问题16"
+   ],
+   "intent": "purchase_process",
+   "engine": "qwen",
+   "path": "llm_generation",
+   "need_clarification": false,
+   "emotion": "neutral",
+   "intent_confidence": 0.85,
+   "decision_latency_ms": 3013
+  },
+  {
+   "id": "T2",
+   "question": "哪些地区现在有试用线路？",
+   "ms": 15583,
+   "answer": "暂时无法回答，需要人工介入",
+   "sources": [],
+   "intent": "price_inquiry",
+   "engine": "qwen",
+   "path": "llm_generation",
+   "need_clarification": false,
+   "emotion": "neutral",
+   "intent_confidence": 0.85,
+   "decision_latency_ms": 3716
+  },
+  {
+   "id": "T3",
+   "question": "怎么申请试用、用什么方式体验？",
+   "ms": 15557,
+   "answer": "可以试用的。体验方式很简单，先用我们的软件客户端连上就行，不用先买路由器。觉得合适了再考虑上硬件，路由器300元/个，淘宝就能下单。",
+   "sources": [
+    "问题16",
+    "问题33"
+   ],
+   "intent": "purchase_process",
+   "engine": "qwen",
+   "path": "llm_generation",
+   "need_clarification": false,
+   "emotion": "neutral",
+   "intent_confidence": 0.85,
+   "decision_latency_ms": 3813
+  },
+  {
+   "id": "TSH1",
+   "question": "同账号别的设备能用，只有一台不能用怎么办？",
+   "ms": 12114,
+   "answer": "先检查一下那台设备的系统时间有没有对齐世界时间。我们用的加密对时间很敏感，误差超过30秒就连不上。Windows的话可以跑一下同步时间脚本，手机/电脑手动把时间改成自动同步就行。",
+   "sources": [
+    "问题38"
+   ],
+   "intent": "troubleshooting",
+   "engine": "qwen",
+   "path": "llm_generation",
+   "need_clarification": false,
+   "emotion": "neutral",
+   "intent_confidence": 0.95,
+   "decision_latency_ms": 3030
+  },
+  {
+   "id": "TSH2",
+   "question": "为什么看到的是广西 IP？",
+   "ms": 13496,
+   "answer": "正常的。测试阶段你还没拿到独立路由，流量要先经过我们SDWAN边缘节点中转出去，所以出口IP显示广西。正式买有路由的线路，出口走的是联通运营商，也是广西的联通节点，都是正规SDWAN，不影响使用。",
+   "sources": [
+    "问题37"
+   ],
+   "intent": "technical_support",
+   "engine": "qwen",
+   "path": "llm_generation",
+   "need_clarification": false,
+   "emotion": "neutral",
+   "intent_confidence": 0.85,
+   "decision_latency_ms": 3445
+  },
+  {
+   "id": "TSH3",
+   "question": "网速慢、视频卡怎么排查？",
+   "ms": 16353,
+   "answer": "先用 https://speedtest.net 测个速，截图发我看下。另外每条线路带宽有限，尽量只留一台设备在用，多设备同时跑会分带宽，容易卡。",
+   "sources": [
+    "问题49",
+    "问题12"
+   ],
+   "intent": "troubleshooting",
+   "engine": "qwen",
+   "path": "llm_generation",
+   "need_clarification": false,
+   "emotion": "neutral",
+   "intent_confidence": 0.95,
+   "decision_latency_ms": 3035
+  },
+  {
+   "id": "TSH4",
+   "question": "断网或连不上先做什么？",
+   "ms": 17908,
+   "answer": "暂时无法回答，需要人工介入",
+   "sources": [],
+   "intent": "troubleshooting",
+   "engine": "qwen",
+   "path": "llm_generation",
+   "need_clarification": false,
+   "emotion": "neutral",
+   "intent_confidence": 0.95,
+   "decision_latency_ms": 3725
+  },
+  {
+   "id": "C1",
+   "question": "苹果手机客户端从哪里下载？",
+   "ms": 6417,
+   "answer": "问题9: 苹果手机客户端哪里下载安装？【usage】\n【腾讯文档】sdwan苹果客户端（iPhone、iPad、macOS）\nhttps://docs.qq.com/doc/DRnZTRXZmaGZPRGVE\n\n问题30: 安卓手机怎么用？客户端哪里下载？【usage】\n【腾讯文档】sdwan安卓客户端使用\nhttps://docs.qq.com/doc/DRmpmSkJiSVpCUnBn\n\n问题10: 使用顺序是怎么样的？【usage】\n以美区加州举例，苹果手机拔卡（不插卡）——切换地区为美国、语言切换US英语、时区切换美国——连上wifi——登录美区apple id账号——安装手机客户端——客户端扫线路专属二维码——打开线路开关——安装tiktok——打开tiktok登录账号——使用。",
+   "sources": [
+    "问题9",
+    "问题30",
+    "问题10"
+   ],
+   "intent": "usage_guide",
+   "engine": "qwen",
+   "path": "faq_match",
+   "need_clarification": false,
+   "emotion": "neutral",
+   "intent_confidence": 0.95,
+   "decision_latency_ms": 3413
+  },
+  {
+   "id": "C2",
+   "question": "安卓手机能不能做 TikTok？",
+   "ms": 14116,
+   "answer": "不建议。TikTok会检测安卓手机的归属地，即使挂了线路也很容易暴露你实际地区，基本用不了。如果一定要试，有一定风险，但大概率会被检测。",
+   "sources": [
+    "问题21",
+    "问题14"
+   ],
+   "intent": "product_comparison",
+   "engine": "qwen",
+   "path": "llm_generation",
+   "need_clarification": false,
+   "emotion": "neutral",
+   "intent_confidence": 0.85,
+   "decision_latency_ms": 3002
+  },
+  {
+   "id": "C3",
+   "question": "Windows 客户端在哪里下载？",
+   "ms": 6908,
+   "answer": "问题35: windows老版客户端如何使用？v2rayn【usage】\n![[sdwan FQA_assets/Exported image 20260405232935-3.jpeg]]\n![[sdwan FQA_assets/Exported image 20260405232941-4.jpeg]]\n\n问题53: windows电脑软件客户端使用教程【usage】\n【腾讯文档】sdwan电脑客户端\nhttps://docs.qq.com/doc/DRmhDSHhnT2daeWZh\n\n问题9: 苹果手机客户端哪里下载安装？【usage】\n【腾讯文档】sdwan苹果客户端（iPhone、iPad、macOS）\nhttps://docs.qq.com/doc/DRnZTRXZmaGZPRGVE",
+   "sources": [
+    "问题35",
+    "问题53",
+    "问题9"
+   ],
+   "intent": "usage_guide",
+   "engine": "qwen",
+   "path": "faq_match",
+   "need_clarification": false,
+   "emotion": "neutral",
+   "intent_confidence": 0.95,
+   "decision_latency_ms": 3906
+  },
+  {
+   "id": "C4",
+   "question": "Windows 老版 v2rayn 怎么用？",
+   "ms": 15735,
+   "answer": "老版v2rayn的使用步骤看这两张图就行：\n![[sdwan FQA_assets/Exported image 20260405232935-3.jpeg]]\n![[sdwan FQA_assets/Exported image 20260405232941-4.jpeg]]\n照着操作就行，有问题再问我。",
+   "sources": [
+    "问题35"
+   ],
+   "intent": "usage_guide",
+   "engine": "qwen",
+   "path": "llm_generation",
+   "need_clarification": false,
+   "emotion": "neutral",
+   "intent_confidence": 0.95,
+   "decision_latency_ms": 3164
+  },
+  {
+   "id": "TAX1",
+   "question": "付款多少可以开发票？",
+   "ms": 11702,
+   "answer": "付款满千元就可以开发票，还能签合同。",
+   "sources": [
+    "问题1",
+    "问题54"
+   ],
+   "intent": "price_inquiry",
+   "engine": "qwen",
+   "path": "llm_generation",
+   "need_clarification": false,
+   "emotion": "neutral",
+   "intent_confidence": 0.85,
+   "decision_latency_ms": 4119
+  },
+  {
+   "id": "TAX2",
+   "question": "发票是什么类型、税率多少？",
+   "ms": 13155,
+   "answer": "暂时无法回答，需要人工介入",
+   "sources": [],
+   "intent": "purchase_process",
+   "engine": "qwen",
+   "path": "llm_generation",
+   "need_clarification": false,
+   "emotion": "neutral",
+   "intent_confidence": 0.85,
+   "decision_latency_ms": 4026
+  },
+  {
+   "id": "TAX3",
+   "question": "开票需要提供什么信息、是否支持对公？",
+   "ms": 6973,
+   "answer": "问题1: 开场【price】\n120/月一条idc线路，独享，社媒TK，FB，5-10兆以上包稳。\n180/月一条ISP家庭IP线路，独享，主推，社媒TK，FB，对IP有要求选这个，5-10兆以上包稳。\n260/月一条ISP家庭ip直播优化线路，独享，专门针对TK直播优化。\n5人拼车共享IP，单人50元/月 ，适合看店、购物、Claude编程等。\n联通sdwan底层网络，联通代理商，付款千元可对公开发票签合同，大项目有资质参与招投标。\n长期稳定使用必须上sdwan路由器硬件300元/个，支持淘宝。短期可以用软件。\n\n\n网购，是买家，还是要登录商家后台发商品？直播？社媒？\n\n问题19: 一条专线，支持几个设备使用？如果1台手机专门直播+几台电脑配合上架链接是否可行？【product】\n可以。但是一条线路资源是有限的，多台设备使用会挤占带宽，卡了就请少上设备。\n\n问题27: 检测线路为什么显示IDC机房IP？为什么显示纯净度不高？为什么提示风险值高？【troubleshooting】\n每个检测网站的检测标准和定义都不一样，有些风险值根本就跟做电商无关，只是历史上这个线路被网络攻击的次数，而且还不代表被攻破的次数。\n大部分线路检测都是基于浏览器，浏览器有自己的指纹信息，而且不用于做业务一般情况下不会做伪装，所以提示风险高。业务目标的APP检测方式跟浏览器完全不一样的，线路检查没有太多的参考价值。\n还有请做好一些基本功要做好。例如时区、国家地区、语言等基础信息要设置好，模拟国外。不要插卡。\n不要拿国外的线路访问国内的网站或者APP，容易触发国内的风控。很多IP线路检测网站都是国内的，甚至是钓鱼专用的。专心做电商业务是不会有问题的。",
+   "sources": [
+    "问题1",
+    "问题19",
+    "问题27"
+   ],
+   "intent": "purchase_process",
+   "engine": "qwen",
+   "path": "faq_match",
+   "need_clarification": false,
+   "emotion": "neutral",
+   "intent_confidence": 0.95,
+   "decision_latency_ms": 3969
+  },
+  {
+   "id": "L1",
+   "question": "你们线路是否合规，能签合同开发票吗？",
+   "ms": 12315,
+   "answer": "合规的，我们是联通代理商，走的是联通跨境专线，所有上网行为都按国家合规要求备案。付款满千元就能签合同、开发票，大项目还能参与招投标。",
+   "sources": [
+    "问题54",
+    "问题26",
+    "问题1"
+   ],
+   "intent": "purchase_process",
+   "engine": "qwen",
+   "path": "llm_generation",
+   "need_clarification": false,
+   "emotion": "neutral",
+   "intent_confidence": 0.85,
+   "decision_latency_ms": 2819
+  },
+  {
+   "id": "L2",
+   "question": "线路有什么用途限制？",
+   "ms": 12501,
+   "answer": "不能碰黄赌毒、诈骗、违法用途，也不能反党反国家反革命。咱们线路就是专门服务合法合规跨境电商的，所有上网行为都按国家要求备案，正常做业务没问题。",
+   "sources": [
+    "问题26"
+   ],
+   "intent": "usage_guide",
+   "engine": "qwen",
+   "path": "llm_generation",
+   "need_clarification": false,
+   "emotion": "neutral",
+   "intent_confidence": 0.85,
+   "decision_latency_ms": 3920
+  },
+  {
+   "id": "L3",
+   "question": "线路检测显示 IDC/风险高，是否说明不能做业务？",
+   "ms": 15458,
+   "answer": "不影响做业务。那些检测网站标准五花八门，风险值很多时候只是历史上被扫过的次数，不代表被攻破。而且检测基本走浏览器，浏览器自带指纹、不做伪装，当然显示风险高。你实际跑业务用的APP检测逻辑跟浏览器完全不一样，线路检测参考价值不大。把时区、地区、语言这些基础设置好，不插卡，专心做电商就没问题。",
+   "sources": [
+    "问题27"
+   ],
+   "intent": "technical_support",
+   "engine": "qwen",
+   "path": "llm_generation",
+   "need_clarification": false,
+   "emotion": "neutral",
+   "intent_confidence": 0.85,
+   "decision_latency_ms": 4114
+  },
+  {
+   "id": "L4",
+   "question": "你们公司名称和资质信息是什么？",
+   "ms": 14016,
+   "answer": "暂时无法回答，需要人工介入",
+   "sources": [],
+   "intent": "unclear",
+   "engine": "qwen",
+   "path": "llm_generation",
+   "need_clarification": false,
+   "emotion": "neutral",
+   "intent_confidence": 0.6,
+   "decision_latency_ms": 3620
+  },
+  {
+   "id": "PH1",
+   "question": "苹果手机客户端从哪里下载？发个截图给我",
+   "ms": 7493,
+   "answer": "问题9: 苹果手机客户端哪里下载安装？【usage】\n【腾讯文档】sdwan苹果客户端（iPhone、iPad、macOS）\nhttps://docs.qq.com/doc/DRnZTRXZmaGZPRGVE\n\n问题30: 安卓手机怎么用？客户端哪里下载？【usage】\n【腾讯文档】sdwan安卓客户端使用\nhttps://docs.qq.com/doc/DRmpmSkJiSVpCUnBn\n\n问题10: 使用顺序是怎么样的？【usage】\n以美区加州举例，苹果手机拔卡（不插卡）——切换地区为美国、语言切换US英语、时区切换美国——连上wifi——登录美区apple id账号——安装手机客户端——客户端扫线路专属二维码——打开线路开关——安装tiktok——打开tiktok登录账号——使用。",
+   "sources": [
+    "问题9",
+    "问题30",
+    "问题10"
+   ],
+   "intent": "usage_guide",
+   "engine": "qwen",
+   "path": "faq_match",
+   "need_clarification": false,
+   "emotion": "neutral",
+   "intent_confidence": 0.95,
+   "decision_latency_ms": 4484
+  },
+  {
+   "id": "PH2",
+   "question": "能把客户端安装包发我吗？",
+   "ms": 5561,
+   "answer": "问题3: 如何使用安装？【usage】\n手机上可以装客户端。或者购买我们深度定制的路由器网关。\n\n问题9: 苹果手机客户端哪里下载安装？【usage】\n【腾讯文档】sdwan苹果客户端（iPhone、iPad、macOS）\nhttps://docs.qq.com/doc/DRnZTRXZmaGZPRGVE\n\n问题10: 使用顺序是怎么样的？【usage】\n以美区加州举例，苹果手机拔卡（不插卡）——切换地区为美国、语言切换US英语、时区切换美国——连上wifi——登录美区apple id账号——安装手机客户端——客户端扫线路专属二维码——打开线路开关——安装tiktok——打开tiktok登录账号——使用。",
+   "sources": [
+    "问题3",
+    "问题9",
+    "问题10"
+   ],
+   "intent": "usage_guide",
+   "engine": "qwen",
+   "path": "faq_match",
+   "need_clarification": false,
+   "emotion": "neutral",
+   "intent_confidence": 0.95,
+   "decision_latency_ms": 2557
+  },
+  {
+   "id": "PH3",
+   "question": "这个我搞不定，帮我转人工",
+   "ms": 5182,
+   "answer": "很抱歉给您带来不好的体验。暂时无法回答，需要人工介入。已为您标记问题并转接人工客服，请稍候，人工会尽快与您联系。",
+   "sources": [],
+   "intent": "unclear",
+   "engine": "qwen",
+   "path": "human_escalation",
+   "need_clarification": false,
+   "emotion": "neutral",
+   "intent_confidence": 0.6,
+   "decision_latency_ms": 2178
+  },
+  {
+   "id": "PH4",
+   "question": "把配置文件发文件给我",
+   "ms": 12633,
+   "answer": "暂时无法回答，需要人工介入",
+   "sources": [],
+   "intent": "usage_guide",
+   "engine": "qwen",
+   "path": "llm_generation",
+   "need_clarification": false,
+   "emotion": "neutral",
+   "intent_confidence": 0.85,
+   "decision_latency_ms": 2877
+  },
+  {
+   "id": "PH5",
+   "question": "需要人工介入处理一下",
+   "ms": 6969,
+   "answer": "很抱歉给您带来不好的体验。暂时无法回答，需要人工介入。已为您标记问题并转接人工客服，请稍候，人工会尽快与您联系。",
+   "sources": [],
+   "intent": "unclear",
+   "engine": "qwen",
+   "path": "human_escalation",
+   "need_clarification": false,
+   "emotion": "neutral",
+   "intent_confidence": 0.5,
+   "decision_latency_ms": 3942
+  }
+ ]
+}

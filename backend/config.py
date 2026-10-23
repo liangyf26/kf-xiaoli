@@ -20,6 +20,10 @@ class Settings(BaseSettings):
     KNOWLEDGE_BASE_PATH: str = Field(..., description="知识库文件路径")
     DECISION_ENGINE: str = Field(..., description="决策引擎: rule/jev/kev/qwen")
 
+    # 管理端点（/admin/kb/*、/api/admin/*）令牌：缺省空 = fail-closed 一律 401，
+    # 不做 localhost 豁免（Chief 裁定 2026-10-23）
+    ADMIN_TOKEN: str = ""
+
     # 模型可选配置
     MODEL_API_KEY: str = ""
     TEMPERATURE: float = 0.3

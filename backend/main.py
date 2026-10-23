@@ -3,15 +3,17 @@
 编排流程：用户消息经等待汇总后交给Orchestrator完成决策→路由→生成。
 日志：控制台+文件双通道，文件按日期轮转（logs/app.log，午夜切割）。
 """
+import hmac
 import json
 import logging
 from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 
-from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Header, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 
 from backend.config import settings
 from backend.connection_manager import ConnectionManager
@@ -116,6 +118,74 @@ async def reset_metrics() -> dict:
     return {"status": "reset", "metrics": metrics.snapshot()}
 
 
+# ---------------------------------------------------------- 知识库热更新（任务书 v1.2）
+
+_kb_previous_stats: dict | None = None   # 最近一次成功切换前的 stats（供对账）
+
+
+def _admin_authorized(x_admin_token: str | None) -> bool:
+    """ADMIN_TOKEN fail-closed（Chief 裁定 2026-10-23）：服务未配置 token 一律 401，
+    不做 localhost 豁免。"""
+    expected = (settings.ADMIN_TOKEN or "").strip()
+    if not expected or x_admin_token is None:
+        return False
+    return hmac.compare_digest(x_admin_token.strip().encode(), expected.encode())
+
+
+def _resolve_kb_arg(raw: str) -> Path:
+    """CLI/HTTP 传入的库路径：相对路径按项目根解析（与启动加载 :54-56 同规则）。"""
+    kb_path = Path(raw)
+    return kb_path if kb_path.is_absolute() else BASE_DIR / kb_path
+
+
+class ReloadKBRequest(BaseModel):
+    path: str = ""          # 缺省用 .env 的 KNOWLEDGE_BASE_PATH
+    dry_run: bool = False   # true = 只解析校验不切换
+
+
+def _do_reload_kb(body: ReloadKBRequest, x_admin_token: str | None) -> dict:
+    """reload/preview 共用主体：全程零 LLM/模型网络调用（用户要求，2026-10-23）。"""
+    if not _admin_authorized(x_admin_token):
+        raise HTTPException(status_code=401,
+                            detail="未授权：X-Admin-Token 缺失、错误或服务未配置 ADMIN_TOKEN")
+    raw = (body.path or "").strip() or settings.KNOWLEDGE_BASE_PATH
+    kb_path = _resolve_kb_arg(raw)
+    global _kb_previous_stats
+    try:
+        if body.dry_run:
+            result = knowledge_base.preview(kb_path)
+            result["delta"] = (result["would_be"]["qa_pairs"]
+                               - result["current"]["qa_pairs"])
+            return result
+        previous = knowledge_base.stats()
+        current = knowledge_base.reload(kb_path)
+    except HTTPException:
+        raise
+    except Exception as exc:  # noqa: BLE001 四种拒换条件都以 400 带原因返回，服务保持旧库
+        raise HTTPException(status_code=400, detail=f"知识库未替换：{exc}") from exc
+    _kb_previous_stats = previous
+    return {"status": "reloaded", "previous": previous, "current": current,
+            "delta": current["qa_pairs"] - previous["qa_pairs"]}
+
+
+@app.post("/admin/kb/reload")
+@app.post("/api/admin/reload-kb")   # 任务书 v1.2 命名，两路同 handler
+async def reload_kb(body: ReloadKBRequest,
+                    x_admin_token: str | None = Header(default=None, alias="X-Admin-Token")) -> dict:
+    """知识库热更新（body.path 缺省用 .env 配置；dry_run=true 只校验不换）。"""
+    return _do_reload_kb(body, x_admin_token)
+
+
+@app.get("/admin/kb/stats")
+@app.get("/api/admin/kb-stats")   # 任务书 v1.2 命名
+async def kb_stats(x_admin_token: str | None = Header(default=None, alias="X-Admin-Token")) -> dict:
+    """当前知识库概况；previous 为最近一次成功切换前的 stats（没有则为 null）。"""
+    if not _admin_authorized(x_admin_token):
+        raise HTTPException(status_code=401,
+                            detail="未授权：X-Admin-Token 缺失、错误或服务未配置 ADMIN_TOKEN")
+    return {"current": knowledge_base.stats(), "previous": _kb_previous_stats}
+
+
 # 当前决策引擎名（rule/jev/kev/qwen）；WebSocket switch_engine消息运行时切换
 current_engine_name = settings.DECISION_ENGINE
 
@@ -130,8 +200,10 @@ manager = ConnectionManager()
 aggregator = WaitAggregator()
 # 会话提炼器：会话静默结束后用Qwen把对话提炼成问答，追加到data/sdwan-real.md
 distiller = SessionDistiller()
-# 编排器：决策层+路由+生成（Phase 3）；知识库随服务启动加载
-orchestrator = Orchestrator()
+# 编排器：决策层+路由+生成（Phase 3）；知识库随服务启动加载。
+# 单实例归一（任务书-kf知识库热更新 v1.2）：显式传入全局 knowledge_base，
+# orchestrator.knowledge_base is knowledge_base 恒成立——reload 只需换一处。
+orchestrator = Orchestrator(knowledge_base=knowledge_base)
 logger.info("编排器已加载: 决策引擎=%s, 知识库=%d问答对", type(orchestrator.decision_engine).__name__, len(orchestrator.knowledge_base.qa_pairs))
 
 
