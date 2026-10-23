@@ -36,14 +36,17 @@ SANDBOX = Path("/tmp/kf-adv")
 
 
 def ensure_not_prod(dst_real: Path, src_real: Path) -> None:
-    """副本不得与源、以及任一生产库登记（两个 canonical path）同路径或同 inode。
+    """副本不得与源、以及任一生产库登记（两个 canonical path）同路径或同文件。
 
+    同文件判定用 (st_dev, st_ino) 联合（#044 对齐：单看 inode 跨设备会撞号）；
     抽成独立函数：gate_copy 在拷贝后调用；单测可直调（硬链接打穿场景）。
     """
+    dst_id = (dst_real.stat().st_dev, dst_real.stat().st_ino)
     checks = [("源", src_real)] + [("生产库", p.resolve(strict=True)) for p in PROD_KBS]
     for name, other in checks:
-        if dst_real == other or dst_real.stat().st_ino == other.stat().st_ino:
-            raise SystemExit(f"[gate] 副本与{name}同路径或同 inode: {dst_real} vs {other}")
+        other_id = (other.stat().st_dev, other.stat().st_ino)
+        if dst_real == other or dst_id == other_id:
+            raise SystemExit(f"[gate] 副本与{name}同路径或同文件(dev,ino): {dst_real} vs {other}")
 
 
 def gate_copy(src: Path, dst: Path) -> Path:
@@ -189,6 +192,8 @@ def main() -> int:
     dst = SANDBOX / "kb" / Path(args.kb).name
     dst.parent.mkdir(parents=True, exist_ok=True)
     dst_real = gate_copy(Path(args.kb), dst)
+    # 副本预期条数在 spawn 前算好（#044）：spawn 之后才算万一抛异常会残留子进程
+    expected_qa = _kb_qa_count(dst_real)
 
     distill_out = SANDBOX / "distilled.md"
     gate_distiller(distill_out)
@@ -196,7 +201,11 @@ def main() -> int:
 
     env = os.environ.copy()
     admin_token = __import__("secrets").token_hex(16)
-    (SANDBOX / "admin.token").write_text(admin_token, encoding="utf-8")
+    token_path = SANDBOX / "admin.token"
+    fd = os.open(token_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)   # #044 权限收敛
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        f.write(admin_token)
+    token_path.chmod(0o600)   # 文件已存在时 O_CREAT 权限位不生效，补一刀保证 0600
     env.update({
         "ADMIN_TOKEN": admin_token,   # 一次性 token：ab_run 对账 kb-stats 用（#021 fail-closed 链路）
         "KNOWLEDGE_BASE_PATH": str(dst_real),
@@ -211,7 +220,6 @@ def main() -> int:
         proc = subprocess.Popen(
             [str(PROJECT_ROOT / ".venv/bin/python"), "-m", "backend.main"],
             cwd=PROJECT_ROOT, env=env, stdout=fh, stderr=subprocess.STDOUT)
-    expected_qa = _kb_qa_count(dst_real)
     h = verify_spawn(proc, args.port, expected_qa, log=log)   # #039 三判（含 8013 盲区）
     (SANDBOX / "instance.pid").write_text(str(proc.pid), encoding="utf-8")   # 三判通过才落 pid 文件
     print(f"[gate] 门禁全过（拷贝/软链/inode/distiller/会话/端口 + #039 三判）："

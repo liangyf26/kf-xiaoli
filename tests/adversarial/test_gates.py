@@ -6,10 +6,13 @@ Reviewer 打穿路径：copyfile 跟随**已存在的目标软链接**，把链�
 
 运行: .venv/bin/python -m pytest tests/adversarial/test_gates.py -q（仓库根）
 """
+import errno
 import os
+import shutil
 import socket
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -86,21 +89,29 @@ def test_hardlink_to_prod_rejected(tmp_path):
 
     gate_copy 对「目标已存在」会先拒绝（O_EXCL 前置），inode 校验抽在
     ensure_not_prod——直调它来打这个场景（gate_copy 内部同样会走到）。
+    硬链接要求同文件系统（#044）：在生产库同目录建临时目录建链，测完清理
+    不污染仓库；跨设备（EXDEV）显式 skip，不静默 pass。
     """
     assert len(PROD_KBS) == 2 and all(p.exists() for p in PROD_KBS)
     for prod in PROD_KBS:
-        hardlink = tmp_path / f"hardlink-{prod.name}"
-        os.link(prod, hardlink)                # 在 /tmp 建指向生产库 inode 的硬链接
-        src_real = tmp_path / "irrelevant-src.md"
-        src_real.write_text("x", encoding="utf-8")
+        linkdir = Path(tempfile.mkdtemp(prefix="kf-test-hardlink-", dir=prod.parent))
         try:
-            with pytest.raises(SystemExit, match="同路径或同 inode"):
+            hardlink = linkdir / f"hardlink-{prod.name}"
+            try:
+                os.link(prod, hardlink)            # 同设备建指向生产库 inode 的硬链接
+            except OSError as e:
+                if e.errno == errno.EXDEV:
+                    pytest.skip(f"生产库与临时目录跨设备，无法建硬链: {e}")
+                raise
+            src_real = tmp_path / "irrelevant-src.md"
+            src_real.write_text("x", encoding="utf-8")
+            with pytest.raises(SystemExit, match="同路径或同文件"):
                 ensure_not_prod(hardlink, src_real)
             # 顺带证明 O_EXCL 也拦得住：把硬链接当拷贝目标直接被拒
             with pytest.raises(SystemExit, match="目标已存在"):
                 gate_copy(prod, hardlink)
         finally:
-            hardlink.unlink()
+            shutil.rmtree(linkdir, ignore_errors=True)
 
 
 def test_residual_copy_blocks_rerun(kb_dir):

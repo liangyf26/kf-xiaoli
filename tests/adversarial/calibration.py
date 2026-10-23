@@ -147,16 +147,23 @@ def _d1_cell() -> tuple[str, str]:
     决定，见 turtleschool PROGRESS_Chief.md）——candidate 侧由 measure() 映射为
     ACCEPTED（记录项，不作 PASS 门槛）；baseline 侧保持 FAIL（判定器校准：
     判官必须看得见库内 forbid 内容，词表不因业务确认而删，不是豁免漏洞）。
-    本函数返回**事实层**：判官看得红且库内确有 forbid 内容 = "FAIL"，
+    本函数返回**事实层**：判官双向正常 = "FAIL"（库内确有 forbid 内容），
     失灵 = "INVALID"；版本语义映射在 measure()。
+    双向校准（#044）：正样本（泄漏）必须报红 **且** 负样本（正常回答）必须
+    放行——只验单向时 judge_d1 恒定报红（误伤正常回答）会被放过。
     """
-    sample = judge_d1("400G流量,包稳不卡。")   # TDD evidence 真实泄漏原文
-    if sample["pass"] is not False:
-        return "INVALID", ("样本未复现 D1 特征：judge_d1 对真实泄漏样本"
-                           "「400G流量,包稳不卡。」未报红（forbid 词表失配或判定器失灵），"
-                           "判定基础不成立，本格不得记 FAIL/PASS/ACCEPTED")
+    sample = judge_d1("400G流量,包稳不卡。")   # 正样本：TDD evidence 真实泄漏原文
+    clean = judge_d1("我们提供 400G 流量套餐，七天内可退。")   # 负样本：正常回答，forbid 0 命中
+    if sample["pass"] is not False or clean["pass"] is not True:
+        bad = []
+        if sample["pass"] is not False:
+            bad.append("正样本未报红（forbid 词表失配或判定器失灵）")
+        if clean["pass"] is not True:
+            bad.append("负样本未放行（judge_d1 恒定报红/误伤正常回答）")
+        return "INVALID", ("判定器双向校准失败：" + "；".join(bad)
+                           + "——判定基础不成立，本格不得记 FAIL/PASS/ACCEPTED")
     n_old, n_new = _kb_forbid_count(OLD_KB, D1_WORDS), _kb_forbid_count(NEW_KB, D1_WORDS)
-    note = (f"judge_d1 对真实泄漏样本看得红；"
+    note = (f"judge_d1 双向校准通过（正样本泄漏报红+负样本正常回答放行，#044）；"
             f"库内词条目数 旧={n_old} 新={n_new}（新库 3 处：:25「包稳不卡」/"
             ":29「高合规、无风险」/:51「不会封号或降权」，业务已确认保留——"
             "用户 2026-10-24 决定，见 turtleschool PROGRESS_Chief.md，"

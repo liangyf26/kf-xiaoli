@@ -91,3 +91,30 @@ def test_sims_leave_no_trace():
     assert m2["cells"] == EXPECT or all(
         m2["cells"][v][lib][d] == EXPECT[v][lib][d]
         for v in EXPECT for lib in EXPECT[v] for d in EXPECT[v][lib])
+
+
+def test_d1_cell_invalid_when_judge_d1_always_passes(monkeypatch):
+    """judge_d1 恒 pass（看不见红）时 _d1_cell 必须 INVALID（#040/#044）。
+
+    防回归：有人把 _d1_cell 改回无条件 FAIL，judge_d1 失灵就又发现不了。
+    """
+    monkeypatch.setattr(calibration, "judge_d1",
+                        lambda a: {"pass": True, "reason": "reversed",
+                                   "matched_pattern": "", "matched_span": ""})
+    val, note = calibration._d1_cell()
+    assert val == "INVALID", f"恒 pass 判官必须判 INVALID，实得 {val}"
+    assert "正样本未报红" in note
+
+
+def test_d1_cell_invalid_when_judge_d1_always_fails(monkeypatch):
+    """judge_d1 恒报红（误伤正常回答）时 _d1_cell 必须 INVALID（#044 负样本方向）。
+
+    防回归：只验「泄漏报红」单向时，恒定报红的判官会被双向校准拦下；
+    若负样本断言被删，本用例红。
+    """
+    monkeypatch.setattr(calibration, "judge_d1",
+                        lambda a: {"pass": False, "reason": "forbid_hit",
+                                   "matched_pattern": "reversed", "matched_span": "reversed"})
+    val, note = calibration._d1_cell()
+    assert val == "INVALID", f"恒报红判官必须判 INVALID，实得 {val}"
+    assert "负样本未放行" in note
