@@ -14,7 +14,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from backend.decision_layer.base import DecisionResult
-from backend.knowledge import KnowledgeBase
+from backend.knowledge import KnowledgeBase, source_label
 from backend.llm.client import QwenClient
 from backend.metrics import Metrics
 from backend.orchestrator.handlers import handle_llm_generation
@@ -195,11 +195,12 @@ def test_handle_llm_generation_retries_on_broken_json():
         "怎么使用", _decision(intent="usage_guide"), {}, llm, PromptBuilder(), kb))
     assert llm.calls == 2, "JSON残缺应触发1次重试"
     assert result["answer"] == "手机上可以装客户端"
-    # #024 后知识段 query 优先（全库相关度 Top-6）+ #023 IDF 加权：「怎么使用」的
-    # Top-3 是 问题10「使用顺序」/问题30「安卓怎么用」（rel 5.27）与 问题8（3.29），
-    # 均比桩自报的 问题3「如何使用安装」（rel 1.99）更贴题——来源回填到新白名单，
-    # 差异是命中更准，不是答案变了。
-    assert result["sources"] == ["问题10", "问题30", "问题8"]
+    # #058：来源不再写死题号（切库后旧断言「问题10/30/8」已失效）。口径改为
+    # 「来源非空，且每一条都是当前库里真实存在的 source_label」——换库不破。
+    labels = {source_label(p.section, p.number) for p in kb.qa_pairs}
+    assert result["sources"], "来源回填不应为空"
+    assert set(result["sources"]) <= labels, \
+        f"来源不在当前库标签里: {set(result['sources']) - labels}"
 
 
 # ---------- 知识库全库检索 ----------
@@ -208,7 +209,13 @@ def test_knowledge_search_all_ranks_by_relevance():
     """search_all按查询相关度返回全库最匹配条目；空查询返回空串。"""
     kb = KnowledgeBase(_kb_path())
     result = kb.search_all("可以试用吗")
-    assert "问题16" in result, "试用问题应命中KB问题16（能不能开试用体验）"
+    # #058：不写死题号。从当前库里找出标题含「试用」的条目，断言其来源标签
+    # 出现在检索结果里——换库后只要库里还有试用条目，这条就不会破。
+    trial = [p for p in kb.qa_pairs if "试用" in p.title or "体验" in p.title]
+    assert trial, "当前库应有试用/体验条目，否则本用例失去被测对象"
+    # search_all 返回的是 _format 串（【章节】问题N: 标题），不是 source_label
+    assert any(f"问题{p.number}:" in result and p.title[:6] in result for p in trial), \
+        f"试用条目应出现在检索结果里: {[(p.number, p.title) for p in trial]}"
     assert kb.search_all("") == ""
 
 
