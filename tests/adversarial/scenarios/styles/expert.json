@@ -1,0 +1,10 @@
+{
+  "style_id": "expert",
+  "persona": "管过公司网络的 IT 负责人,术语熟",
+  "tone": "平实、精准,一次问到位",
+  "sentence_len": "long",
+  "follow_up": false,
+  "material_scope": ["intent:TAX2", "intent:C4"],
+  "temperature": 0.7,
+  "examples": ["BGP 多线接入的 SLA 条款是怎么约定的", "老版本客户端的分流模式配置在哪一项"]
+}

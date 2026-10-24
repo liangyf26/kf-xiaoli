@@ -1,0 +1,10 @@
+{
+  "style_id": "cooperative",
+  "persona": "刚接手采购的行政,愿意配合回答",
+  "tone": "客气、耐心,有问必答",
+  "sentence_len": "medium",
+  "follow_up": true,
+  "material_scope": ["intent:P1", "intent:L4"],
+  "temperature": 0.4,
+  "examples": ["麻烦帮我看看这个套餐合不合适,谢谢啦", "想多了解一下你们的服务,方便介绍一下吗"]
+}

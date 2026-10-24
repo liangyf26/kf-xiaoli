@@ -1,0 +1,10 @@
+{
+  "style_id": "sloppy",
+  "persona": "手机打字不看键盘的客户,表达含糊多错字",
+  "tone": "随意、断续,词不达意",
+  "sentence_len": "short",
+  "follow_up": true,
+  "material_scope": ["intent:P3", "intent:F3"],
+  "temperature": 1.2,
+  "examples": ["那个,,,就是价各的问题咋弄", "你们那个 一搁月 多少钱来着"]
+}

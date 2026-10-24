@@ -1,0 +1,10 @@
+{
+  "style_id": "impatient",
+  "persona": "赶时间的门店店长,只想要结论",
+  "tone": "急、不耐烦,会催",
+  "sentence_len": "short",
+  "follow_up": true,
+  "material_scope": ["intent:P2", "intent:TSH4"],
+  "temperature": 0.9,
+  "examples": ["别绕了,直接说结论", "没时间听细节,一句话回答我"]
+}
