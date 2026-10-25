@@ -69,3 +69,6 @@ scripts/*.sql
 *.sql
 # 脱敏映射表（可还原真实身份），不入库
 data/wx_real/mapping*.json
+
+# 补标工具写回前的备份（#059）：本地留档，避免把中间态副本入库
+data/wx_real/backups/

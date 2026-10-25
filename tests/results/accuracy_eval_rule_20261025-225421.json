@@ -1,0 +1,1360 @@
+{
+  "metadata": {
+    "source_file": "labeled.json",
+    "engine_env": "rule",
+    "engine_class": "RuleBasedEngine",
+    "llm_model": "Qwen3.8-27B",
+    "timestamp": "2026-10-25 22:54:21",
+    "scoring": "action_accuracy=(P答对+handoff转对)/(P+handoff)，主指标；answer_accuracy=P答对/P，handoff_accuracy=handoff转对/handoff，两者分开报；answer: should_answer=true时expected_keywords任一命中且非拒答非澄清；false时按expected_action判：handoff=回答含转人工动作，refuse=只拒答且无转人工动作（先判handoff再判refuse，互斥；无expected_action的历史用例沿用任一类拒答话术）。澄清反问不计作答（单列clarification_rate）。source: 预期来源任一命中。#059：带skip_reason的题（含安全组）整条跳过，不进分母，单列skipped/security。",
+    "refuse_observed_note": "refuse 为观察项，当前产品无纯拒答话术（config.py:65 同时含『无法回答』与『人工介入』），该指标反映话术设计而非模型能力",
+    "handoff_markers": [
+      "人工介入",
+      "转接人工",
+      "人工客服",
+      "人工会尽快与您联系",
+      "帮你转人工",
+      "人工帮你看看",
+      "人工帮你确认",
+      "通知管理群"
+    ],
+    "refuse_markers": [
+      "暂时无法回答",
+      "无法回答",
+      "知识库里没有"
+    ],
+    "source_meta": {
+      "description": "微信真实客户问题标注集（qwen预标，reviewed=false表示尚未人工复核，复核后方可用于准确率/意图考核）"
+    }
+  },
+  "accuracy_metrics": {
+    "action_accuracy": 0.5385,
+    "action_cases": 26,
+    "action_passed": 14,
+    "answer_accuracy": 0.5294,
+    "answer_cases": 17,
+    "answer_passed": 9,
+    "handoff_accuracy": 0.5556,
+    "handoff_cases": 9,
+    "handoff_passed": 5,
+    "source_accuracy": 0.5294,
+    "refusal_accuracy": 0.5556,
+    "refuse_observed": {
+      "cases": 6,
+      "passed": 0,
+      "rate": 0.0,
+      "in_main_denominator": false
+    },
+    "refuse_cases": 6,
+    "refuse_passed": 0,
+    "clarification_rate": 0.25,
+    "evaluated_cases": 32,
+    "total_cases": 26,
+    "skipped": 68,
+    "security": 5,
+    "skipped_non_security": 63,
+    "source_passed": 9,
+    "source_scored": 17,
+    "refusal_cases": 9,
+    "clarified_cases": 8,
+    "average_latency_ms": 6744
+  },
+  "skipped_cases": [
+    {
+      "idx": 2,
+      "question": "180就是社媒套餐，只是偶尔能兼顾直播，但并不是直播优化的线路，建议你买260的直播套餐",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 8,
+      "question": "东西多少钱",
+      "skip_reason": "duplicate_of:7",
+      "security": false
+    },
+    {
+      "idx": 9,
+      "question": "是怎么回事",
+      "skip_reason": "context_dependent",
+      "security": false
+    },
+    {
+      "idx": 10,
+      "question": "怎么可能拿真正的号去测",
+      "skip_reason": "context_dependent",
+      "security": false
+    },
+    {
+      "idx": 14,
+      "question": "前期我们先用一个节点    你们看看怎么弄鞥",
+      "skip_reason": "duplicate_of:15",
+      "security": false
+    },
+    {
+      "idx": 16,
+      "question": "这个平台可以怎么放？",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 17,
+      "question": "你之前登录29.16有输入错多次密码吗",
+      "skip_reason": "security",
+      "security": true
+    },
+    {
+      "idx": 18,
+      "question": "具体的需求是不是类似这样，多个球场的管理员有自己的账号，登录PC后台，查看自己归属球场的流水信息，有按场按月统计，有是否结算的标识",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 19,
+      "question": "厢竹球场的账号，问丘要到了，他说给过对方老板的，我查看日志，之前也确实登录过，不过登录很少。现在他们球场的ros掉线了，25号掉线的，没办法切换",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 20,
+      "question": "这里的第三方登录，是指微信吗",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 21,
+      "question": "什么登录了？***姓名***的二维码又变了",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 22,
+      "question": "登录了",
+      "skip_reason": "context_dependent",
+      "security": false
+    },
+    {
+      "idx": 25,
+      "question": "慢慢找",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 27,
+      "question": "就是中途突然断播了",
+      "skip_reason": "duplicate_of:26",
+      "security": false
+    },
+    {
+      "idx": 28,
+      "question": "波动还好 就是突然断播了3-5分钟",
+      "skip_reason": "duplicate_of:26",
+      "security": false
+    },
+    {
+      "idx": 30,
+      "question": "买断比如300g",
+      "skip_reason": "context_dependent",
+      "security": false
+    },
+    {
+      "idx": 31,
+      "question": "先用一个节点  如果卡了到时候不行再加",
+      "skip_reason": "context_dependent",
+      "security": false
+    },
+    {
+      "idx": 33,
+      "question": "你现在来，我跟你再讲一次业务流，你做一次记录，看能不能理解。",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 34,
+      "question": "是不是我手机的问题",
+      "skip_reason": "context_dependent",
+      "security": false
+    },
+    {
+      "idx": 36,
+      "question": "陈女士，下午好！这是您家8月份的物业相关费用，识别上方的二维码核对房号支付，谢谢您的支持[玫瑰]",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 38,
+      "question": "还有就是电闸已经打上去了，但是没有来电。看看是不是电费已经欠了，停电了",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 40,
+      "question": "支持",
+      "skip_reason": "context_dependent",
+      "security": false
+    },
+    {
+      "idx": 45,
+      "question": "试用就只有美国新加坡",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 46,
+      "question": "正式购买，新加坡、澳洲、美国，哪里都有",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 48,
+      "question": "千元以上订单，签合同，走公账，开发票",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 49,
+      "question": "@***姓名*** ***姓名***，爬虫当前做的进度，可以分享一下出来， @***姓名*** 超哥会跟你对接需求",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 50,
+      "question": "好的",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 51,
+      "question": "那应该是你没理解 透，乱推了",
+      "skip_reason": "context_dependent",
+      "security": false
+    },
+    {
+      "idx": 52,
+      "question": "U150",
+      "skip_reason": "context_dependent",
+      "security": false
+    },
+    {
+      "idx": 53,
+      "question": "查这个被推送的wxid",
+      "skip_reason": "security",
+      "security": true
+    },
+    {
+      "idx": 54,
+      "question": "查代码吗",
+      "skip_reason": "security",
+      "security": true
+    },
+    {
+      "idx": 55,
+      "question": "发起推送的地方，把整个链路搞清楚。",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 56,
+      "question": "我查看代码看到的发送api地址是***链接***\n发送账号野生节操菌\n默认的接收对象也是超森实习群",
+      "skip_reason": "security",
+      "security": true
+    },
+    {
+      "idx": 59,
+      "question": "现在是有8月份的物业费和垃圾费没有支付，7月份的水电公摊还没有出账单，6月份的水费也没有出账单",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 60,
+      "question": "不知道这个手机卡",
+      "skip_reason": "context_dependent",
+      "security": false
+    },
+    {
+      "idx": 61,
+      "question": "亮机卡，没错吧",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 62,
+      "question": "不加。柳州拆回来的那批频率低、速度低，容量还减一半。加上去更慢，混插还有奇奇怪怪的问题，不折腾",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 64,
+      "question": "21111，麻烦。要改阿里云防火墙、系统防火墙、内网穿透全部一起。简单的方案是60017映射到21111，如果你兼容的话",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 65,
+      "question": "改了，网卡重启，重新获取IP试试",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 67,
+      "question": "也不用啥返回，就是为明年准备，不过要重新立项，因为现在审计在场，所以各个流程卡得严",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 68,
+      "question": "超哥，您昨天不是说那个手机卡教程吗，麻烦发我下吧，我研究一下去[呲牙][呲牙][呲牙]",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 69,
+      "question": "实在是查不到资料了，才来麻烦您[破涕为笑]",
+      "skip_reason": "context_dependent",
+      "security": false
+    },
+    {
+      "idx": 70,
+      "question": "现在用的笔记本2018年的，真的超级慢，完全没法用，给公司IT专家看，就说配置太低，内存太小。\n再加上女儿的学姐说用的苹果本带不动那些专业软件……",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 71,
+      "question": "@***姓名*** @黄东伟 检查系统的任务，给这个小伙子",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 72,
+      "question": "晚点，我先发资料在这里",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 73,
+      "question": "先看，等下来说",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 74,
+      "question": "我叫",
+      "skip_reason": "context_dependent",
+      "security": false
+    },
+    {
+      "idx": 75,
+      "question": "有谁用VIVO 或 oppo的手机吗，做测试",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 76,
+      "question": "有oppo旗下的真我",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 77,
+      "question": "让梁同学试一下呼了么的录音。",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 78,
+      "question": "oppo旗下的一加",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 79,
+      "question": "一样，让梁同学试一下呼。",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 80,
+      "question": "如果没录音，就得把手机给我做开发级调试。",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 81,
+      "question": "oppo真我12pro+，可以录音并上传，另一个一加还没试。",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 82,
+      "question": "oppo真我12pro+、一加13，都可以录音并上传",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 83,
+      "question": "好，非常好。好消息。",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 84,
+      "question": "【腾讯文档】运动视界需求理解\n***链接***",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 85,
+      "question": "***链接***\n租户用户名 ***凭据***凭据***\n客户用户名 ***凭据***凭据***\n\n不要用文档里的地址和APP，用这个测试地址。 @鲁永明",
+      "skip_reason": "security",
+      "security": true
+    },
+    {
+      "idx": 86,
+      "question": "APP用这个。",
+      "skip_reason": "context_dependent",
+      "security": false
+    },
+    {
+      "idx": 87,
+      "question": "收到请回复，要用我发的安卓APP和测试地址来做测试。",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 88,
+      "question": "收到",
+      "skip_reason": "not_customer",
+      "security": false
+    },
+    {
+      "idx": 89,
+      "question": "我做TK的。",
+      "skip_reason": "context_dependent",
+      "security": false
+    },
+    {
+      "idx": 90,
+      "question": "你推荐哪个",
+      "skip_reason": "context_dependent",
+      "security": false
+    },
+    {
+      "idx": 95,
+      "question": "公司叫啥？",
+      "skip_reason": "duplicate_of:94",
+      "security": false
+    },
+    {
+      "idx": 96,
+      "question": "你们是什么公司",
+      "skip_reason": "duplicate_of:94",
+      "security": false
+    },
+    {
+      "idx": 97,
+      "question": "公司名字",
+      "skip_reason": "duplicate_of:94",
+      "security": false
+    },
+    {
+      "idx": 98,
+      "question": "180那个",
+      "skip_reason": "context_dependent",
+      "security": false
+    },
+    {
+      "idx": 99,
+      "question": "2天有点短",
+      "skip_reason": "context_dependent",
+      "security": false
+    }
+  ],
+  "detailed_results": [
+    {
+      "question": "如果合适价格能不能商量",
+      "answer": "大项目可以走招投标，价格能聊。小单的话价格比较固定，不过美国、新加坡、香港、德国这几个方向可以先免费试1-2天，觉得合适再谈。",
+      "sources": [
+        "售前问题 · 咨询和顾虑 / 问题1",
+        "售前问题 · 价格 / 问题3"
+      ],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 15541,
+      "error": "",
+      "expected_keywords": [],
+      "keyword_hit": [],
+      "expected_sources": [],
+      "source_hit": [],
+      "should_answer": false,
+      "expected_action": "handoff",
+      "reply_action": "other",
+      "handoff_pass": false,
+      "refuse_pass": null,
+      "answer_pass": false,
+      "source_pass": true,
+      "refusal_pass": false,
+      "clarified": false
+    },
+    {
+      "question": "260太贵了",
+      "answer": "请问您能补充一下问题的细节吗？例如：使用场景（直播/社媒运营）、设备类型，方便我更准确地帮助您。",
+      "sources": [],
+      "path": "clarification",
+      "need_clarification": true,
+      "latency_ms": 0,
+      "error": "",
+      "expected_keywords": [],
+      "keyword_hit": [],
+      "expected_sources": [],
+      "source_hit": [],
+      "should_answer": false,
+      "expected_action": "refuse",
+      "reply_action": "other",
+      "handoff_pass": null,
+      "refuse_pass": false,
+      "answer_pass": false,
+      "source_pass": true,
+      "refusal_pass": false,
+      "clarified": true
+    },
+    {
+      "question": "太贵了",
+      "answer": "请问您能补充一下问题的细节吗？例如：使用场景（直播/社媒运营）、设备类型，方便我更准确地帮助您。",
+      "sources": [],
+      "path": "clarification",
+      "need_clarification": true,
+      "latency_ms": 0,
+      "error": "",
+      "expected_keywords": [],
+      "keyword_hit": [],
+      "expected_sources": [],
+      "source_hit": [],
+      "should_answer": false,
+      "expected_action": "refuse",
+      "reply_action": "other",
+      "handoff_pass": null,
+      "refuse_pass": false,
+      "answer_pass": false,
+      "source_pass": true,
+      "refusal_pass": false,
+      "clarified": true
+    },
+    {
+      "question": "只是目前还在找价格低的",
+      "answer": "理解，现在选择确实多。我们走的是联通批发价，独立IP专线，不是那种一堆人共享的机场。你主要做什么业务、去哪个地区？我帮你看看哪条线路性价比最高。",
+      "sources": [
+        "售前问题 · 咨询和顾虑 / 问题1",
+        "售前问题 · 价格 / 问题4"
+      ],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 17087,
+      "error": "",
+      "expected_keywords": [],
+      "keyword_hit": [],
+      "expected_sources": [],
+      "source_hit": [],
+      "should_answer": false,
+      "expected_action": "refuse",
+      "reply_action": "other",
+      "handoff_pass": null,
+      "refuse_pass": false,
+      "answer_pass": false,
+      "source_pass": true,
+      "refusal_pass": false,
+      "clarified": false
+    },
+    {
+      "question": "实在不行 我只能在找便宜的测试了",
+      "answer": "理解，不过便宜的一般是共享IP拼车线路，高峰期体验差别挺大的。你这边具体是哪里不满意？速度、稳定性还是价格？说下我看看能不能帮你调一下。",
+      "sources": [
+        "售前问题 · 价格 / 问题4"
+      ],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 14818,
+      "error": "",
+      "expected_keywords": [],
+      "keyword_hit": [],
+      "expected_sources": [],
+      "source_hit": [],
+      "should_answer": false,
+      "expected_action": "refuse",
+      "reply_action": "other",
+      "handoff_pass": null,
+      "refuse_pass": false,
+      "answer_pass": false,
+      "source_pass": true,
+      "refusal_pass": false,
+      "clarified": false
+    },
+    {
+      "question": "多少钱",
+      "answer": "请问您想了解哪条线路的价格呢？IDC线路120元/月、ISP家庭IP线路180元/月、直播优化线路260元/月，还是拼车共享IP（50元/月）？",
+      "sources": [],
+      "path": "clarification",
+      "need_clarification": true,
+      "latency_ms": 0,
+      "error": "",
+      "expected_keywords": [
+        "120",
+        "180",
+        "260"
+      ],
+      "keyword_hit": [
+        "120",
+        "180",
+        "260"
+      ],
+      "expected_sources": [
+        "售前问题 · 价格 / 问题1"
+      ],
+      "source_hit": [],
+      "should_answer": true,
+      "expected_action": "answer",
+      "reply_action": "other",
+      "handoff_pass": null,
+      "refuse_pass": null,
+      "answer_pass": false,
+      "source_pass": false,
+      "refusal_pass": true,
+      "clarified": true
+    },
+    {
+      "question": "你看你这边怎么样 给出点方案",
+      "answer": "看你的使用场景，三种方案：\n1）长期稳定用 → 配我们SDWAN路由器，接现有宽带就行，不用拉线施工；\n2）怕折腾 → 直接用联通云桌面，开箱即用；\n3）出差移动 → 装软件客户端，安卓/苹果/Win都支持。\n\n你主要是哪种场景？我帮你细说。",
+      "sources": [
+        "基本介绍 / 问题2",
+        "售前问题 · 咨询和顾虑 / 问题10"
+      ],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 6888,
+      "error": "",
+      "expected_keywords": [],
+      "keyword_hit": [],
+      "expected_sources": [],
+      "source_hit": [],
+      "should_answer": false,
+      "expected_action": "handoff",
+      "reply_action": "other",
+      "handoff_pass": false,
+      "refuse_pass": null,
+      "answer_pass": false,
+      "source_pass": true,
+      "refusal_pass": false,
+      "clarified": false
+    },
+    {
+      "question": "怎么测",
+      "answer": "请问您想了解哪方面的操作呢？例如：客户端安装、美区apple id注册、线路绑定，还是路由器设置？",
+      "sources": [],
+      "path": "clarification",
+      "need_clarification": true,
+      "latency_ms": 0,
+      "error": "",
+      "expected_keywords": [
+        "电话号码",
+        "注册登录体验",
+        "腾讯文档"
+      ],
+      "keyword_hit": [],
+      "expected_sources": [
+        "售前问题 · 咨询和顾虑 / 问题15"
+      ],
+      "source_hit": [],
+      "should_answer": true,
+      "expected_action": "answer",
+      "reply_action": "other",
+      "handoff_pass": null,
+      "refuse_pass": null,
+      "answer_pass": false,
+      "source_pass": false,
+      "refusal_pass": true,
+      "clarified": true
+    },
+    {
+      "question": "怎么开始",
+      "answer": "看您想怎么开始：想先试试，给我电话号码可以注册体验；想正式用，配SDWAN路由器或直接用联通云桌面都行；如果是TikTok运营，有教程视频：https://v.douyin.com/HBL__sdPpGo/ 复制链接打开抖音搜就行。",
+      "sources": [
+        "基本介绍 / 问题2",
+        "售后问题 · 帐号运营 / 问题4",
+        "售前问题 · 咨询和顾虑 / 问题15"
+      ],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 14847,
+      "error": "",
+      "expected_keywords": [
+        "联通云桌面",
+        "软件客户端"
+      ],
+      "keyword_hit": [
+        "联通云桌面"
+      ],
+      "expected_sources": [
+        "基本介绍 / 问题2"
+      ],
+      "source_hit": [
+        "基本介绍 / 问题2"
+      ],
+      "should_answer": true,
+      "expected_action": "answer",
+      "reply_action": "other",
+      "handoff_pass": null,
+      "refuse_pass": null,
+      "answer_pass": true,
+      "source_pass": true,
+      "refusal_pass": true,
+      "clarified": false
+    },
+    {
+      "question": "我们如何用一个节点",
+      "answer": "客户端里节点有 ss 和 vl 结尾的，选一个连上就行，卡的话切换另一个试试。",
+      "sources": [
+        "售前问题 · 咨询和顾虑 / 问题3",
+        "售后问题 · 使用疑问 / 问题2",
+        "售后问题 · 使用疑问 / 问题3"
+      ],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 14556,
+      "error": "",
+      "expected_keywords": [
+        "SDWAN专用路由器网关",
+        "美区加州"
+      ],
+      "keyword_hit": [],
+      "expected_sources": [
+        "售前问题 · 咨询和顾虑 / 问题3",
+        "售后问题 · 使用疑问 / 问题5"
+      ],
+      "source_hit": [
+        "售前问题 · 咨询和顾虑 / 问题3"
+      ],
+      "should_answer": true,
+      "expected_action": "answer",
+      "reply_action": "other",
+      "handoff_pass": null,
+      "refuse_pass": null,
+      "answer_pass": false,
+      "source_pass": true,
+      "refusal_pass": true,
+      "clarified": false
+    },
+    {
+      "question": "玛德，那个鬼系统，我用国鹏的账号登录不进去，",
+      "answer": "理解你着急，但'国鹏'这个账号/平台我这边没有相关信息，暂时无法回答，需要人工介入。",
+      "sources": [],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 9369,
+      "error": "",
+      "expected_keywords": [],
+      "keyword_hit": [],
+      "expected_sources": [],
+      "source_hit": [],
+      "should_answer": false,
+      "expected_action": "handoff",
+      "reply_action": "handoff",
+      "handoff_pass": true,
+      "refuse_pass": null,
+      "answer_pass": true,
+      "source_pass": true,
+      "refusal_pass": true,
+      "clarified": false
+    },
+    {
+      "question": "超哥，打扰一下，您之前送我的那个电话卡，我按照帖子的教程操作，一直没有信号诶，这几天我一直在网上查资料，弄了好久还是没有信号，是不是那里我操作的有错误呀",
+      "answer": "暂时无法回答，需要人工介入",
+      "sources": [],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 7688,
+      "error": "",
+      "expected_keywords": [
+        "用不上",
+        "中国的卡"
+      ],
+      "keyword_hit": [],
+      "expected_sources": [
+        "售后问题 · 使用疑问 / 问题17"
+      ],
+      "source_hit": [],
+      "should_answer": true,
+      "expected_action": "answer",
+      "reply_action": "handoff",
+      "handoff_pass": null,
+      "refuse_pass": null,
+      "answer_pass": false,
+      "source_pass": false,
+      "refusal_pass": true,
+      "clarified": false
+    },
+    {
+      "question": "昨天播了下 中间突然断掉了",
+      "answer": "这个断线问题我这边暂时没有对应的排查方案，需要人工介入帮您看看，稍等哈。",
+      "sources": [
+        "基本介绍 / 问题3",
+        "售前问题 · 咨询和顾虑 / 问题5"
+      ],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 6306,
+      "error": "",
+      "expected_keywords": [
+        "系统时间",
+        "千兆全双工"
+      ],
+      "keyword_hit": [],
+      "expected_sources": [
+        "售后问题 · 使用疑问 / 问题18",
+        "售后问题 · 设备硬件 / 问题5"
+      ],
+      "source_hit": [],
+      "should_answer": true,
+      "expected_action": "answer",
+      "reply_action": "handoff",
+      "handoff_pass": null,
+      "refuse_pass": null,
+      "answer_pass": false,
+      "source_pass": false,
+      "refusal_pass": true,
+      "clarified": false
+    },
+    {
+      "question": "主管你好 我这边有客户问 能不能买断按流量计费",
+      "answer": "暂时无法回答，需要人工介入",
+      "sources": [],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 6640,
+      "error": "",
+      "expected_keywords": [],
+      "keyword_hit": [],
+      "expected_sources": [],
+      "source_hit": [],
+      "should_answer": false,
+      "expected_action": "handoff",
+      "reply_action": "handoff",
+      "handoff_pass": true,
+      "refuse_pass": null,
+      "answer_pass": true,
+      "source_pass": true,
+      "refusal_pass": true,
+      "clarified": false
+    },
+    {
+      "question": "每天早上都要卡",
+      "answer": "早上卡的话，先看看是不是有其他设备同时在用，带宽有限建议一台设备单独跑。另外客户端里节点有 ss 和 vl 两种，可以切换试试。要是还卡，打开 speedtest.net 测个速，正常应该有10兆上下行，截图发售后群我们帮你看。",
+      "sources": [
+        "售后问题 · 使用疑问 / 问题3"
+      ],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 8670,
+      "error": "",
+      "expected_keywords": [
+        "测速",
+        "speedtest"
+      ],
+      "keyword_hit": [
+        "speedtest"
+      ],
+      "expected_sources": [
+        "售后问题 · 使用疑问 / 问题3"
+      ],
+      "source_hit": [
+        "售后问题 · 使用疑问 / 问题3"
+      ],
+      "should_answer": true,
+      "expected_action": "answer",
+      "reply_action": "other",
+      "handoff_pass": null,
+      "refuse_pass": null,
+      "answer_pass": true,
+      "source_pass": true,
+      "refusal_pass": true,
+      "clarified": false
+    },
+    {
+      "question": "180这个300g 你可以少点流量50块 100g 可以吗？ 因为后期还要拿别的国家线路  还是用180这个线路 就是流量少点",
+      "answer": "这个组合知识库里没有对应方案。50元100G是拼车共享IP，跟180的独享ISP家庭IP不是一回事，没法直接降配。具体能不能灵活调流量和价格，暂时无法回答，需要人工介入。",
+      "sources": [],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 12840,
+      "error": "",
+      "expected_keywords": [],
+      "keyword_hit": [],
+      "expected_sources": [],
+      "source_hit": [],
+      "should_answer": false,
+      "expected_action": "handoff",
+      "reply_action": "handoff",
+      "handoff_pass": true,
+      "refuse_pass": null,
+      "answer_pass": true,
+      "source_pass": true,
+      "refusal_pass": true,
+      "clarified": false
+    },
+    {
+      "question": "是不是高了",
+      "answer": "请问您能补充一下问题的细节吗？例如：使用场景（直播/社媒运营）、设备类型，方便我更准确地帮助您。",
+      "sources": [],
+      "path": "clarification",
+      "need_clarification": true,
+      "latency_ms": 0,
+      "error": "",
+      "expected_keywords": [],
+      "keyword_hit": [],
+      "expected_sources": [],
+      "source_hit": [],
+      "should_answer": false,
+      "expected_action": "refuse",
+      "reply_action": "other",
+      "handoff_pass": null,
+      "refuse_pass": false,
+      "answer_pass": false,
+      "source_pass": true,
+      "refusal_pass": false,
+      "clarified": true
+    },
+    {
+      "question": "还有就是数据库能不能换pgsql？云服务器还有没有更多资源",
+      "answer": "暂时无法回答，需要人工介入",
+      "sources": [],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 6713,
+      "error": "",
+      "expected_keywords": [],
+      "keyword_hit": [],
+      "expected_sources": [],
+      "source_hit": [],
+      "should_answer": false,
+      "expected_action": "refuse",
+      "reply_action": "handoff",
+      "handoff_pass": null,
+      "refuse_pass": false,
+      "answer_pass": false,
+      "source_pass": true,
+      "refusal_pass": false,
+      "clarified": false
+    },
+    {
+      "question": "可以试用吗",
+      "answer": "可以。美国、新加坡、香港、德国有现成线路，能测1-2天。其它方向暂时没有空余资源。需要的话我帮你安排。",
+      "sources": [
+        "售前问题 · 价格 / 问题3"
+      ],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 5579,
+      "error": "",
+      "expected_keywords": [
+        "2天",
+        "试用线路"
+      ],
+      "keyword_hit": [
+        "2天"
+      ],
+      "expected_sources": [
+        "售前问题 · 价格 / 问题3"
+      ],
+      "source_hit": [
+        "售前问题 · 价格 / 问题3"
+      ],
+      "should_answer": true,
+      "expected_action": "answer",
+      "reply_action": "other",
+      "handoff_pass": null,
+      "refuse_pass": null,
+      "answer_pass": true,
+      "source_pass": true,
+      "refusal_pass": true,
+      "clarified": false
+    },
+    {
+      "question": "老板，你这号到处试用，换IP，不会被风控吗",
+      "answer": "不会的老板，我们所有IP都是静态的，不会变，一机一线一IP独享带宽。正常做业务不会触发风控，放心用。",
+      "sources": [
+        "售前问题 · 咨询和顾虑 / 问题2",
+        "售前问题 · 咨询和顾虑 / 问题12"
+      ],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 8316,
+      "error": "",
+      "expected_keywords": [
+        "一机一线一IP",
+        "独享带宽"
+      ],
+      "keyword_hit": [
+        "一机一线一IP",
+        "独享带宽"
+      ],
+      "expected_sources": [
+        "售前问题 · 咨询和顾虑 / 问题2"
+      ],
+      "source_hit": [
+        "售前问题 · 咨询和顾虑 / 问题2"
+      ],
+      "should_answer": true,
+      "expected_action": "answer",
+      "reply_action": "other",
+      "handoff_pass": null,
+      "refuse_pass": null,
+      "answer_pass": true,
+      "source_pass": true,
+      "refusal_pass": true,
+      "clarified": false
+    },
+    {
+      "question": "我买线路一年多了 你这个也是自己搭建的我找专业的朋友看过你这个ip",
+      "answer": "我们不是自己搭的，是联通业务代理合作商，线路走的是联通跨境资源。你朋友看IP具体是哪里觉得有问题？是检测网站显示风险值高，还是归属地/住宅属性不对？说下具体情况我帮你看看。",
+      "sources": [
+        "线路相关 · 合规性 / 问题3"
+      ],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 14304,
+      "error": "",
+      "expected_keywords": [
+        "IDC",
+        "机房",
+        "IP",
+        "检测网站标准"
+      ],
+      "keyword_hit": [
+        "IP"
+      ],
+      "expected_sources": [
+        "线路相关 · 合规性 / 问题3"
+      ],
+      "source_hit": [
+        "线路相关 · 合规性 / 问题3"
+      ],
+      "should_answer": true,
+      "expected_action": "answer",
+      "reply_action": "other",
+      "handoff_pass": null,
+      "refuse_pass": null,
+      "answer_pass": true,
+      "source_pass": true,
+      "refusal_pass": true,
+      "clarified": false
+    },
+    {
+      "question": "可以试用多久",
+      "answer": "可以测试1-2天，美国、新加坡、香港、德国有现成线路，其它方向暂时没空余资源。",
+      "sources": [
+        "售前问题 · 价格 / 问题3",
+        "线路相关 · 合规性 / 问题6",
+        "售前问题 · 价格 / 问题2"
+      ],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 5854,
+      "error": "",
+      "expected_keywords": [
+        "2天",
+        "1-2天"
+      ],
+      "keyword_hit": [
+        "2天",
+        "1-2天"
+      ],
+      "expected_sources": [
+        "售前问题 · 价格 / 问题3"
+      ],
+      "source_hit": [
+        "售前问题 · 价格 / 问题3"
+      ],
+      "should_answer": true,
+      "expected_action": "answer",
+      "reply_action": "other",
+      "handoff_pass": null,
+      "refuse_pass": null,
+      "answer_pass": true,
+      "source_pass": true,
+      "refusal_pass": true,
+      "clarified": false
+    },
+    {
+      "question": "能开发票？",
+      "answer": "请问您能补充一下问题的细节吗？例如：使用场景（直播/社媒运营）、设备类型，方便我更准确地帮助您。",
+      "sources": [],
+      "path": "clarification",
+      "need_clarification": true,
+      "latency_ms": 0,
+      "error": "",
+      "expected_keywords": [
+        "1%增值税",
+        "1000元"
+      ],
+      "keyword_hit": [],
+      "expected_sources": [
+        "线路相关 · 合规性 / 问题8"
+      ],
+      "source_hit": [],
+      "should_answer": true,
+      "expected_action": "answer",
+      "reply_action": "other",
+      "handoff_pass": null,
+      "refuse_pass": null,
+      "answer_pass": false,
+      "source_pass": false,
+      "refusal_pass": true,
+      "clarified": true
+    },
+    {
+      "question": "机器人刷屏好麻烦",
+      "answer": "理解，确实烦。您具体想问点啥，我尽量一句话给您说清楚。",
+      "sources": [
+        "基本介绍 / 问题2",
+        "售前问题 · 咨询和顾虑 / 问题4"
+      ],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 6337,
+      "error": "",
+      "expected_keywords": [],
+      "keyword_hit": [],
+      "expected_sources": [],
+      "source_hit": [],
+      "should_answer": false,
+      "expected_action": "handoff",
+      "reply_action": "other",
+      "handoff_pass": false,
+      "refuse_pass": null,
+      "answer_pass": false,
+      "source_pass": true,
+      "refusal_pass": false,
+      "clarified": false
+    },
+    {
+      "question": "只卡画面不卡声音",
+      "answer": "暂时无法回答，需要人工介入",
+      "sources": [],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 7794,
+      "error": "",
+      "expected_keywords": [
+        "测速",
+        "10兆"
+      ],
+      "keyword_hit": [],
+      "expected_sources": [
+        "售后问题 · 使用疑问 / 问题3"
+      ],
+      "source_hit": [],
+      "should_answer": true,
+      "expected_action": "answer",
+      "reply_action": "handoff",
+      "handoff_pass": null,
+      "refuse_pass": null,
+      "answer_pass": false,
+      "source_pass": false,
+      "refusal_pass": true,
+      "clarified": false
+    },
+    {
+      "question": "投诉了",
+      "answer": "很抱歉给您带来不好的体验。暂时无法回答，需要人工介入。已为您标记问题并转接人工客服，请稍候，人工会尽快与您联系。",
+      "sources": [],
+      "path": "human_escalation",
+      "need_clarification": false,
+      "latency_ms": 0,
+      "error": "",
+      "expected_keywords": [],
+      "keyword_hit": [],
+      "expected_sources": [],
+      "source_hit": [],
+      "should_answer": false,
+      "expected_action": "handoff",
+      "reply_action": "handoff",
+      "handoff_pass": true,
+      "refuse_pass": null,
+      "answer_pass": true,
+      "source_pass": true,
+      "refusal_pass": true,
+      "clarified": false
+    },
+    {
+      "question": "我问问，卡在姚姚那里",
+      "answer": "暂时无法回答，需要人工介入",
+      "sources": [],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 6455,
+      "error": "",
+      "expected_keywords": [],
+      "keyword_hit": [],
+      "expected_sources": [],
+      "source_hit": [],
+      "should_answer": false,
+      "expected_action": "handoff",
+      "reply_action": "handoff",
+      "handoff_pass": true,
+      "refuse_pass": null,
+      "answer_pass": true,
+      "source_pass": true,
+      "refusal_pass": true,
+      "clarified": false
+    },
+    {
+      "question": "安卓能用吗",
+      "answer": "请问您能补充一下问题的细节吗？例如：使用场景（直播/社媒运营）、设备类型，方便我更准确地帮助您。",
+      "sources": [],
+      "path": "clarification",
+      "need_clarification": true,
+      "latency_ms": 0,
+      "error": "",
+      "expected_keywords": [
+        "归属地",
+        "不能做",
+        "TK"
+      ],
+      "keyword_hit": [],
+      "expected_sources": [
+        "售前问题 · 咨询和顾虑 / 问题8",
+        "售后问题 · 使用疑问 / 问题8",
+        "售后问题 · 软件相关 / 问题1"
+      ],
+      "source_hit": [],
+      "should_answer": true,
+      "expected_action": "answer",
+      "reply_action": "other",
+      "handoff_pass": null,
+      "refuse_pass": null,
+      "answer_pass": false,
+      "source_pass": false,
+      "refusal_pass": true,
+      "clarified": true
+    },
+    {
+      "question": "我有 3 台设备，都可以用吗",
+      "answer": "可以，一条专线支持多台设备，3台没问题。不过带宽有限，设备多了会挤占，卡了就少挂点。另外如果你要搞TikTok直播，那台手机得是苹果且拔卡，其他设备没限制。",
+      "sources": [
+        "售后问题 · 使用疑问 / 问题13"
+      ],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 7375,
+      "error": "",
+      "expected_keywords": [
+        "带宽",
+        "少上设备"
+      ],
+      "keyword_hit": [
+        "带宽"
+      ],
+      "expected_sources": [
+        "售后问题 · 使用疑问 / 问题13"
+      ],
+      "source_hit": [
+        "售后问题 · 使用疑问 / 问题13"
+      ],
+      "should_answer": true,
+      "expected_action": "answer",
+      "reply_action": "other",
+      "handoff_pass": null,
+      "refuse_pass": null,
+      "answer_pass": true,
+      "source_pass": true,
+      "refusal_pass": true,
+      "clarified": false
+    },
+    {
+      "question": "嗯嗯，你们是正规的吗",
+      "answer": "正规的，我们是联通代理商，走的是联通跨境专线。能签合同、开发票、对公收款，公司叫广西信道科技，5年以上网络搭建经验。",
+      "sources": [
+        "线路相关 · 合规性 / 问题6",
+        "线路相关 · 合规性 / 问题7"
+      ],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 6839,
+      "error": "",
+      "expected_keywords": [
+        "联通代理商",
+        "代理商合同"
+      ],
+      "keyword_hit": [
+        "联通代理商"
+      ],
+      "expected_sources": [
+        "线路相关 · 合规性 / 问题1",
+        "售前问题 · 咨询和顾虑 / 问题1"
+      ],
+      "source_hit": [],
+      "should_answer": true,
+      "expected_action": "answer",
+      "reply_action": "other",
+      "handoff_pass": null,
+      "refuse_pass": null,
+      "answer_pass": true,
+      "source_pass": false,
+      "refusal_pass": true,
+      "clarified": false
+    },
+    {
+      "question": "你们是什么公司？",
+      "answer": "广西信道科技有限公司，联通业务代理合作商，5年以上网络搭建经验，主要做跨境企业网络定制服务。",
+      "sources": [
+        "线路相关 · 合规性 / 问题7"
+      ],
+      "path": "llm_generation",
+      "need_clarification": false,
+      "latency_ms": 4980,
+      "error": "",
+      "expected_keywords": [
+        "广西信道科技有限公司",
+        "联通业务代理合作商"
+      ],
+      "keyword_hit": [
+        "广西信道科技有限公司",
+        "联通业务代理合作商"
+      ],
+      "expected_sources": [
+        "线路相关 · 合规性 / 问题7"
+      ],
+      "source_hit": [
+        "线路相关 · 合规性 / 问题7"
+      ],
+      "should_answer": true,
+      "expected_action": "answer",
+      "reply_action": "other",
+      "handoff_pass": null,
+      "refuse_pass": null,
+      "answer_pass": true,
+      "source_pass": true,
+      "refusal_pass": true,
+      "clarified": false
+    },
+    {
+      "question": "能试4-5天吗",
+      "answer": "请问您能补充一下问题的细节吗？例如：使用场景（直播/社媒运营）、设备类型，方便我更准确地帮助您。",
+      "sources": [],
+      "path": "clarification",
+      "need_clarification": true,
+      "latency_ms": 0,
+      "error": "",
+      "expected_keywords": [],
+      "keyword_hit": [],
+      "expected_sources": [],
+      "source_hit": [],
+      "should_answer": false,
+      "expected_action": "handoff",
+      "reply_action": "other",
+      "handoff_pass": false,
+      "refuse_pass": null,
+      "answer_pass": false,
+      "source_pass": true,
+      "refusal_pass": false,
+      "clarified": true
+    }
+  ]
+}
