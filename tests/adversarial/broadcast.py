@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import sys
 import time
 from pathlib import Path
 
@@ -66,12 +67,14 @@ class Outbox:
                 fh.write(json.dumps(record, ensure_ascii=False) + "\n")
             return True
         except OSError as exc:
+            note = {"error": str(exc), "seq": record.get("seq"), "text": record.get("text", "")}
+            target = self.dir.parent / "broadcast_errors.jsonl"
             try:
-                with (self.dir / "broadcast_errors.jsonl").open("a", encoding="utf-8") as fh:
-                    fh.write(json.dumps({"error": str(exc), "seq": record.get("seq")},
-                                        ensure_ascii=False) + "\n")
-            except OSError:
-                pass
+                with target.open("a", encoding="utf-8") as fh:
+                    fh.write(json.dumps(note, ensure_ascii=False) + "\n")
+            except OSError as second:
+                print(f"[broadcast] outbox 与错误日志都写失败: {exc} / {second}",
+                      file=sys.stderr)
             return False
 
     def emit(self, game: int, kind: str, text: str, lost: bool = False) -> int:
@@ -106,3 +109,25 @@ class Outbox:
                   "text": item["text"], "sha256": _sha256(item["text"])}
         self._write(record)
         return 1
+
+    def mark_sent(self, seq: int) -> None:
+        """转发者成功后记 seq。约定：outbox.sent 一行一个已发 seq，重读时跳过。"""
+        if seq in self.sent_seqs():
+            return
+        with (self.dir / "outbox.sent").open("a", encoding="utf-8") as fh:
+            fh.write(f"{seq}\n")
+
+    def sent_seqs(self) -> set[int]:
+        path = self.dir / "outbox.sent"
+        if not path.exists():
+            return set()
+        return {int(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()}
+
+    def unsent(self) -> list[dict]:
+        """转发者读这个：outbox 里还没有记入 outbox.sent 的行。"""
+        path = self.dir / "outbox.jsonl"
+        if not path.exists():
+            return []
+        sent = self.sent_seqs()
+        rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+        return [row for row in rows if row.get("seq") not in sent]

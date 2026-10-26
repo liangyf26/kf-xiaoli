@@ -1,10 +1,10 @@
 # #061 阶段 2 默认配置。缺任一字段时 run_round.load_config 用同名默认值补上。
 red:  {base: http://172.28.29.24:30032/v1, model: qwen3.8-27b, timeout_s: 120}
-blue: {base: http://172.28.50.9:30030/v1, model: Qwen3.8-27B}
+blue: {base: http://172.28.50.9:30030/v1, model: Qwen3.8-27B, temperature: 0.7}
 match: {games: 1, mode: fixed, questions: 10, target_score: 20, max_questions: 60, max_followups: 3, seed: 42}
 retry: {per_question: 2, backoff_s: [5, 20]}
 kb:   {seed_path: data/sdwan-new.md, work_dir: runs/adversarial/kb}
-broadcast: {enabled: true, group: "kf红蓝对抗直播", level: summary, max_per_sec: 2, relay_every_s: 60}
+broadcast: {enabled: true, group: "kf红蓝对抗直播", level: all, max_per_sec: 2, relay_every_s: 60}
 mode: program
 publish: {git_branch: adversarial-logs, push: true}
 scope: ["SDWAN", "直播线路", "带宽", "IP", "备案", "域名"]

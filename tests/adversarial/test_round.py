@@ -113,6 +113,85 @@ def test_unbalanced_round_exits_3(tmp_path):
     assert code == 3
 
 
+def test_broadcast_error_falls_back_to_stderr(tmp_path, capsys):
+    box = Outbox(tmp_path, level="all", max_per_sec=10, clock=lambda: 0)
+    # outbox 的父目录是文件，两条日志都写不了，必须落到 stderr
+    blocker = tmp_path / "blocked"
+    blocker.write_text("x", encoding="utf-8")
+    box.dir = blocker / "round"
+    assert box.emit(1, "open", "hello") == 1
+    assert "都写失败" in capsys.readouterr().err
+
+
+def test_outbox_sent_skips_already_sent(tmp_path):
+    box = Outbox(tmp_path, level="all", max_per_sec=10, clock=lambda: 0)
+    box.emit(1, "open", "第一")
+    box.flush()
+    seq = json.loads((tmp_path / "outbox.jsonl").read_text(encoding="utf-8"))["seq"]
+    box.mark_sent(seq)
+    box.mark_sent(seq)                      # 重复标记不写第二行
+    assert box.unsent() == []
+    assert (tmp_path / "outbox.sent").read_text(encoding="utf-8").strip() == str(seq)
+
+
+def test_deadline_turns_hang_into_invalid():
+    def answer(q):
+        import time
+        time.sleep(5)
+        return Answer("晚了")
+
+    out, _ = _run(lambda t, f: Pose("SDWAN"), answer,
+                  match={"mode": "fixed", "questions": 1},
+                  red={"timeout_s": 0.05}, retry={"per_question": 0, "backoff_s": []})
+    assert out["turns"][0]["invalid"] is True
+    assert "TimeoutError" in out["turns"][0]["error"]
+
+
+def test_wrong_port_retries_then_continues(monkeypatch):
+    import urllib.error
+    calls = []
+
+    def answer(q):
+        calls.append(q)
+        raise urllib.error.URLError("connection refused")
+
+    out, _ = _run(lambda t, f: Pose(f"题{len(calls)}"), answer,
+                  match={"mode": "fixed", "questions": 2, "max_followups": 0},
+                  retry={"per_question": 1, "backoff_s": []})
+    assert len(out["turns"]) == 2
+    assert all(t["invalid"] for t in out["turns"])
+    assert len(calls) == 4          # 每题首次 + 1 次重试，然后进下一题
+
+
+def test_meta_redacts_and_has_task_fields(tmp_path):
+    from tests.adversarial.match_log import new_round
+    cfg = {"red": {"base": "http://red", "model": "m", "api_key": "secret-value", "temperature": 0},
+           "blue": {"base": "http://blue", "model": "b", "temperature": 0.7},
+           "match": {"seed": 7}, "style_card_version": "v1"}
+    kb = tmp_path / "kb.md"
+    kb.write_text("x", encoding="utf-8")
+    round_dir = new_round(tmp_path, cfg, kb)
+    meta = json.loads((round_dir / "meta.json").read_text(encoding="utf-8"))
+    assert meta["models"] == {"red": "m", "blue": "b"}
+    assert meta["temperature"]["blue"] == 0.7
+    assert meta["seed"] == 7 and meta["style_card_version"] == "v1" and meta["kb_copy_sha256"]
+    assert "secret-value" not in json.dumps(meta)
+
+
+def test_kb_changes_are_recorded_not_applied(tmp_path):
+    cfg = {"mode": "program",
+           "match": {"games": 1, "mode": "fixed", "questions": 1, "seed": 1, "max_followups": 0},
+           "kb": {"seed_path": "missing.md", "work_dir": str(tmp_path / "kb")},
+           "broadcast": {"level": "all", "max_per_sec": 10, "enabled": True},
+           "scope": ["SDWAN"], "retry": {"per_question": 0, "backoff_s": []}}
+    round_dir, code = run(cfg, tmp_path, dry_run=True,
+                          pose_fn=lambda t, f: Pose("SDWAN 缺口"),
+                          answer_fn=lambda q: Answer("不知道"))
+    changes = (round_dir / "game_1" / "kb_changes.jsonl").read_text(encoding="utf-8")
+    assert '"applied": false' in changes
+    assert code == 0
+
+
 def test_ask_kf_rejects_bad_ids(tmp_path):
     questions = {"1": {"id": "1", "question": "多少钱"}}
     with pytest.raises(ValueError, match="不存在"):

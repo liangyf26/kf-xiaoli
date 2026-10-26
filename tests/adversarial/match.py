@@ -8,6 +8,8 @@
 """
 from __future__ import annotations
 
+import queue
+import threading
 import time
 
 from tests.adversarial.classify import classify_turn
@@ -38,16 +40,32 @@ class Answer:
         self.error = error
 
 
-def _retry(answer_fn, question: str, attempts: int, backoff: list[float], sleep) -> tuple[Answer, int]:
+def _call_with_deadline(answer_fn, question: str, timeout_s: float) -> Answer:
+    """单题截止时间。函数自己超时、卡死或抛错都变成带 error 的答案。"""
+    done: queue.Queue = queue.Queue(maxsize=1)
+
+    def work() -> None:
+        try:
+            done.put(answer_fn(question))
+        except Exception as exc:                       # 断连/5xx/超时都进重试
+            done.put(Answer(error=f"{type(exc).__name__}: {exc}"))
+
+    thread = threading.Thread(target=work, daemon=True)
+    thread.start()
+    try:
+        return done.get(timeout=timeout_s)
+    except queue.Empty:
+        return Answer(error=f"TimeoutError: 超过 {timeout_s}s")
+
+
+def _retry(answer_fn, question: str, attempts: int, backoff: list[float], sleep,
+           timeout_s: float) -> tuple[Answer, int]:
     """attempts 含首次。返回 (最后一次答案, 重试次数)。"""
     last = Answer(error="not_called")
     for i in range(attempts):
         if i:
             sleep(backoff[min(i - 1, len(backoff) - 1)] if backoff else 0)
-        try:
-            last = answer_fn(question)
-        except Exception as exc:                       # 超时/断连都进重试
-            last = Answer(error=f"{type(exc).__name__}: {exc}")
+        last = _call_with_deadline(answer_fn, question, timeout_s)
         if not last.error:
             return last, i
     return last, attempts - 1
@@ -63,6 +81,7 @@ def run_game(game: int, config: dict, pose_fn, answer_fn, search_fn,
     max_followups = match.get("max_followups", 3)
     retry_n = config.get("retry", {}).get("per_question", 2) + 1   # 含首次
     backoff = config.get("retry", {}).get("backoff_s", [])
+    timeout_s = config.get("red", {}).get("timeout_s", 120)
     scope = config.get("scope", [])
 
     turns: list[dict] = []
@@ -88,7 +107,7 @@ def run_game(game: int, config: dict, pose_fn, answer_fn, search_fn,
             topic, followups = topic + 1, 0
             continue
 
-        answer, retries = _retry(answer_fn, pose.question, retry_n, backoff, sleep)
+        answer, retries = _retry(answer_fn, pose.question, retry_n, backoff, sleep, timeout_s)
         if answer.error:
             emit({"question": pose.question, "reason": pose.reason, "invalid": True,
                   "error": answer.error, "retries": retries, "scored": False,
