@@ -315,6 +315,37 @@ def test_shuffle_actually_randomizes(tmp_path):
     assert keys != sorted(keys), "批次仍为规范序——shuffle 未生效或被删除"
 
 
+def test_session_cap_counts_sessions_not_contacts(tmp_path):
+    """C1-P1 回归：同一 session_key 被按时间切成多个会话，每会话各有 cap 名额。
+
+    两个会话同 key=P:Z001、start_time 不同，各 5 条合格轮，--per-session 3
+    → 应取到 6 条（每会话 3 条）。旧实现按 session_key 计数 → 只取 3 条，此测试红。
+    """
+    sessions = tmp_path / "sessions.json"
+    turns1 = [_turn(f"甲段问题{i}", f"2026-08-02 09:0{i}:00") for i in range(1, 6)]
+    turns2 = [_turn(f"乙段问题{i}", f"2026-08-02 15:0{i}:00") for i in range(1, 6)]
+    sessions.write_text(json.dumps({"description": "cap 回归", "sessions": [
+        _session("S-Z1", "P:Z001", "2026-08-02 09:00:00", "2026-08-02 09:05:00", turns1),
+        _session("S-Z2", "P:Z001", "2026-08-02 15:00:00", "2026-08-02 15:05:00", turns2),
+    ]}, ensure_ascii=False), encoding="utf-8")
+    l059 = tmp_path / "l059.json"
+    l059.write_text(json.dumps({"description": "空059", "cases": []}, ensure_ascii=False),
+                    encoding="utf-8")
+    out = tmp_path / "out.json"
+    r = _run("sample", "--seed", "60", "--context-turns", "5", "--per-session", "3",
+             "--batch-size", "50", "--batch", "1", "--out", str(out),
+             "--sessions", str(sessions), "--labeled-059", str(l059))
+    assert r.returncode == 0, r.stderr
+    d = json.loads(out.read_text(encoding="utf-8"))
+    assert d["funnel"]["per_session_capped"] == 4      # 10 候选 - 6 入池
+    assert d["funnel"]["pool"] == 6
+    by_start = {}
+    for c in d["cases"]:
+        by_start.setdefault(c["anchor"]["session_start"], []).append(c)
+    assert {k: len(v) for k, v in by_start.items()} == {
+        "2026-08-02 09:00:00": 3, "2026-08-02 15:00:00": 3}
+
+
 # ------------------------------------------------ stats 逐数核对（4 条假数据）
 
 def test_stats_four_fake_cases(tmp_path):

@@ -153,11 +153,15 @@ def build_pool(sessions, seed: int, per_session: int, labeled059_questions: set)
         if c["norm"] in seen_texts:            # 序列内原话重复：保留抽样顺序第一条（§5）
             funnel["dup_text"] += 1
             continue
-        if session_count[c["session"]["session_key"]] >= per_session:   # §3 每会话≤3
-            funnel["per_session_capped"] += 1
+        # §3「每个会话最多抽 3 个目标轮」的「会话」按 (session_key, start_time) 唯一识别
+        # （§10 规范序同键，实测 340 个两两不同）。session_key 只是联系人——同一联系人
+        # 会被按时间切成多个会话（C1-P1：按 key 计数会把 39 个会话当 1 个，池子少 2.4 倍）。
+        cap_key = (c["session"]["session_key"], c["session"]["start_time"])
+        if session_count[cap_key] >= per_session:
+            funnel["per_session_capped"] += 1   # 会话满（不是联系人满）
             continue
         seen_texts.add(c["norm"])
-        session_count[c["session"]["session_key"]] += 1
+        session_count[cap_key] += 1
         pool.append(c)
     funnel["pool"] = len(pool)
     return pool, funnel
