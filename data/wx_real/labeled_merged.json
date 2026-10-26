@@ -3787,7 +3787,7 @@
     }
   ],
   "merge_info": {
-    "generated_at": "2026-10-26T11:33:07",
+    "generated_at": "2026-10-26T11:55:51",
     "total_input": 150,
     "total_output": 150,
     "duplicates_dropped": 0,
@@ -3808,6 +3808,6 @@
       }
     ],
     "dropped_detail": [],
-    "dedup_rule": "060 按 case_id；059（无 case_id）按规范化原话；双键任一命中剔后入者"
+    "dedup_rule": "按卷型分键：带 case_id 只按 case_id（同文不同 id 都保留）；无 case_id（059）按规范化原话；跨卷不做原话交叉去重；剔后入者"
   }
 }

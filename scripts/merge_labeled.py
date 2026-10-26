@@ -4,10 +4,14 @@
 用法：
     .venv/bin/python scripts/merge_labeled.py 卷1.json 卷2.json ... --out 总卷.json
 
-规则（Chief 任务单 C5）：
-- 去重：060 条目按 `case_id`；059 条目（无 case_id）按规范化原话（去首尾空白、
-  连续空白合并成 1 个空格，与 Q1/C1 同一套）；双键任一命中即剔，保留先传入
-  卷的条目，剔的逐条记录进 merge_info.dropped_detail。
+规则（Chief 任务单 C5 + 复审 P1 裁决：按卷型分键）：
+- 带 `case_id` 的条目（060 各批）：**只按 `case_id` 去重**，不看 question——
+  两个不同 case_id 即使原话逐字相同也都保留；
+- 不带 `case_id` 的条目（059）：按规范化原话去重（去首尾空白、连续空白合并成
+  1 个空格，与 Q1/C1 同一套）；
+- 跨卷之间**不做**原话交叉去重：060 卷内逐字重复已由 C1 抽样 dup_text 挡住，
+  合并层不做第二道按原话的剔除（双键并用会静默丢 060 的同文不同 id 条目）。
+- 任一键命中即剔后传入者，剔的逐条记录进 merge_info.dropped_detail。
 - 059 条目保持原样不加字段；060 条目 case_id/batch/anchor/context 原样透传。
 - 输出 {description, cases, merge_info}：merge_info 带来源卷路径、sha256、
   各卷条数/保留数/剔除数、合并时间；load_cases 兼容（cases 之外全是 meta）。
@@ -38,15 +42,16 @@ def norm_text(s: str) -> str:
 
 
 def case_keys(case: dict) -> list[tuple[str, str]]:
-    """一条条目的去重键集合：有 case_id 用 case_id；规范化原话非空再用原话键。"""
-    keys = []
+    """一条条目的去重键：按卷型分键（复审 P1 裁决，禁止双键并用）。
+
+    带 case_id（060 各批）→ 只按 case_id，不看 question（同文不同 id 都保留）；
+    不带 case_id（059）→ 只按规范化原话。跨卷不做原话交叉去重。
+    """
     cid = case.get("case_id")
     if cid:
-        keys.append(("case_id", str(cid)))
+        return [("case_id", str(cid))]
     nq = norm_text(case.get("question", ""))
-    if nq:
-        keys.append(("q", nq))
-    return keys
+    return [("q", nq)] if nq else []
 
 
 def merge_volumes(volumes: list[tuple[str, dict]]) -> tuple[list[dict], dict]:
@@ -102,7 +107,8 @@ def merge_volumes(volumes: list[tuple[str, dict]]) -> tuple[list[dict], dict]:
         "duplicates_dropped": len(dropped_detail),
         "sources": sources,
         "dropped_detail": dropped_detail,
-        "dedup_rule": "060 按 case_id；059（无 case_id）按规范化原话；双键任一命中剔后入者",
+        "dedup_rule": "按卷型分键：带 case_id 只按 case_id（同文不同 id 都保留）；"
+                      "无 case_id（059）按规范化原话；跨卷不做原话交叉去重；剔后入者",
     }
     return out, info
 
@@ -124,7 +130,10 @@ def write_merged(out_path: Path, volume_paths: list[Path]) -> dict:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="合并多份标注卷为可跑总卷（#060 C5）")
+    ap = argparse.ArgumentParser(
+        description="合并多份标注卷为可跑总卷（#060 C5）。去重按卷型分键："
+                    "带 case_id 的条目只按 case_id（同文不同 id 都保留）；"
+                    "无 case_id 的条目（059）按规范化原话；跨卷不做原话交叉去重。")
     ap.add_argument("volumes", nargs="+", help="输入卷 JSON（{description,cases} 或裸 list）")
     ap.add_argument("--out", required=True, help="输出总卷路径")
     args = ap.parse_args()

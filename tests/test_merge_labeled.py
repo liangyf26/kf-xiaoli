@@ -67,15 +67,15 @@ def test_merge_single_volume_preserves_entries_verbatim(tmp_path):
     assert src["sha256"] == ml.sha256_of(v)   # 来源卷 sha256 记录正确
 
 
-# --------------------------------------------- ③ 两卷合并去重（case_id + 原话双键）
+# --------------------------------- ③ 两卷合并去重（按卷型分键，跨卷不交叉去重）
 
 def test_merge_two_volumes_dedup(tmp_path):
     v59 = _vol(tmp_path, "l059.json", [
         _c059("如果合适价格 能不能商量"),
         _c059("能开发票？", expected_action="handoff"),
     ])
-    # 060 卷 3 条：C2 规范化后（trim + 连续空白并 1 空格）与 059 第 1 条同原话（跨卷撞 q 键）；
-    # C3 的 case_id 与 C1 相同（卷间撞 case_id 键）。C1 正常保留。
+    # 060 卷 3 条：C2 规范化后与 059 第 1 条同原话——跨卷不做原话交叉去重，保留；
+    # C3 的 case_id 与 C1 相同（case_id 键撞，剔后入者）。C1、C2 都保留。
     v60 = _vol(tmp_path, "l060.json", [
         _c060("060-0001", "套餐多少钱"),
         _c060("060-0002", "  如果合适价格   能不能商量 "),
@@ -83,16 +83,39 @@ def test_merge_two_volumes_dedup(tmp_path):
     ])
     out, info = ml.merge_volumes([(str(v59), json.loads(v59.read_text())),
                                  (str(v60), json.loads(v60.read_text()))])
-    assert len(out) == 3                      # 2（059）+ 1（060 C1）= 3
-    assert [c.get("case_id", "059") for c in out] == ["059", "059", "060-0001"]
-    assert info["duplicates_dropped"] == 2
-    # 剔的是后传入卷的重复条目，且逐条记录撞的键与原因
-    reasons = {d["reason"] for d in info["dropped_detail"]}
-    assert reasons == {"case_id 重复", "原话重复(与先入条目)"}
-    assert {d["source"] for d in info["dropped_detail"]} == {str(v60)}
+    assert len(out) == 4                      # 2（059）+ 2（060 C1、C2）= 4
+    assert [c.get("case_id", "059") for c in out] == ["059", "059", "060-0001", "060-0002"]
+    assert info["duplicates_dropped"] == 1
+    # 剔的只是 case_id 撞的后入条目
+    assert [d["reason"] for d in info["dropped_detail"]] == ["case_id 重复"]
+    assert info["dropped_detail"][0]["source"] == str(v60)
     # 060 条目的 case_id/batch/context 原样透传，059 条目无 case_id 字段
     assert out[2]["batch"] == "B1" and out[2]["context"] == []
     assert all("case_id" not in c for c in out[:2])
+
+
+# ------------------------------------------- ③b 分键规则（Chief P1 裁决）专项
+
+def test_060_same_text_different_case_id_both_kept(tmp_path):
+    """060 两条不同 case_id、question 逐字相同：只按 case_id 去重 → 两条都保留。
+
+    旧实现（case_id+question 双键同时用）会把它们误剔成 1 条——静默丢数据。
+    """
+    v = _vol(tmp_path, "same_text.json", [_c060("060-0001", "帮我看看网络"),
+                                          _c060("060-0002", "帮我看看网络")])
+    out, info = ml.merge_volumes([(str(v), json.loads(v.read_text()))])
+    assert len(out) == 2
+    assert [c["case_id"] for c in out] == ["060-0001", "060-0002"]
+    assert info["duplicates_dropped"] == 0
+
+
+def test_059_same_normalized_text_deduped(tmp_path):
+    """059 两条规范化原话相同（空白差异）：按规范化 question 去重 → 剔后入者。"""
+    v = _vol(tmp_path, "dup059.json", [_c059("能开发票？"), _c059("  能开发票？  ")])
+    out, info = ml.merge_volumes([(str(v), json.loads(v.read_text()))])
+    assert len(out) == 1 and out[0]["question"] == "能开发票？"
+    assert info["duplicates_dropped"] == 1
+    assert info["dropped_detail"][0]["reason"] == "原话重复(与先入条目)"
 
 
 # ------------------------------------------- ④ 输出能被 accuracy_evaluation.load_cases 读
