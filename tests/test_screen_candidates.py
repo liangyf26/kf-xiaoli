@@ -43,7 +43,11 @@ def _write_059(tmp_path):
 
 
 class FakeQwenClient:
-    """桩：按 prompt 里第一个客户行文本查表返回 verdict；记调用次数。"""
+    """桩：按 prompt 里第一个客户行文本查表。
+
+    answers 的值可以是 verdict 字符串（确认轮默认 keep），也可以是
+    {"verdict": ..., "confirm": ...}。记调用次数。
+    """
     calls = 0
     answers: dict = {}
     boom = False
@@ -57,12 +61,20 @@ class FakeQwenClient:
         if type(self).boom:
             raise RuntimeError("桩故意失败")
         text = messages[0]["content"]
+        spec = None
         for needle, v in type(self).answers.items():
             if needle in text:
-                return {"response": json.dumps({"verdict": v, "reason": f"桩判 {v}"},
-                                               ensure_ascii=False), "usage": {}}
-        return {"response": json.dumps({"verdict": "unsure", "reason": "桩默认"}),
-                "usage": {}}
+                spec = v
+                break
+        if isinstance(spec, str) or spec is None:
+            verdict, confirm = spec or "unsure", "keep"
+        else:
+            verdict, confirm = spec.get("verdict", "unsure"), spec.get("confirm", "keep")
+        if "第二道确认" in text:
+            return {"response": json.dumps({"confirm": confirm, "reason": f"桩确认 {confirm}"},
+                                           ensure_ascii=False), "usage": {}}
+        return {"response": json.dumps({"verdict": verdict, "reason": f"桩判 {verdict}"},
+                                       ensure_ascii=False), "usage": {}}
 
 
 def _run(tmp_path, sessions_path, l059_path, monkeypatch, cap=10, extra=()):
@@ -158,7 +170,10 @@ def test_end_to_end_verdicts_skipped_and_meta(tmp_path, monkeypatch):
         for c in x["candidates"]:
             assert {"session_key", "session_start", "turn_idx"} <= set(c)
     assert "generated_at" not in json.dumps(d)
-    assert FakeQwenClient.calls == 2          # P:U1 走规则、P:U4 无候选，只有两个 LLM 调用
+    # P:U1 走规则、P:U4 无候选；P:U2 初判 customer 再跑确认轮，P:U3 初判 unsure 不确认
+    assert FakeQwenClient.calls == 3
+    assert by_key["P:U2"]["confirm"] == "keep"
+    assert d["meta"]["confirm_pass"] == {"keep": 1, "drop": 0, "unsure": 0}
 
 
 def test_cache_hit_rerun_no_llm_same_sha(tmp_path, monkeypatch):
@@ -208,4 +223,48 @@ def test_cache_key_varies_with_every_field():
                       base["sk"], base["ss"])
     k4 = sc.cache_key(base["canon_sha"], base["p_sha"], base["model_config"],
                       "P:U2", base["ss"])
-    assert len({k0, k1, k2, k3, k4}) == 5
+    k5 = sc.cache_key(base["canon_sha"], base["p_sha"], base["model_config"],
+                      base["sk"], base["ss"], "confirm-sha")
+    assert len({k0, k1, k2, k3, k4, k5}) == 6
+
+
+def test_confirm_drop_rewrites_customer(tmp_path, monkeypatch):
+    """确认轮 drop → verdict 改 not_customer、reason 前缀「二次确认:」，候选仍在。"""
+    FakeQwenClient.calls = 0
+    FakeQwenClient.boom = False
+    FakeQwenClient.answers = {"登录不了控制台": {"verdict": "customer", "confirm": "drop"},
+                              "帮我看看这条专线": "unsure"}
+    sp = _write_sessions(tmp_path, _std_library())
+    rc, out, _ = _run(tmp_path, sp, _write_059(tmp_path), monkeypatch)
+    assert rc == 0
+    by = {x["session_key"]: x for x in json.loads(out.read_text())["sessions"]}
+    assert by["P:U2"]["verdict"] == "not_customer"
+    assert by["P:U2"]["confirm"] == "drop"
+    assert by["P:U2"]["reason"].startswith("二次确认:")
+    assert len(by["P:U2"]["candidates"]) == 2
+    meta = json.loads(out.read_text())["meta"]["confirm_pass"]
+    assert meta["drop"] == 1 and meta["keep"] == 0
+
+
+def test_agency_signal_does_not_exclude():
+    """代办特征只标记、不直接排除：含「公司转让」但无整会话规则命中 → rule_hit 为 None。"""
+    text = "[客户] 您这边有广西南宁纳税的公司转让吗"
+    assert sc.rule_hit(text) is None
+    assert sc.agency_signal(text) == "公司转让"
+
+
+def test_a3_must_pass_guard_raises_on_not_customer():
+    """P1 硬校验：四条会话出现在产物里且 verdict=not_customer → 直接抛错。"""
+    out = [{"session_key": sk, "session_start": ss, "verdict": "not_customer"}
+           for sk, ss in sc.A3_MUST_PASS_SESSIONS]
+    try:
+        sc.assert_a3_must_pass(out)
+    except AssertionError as e:
+        assert "P:U041" in str(e)
+    else:
+        raise AssertionError("兜底断言没有拦住 not_customer")
+    out[0]["verdict"] = "customer"
+    out[1]["verdict"] = "unsure"
+    out[2]["verdict"] = "customer"
+    out[3]["verdict"] = "unsure"
+    sc.assert_a3_must_pass(out)          # 最差 unsure 也放行

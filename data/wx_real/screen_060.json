@@ -2,6 +2,12 @@
   "meta": {
     "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
     "cap": 10,
+    "confirm_pass": {
+      "drop": 27,
+      "keep": 45,
+      "unsure": 4
+    },
+    "confirm_prompt_sha256": "4d3d3cf84912c83d7ebf157da93898dd93947ee8acdf7881e167858621061451",
     "context_budget": {
       "max_chars": 2000,
       "max_turns": 20,
@@ -27,16 +33,17 @@
       "total_turns": 1647
     },
     "private_sessions": 322,
-    "prompt_sha256": "e58c62ba614f0b16b6b3c5c89c3b0c3b2893daf3771f081297b68091873fb134",
-    "screened_customer": 290,
-    "screened_not_customer": 665,
-    "screened_unsure": 10,
+    "prompt_sha256": "66b6bd848dcb29c5eade7f4e017993ebe3a40563630f2d4546dd0b0a717e5356",
+    "screened_customer": 191,
+    "screened_not_customer": 693,
+    "screened_unsure": 81,
     "sessions_with_candidates": 289,
     "total_candidates": 965,
     "total_sessions_all": 340
   },
   "sessions": [
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0001_T000",
@@ -67,8 +74,9 @@
           "turn_idx": 4
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对端主动推销企业资质完善服务，属于典型的B2B业务推销/代办行为，而非咨询或报障的客户。",
+      "reason": "对端主动推销企业资质完善服务，属于定义中的推销行为，非咨询或报障。",
       "sent_chars": 310,
       "sent_turns": 5,
       "session_key": "P:U103",
@@ -76,6 +84,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0002_T000",
@@ -92,8 +101,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "发言内容包含推销软著申请服务、报价优惠及引导对方自行尝试的话术，符合非客户中推销/代办人员的特征。",
+      "reason": "会话内容显示对端在推销软著申请服务并提及内部定价策略，属于推销/内部人员行为，而非客户咨询。",
       "sent_chars": 108,
       "sent_turns": 2,
       "session_key": "P:U080",
@@ -101,6 +111,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0004_T000",
@@ -110,8 +121,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "发送方自称经理并主动推销会员及合作服务，属于典型的推销/代办行为，而非咨询或报障的客户。",
+      "reason": "对端主动推销会员及合作服务，属于推销行为，非客户咨询或报障。",
       "sent_chars": 131,
       "sent_turns": 1,
       "session_key": "P:U112",
@@ -119,6 +131,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0005_T000",
@@ -128,8 +141,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息内容为典型的B2B推销话术，旨在通过强调资源、人脉及公司庆典优惠来促成合作，属于推销行为而非客户咨询或报障。",
+      "reason": "对端正在向用户推销合作机会并提及公司庆典活动，属于典型的推销/业务拓展行为，而非咨询产品或报故障的客户。",
       "sent_chars": 155,
       "sent_turns": 1,
       "session_key": "P:U112",
@@ -137,6 +151,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0008_T000",
@@ -160,8 +175,9 @@
           "turn_idx": 3
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "发送方自称是“摘星AI”的销售人员（小梁），正在向对方推销GEO服务，属于推销/非客户行为。",
+      "reason": "会话内容显示对端是主动联系用户、推销GEO服务的销售人员（小梁），属于推销/代办类非客户行为。",
       "sent_chars": 526,
       "sent_turns": 4,
       "session_key": "P:U063",
@@ -169,6 +185,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0009_T000",
@@ -178,8 +195,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "发言内容包含“催催您”、“项目能接”、“合作一次”等典型的B2B销售或业务拓展话术，表明对端是推销方或合作方，而非咨询服务的客户。",
+      "reason": "对端使用“催催您”、“大胆合作”等销售话术，明显是推销/业务拓展人员，而非咨询产品或报故障的客户。",
       "sent_chars": 99,
       "sent_turns": 1,
       "session_key": "P:U112",
@@ -187,6 +205,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0010_T000",
@@ -203,15 +222,17 @@
           "turn_idx": 2
         }
       ],
+      "confirm": "drop",
       "method": "llm",
-      "reason": "对端针对发送的课程详情询问具体指代，属于咨询产品/服务内容的行为。",
+      "reason": "二次确认:对端自称“大成方略广西公司”员工，正在向用户推销/通知培训课程，属于同行或渠道方，而非客户本人提诉求。",
       "sent_chars": 475,
       "sent_turns": 3,
       "session_key": "P:U078",
       "session_start": "2026-07-30 10:21:49",
-      "verdict": "customer"
+      "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0011_T000",
@@ -235,8 +256,9 @@
           "turn_idx": 2
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "会话内容明确包含“测试”、“test”及“wild account”等字样，属于内部测试或自动化脚本行为，非真实客户咨询。",
+      "reason": "会话内容明确标注为“政策监控测试”及“test”，属于内部测试或自动化脚本行为，非真实客户咨询。",
       "sent_chars": 89,
       "sent_turns": 3,
       "session_key": "P:U096",
@@ -244,6 +266,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0012_T000",
@@ -253,8 +276,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "发送方自称经理并推销会员服务、提及红头文件及优惠底价，属于典型的B2B销售或推销行为，而非咨询或报障的客户。",
+      "reason": "对端发送的是推销会员服务及报价的营销话术，属于推销行为，非客户咨询或报障。",
       "sent_chars": 129,
       "sent_turns": 1,
       "session_key": "P:U112",
@@ -262,6 +286,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0013_T000",
@@ -271,8 +296,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息为典型的ISO认证推销/营销话术，属于定义中的‘推销’类非客户行为。",
+      "reason": "对端发送的是关于ISO认证机构缩减和档期紧张的推销/营销信息，属于推销行为，非客户咨询或报障。",
       "sent_chars": 202,
       "sent_turns": 1,
       "session_key": "P:U103",
@@ -280,6 +306,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0014_T000",
@@ -289,8 +316,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息为典型的推销/销售话术，包含“安排办理”、“价格划算”等营销特征，且语气为主动跟进客户，符合非客户（推销/内部人员）定义。",
+      "reason": "发言方为推销人员，正在向对方进行业务推广和促成交易，属于非客户角色。",
       "sent_chars": 156,
       "sent_turns": 1,
       "session_key": "P:U112",
@@ -298,6 +326,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0016_T000",
@@ -307,8 +336,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息内容为推销合作渠道、强调优惠及增值服务，属于典型的B2B业务拓展或推销行为，而非客户咨询或报障。",
+      "reason": "对端正在推销合作渠道并试图促成签约，属于典型的推销/代办行为，而非咨询产品或报故障的客户。",
       "sent_chars": 158,
       "sent_turns": 1,
       "session_key": "P:U112",
@@ -316,6 +346,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0018_T000",
@@ -325,8 +356,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "发送方以公司总经办名义发布内部价格调整及业务办理通知，属于内部行政或管理指令，而非客户咨询或诉求。",
+      "reason": "对端发送的是内部业务调整通知，属于内部人员或管理方发布的信息，而非客户咨询或报障。",
       "sent_chars": 109,
       "sent_turns": 1,
       "session_key": "P:U112",
@@ -334,6 +366,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0021_T000",
@@ -343,8 +376,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": "drop",
       "method": "llm",
-      "reason": "对话内容显示对端在推销服务并寻求合作，属于推销/业务拓展行为，而非咨询或报障的客户。",
+      "reason": "二次确认:对端使用“可以合作一年嘛”及推销口吻，符合同行/渠道/供应商谈合作分成的特征，而非客户本人咨询产品。",
       "sent_chars": 48,
       "sent_turns": 1,
       "session_key": "P:U112",
@@ -352,6 +386,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0022_T000",
@@ -368,8 +403,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话中一方主动询问对方是“新用户还是老用户”以确认身份，这是典型的客服或销售人员核实客户状态的话术，而非客户咨询产品或提诉求。",
+      "reason": "会话中一方在主动询问对方是阿里云新用户还是老用户，这是典型的销售/客服向潜在客户核实身份的话术，表明对端是内部销售人员而非客户。",
       "sent_chars": 53,
       "sent_turns": 2,
       "session_key": "P:U138",
@@ -377,6 +413,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0023_T000",
@@ -428,15 +465,17 @@
           "turn_idx": 6
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部网络架构（教育网与移动互联互通）及运维排查，且包含“我快被辞了”等内部职场闲聊，符合内部人员或运维场景特征。",
+      "reason": "会话前半部分涉及具体的网络互联互通故障排查，符合客户报障特征，但后半部分突然转为个人职场危机（被辞退、谋后路）的闲聊，属于混合场景，无法单纯判定为纯客户咨询或纯内部闲聊。",
       "sent_chars": 175,
       "sent_turns": 7,
       "session_key": "P:U041",
       "session_start": "2026-08-03 07:49:19",
-      "verdict": "not_customer"
+      "verdict": "unsure"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0024_T000",
@@ -460,15 +499,17 @@
           "turn_idx": 3
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "用户提及在闲鱼（二手交易平台）咨询，且对话内容为简短确认，符合二手交易或代办场景，非标准产品/服务客户咨询。",
+      "reason": "会话内容极简且缺乏具体业务上下文，无法区分是真实客户咨询还是内部测试/闲聊，符合不确定定义。",
       "sent_chars": 47,
       "sent_turns": 4,
       "session_key": "P:U126",
       "session_start": "2026-08-03 08:40:56",
-      "verdict": "not_customer"
+      "verdict": "unsure"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0025_T002",
@@ -506,8 +547,9 @@
           "turn_idx": 7
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "会话内容涉及内部专利申报流程、供应商采购协调及内部财务对账，属于内部工作沟通而非外部客户咨询。",
+      "reason": "会话内容均为内部工作进度同步（如专利申报、采购询价、财务对账），无外部客户咨询或报障特征。",
       "sent_chars": 238,
       "sent_turns": 9,
       "session_key": "P:U123",
@@ -515,6 +557,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": "盖章代收",
       "candidates": [
         {
           "case_candidate_id": "S0026_T000",
@@ -552,8 +595,9 @@
           "turn_idx": 4
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部利润策略、报价规则及向特定经理（李经理）交付合同，属于内部业务沟通或B2B供应商协作，而非终端客户咨询。",
+      "reason": "会话内容涉及内部利润策略、报价规则及内部人员（李经理）对接，属于内部工作沟通或B2B业务洽谈，非终端客户咨询。",
       "sent_chars": 111,
       "sent_turns": 5,
       "session_key": "P:U053",
@@ -561,6 +605,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0027_T000",
@@ -591,15 +636,17 @@
           "turn_idx": 3
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及具体的网络底层配置（IPv6、169.254.x.x链路本地地址）及服务器连接问题，且语气为技术排查与内部沟通，符合内部运维或技术人员之间的交流特征，而非普通客户咨询。",
+      "reason": "会话内容涉及V6地址、接口配置及运营商故障排查，属于典型的技术运维或内部协作场景，且缺乏明确的客户咨询或报修特征，无法确定对端身份。",
       "sent_chars": 105,
       "sent_turns": 5,
       "session_key": "P:U041",
       "session_start": "2026-08-03 10:48:43",
-      "verdict": "not_customer"
+      "verdict": "unsure"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0028_T001",
@@ -672,8 +719,9 @@
           "turn_idx": 18
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "会话内容全为对某社会新闻/单位内部纠纷的闲聊与吐槽，未涉及任何产品咨询、服务诉求或业务操作。",
+      "reason": "会话内容全为对某社会新闻/单位内部纠纷的闲聊与吐槽，未涉及任何产品咨询、服务诉求或故障报修。",
       "sent_chars": 378,
       "sent_turns": 19,
       "session_key": "P:U033",
@@ -681,6 +729,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0029_T000",
@@ -697,8 +746,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部业务运营（直播运行、收成方案、收账方式）及内部人员称呼（徐总），属于内部工作沟通而非外部客户咨询。",
+      "reason": "对话内容涉及内部业务运营（直播运行、收成方案、收账方式）及内部人员称呼（徐总），属于内部工作沟通，非外部客户咨询或报障。",
       "sent_chars": 86,
       "sent_turns": 2,
       "session_key": "P:U125",
@@ -706,6 +756,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0030_T000",
@@ -743,8 +794,9 @@
           "turn_idx": 5
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户提及开发票、请款函等具体业务操作，并询问认证流程，符合客户咨询产品/服务及提诉求的定义。",
+      "reason": "对端明确提及“开发票”、“请款函”等具体业务诉求，并询问“在哪里认证”的操作指引，符合客户咨询产品/服务及提诉求的定义。",
       "sent_chars": 86,
       "sent_turns": 7,
       "session_key": "P:U032",
@@ -752,6 +804,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0031_T000",
@@ -761,8 +814,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部工作汇报（拜访客户）及内部技术维护（小程序漏洞修补），属于内部人员沟通。",
+      "reason": "会话内容均为内部工作汇报（拜访客户、修补漏洞），属于内部人员沟通，非对端作为客户发起的咨询或诉求。",
       "sent_chars": 40,
       "sent_turns": 1,
       "session_key": "P:U004",
@@ -770,6 +824,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0032_T001",
@@ -779,8 +834,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户询问具体功能操作位置（上传电子签章），属于典型的产品使用咨询。",
+      "reason": "对端询问具体功能操作位置（上传电子签章），属于典型的产品使用咨询。",
       "sent_chars": 22,
       "sent_turns": 2,
       "session_key": "P:U032",
@@ -788,6 +844,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0033_T000",
@@ -832,15 +889,17 @@
           "turn_idx": 5
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部人员（元境蔡工）询问代理价格及内部报价策略，属于内部沟通或B2B业务对接，而非终端客户咨询。",
+      "reason": "会话中明确出现“元境蔡工问我”、“客户问”等转述第三方咨询的话术，属于混合场景或内部沟通，依据规则必须判为 unsure。",
       "sent_chars": 120,
       "sent_turns": 6,
       "session_key": "P:U123",
       "session_start": "2026-08-04 09:06:28",
-      "verdict": "not_customer"
+      "verdict": "unsure"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0034_T000",
@@ -871,8 +930,9 @@
           "turn_idx": 3
         }
       ],
+      "confirm": "drop",
       "method": "llm",
-      "reason": "对话内容显示该方在主导商务谈判、制定付款方案（预付款/质保金比例）并审核合同，属于供应商或乙方角色，而非咨询服务的客户。",
+      "reason": "二次确认:对端以“公司领导”名义制定付款方案、强调“所有项目”均有质保金，且处于合同审核阶段，符合供应商/乙方（卖东西给我们）的特征，而非客户本人。",
       "sent_chars": 320,
       "sent_turns": 4,
       "session_key": "P:U024",
@@ -880,6 +940,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0036_T000",
@@ -889,8 +950,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对端主动推销物联网卡并提及免费测试卡及报价，属于典型的推销行为，而非咨询或报障的客户。",
+      "reason": "对端主动推销物联网卡并提及免费测试卡，属于典型的推销行为，符合非客户定义。",
       "sent_chars": 38,
       "sent_turns": 1,
       "session_key": "P:U134",
@@ -898,6 +960,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": "公司转让",
       "candidates": [
         {
           "case_candidate_id": "S0037_T000",
@@ -956,8 +1019,9 @@
           "turn_idx": 8
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对端自述为从事公司转让业务的同行，目的是寻找货源（收公司）而非咨询或购买服务，属于B2B业务对接或推销，非终端客户。",
+      "reason": "对端自述为从事公司转让业务的中介，目的是寻找货源（收公司）而非咨询自身业务问题，属于B2B业务对接或推销，非终端客户。",
       "sent_chars": 132,
       "sent_turns": 9,
       "session_key": "P:U114",
@@ -965,6 +1029,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0038_T000",
@@ -1009,6 +1074,7 @@
           "turn_idx": 7
         }
       ],
+      "confirm": null,
       "method": "rule",
       "reason": "规则命中「转账验证码」：依据：整段只有验证码文本、无业务问题，是转发验证码不是咨询",
       "sent_chars": 134,
@@ -1018,6 +1084,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0039_T000",
@@ -1041,8 +1108,9 @@
           "turn_idx": 2
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部合同核对、Bug修复及内部款项结算，属于内部工作沟通，非外部客户咨询。",
+      "reason": "会话内容涉及内部合同核对、需求变更确认及内部款项结算，属于内部工作沟通，无对外客户咨询或报障特征。",
       "sent_chars": 80,
       "sent_turns": 3,
       "session_key": "P:U004",
@@ -1050,6 +1118,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0040_T000",
@@ -1094,8 +1163,9 @@
           "turn_idx": 8
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部IP排查、暴力破解溯源及发给特定内部人员（陈永晏）的需求报价表，属于内部运维或项目协作场景，非外部客户咨询。",
+      "reason": "会话内容显示对端在进行内部技术排查（如IP暴力破解、杀毒软件设置）并发送内部需求报价表，属于内部人员工作沟通，无外部客户咨询特征。",
       "sent_chars": 188,
       "sent_turns": 10,
       "session_key": "P:U004",
@@ -1103,6 +1173,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0041_T000",
@@ -1112,6 +1183,7 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "rule",
       "reason": "规则命中「招聘/面试通知」：依据：SDWAN 客户咨询不会出现面试/入职/月薪/报到——这是 HR 通知语境",
       "sent_chars": 127,
@@ -1121,6 +1193,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0042_T000",
@@ -1137,15 +1210,17 @@
           "turn_idx": 1
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "对话内容涉及内部账号登录及特定文件下载操作，且语气为指令性指导，符合内部人员或客服协助处理内部事务的特征，而非外部客户咨询。",
+      "reason": "对端在咨询备案申请书的下载方式及登录操作，属于典型的产品/服务咨询与操作诉求。",
       "sent_chars": 59,
       "sent_turns": 2,
       "session_key": "P:U123",
       "session_start": "2026-08-05 08:55:35",
-      "verdict": "not_customer"
+      "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0043_T000",
@@ -1176,8 +1251,9 @@
           "turn_idx": 3
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户明确表达咨询跨境电商业务并预约时间，符合客户咨询产品/服务的定义。",
+      "reason": "对端明确表达咨询跨境电商业务并预约时间，符合客户定义。",
       "sent_chars": 91,
       "sent_turns": 5,
       "session_key": "P:U145",
@@ -1185,6 +1261,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0044_T000",
@@ -1208,8 +1285,9 @@
           "turn_idx": 4
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部人员（秦总）及内部资产（华为P20）的处理与流转，属于内部沟通而非外部客户咨询。",
+      "reason": "会话内容涉及内部人员之间的物品交接（华为P20手机）及内部事务沟通（SDWAN项目取消、询问号码归属），未出现对外部客户的产品咨询、故障报修或业务诉求，属于内部工作交流。",
       "sent_chars": 65,
       "sent_turns": 5,
       "session_key": "P:U004",
@@ -1217,6 +1295,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0045_T002",
@@ -1254,8 +1333,9 @@
           "turn_idx": 6
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户明确咨询系统登录问题及联系人增删改的具体操作方法，符合客户提诉求和咨询服务的定义。",
+      "reason": "对端明确咨询系统登录故障及联系人修改的具体操作方法，符合客户提诉求和报问题的定义。",
       "sent_chars": 143,
       "sent_turns": 7,
       "session_key": "P:U032",
@@ -1263,6 +1343,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0046_T000",
@@ -1286,8 +1367,9 @@
           "turn_idx": 5
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及打印文件、确认版本及内部物品交接（“在办公室吗”、“拿给你”），属于内部同事间的工作协作，而非对外部客户的业务咨询或诉求。",
+      "reason": "会话内容显示对端在询问是否继续拉线、确认打印版本及送件，属于内部协作或供应商对接场景，而非客户咨询产品或报障。",
       "sent_chars": 96,
       "sent_turns": 7,
       "session_key": "P:U123",
@@ -1295,6 +1377,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0047_T000",
@@ -1346,8 +1429,9 @@
           "turn_idx": 8
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话中提及“超哥”、“邹总”、“东信”等具体内部人员及合作方名称，且内容涉及合同拟定、人员到岗安排等内部业务协调，属于内部人员或合作伙伴间的沟通，而非外部客户咨询。",
+      "reason": "会话内容涉及内部合同细节、人员到岗安排及内部沟通（如“超哥”、“邹总”），属于内部工作协调，非外部客户咨询。",
       "sent_chars": 153,
       "sent_turns": 9,
       "session_key": "P:U003",
@@ -1355,6 +1439,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0048_T000",
@@ -1413,8 +1498,9 @@
           "turn_idx": 7
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容显示发送方在解释内部业务规则（如老号码无法升级、副卡违规风险）并主动推销套餐，符合内部客服或销售人员特征，而非咨询服务的客户。",
+      "reason": "会话内容显示对端在解释套餐规则、办理限制及副卡资费，语气为向他人推销或解释业务，符合内部人员或代办人员特征，而非客户咨询。",
       "sent_chars": 253,
       "sent_turns": 8,
       "session_key": "P:U088",
@@ -1422,6 +1508,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0049_T000",
@@ -1431,8 +1518,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "会话内容详细描述了岗位职责、工作场景（政府单位空调房）及具体操作（QQ群运营、工单系统），属于招聘或内部岗位说明，而非客户咨询。",
+      "reason": "会话内容详细描述了岗位职责、工作内容（QQ群运营、工单系统操作）及办公环境，属于招聘或岗位介绍场景，非客户咨询或报障。",
       "sent_chars": 123,
       "sent_turns": 1,
       "session_key": "P:U001",
@@ -1440,6 +1528,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0051_T000",
@@ -1456,6 +1545,7 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "rule",
       "reason": "规则命中「招聘/面试通知」：依据：SDWAN 客户咨询不会出现面试/入职/月薪/报到——这是 HR 通知语境",
       "sent_chars": 238,
@@ -1465,6 +1555,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0052_T000",
@@ -1481,15 +1572,17 @@
           "turn_idx": 3
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "用户提及合同条款及具体比例（25% vs 30%），属于对服务/产品条款的咨询或确认，符合客户定义。",
+      "reason": "会话内容涉及合同比例（25% vs 30%）及“不谈了”的表述，既可能是客户在抱怨或确认商务条款，也可能是内部人员讨论业务规则或模拟客户场景，单看文本无法确定对端身份。",
       "sent_chars": 58,
       "sent_turns": 4,
       "session_key": "P:U032",
       "session_start": "2026-08-06 07:53:09",
-      "verdict": "customer"
+      "verdict": "unsure"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0053_T000",
@@ -1499,15 +1592,17 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部文档或系统内容的编辑与确认（如“AI大赛”、“sdwan”内容添加），属于内部协作或运维场景，而非外部客户咨询产品或服务。",
+      "reason": "会话内容涉及具体业务（AI大赛、SDWAN）的添加操作，但缺乏上下文无法区分是内部测试/运维在配置系统，还是客户在咨询/要求添加服务，属于混合或身份不明场景。",
       "sent_chars": 40,
       "sent_turns": 1,
       "session_key": "P:U004",
       "session_start": "2026-08-06 10:22:08",
-      "verdict": "not_customer"
+      "verdict": "unsure"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0054_T000",
@@ -1531,6 +1626,7 @@
           "turn_idx": 2
         }
       ],
+      "confirm": null,
       "method": "rule",
       "reason": "规则命中「招聘/面试通知」：依据：SDWAN 客户咨询不会出现面试/入职/月薪/报到——这是 HR 通知语境",
       "sent_chars": 53,
@@ -1540,6 +1636,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0055_T000",
@@ -1577,6 +1674,7 @@
           "turn_idx": 4
         }
       ],
+      "confirm": null,
       "method": "rule",
       "reason": "规则命中「招聘/面试通知」：依据：SDWAN 客户咨询不会出现面试/入职/月薪/报到——这是 HR 通知语境",
       "sent_chars": 82,
@@ -1586,6 +1684,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0056_T000",
@@ -1658,8 +1757,9 @@
           "turn_idx": 28
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及走私、内部额度及商业合作探讨，且结尾出现“晚点打给你”、“睡吧”等熟人间的非正式互动，属于内部人员或合作伙伴间的闲聊，非标准客户咨询。",
+      "reason": "会话内容涉及走私、内部竞争策略及私人闲聊，属于非业务咨询的社交或内部交流，无产品/服务诉求。",
       "sent_chars": 390,
       "sent_turns": 20,
       "session_key": "P:U092",
@@ -1667,6 +1767,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0057_T000",
@@ -1683,8 +1784,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "发言者使用“我们这边老师”指代内部团队，并抱怨其响应速度，符合内部员工或管理层视角，而非外部客户。",
+      "reason": "发言者自称“我们这边老师”，表明其身份为内部员工或合作方，正在抱怨内部响应速度，属于内部工作沟通而非外部客户咨询。",
       "sent_chars": 38,
       "sent_turns": 3,
       "session_key": "P:U087",
@@ -1692,6 +1794,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0058_T000",
@@ -1708,8 +1811,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部人员编制调整、合同协议及内部管理层（王经理、邹总）沟通，属于内部工作协调而非外部客户咨询。",
+      "reason": "对话内容为内部人员讨论与另一家公司（数广）的人员配置变动及合同执行细节，属于内部工作沟通，非外部客户咨询或报障。",
       "sent_chars": 104,
       "sent_turns": 3,
       "session_key": "P:U003",
@@ -1717,6 +1821,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0059_T000",
@@ -1747,8 +1852,9 @@
           "turn_idx": 3
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部系统功能（管理后台、账单导出）及内部人员（李君、经理）的工作汇报与确认，属于内部沟通而非外部客户咨询。",
+      "reason": "对端在陈述内部系统功能（管理后台、账单导出等）及内部人员（李君、经理）的操作状态，属于内部工作汇报或测试反馈，无外部客户咨询或报障特征。",
       "sent_chars": 153,
       "sent_turns": 4,
       "session_key": "P:U061",
@@ -1756,6 +1862,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0060_T000",
@@ -1814,8 +1921,9 @@
           "turn_idx": 8
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部请示流程、合同微调及腾讯会议安排，属于内部工作沟通，非外部客户咨询。",
+      "reason": "会话内容涉及内部请示流程、合同微调及会议安排，属于内部工作沟通，无对外客户咨询或报障特征。",
       "sent_chars": 143,
       "sent_turns": 9,
       "session_key": "P:U032",
@@ -1823,6 +1931,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0061_T000",
@@ -1832,8 +1941,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息为典型的营销推广文案，旨在吸引潜在客户进行AI落地诊断，属于推销行为而非客户咨询。",
+      "reason": "对端发送的是推销AI落地诊断服务的营销文案，属于推销行为，非客户咨询。",
       "sent_chars": 81,
       "sent_turns": 1,
       "session_key": "P:U063",
@@ -1841,6 +1951,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0062_T000",
@@ -1857,15 +1968,17 @@
           "turn_idx": 1
         }
       ],
+      "confirm": "drop",
       "method": "llm",
-      "reason": "对端提供了企业开票信息并明确请求安排货款及订货，属于典型的业务咨询与支付诉求。",
+      "reason": "二次确认:对端提及“帮您订货”及发送供应商/收款信息，符合“卖东西给我们”或“供应商/渠道”特征，非本公司客户。",
       "sent_chars": 139,
       "sent_turns": 3,
       "session_key": "P:U053",
       "session_start": "2026-08-07 10:59:10",
-      "verdict": "customer"
+      "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0063_T000",
@@ -1875,8 +1988,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容为典型的营销推广文案（包含“获客”、“曝光”、“意向”等术语及表情符号），属于推销行为，而非客户咨询或报障。",
+      "reason": "对端发送的是关于GEO营销和智能家居获客效果的宣传文案，属于推销或营销行为，而非咨询产品或报故障。",
       "sent_chars": 187,
       "sent_turns": 1,
       "session_key": "P:U063",
@@ -1884,6 +1998,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0064_T000",
@@ -1921,8 +2036,9 @@
           "turn_idx": 4
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "会话中明确提及“测试”、“内部用”及“1分钱入口”，表明对端为内部人员在进行系统测试或内部沟通，而非外部客户咨询。",
+      "reason": "会话中明确出现“测试”、“内部用”字样，且内容涉及内部链接分享及内部功能状态说明，属于内部人员沟通。",
       "sent_chars": 252,
       "sent_turns": 5,
       "session_key": "P:U004",
@@ -1930,6 +2046,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0065_T000",
@@ -1939,8 +2056,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息为典型的商家服务推广/广告文案，包含服务项目、耗材列表及多地联系电话，属于推销或内部宣传内容，而非客户咨询。",
+      "reason": "对端发送的是包含服务项目、维修范围、耗材配送及咨询热线的完整业务推广文案，属于推销或广告行为，而非客户咨询或报障。",
       "sent_chars": 203,
       "sent_turns": 1,
       "session_key": "P:U071",
@@ -1948,6 +2066,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0067_T000",
@@ -1957,8 +2076,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "内容涉及内部系统操作及具体项目现场核查准备，属于内部工作事项或内部人员沟通，非外部客户咨询。",
+      "reason": "会话内容为内部工作待办事项（系统材料修改、现场核查准备），属于内部人员的工作沟通，无对外服务或咨询特征。",
       "sent_chars": 39,
       "sent_turns": 1,
       "session_key": "P:U004",
@@ -1966,6 +2086,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0068_T001",
@@ -2003,8 +2124,9 @@
           "turn_idx": 6
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部项目合规性、审计驻场及内部流程协调，且明确提到“电话和桂电说”、“不用啥返回”，属于内部人员之间的业务沟通，非外部客户咨询。",
+      "reason": "会话内容涉及内部项目合规性讨论、审计驻场应对及内部沟通策略（如“自己消化”、“电话说”），属于内部人员或合作方内部协调，非外部客户咨询产品或服务。",
       "sent_chars": 512,
       "sent_turns": 10,
       "session_key": "P:U032",
@@ -2012,6 +2134,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0069_T000",
@@ -2021,8 +2144,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对方主动推销软件技术人员外包服务，属于推销行为，非咨询或报障的客户。",
+      "reason": "对端明确提供软件技术人员外包服务，属于推销/招聘行为，符合非客户定义。",
       "sent_chars": 93,
       "sent_turns": 1,
       "session_key": "P:U124",
@@ -2030,6 +2154,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0070_T000",
@@ -2053,8 +2178,9 @@
           "turn_idx": 2
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "会话内容显示发送方在指导接收方补充材料并上传，属于客服或内部人员向客户/用户下达指令，而非客户在咨询或提诉求。",
+      "reason": "会话内容显示对端正在向用户发送指令，要求补充上传纳税记录截图以完成合格投资者认证，这是典型的客服或业务人员引导客户操作的行为，而非客户在咨询或报障。",
       "sent_chars": 117,
       "sent_turns": 3,
       "session_key": "P:U093",
@@ -2062,6 +2188,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0072_T001",
@@ -2071,8 +2198,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部运维故障处理（SDWAN服务商服务器关闭），属于内部人员沟通工作事务，非外部客户咨询。",
+      "reason": "对端自述正在处理SDWAN服务商服务器故障，属于内部运维或技术人员的工作沟通，而非客户咨询或报障。",
       "sent_chars": 41,
       "sent_turns": 2,
       "session_key": "P:U004",
@@ -2080,6 +2208,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": "盖章代收",
       "candidates": [
         {
           "case_candidate_id": "S0073_T002",
@@ -2152,8 +2281,9 @@
           "turn_idx": 27
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "对话内容涉及产品报价单修改、功能清单确认及合同签署流程，属于典型的商务咨询与业务办理场景。",
+      "reason": "对端在咨询产品报价、要求修改报价单内容（表头、列、价格、功能描述）并提及签合同及盖章流程，属于典型的客户采购/咨询行为。",
       "sent_chars": 233,
       "sent_turns": 20,
       "session_key": "P:U042",
@@ -2161,6 +2291,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0074_T000",
@@ -2191,8 +2322,9 @@
           "turn_idx": 3
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及具体的服务器IP、代码路径、技术栈（Java/Py）及内部重构需求，且称呼为“超哥”，属于内部开发人员之间的技术沟通，而非外部客户咨询。",
+      "reason": "对话内容涉及内部代码结构、服务器路径、重构计划及Git管理，且称呼为“超哥”，属于内部技术人员之间的开发沟通，非外部客户咨询。",
       "sent_chars": 256,
       "sent_turns": 4,
       "session_key": "P:U061",
@@ -2200,6 +2332,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0075_T000",
@@ -2209,6 +2342,7 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "rule",
       "reason": "规则命中「群发营销」：依据：模板化营销句式，真实客户不会主动发",
       "sent_chars": 180,
@@ -2218,6 +2352,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0076_T000",
@@ -2227,15 +2362,17 @@
           "turn_idx": 0
         }
       ],
+      "confirm": "drop",
       "method": "llm",
-      "reason": "用户明确提出了关于工业系统和高企系统材料修改、上传及准备的具体业务诉求，符合客户定义。",
+      "reason": "二次确认:用户提及“工业系统”、“高企系统”及“材料准备/上传”，符合代办资质、代交材料或同行/渠道沟通的特征，非客户本人直接咨询本公司产品。",
       "sent_chars": 39,
       "sent_turns": 1,
       "session_key": "P:U004",
       "session_start": "2026-08-11 08:58:55",
-      "verdict": "customer"
+      "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0077_T000",
@@ -2280,8 +2417,9 @@
           "turn_idx": 6
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部设备交接、账号登记表格更新及内部人员（李君）沟通，属于内部运维或行政事务，非外部客户咨询。",
+      "reason": "会话内容涉及内部设备交接、文档更新及工作确认，属于内部人员协作场景，无外部客户咨询或报障特征。",
       "sent_chars": 170,
       "sent_turns": 8,
       "session_key": "P:U123",
@@ -2289,6 +2427,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0078_T000",
@@ -2326,15 +2465,17 @@
           "turn_idx": 4
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "会话中一方提供专业解释（如‘立减金七天有效’、‘只能用储蓄卡’）并指导另一方操作，符合客服或内部人员向用户/测试人员解答的特征，且无典型客户咨询或报障行为。",
+      "reason": "LLM 输出解析失败兜底 unsure：{\"verdict\": \"not_customer\", \"reason\": \"会话中一方提供专业解答（如解释立减金规则、建议尝试储蓄卡支付），另一方提出具体疑问，符合客服与用户咨询的场景，但根据题目定",
       "sent_chars": 119,
       "sent_turns": 5,
       "session_key": "P:U093",
       "session_start": "2026-08-11 14:33:22",
-      "verdict": "not_customer"
+      "verdict": "unsure"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0081_T000",
@@ -2344,8 +2485,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部工作指令（签合同）及内部称呼（超哥），属于内部人员沟通，非外部客户咨询。",
+      "reason": "对话内容为内部工作指令（要求专注签合同），无产品咨询或故障报修，属于内部人员沟通。",
       "sent_chars": 22,
       "sent_turns": 1,
       "session_key": "P:U003",
@@ -2353,6 +2495,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0082_T000",
@@ -2362,8 +2505,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息内容为内部工作进度同步（催合同流程中），属于内部人员之间的沟通，而非客户咨询或诉求。",
+      "reason": "该消息为内部工作进度同步（催合同流程），属于内部人员沟通，非客户咨询或诉求。",
       "sent_chars": 13,
       "sent_turns": 1,
       "session_key": "P:U058",
@@ -2371,6 +2515,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0083_T000",
@@ -2387,8 +2532,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容显示对端正在推销法律服务并赠送案件，属于典型的推销行为，而非咨询或报障。",
+      "reason": "对端主动推销法律顾问服务并赠送诉讼案件，属于典型的推销行为，符合非客户定义。",
       "sent_chars": 118,
       "sent_turns": 2,
       "session_key": "P:U072",
@@ -2396,6 +2542,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0084_T000",
@@ -2468,8 +2615,9 @@
           "turn_idx": 11
         }
       ],
+      "confirm": "drop",
       "method": "llm",
-      "reason": "对话内容显示用户正在执行房屋交接、设施检查及欠费查询等具体操作，且提及“保利管家”身份，符合内部人员或代办人员处理业务场景，而非普通客户咨询。",
+      "reason": "二次确认:对端自称为“保利管家”（物业/中介人员），正在执行房屋交接、设施检查及处理欠费等代办/运维事务，属于非客户本人的内部或第三方操作，符合“代办/中介”或“内部/运维”的drop判据。",
       "sent_chars": 418,
       "sent_turns": 13,
       "session_key": "P:U004",
@@ -2477,6 +2625,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0085_T000",
@@ -2486,8 +2635,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息为推销代办ISO认证服务的广告，属于定义中的非客户类别（代办/推销）。",
+      "reason": "对端发送的是ISO认证和3A认证的代办推销广告，属于定义中的非客户类别（代办/推销）。",
       "sent_chars": 78,
       "sent_turns": 1,
       "session_key": "P:U085",
@@ -2495,6 +2645,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0086_T001",
@@ -2525,8 +2676,9 @@
           "turn_idx": 4
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户明确提出了取消特定银行卡（桂林银行幸运卡）的业务诉求，符合客户定义。",
+      "reason": "对端明确提出了取消特定银行卡（桂林银行幸运卡）的业务诉求，属于典型的客户操作请求。",
       "sent_chars": 59,
       "sent_turns": 5,
       "session_key": "P:U110",
@@ -2534,6 +2686,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0088_T000",
@@ -2585,8 +2738,9 @@
           "turn_idx": 7
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及带红酒、洗澡、天气闲聊等私人生活场景，属于纯社交闲聊，无产品咨询或业务诉求。",
+      "reason": "会话内容涉及带红酒、洗澡、天气闲聊等私人社交话题，属于纯社交闲聊，无产品咨询或业务诉求。",
       "sent_chars": 101,
       "sent_turns": 8,
       "session_key": "P:U031",
@@ -2594,6 +2748,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0089_T000",
@@ -2610,8 +2765,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户明确提出了开具发票的业务诉求，并提供了完整的开票信息，符合客户定义。",
+      "reason": "对端明确提出开具发票的诉求并提供了完整的开票信息，属于典型的客户业务请求。",
       "sent_chars": 139,
       "sent_turns": 2,
       "session_key": "P:U145",
@@ -2619,6 +2775,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0090_T000",
@@ -2670,8 +2827,9 @@
           "turn_idx": 7
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "对话内容涉及对系统架构、第三方责任界定、数据库选型、性能指标及需求文档细节的深入咨询与确认，符合客户在采购或实施阶段对供应商/服务商提出具体技术诉求和质疑的特征。",
+      "reason": "对端在咨询产品技术细节（如数据库更换、性能瓶颈、功能定义）并确认需求边界，符合客户咨询产品/服务的定义。",
       "sent_chars": 245,
       "sent_turns": 8,
       "session_key": "P:U004",
@@ -2679,6 +2837,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0091_T000",
@@ -2751,8 +2910,9 @@
           "turn_idx": 29
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部人员培训、考核及团队管理（如“带他们一周”、“上考核”），属于内部工作沟通，非客户咨询。",
+      "reason": "会话内容显示对端正在管理内部团队（如“带他们”、“上考核”、“确认回复正确再让他们发出去”），属于内部人员的工作沟通，而非客户咨询。",
       "sent_chars": 337,
       "sent_turns": 20,
       "session_key": "P:U003",
@@ -2760,6 +2920,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0092_T000",
@@ -2769,8 +2930,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息为典型的推销/广告话术（供应算力设备、欢迎询价），属于定义中的非客户类别。",
+      "reason": "对端发送的是推销算力设备/硬件的营销广告，属于定义中的推销类非客户行为。",
       "sent_chars": 47,
       "sent_turns": 1,
       "session_key": "P:U084",
@@ -2778,6 +2940,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0093_T000",
@@ -2787,8 +2950,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "用户仅发送了疑似工号/ID及简短确认语，缺乏具体的咨询、报障或业务诉求内容，无法判断其为客户还是内部测试人员。",
+      "reason": "会话仅包含身份自报和简短确认，缺乏具体的咨询、报障或诉求内容，无法判断对端是真实客户还是内部测试人员。",
       "sent_chars": 23,
       "sent_turns": 2,
       "session_key": "P:U107",
@@ -2796,6 +2960,7 @@
       "verdict": "unsure"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0094_T000",
@@ -2805,8 +2970,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息为内部人员向客服同步业务处理进度（发票已开具），属于内部工作沟通而非客户咨询或诉求。",
+      "reason": "该消息为内部人员向客服同步工作进度（告知发票已开具），属于内部协作或状态更新，而非客户发起的咨询或诉求。",
       "sent_chars": 13,
       "sent_turns": 1,
       "session_key": "P:U123",
@@ -2814,6 +2980,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0095_T000",
@@ -2823,8 +2990,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息为典型的营销推广内容（推销GEO优化服务），属于定义中的非客户类别（推销）。",
+      "reason": "对端发送的是关于GEO优化和自媒体运营的推销广告，属于定义中的推销行为，非客户咨询或报障。",
       "sent_chars": 136,
       "sent_turns": 1,
       "session_key": "P:U060",
@@ -2832,6 +3000,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0096_T000",
@@ -2855,8 +3024,9 @@
           "turn_idx": 2
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部方案审计、科长领导沟通及内部网络建设，属于B端销售或内部项目推进场景，非终端客户咨询。",
+      "reason": "对端在陈述其内部方案审批流程及与第三方（审计部门、科长）的沟通进度，属于业务进展同步或闲聊，未向客服提出咨询、报障或操作诉求。",
       "sent_chars": 122,
       "sent_turns": 3,
       "session_key": "P:U137",
@@ -2864,6 +3034,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0097_T000",
@@ -2936,8 +3107,9 @@
           "turn_idx": 18
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话中提及“不要加在我们这里”、“丢给他们”、“要我们采再说”等内部决策用语，表明对端是内部采购或技术人员在与供应商进行内部评估和议价，而非外部终端客户。",
+      "reason": "对话中“客户”标签下的发言者表现出内部采购或项目负责人的特征（如讨论成本构成、利润空间、内部决策流程“丢给他们”、“要我们采再说”），而非最终终端用户咨询产品或服务。",
       "sent_chars": 273,
       "sent_turns": 20,
       "session_key": "P:U026",
@@ -2945,6 +3117,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0098_T000",
@@ -2954,15 +3127,17 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部业务操作（断开业务），且语气和用词符合内部人员沟通特征，非典型客户咨询或诉求。",
+      "reason": "会话内容极度简短且语义模糊，缺乏具体的产品、服务或故障背景，无法判断是内部指令还是客户诉求。",
       "sent_chars": 14,
       "sent_turns": 1,
       "session_key": "P:U041",
       "session_start": "2026-08-13 19:14:36",
-      "verdict": "not_customer"
+      "verdict": "unsure"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0099_T000",
@@ -2993,8 +3168,9 @@
           "turn_idx": 5
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部账号管理、内部人员指派（永晏）及内部工作文档（动物溯源摘要）的流转，属于内部协作场景。",
+      "reason": "会话内容涉及内部账号使用策略、内部人员（永晏）指令及内部文档分享，属于内部工作沟通，无对外客户咨询或诉求特征。",
       "sent_chars": 95,
       "sent_turns": 6,
       "session_key": "P:U003",
@@ -3002,6 +3178,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0100_T004",
@@ -3074,15 +3251,17 @@
           "turn_idx": 19
         }
       ],
+      "confirm": "drop",
       "method": "llm",
-      "reason": "对话中明确咨询了政采云操作、高配置台式机采购、发票开具等具体业务诉求，符合客户定义。",
+      "reason": "二次确认:对端提及“政采云”、“报审”、“走流程”、“验收”及“节能清单”，表明其身份为负责政府采购的中介或渠道商，而非最终使用产品的客户本人，属于代办/渠道性质。",
       "sent_chars": 340,
       "sent_turns": 20,
       "session_key": "P:U081",
       "session_start": "2026-08-13 21:48:39",
-      "verdict": "customer"
+      "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0101_T000",
@@ -3120,8 +3299,9 @@
           "turn_idx": 4
         }
       ],
+      "confirm": "drop",
       "method": "llm",
-      "reason": "对话内容涉及内部系统（政采云）的上架测试、审批流程及内部权限限制（如框架协议需厂家办理），属于内部业务沟通或测试场景，而非外部客户咨询。",
+      "reason": "二次确认:对端提及“框架协议要厂家去弄，我们弄不了”，表明其身份为代理商或渠道商，而非产品厂家（本公司）的直接客户，属于同行/渠道沟通。",
       "sent_chars": 124,
       "sent_turns": 5,
       "session_key": "P:U053",
@@ -3129,6 +3309,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0102_T000",
@@ -3138,8 +3319,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对方主动推销音视频设备及系统集成服务，属于推销行为，非咨询或报障的客户。",
+      "reason": "对端主动推销音视频设备及系统集成服务，属于推销行为，非客户咨询或报障。",
       "sent_chars": 178,
       "sent_turns": 1,
       "session_key": "P:U070",
@@ -3147,6 +3329,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0104_T000",
@@ -3219,8 +3402,9 @@
           "turn_idx": 10
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部技术架构讨论（SD-WAN组网、云主机搭建）及非正式社交闲聊，未体现向服务方咨询产品或提出业务诉求，符合内部人员或合作伙伴沟通特征。",
+      "reason": "会话内容为熟人间的闲聊及内部技术方案讨论（SD-WAN组网、云主机搭建），无咨询产品、报故障或要求客服操作等典型客户行为。",
       "sent_chars": 293,
       "sent_turns": 11,
       "session_key": "P:U041",
@@ -3228,6 +3412,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0105_T000",
@@ -3258,15 +3443,17 @@
           "turn_idx": 3
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部合同细节、服务器配置清单及域名归属等内部执行层面的确认，且最后提到“跟他聊一下”表明是内部协作沟通，而非外部客户咨询。",
+      "reason": "会话中出现了「他们自己注册认证吗」及「我跟他聊一下」等转述第三方（客户）咨询及内部沟通的话术，符合混合场景或内部人员代问的特征，依据规则判定为 unsure。",
       "sent_chars": 87,
       "sent_turns": 4,
       "session_key": "P:U004",
       "session_start": "2026-08-14 11:28:05",
-      "verdict": "not_customer"
+      "verdict": "unsure"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0106_T000",
@@ -3325,8 +3512,9 @@
           "turn_idx": 7
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户正在确认具体的费用计算（4500*0.12=540）及是否有其他费用，属于典型的咨询产品/服务收费及提诉求行为。",
+      "reason": "对端在确认具体的费用计算（4500*0.12=540）及是否有其他费用，属于典型的咨询产品/服务收费的诉求。",
       "sent_chars": 167,
       "sent_turns": 8,
       "session_key": "P:U081",
@@ -3334,6 +3522,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0107_T000",
@@ -3350,8 +3539,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容显示对端为主动推销法律服务、要求见面洽谈并提及“贵司”及“欠款案件”，符合内部人员或外部推销/代办人员的特征，而非咨询产品的客户。",
+      "reason": "对端主动推销法律服务并提及“贵司”，表明其身份为外部供应商或推销人员，而非咨询产品或报故障的客户。",
       "sent_chars": 91,
       "sent_turns": 2,
       "session_key": "P:U072",
@@ -3359,6 +3549,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0108_T000",
@@ -3424,8 +3615,9 @@
           "turn_idx": 10
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "会话内容显示说话方为物业或租赁部工作人员，正在向业主解释账单状态并主动提供房屋出租服务，属于内部人员或服务商角色，而非咨询服务的客户。",
+      "reason": "会话内容显示对端在主动查询欠费、询问房屋出租意向并协助对接租赁部，符合物业/客服工作人员向业主（房主）沟通的特征，而非客户向服务方咨询。",
       "sent_chars": 280,
       "sent_turns": 11,
       "session_key": "P:U018",
@@ -3433,6 +3625,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0109_T000",
@@ -3442,8 +3635,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容为内部人员确认收到特定公司（南宁超森）的专利费用款项，属于内部财务或业务确认，非外部客户咨询或诉求。",
+      "reason": "会话内容仅为内部人员确认收到特定款项（专利费用）的工作记录，无咨询、报障或业务办理诉求，属于内部工作沟通。",
       "sent_chars": 39,
       "sent_turns": 3,
       "session_key": "P:U123",
@@ -3451,6 +3645,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0110_T000",
@@ -3481,8 +3676,9 @@
           "turn_idx": 3
         }
       ],
+      "confirm": "unsure",
       "method": "llm",
-      "reason": "用户正在咨询具体的发票开具金额、税额及接收人范围，属于典型的产品/服务咨询与业务确认。",
+      "reason": "对端在确认具体的发票金额、税额及开票对象，属于典型的业务咨询与数据核对诉求。",
       "sent_chars": 79,
       "sent_turns": 4,
       "session_key": "P:U123",
@@ -3490,6 +3686,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0111_T000",
@@ -3506,8 +3703,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容显示一方在推销房屋代运营管理服务并说明分成比例，属于推销/代办场景，而非客户咨询或报障。",
+      "reason": "会话内容显示对端正在推销房屋代运营服务（二八分成），属于定义中的推销/代办类非客户行为。",
       "sent_chars": 80,
       "sent_turns": 2,
       "session_key": "P:U116",
@@ -3515,6 +3713,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0112_T001",
@@ -3524,8 +3723,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "用户在进行产品功能对比和体验反馈，属于内部测试或技术评估场景，而非典型的外部客户咨询或报障。",
+      "reason": "对端在对比不同AI工具（zcode与claude）的技术特性，属于内部技术讨论或闲聊，未涉及具体业务咨询、故障报修或操作诉求。",
       "sent_chars": 101,
       "sent_turns": 2,
       "session_key": "P:U061",
@@ -3533,6 +3733,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0113_T000",
@@ -3549,8 +3750,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部人员招聘、合同签署及社保要求，属于内部行政或HR事务，非外部客户咨询。",
+      "reason": "对话内容涉及内部人员招聘、合同签署及社保要求，属于内部行政或HR事务，非外部客户咨询产品或服务。",
       "sent_chars": 60,
       "sent_turns": 2,
       "session_key": "P:U003",
@@ -3558,6 +3760,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0114_T000",
@@ -3588,8 +3791,9 @@
           "turn_idx": 4
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "会话内容涉及具体的儿童用药指导（如糖浆、氨溴索、复方药剂量）及生活琐事，属于私人间的医疗咨询或家庭沟通，而非针对商业产品或服务的业务咨询。",
+      "reason": "会话内容涉及儿童用药剂量、具体药物名称及家庭日常对话，属于纯社交闲聊或私人生活分享，无任何产品咨询、服务诉求或故障报修。",
       "sent_chars": 70,
       "sent_turns": 6,
       "session_key": "P:U110",
@@ -3597,6 +3801,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0115_T000",
@@ -3613,8 +3818,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容为纯社交闲聊（提及游泳、调侃新梯子），无产品咨询、业务诉求或问题反馈，符合非客户定义。",
+      "reason": "会话内容为纯社交闲聊（游泳、调侃），未涉及任何产品咨询、故障报修或业务诉求。",
       "sent_chars": 34,
       "sent_turns": 2,
       "session_key": "P:U003",
@@ -3622,6 +3828,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0116_T000",
@@ -3652,8 +3859,9 @@
           "turn_idx": 4
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户咨询具体产品配置、对比高低配差异并表达购买顾虑，符合客户咨询产品/服务的定义。",
+      "reason": "对端明确咨询联想笔记本的具体配置、性能差异及购买建议，属于典型的产品咨询行为。",
       "sent_chars": 199,
       "sent_turns": 6,
       "session_key": "P:U038",
@@ -3661,6 +3869,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0117_T000",
@@ -3684,8 +3893,9 @@
           "turn_idx": 2
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户明确咨询云电脑账号的具体配置及价格，属于典型的产品咨询行为。",
+      "reason": "对端明确咨询云电脑账号的具体配置及价格，属于典型的产品咨询行为。",
       "sent_chars": 47,
       "sent_turns": 3,
       "session_key": "P:U034",
@@ -3693,6 +3903,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0118_T000",
@@ -3702,8 +3913,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容为内部运维人员汇报服务器BIOS时间同步及状态正常的技术操作结果，属于内部工作沟通而非客户咨询或诉求。",
+      "reason": "对端陈述的是内部服务器（西江服务器）的运维操作结果（BIOS时间同步），属于内部技术/运维人员的工作汇报，而非外部客户咨询或报障。",
       "sent_chars": 38,
       "sent_turns": 1,
       "session_key": "P:U004",
@@ -3711,6 +3923,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0120_T000",
@@ -3727,8 +3940,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "用户提及具体硬件型号但随后要求对方先提问，缺乏明确的咨询、购买或报障意图，无法确定是真实客户咨询还是内部测试/闲聊。",
+      "reason": "会话内容极简且包含“你先问下吧”这种典型的内部协作或转述指令，无法确定对端是真实客户还是内部人员/中介，符合混合或身份不明场景。",
       "sent_chars": 26,
       "sent_turns": 2,
       "session_key": "P:U081",
@@ -3736,6 +3950,7 @@
       "verdict": "unsure"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0121_T000",
@@ -3808,8 +4023,9 @@
           "turn_idx": 12
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "会话内容为熟人间的闲聊及业务探讨，涉及个人生活状态、创业模式交流及约定通话，无产品咨询、报障或要求客服执行操作等典型客户行为。",
+      "reason": "会话内容为熟人间的闲聊及商业合作探讨（如TK直播、供应链、个人状态分享），未出现向服务方咨询产品、报故障或要求操作等典型客户行为。",
       "sent_chars": 319,
       "sent_turns": 15,
       "session_key": "P:U119",
@@ -3817,6 +4033,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0122_T001",
@@ -3826,8 +4043,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容为内部工作进度同步（提及具体公司名、专利状态及内部缴费安排），属于内部人员沟通，非外部客户咨询。",
+      "reason": "会话内容为内部工作进度同步（确认收到通知、安排缴费时间），无对外咨询或报障特征，属于内部人员沟通。",
       "sent_chars": 53,
       "sent_turns": 2,
       "session_key": "P:U123",
@@ -3835,6 +4053,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0123_T000",
@@ -3844,8 +4063,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户提及账号注册成功及更新公司信息，属于典型的产品使用与数据维护诉求，符合客户定义。",
+      "reason": "对端提及账号注册成功及更新公司信息，属于典型的客户业务操作咨询或状态确认。",
       "sent_chars": 29,
       "sent_turns": 1,
       "session_key": "P:U123",
@@ -3853,6 +4073,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0124_T000",
@@ -3883,8 +4104,9 @@
           "turn_idx": 4
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户咨询具体的费用收取标准及税率，并提及学校对公打款等实际业务场景，符合客户咨询产品/服务及提诉求的定义。",
+      "reason": "对端在咨询具体的费用收取标准及发票开具流程，属于典型的产品/服务咨询行为。",
       "sent_chars": 75,
       "sent_turns": 5,
       "session_key": "P:U081",
@@ -3892,6 +4114,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0125_T000",
@@ -3915,8 +4138,9 @@
           "turn_idx": 2
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部工资发放、预约转账及账户余额归集等财务内部操作流程，属于内部人员工作沟通，非外部客户咨询。",
+      "reason": "会话内容涉及工资发放、内部账户资金归集及余额表更新，属于企业内部财务或行政人员的内部工作沟通，非外部客户咨询。",
       "sent_chars": 86,
       "sent_turns": 3,
       "session_key": "P:U123",
@@ -3924,6 +4148,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0126_T000",
@@ -3982,8 +4207,9 @@
           "turn_idx": 9
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户确认了具体的上门/服务时间（明天11点），并反馈了关于漏水问题的观察结果，符合客户预约服务及反馈问题的特征。",
+      "reason": "对端在确认上门维修/检查的时间，并反馈了漏水问题的观察情况，属于典型的报修和预约服务场景。",
       "sent_chars": 139,
       "sent_turns": 10,
       "session_key": "P:U003",
@@ -3991,6 +4217,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0127_T000",
@@ -4021,8 +4248,9 @@
           "turn_idx": 5
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容显示对端在主动提供信托产品的具体发售时间、期限及业绩基准等内部业务信息，符合内部人员（如理财经理或客服）向用户播报或解释产品的特征，而非客户在咨询或提诉求。",
+      "reason": "会话内容显示对端在主动提供信托产品的具体发售时间、期限及业绩基准等内部业务信息，符合内部人员（如理财经理或客服）向客户播报或内部同步工作的特征，而非客户在咨询或报障。",
       "sent_chars": 109,
       "sent_turns": 6,
       "session_key": "P:U093",
@@ -4030,6 +4258,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0128_T000",
@@ -4046,6 +4275,7 @@
           "turn_idx": 1
         }
       ],
+      "confirm": "keep",
       "method": "llm",
       "reason": "用户明确表达注销账户及转接人工服务的诉求，属于典型的客户业务操作请求。",
       "sent_chars": 34,
@@ -4055,6 +4285,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0129_T000",
@@ -4127,8 +4358,9 @@
           "turn_idx": 15
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及学校选寝室策略及笔记本电脑选购咨询，属于个人生活事务或消费建议，并非针对当前服务方产品的业务咨询或诉求。",
+      "reason": "会话内容主要涉及个人选购笔记本电脑（华硕/联想）的咨询及宿舍选寝室的策略讨论，属于个人生活/购物咨询，非针对特定企业产品或服务的B端/专业客户咨询，且无内部测试或混合场景特征。",
       "sent_chars": 556,
       "sent_turns": 17,
       "session_key": "P:U038",
@@ -4136,6 +4368,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0130_T001",
@@ -4145,6 +4378,7 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "rule",
       "reason": "规则命中「招聘/面试通知」：依据：SDWAN 客户咨询不会出现面试/入职/月薪/报到——这是 HR 通知语境",
       "sent_chars": 626,
@@ -4154,6 +4388,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0131_T000",
@@ -4177,8 +4412,9 @@
           "turn_idx": 4
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部人员（@李妙、@唐）之间关于查询公司营业执照是否录入系统的内部工作协调，属于内部运维或行政事务，非外部客户咨询。",
+      "reason": "会话内容涉及内部人员之间关于提供公司营业执照、确认系统录入状态及水印要求的行政/内部协作沟通，属于内部工作事务，非外部客户咨询。",
       "sent_chars": 142,
       "sent_turns": 6,
       "session_key": "P:U123",
@@ -4186,6 +4422,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0132_T000",
@@ -4216,8 +4453,9 @@
           "turn_idx": 4
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及考察公司规模、判断合作意向及商务社交（握手、互相帮助），属于B2B商务合作洽谈或内部沟通，而非普通客户咨询产品或服务。",
+      "reason": "会话内容涉及考察公司规模、判断是否合作及预约时间，属于商务洽谈或内部协作，非产品咨询或故障报修。",
       "sent_chars": 96,
       "sent_turns": 5,
       "session_key": "P:U146",
@@ -4225,6 +4463,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0133_T000",
@@ -4234,8 +4473,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容为私人生活安排（安装油烟机）及社交闲聊，未涉及任何产品咨询、服务诉求或业务操作。",
+      "reason": "对话内容为私人生活安排（安装油烟机）及社交闲聊，未涉及任何产品咨询、服务诉求或故障报修。",
       "sent_chars": 60,
       "sent_turns": 1,
       "session_key": "P:U061",
@@ -4243,6 +4483,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0134_T000",
@@ -4280,8 +4521,9 @@
           "turn_idx": 4
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话中称呼对方为“超哥”并涉及内部开票额度管理、申请流程及内部文档链接，属于内部财务或行政人员之间的协作沟通，而非外部客户咨询。",
+      "reason": "会话内容涉及内部人员（超哥）协调开票信息、确认额度及内部文档流转，属于内部工作沟通，非外部客户咨询。",
       "sent_chars": 199,
       "sent_turns": 5,
       "session_key": "P:U123",
@@ -4289,6 +4531,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0135_T000",
@@ -4340,6 +4583,7 @@
           "turn_idx": 7
         }
       ],
+      "confirm": null,
       "method": "rule",
       "reason": "规则命中「硬件采购推销」：依据：具体服务器型号+报价是采购推销群发，客户咨询用不到型号词",
       "sent_chars": 432,
@@ -4349,6 +4593,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0136_T000",
@@ -4358,8 +4603,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息为典型的营销推广内容，包含产品报价和促销信息，属于推销行为而非客户咨询。",
+      "reason": "对端发送的是典型的营销推广信息（推销软著、证书、认证等服务），属于定义中的“推销”类非客户行为。",
       "sent_chars": 109,
       "sent_turns": 1,
       "session_key": "P:U103",
@@ -4367,6 +4613,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": "马甲代运营",
       "candidates": [
         {
           "case_candidate_id": "S0138_T001",
@@ -4439,15 +4686,17 @@
           "turn_idx": 11
         }
       ],
+      "confirm": "drop",
       "method": "llm",
-      "reason": "用户提供了具体的开票资料并确认税率，明确表达了购买产品转售给最终客户的商业诉求，符合客户定义。",
+      "reason": "二次确认:对端自述拥有多个“马甲”账号且为一般纳税人，并提及帮合伙人处理注销事宜，符合“代办/中介/代跑腿”或“马甲账号代运营”的排除特征。",
       "sent_chars": 392,
       "sent_turns": 12,
       "session_key": "P:U037",
       "session_start": "2026-08-19 17:28:52",
-      "verdict": "customer"
+      "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0139_T000",
@@ -4520,15 +4769,17 @@
           "turn_idx": 17
         }
       ],
+      "confirm": "drop",
       "method": "llm",
-      "reason": "对话内容涉及具体硬件（硬盘、显卡、主板）的询价、库存确认及售后顾虑，符合客户咨询产品与服务的特征。",
+      "reason": "二次确认:对端以供应商/卖家身份报价（含税、订货周期、库存情况），并讨论显卡缺货及客户预算，属于同行/渠道/供应商沟通，非客户本人提诉求。",
       "sent_chars": 307,
       "sent_turns": 20,
       "session_key": "P:U047",
       "session_start": "2026-08-19 17:37:45",
-      "verdict": "customer"
+      "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0142_T000",
@@ -4538,8 +4789,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "内容包含具体内部工作事项（如软著补证、需求整理、流程处理）及日期汇报，属于内部人员的工作日志或状态同步，而非外部客户的咨询或诉求。",
+      "reason": "对端发送的是内部工作日报（包含软著提交、需求整理、合同模板等内部事务），属于内部人员汇报工作，非客户咨询或报障。",
       "sent_chars": 79,
       "sent_turns": 2,
       "session_key": "P:U003",
@@ -4547,6 +4799,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0143_T000",
@@ -4556,8 +4809,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息内容为向对方推销常年法务合作及包年服务，属于典型的推销行为，而非客户咨询或提诉求。",
+      "reason": "对端正在推销常年法务合作及包年服务，属于推销行为，符合非客户定义。",
       "sent_chars": 77,
       "sent_turns": 1,
       "session_key": "P:U072",
@@ -4565,6 +4819,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0144_T000",
@@ -4574,8 +4829,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对端发送的是典型的法律服务营销/推销话术，属于非客户定义的推销类行为。",
+      "reason": "对端发送的是典型的法律业务推销/广告信息，属于定义中的推销类非客户行为。",
       "sent_chars": 53,
       "sent_turns": 1,
       "session_key": "P:U109",
@@ -4583,6 +4839,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0145_T000",
@@ -4599,8 +4856,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "会话内容为系统自动发送的入住指引（密码、WiFi、注意事项），属于服务方单向通知，无客户咨询或诉求。",
+      "reason": "会话内容为系统自动发送的入住指引（房间密码、WiFi、信箱信息），属于服务通知而非客户发起的咨询或诉求。",
       "sent_chars": 266,
       "sent_turns": 2,
       "session_key": "P:U052",
@@ -4608,6 +4866,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0146_T000",
@@ -4617,8 +4876,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息为典型的B2B推销话术，包含资源介绍、报价谈判、对公结算及催单内容，属于非客户定义的推销行为。",
+      "reason": "对端正在推销合作服务（拓展业务、增加客户），属于定义中的推销/代办类非客户行为。",
       "sent_chars": 127,
       "sent_turns": 1,
       "session_key": "P:U112",
@@ -4626,6 +4886,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0147_T000",
@@ -4691,8 +4952,9 @@
           "turn_idx": 10
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "会话内容包含大量家庭琐事（孩子咳嗽、送学）、情感表达（想你）及生活闲聊，且“发验证码”语境更像熟人间的操作协助或测试，缺乏典型商业咨询或报障特征，符合非客户（如亲友或内部测试）定义。",
+      "reason": "会话内容全为家庭琐事、情感表达及日常闲聊，无任何产品咨询、故障报修或业务诉求。",
       "sent_chars": 164,
       "sent_turns": 12,
       "session_key": "P:U110",
@@ -4700,6 +4962,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0148_T000",
@@ -4716,8 +4979,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "用户提及“我自己住”并询问价格，属于租房场景，符合非客户定义中的租房类别。",
+      "reason": "用户询问“价格还能不能谈”属于典型的租房/房产交易场景，符合非客户定义中的“租房”类别。",
       "sent_chars": 46,
       "sent_turns": 2,
       "session_key": "P:U122",
@@ -4725,6 +4989,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0149_T000",
@@ -4748,8 +5013,9 @@
           "turn_idx": 2
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部项目对接、人员安排及内部系统（阳光采购平台）注册，且提及“罗总”、“蔡工”等内部或合作方人员，属于内部工作沟通而非外部客户咨询。",
+      "reason": "会话内容涉及内部人员（罗总、蔡工）对接、内部账号注册及内部项目配合关系的调整，属于内部工作协调，无外部客户咨询或报障特征。",
       "sent_chars": 128,
       "sent_turns": 3,
       "session_key": "P:U123",
@@ -4757,6 +5023,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0150_T000",
@@ -4766,8 +5033,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": "drop",
       "method": "llm",
-      "reason": "对话内容为内部人员汇报工作进度（支付完成），属于内部协作或测试场景，非外部客户咨询。",
+      "reason": "二次确认:对端提及“数据局”及“奖补指导费用”，属于代办资质/政府补贴申报的中介或服务商，非本公司产品/服务的直接客户。",
       "sent_chars": 22,
       "sent_turns": 1,
       "session_key": "P:U032",
@@ -4775,6 +5043,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0151_T000",
@@ -4798,8 +5067,9 @@
           "turn_idx": 4
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户主动提出寄送合同并要求对方签字盖章，属于典型的商务合作或业务办理诉求，符合客户定义。",
+      "reason": "对端主动要求提供地址以寄送合同进行签字盖章，属于明确的业务办理诉求。",
       "sent_chars": 91,
       "sent_turns": 5,
       "session_key": "P:U027",
@@ -4807,6 +5077,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0152_T000",
@@ -4816,8 +5087,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息为物业向业主发送的缴费通知，属于服务提供方主动触达，而非客户发起的咨询或诉求。",
+      "reason": "该消息为物业向业主发送的缴费通知，属于服务方对用户的单向告知，而非用户发起的咨询、报障或诉求，不符合客户定义。",
       "sent_chars": 58,
       "sent_turns": 1,
       "session_key": "P:U018",
@@ -4825,6 +5097,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0153_T004",
@@ -4897,8 +5170,9 @@
           "turn_idx": 20
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "会话内容包含大量私人情感表达、生活琐事分享及亲密称呼，属于纯社交闲聊，无产品咨询或业务诉求。",
+      "reason": "会话内容全为打雷、睡觉、生活琐事等纯社交闲聊，无任何产品咨询、服务诉求或故障报修。",
       "sent_chars": 229,
       "sent_turns": 20,
       "session_key": "P:U110",
@@ -4906,6 +5180,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0154_T000",
@@ -4915,8 +5190,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部工作协调（制作demo、对接图片资源），属于内部人员沟通，非客户咨询或诉求。",
+      "reason": "会话内容显示对端正在内部协调工作（提及“他们那边”未提供素材、计划制作demo），属于内部人员的工作沟通，而非客户咨询或报障。",
       "sent_chars": 48,
       "sent_turns": 2,
       "session_key": "P:U003",
@@ -4924,6 +5200,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": "盖章代收",
       "candidates": [
         {
           "case_candidate_id": "S0155_T000",
@@ -4933,8 +5210,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "会话内容为内部工作日报，涉及合同对接、系统测试跟进及软著提交等内部事务，属于内部人员汇报工作。",
+      "reason": "会话内容为内部工作汇报，涉及合同对接、内部测试跟进及软著提交等内部事务，无外部客户咨询或诉求。",
       "sent_chars": 160,
       "sent_turns": 1,
       "session_key": "P:U003",
@@ -4942,6 +5220,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0156_T000",
@@ -4951,8 +5230,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对端自称为云服务商商务经理，主动推销产品优惠并寻求合作，属于典型的推销/代办行为，非咨询或报障的客户。",
+      "reason": "对端自称为云服务商商务经理，主动推销产品优惠并寻求合作，属于典型的推销/代办行为，非客户咨询。",
       "sent_chars": 123,
       "sent_turns": 1,
       "session_key": "P:U083",
@@ -4960,6 +5240,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0157_T001",
@@ -4976,8 +5257,9 @@
           "turn_idx": 2
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户明确咨询产品具体参数（带宽、流量限制、IP归属地），属于典型的产品咨询行为。",
+      "reason": "对端明确咨询产品具体参数（带宽、流量限制、IP归属），符合客户咨询定义。",
       "sent_chars": 54,
       "sent_turns": 4,
       "session_key": "P:U132",
@@ -4985,6 +5267,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0158_T000",
@@ -5001,8 +5284,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部合同签署确认及结算规则沟通，且明确提到“跟业主”签约，表明对端为服务提供方或内部人员，而非最终消费者。",
+      "reason": "对端明确提及“跟业主签”、“按你们实际服务时长结算”，表明其身份为服务提供方或合作方，而非咨询产品或报故障的客户。",
       "sent_chars": 77,
       "sent_turns": 3,
       "session_key": "P:U027",
@@ -5010,6 +5294,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0159_T000",
@@ -5033,8 +5318,9 @@
           "turn_idx": 3
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部人员（李镇）处理离职或设备回收时的账号解绑及内部交接事宜，属于内部运维或行政沟通，非外部客户咨询。",
+      "reason": "会话内容涉及内部人员处理特定员工（李镇）的账号解绑及内部资源（软著账号、内部微信）的交接，属于内部运维或行政事务，非外部客户咨询。",
       "sent_chars": 127,
       "sent_turns": 5,
       "session_key": "P:U123",
@@ -5042,6 +5328,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0160_T001",
@@ -5072,8 +5359,9 @@
           "turn_idx": 5
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部人员（姚姚）之间的流程卡点、材料赶工及物品借用，属于内部协作或私人事务，无产品咨询或业务诉求。",
+      "reason": "会话内容涉及内部人员（姚姚）之间的材料流转、留言沟通及物品借用，属于内部工作协调或私人社交，无产品咨询或故障报修等客户特征。",
       "sent_chars": 96,
       "sent_turns": 6,
       "session_key": "P:U031",
@@ -5081,6 +5369,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0161_T002",
@@ -5090,15 +5379,17 @@
           "turn_idx": 2
         }
       ],
+      "confirm": "drop",
       "method": "llm",
-      "reason": "用户咨询之前获得的电话卡无信号问题并寻求操作指导，符合客户报问题/提诉求的定义。",
+      "reason": "二次确认:对端称呼客服为“超哥”并提及“您之前送我的”，表明双方存在私人社交关系，且该电话卡为个人赠送而非公司正式销售产品，属于私人事务咨询而非标准客户业务诉求。",
       "sent_chars": 125,
       "sent_turns": 3,
       "session_key": "P:U035",
       "session_start": "2026-08-21 17:33:07",
-      "verdict": "customer"
+      "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0162_T002",
@@ -5115,8 +5406,9 @@
           "turn_idx": 5
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户明确表达咨询SD-WAN跨境专线业务并指定具体地域，符合客户咨询产品/服务的定义。",
+      "reason": "对端明确咨询SD-WAN跨境专线产品并指定具体地域，符合客户咨询定义。",
       "sent_chars": 58,
       "sent_turns": 6,
       "session_key": "P:U135",
@@ -5124,6 +5416,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0163_T000",
@@ -5196,8 +5489,9 @@
           "turn_idx": 14
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "会话内容为家庭成员间的日常沟通与情感倾诉（照顾孩子、身体不适），不涉及任何产品咨询、服务诉求或业务操作，属于纯社交/生活场景。",
+      "reason": "会话内容为家庭成员间的日常沟通与情感倾诉（照顾孩子、身体不适、安排家务），属于纯社交闲聊，无产品咨询或业务诉求。",
       "sent_chars": 217,
       "sent_turns": 17,
       "session_key": "P:U110",
@@ -5205,6 +5499,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0164_T000",
@@ -5221,8 +5516,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部合同上会及议题安排，属于公司内部行政或商务流程沟通，非外部客户咨询或诉求。",
+      "reason": "对话内容为内部工作进度同步（等待合同上会、争取议题），无产品咨询、故障报修或业务诉求，属于内部人员沟通。",
       "sent_chars": 27,
       "sent_turns": 2,
       "session_key": "P:U030",
@@ -5230,6 +5526,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0165_T000",
@@ -5253,8 +5550,9 @@
           "turn_idx": 2
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "会话内容包含内部工作计划（软著、驻场、实习生管理）及系统调试操作（重启），符合内部人员或运维场景特征，非外部客户咨询。",
+      "reason": "会话内容包含内部工作计划（软著、驻场、实习生）及针对内部系统（37）的测试/重启操作，属于内部人员工作沟通。",
       "sent_chars": 101,
       "sent_turns": 6,
       "session_key": "P:U003",
@@ -5262,6 +5560,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0166_T000",
@@ -5285,8 +5584,9 @@
           "turn_idx": 2
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部项目走账、合同签署及发票流程协调，属于内部业务对接或供应商管理，而非外部客户咨询产品或服务。",
+      "reason": "会话内容涉及内部项目对接、合同签署及付款流程协调，属于内部工作沟通，非外部客户咨询或报障。",
       "sent_chars": 149,
       "sent_turns": 3,
       "session_key": "P:U123",
@@ -5294,6 +5594,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0167_T002",
@@ -5366,8 +5667,9 @@
           "turn_idx": 27
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容显示对端正在讨论如何向第三方企业（如李宁来宾厂、连锁企业）推销AI服务及报价策略，属于内部业务交流或销售同事间的沟通，而非向服务方咨询产品。",
+      "reason": "对端在讨论如何向第三方企业（来宾工厂、连锁企业）推销AI服务，并分享自己的销售案例和获客经验，属于内部业务交流或同行探讨，而非向服务方咨询自身需求。",
       "sent_chars": 387,
       "sent_turns": 20,
       "session_key": "P:U036",
@@ -5375,6 +5677,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0168_T000",
@@ -5384,6 +5687,7 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "rule",
       "reason": "规则命中「硬件采购推销」：依据：具体服务器型号+报价是采购推销群发，客户咨询用不到型号词",
       "sent_chars": 90,
@@ -5393,6 +5697,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0170_T000",
@@ -5409,15 +5714,17 @@
           "turn_idx": 2
         }
       ],
+      "confirm": "drop",
       "method": "llm",
-      "reason": "用户明确提出了账号换绑手机的业务诉求，并提供了具体的账号信息，符合客户定义。",
+      "reason": "二次确认:对端提及“副厅”、“飘窗”等房产装修/看房术语，与“软著账号”业务场景严重不符，疑似误发或内部/无关人员闲聊，非客户本人针对软著服务提诉求。",
       "sent_chars": 55,
       "sent_turns": 3,
       "session_key": "P:U123",
       "session_start": "2026-08-24 10:46:07",
-      "verdict": "customer"
+      "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0171_T000",
@@ -5434,8 +5741,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": "drop",
       "method": "llm",
-      "reason": "对话内容涉及内网漏洞扫描、SD-WAN系统内部管理及特定内部人员（孙总）的操作，属于内部运维或安全排查场景，非外部客户咨询。",
+      "reason": "二次确认:对端提及“我们内网”、“我们sdwan系统”，表明其身份为供应商或合作方（如孙总所属团队），正在向本公司（客服方）质询内部安全事件，而非客户本人咨询产品。",
       "sent_chars": 75,
       "sent_turns": 2,
       "session_key": "P:U004",
@@ -5443,6 +5751,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0172_T000",
@@ -5480,6 +5789,7 @@
           "turn_idx": 4
         }
       ],
+      "confirm": null,
       "method": "rule",
       "reason": "规则命中「硬件采购推销」：依据：具体服务器型号+报价是采购推销群发，客户咨询用不到型号词",
       "sent_chars": 302,
@@ -5489,6 +5799,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0173_T000",
@@ -5547,8 +5858,9 @@
           "turn_idx": 9
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户明确咨询摄像头直播的收费标准及具体操作流程，属于典型的产品服务咨询行为。",
+      "reason": "对端明确咨询摄像头直播的收费标准及具体操作流程，属于典型的产品/服务咨询行为。",
       "sent_chars": 189,
       "sent_turns": 10,
       "session_key": "P:U062",
@@ -5556,6 +5868,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0174_T000",
@@ -5565,15 +5878,17 @@
           "turn_idx": 0
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "该语句仅反馈了部分状态，缺乏具体的业务背景（如是测试验收还是真实故障排查），无法确定对端是内部测试人员还是真实客户。",
+      "reason": "用户反馈网络状态（公网IP异常），属于报故障/提诉求，符合客户定义。",
       "sent_chars": 17,
       "sent_turns": 1,
       "session_key": "P:U049",
       "session_start": "2026-08-25 07:58:00",
-      "verdict": "unsure"
+      "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0175_T000",
@@ -5590,8 +5905,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部技术栈（若依plus）、SDK集成及内部测试（联通云桌面SDWAN），属于内部研发或运维人员的技术沟通，而非外部客户咨询。",
+      "reason": "会话内容涉及内部技术栈（若依plus）、SDK集成及联通云桌面SDWAN测试，属于内部研发或运维人员的工作沟通，无外部客户咨询或报障特征。",
       "sent_chars": 134,
       "sent_turns": 3,
       "session_key": "P:U004",
@@ -5599,6 +5915,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0176_T000",
@@ -5608,8 +5925,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "发言内容涉及内部合同审批流程及领导决策，属于内部工作进度同步，非客户咨询或诉求。",
+      "reason": "该消息为内部工作进度同步（汇报合同审批状态），未包含任何产品咨询、故障报修或业务诉求，属于内部人员沟通。",
       "sent_chars": 30,
       "sent_turns": 1,
       "session_key": "P:U058",
@@ -5617,6 +5935,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0177_T001",
@@ -5633,15 +5952,17 @@
           "turn_idx": 2
         }
       ],
+      "confirm": "drop",
       "method": "llm",
-      "reason": "用户提供了具体的硬盘型号、序列号及含税价格，并确认有货，属于典型的产品询价与采购咨询行为。",
+      "reason": "二次确认:对端提供具体型号及含税价格，并询问是否有该型号，符合供应商/渠道向本公司供货或询价的特征，非客户本人咨询本公司产品。",
       "sent_chars": 48,
       "sent_turns": 3,
       "session_key": "P:U059",
       "session_start": "2026-08-25 11:52:33",
-      "verdict": "customer"
+      "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0178_T000",
@@ -5693,8 +6014,9 @@
           "turn_idx": 6
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部数据核对、代码/数据修改确认及内部结算金额讨论，属于内部人员之间的协作沟通，而非外部客户咨询。",
+      "reason": "对话内容涉及内部数据核对、修改确认及内部人员间的责任推诿（如‘实际是你自己改的’），属于内部工作沟通，无外部客户咨询或报障特征。",
       "sent_chars": 154,
       "sent_turns": 7,
       "session_key": "P:U123",
@@ -5702,6 +6024,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0179_T000",
@@ -5718,8 +6041,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户咨询具体产品（tk直播AI语音插件）的使用难度及PC端接入方式，属于典型的产品咨询行为。",
+      "reason": "对端明确咨询产品功能（tk直播插件）及接入难度，符合客户咨询定义。",
       "sent_chars": 52,
       "sent_turns": 3,
       "session_key": "P:U119",
@@ -5727,6 +6051,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": "公司转让",
       "candidates": [
         {
           "case_candidate_id": "S0180_T000",
@@ -5736,15 +6061,17 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "用户明确咨询公司转让服务并提出具体需求（广西2018年前工程类空壳、迁移柳州、即时付款），符合客户定义。",
+      "reason": "用户咨询的是公司转让及迁移服务，属于代办/商业交易范畴，符合非客户定义中的代办/推销类，而非咨询产品或报故障。",
       "sent_chars": 61,
       "sent_turns": 1,
       "session_key": "P:U114",
       "session_start": "2026-08-25 14:53:41",
-      "verdict": "customer"
+      "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0183_T000",
@@ -5803,8 +6130,9 @@
           "turn_idx": 7
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话中明确提到“登录测试”且涉及内部人员（刘总）安排，属于内部运维或测试场景，非外部客户咨询。",
+      "reason": "对端主动提供账号密码供登录测试，并询问远程安装及内部人员安排，符合内部人员或测试场景特征，非外部客户咨询。",
       "sent_chars": 161,
       "sent_turns": 8,
       "session_key": "P:U098",
@@ -5812,6 +6140,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0184_T000",
@@ -5828,8 +6157,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "用户提及在闲鱼出售软著代办服务并咨询定价，属于推销或商业咨询，非向当前平台咨询产品或服务。",
+      "reason": "对端在讨论闲鱼上出售软著服务的定价问题，属于推销/二手交易场景，非咨询产品或报故障。",
       "sent_chars": 74,
       "sent_turns": 2,
       "session_key": "P:U004",
@@ -5837,6 +6167,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0185_T000",
@@ -5860,15 +6191,17 @@
           "turn_idx": 2
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "用户主动咨询直播接入方式及自动回复功能，属于典型的产品功能咨询与试用意向。",
+      "reason": "会话内容主要为闲聊（“随便聊聊”）及关于直播技术实现的讨论，未涉及具体的产品咨询、故障报修或业务诉求，符合非客户定义中的纯社交闲聊或技术探讨。",
       "sent_chars": 88,
       "sent_turns": 3,
       "session_key": "P:U119",
       "session_start": "2026-08-25 21:43:02",
-      "verdict": "customer"
+      "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0186_T000",
@@ -5878,8 +6211,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "会话内容明确提及“测试”、“兼容”及内部技术接入（SDWAN），属于内部研发或运维人员的工作沟通，非外部客户咨询。",
+      "reason": "会话内容明确提及“测试”和“兼容”，属于内部研发或运维人员的工作沟通，非外部客户咨询。",
       "sent_chars": 44,
       "sent_turns": 1,
       "session_key": "P:U004",
@@ -5887,6 +6221,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0187_T000",
@@ -5896,8 +6231,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "发送者主动推销服务并报价，属于推销行为，而非咨询或提诉求的客户。",
+      "reason": "对端正在向用户推销业务经理服务并报价，属于推销行为，符合非客户定义。",
       "sent_chars": 102,
       "sent_turns": 1,
       "session_key": "P:U112",
@@ -5905,6 +6241,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0188_T000",
@@ -5914,8 +6251,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容显示对端正在向用户推销业务并索要支付，属于推销/代办行为，而非咨询或报障的客户。",
+      "reason": "对端主动推销业务并索要支付，属于推销/代办行为，而非咨询或报障的客户。",
       "sent_chars": 141,
       "sent_turns": 1,
       "session_key": "P:U112",
@@ -5923,6 +6261,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0189_T000",
@@ -5932,8 +6271,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对端正在推销合作方案并试图促成签约，属于典型的推销/业务拓展行为，而非咨询产品或报问题的客户。",
+      "reason": "对端正在推销合作方案并试图促成签约，属于典型的推销/业务拓展行为，而非咨询产品或报故障的客户。",
       "sent_chars": 145,
       "sent_turns": 1,
       "session_key": "P:U112",
@@ -5941,6 +6281,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0190_T000",
@@ -5950,8 +6291,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息为典型的保险推销/营销话术，属于非客户定义的推销行为。",
+      "reason": "对端发送的是推销学生意外险的广告文案，属于推销行为，非客户咨询或报障。",
       "sent_chars": 60,
       "sent_turns": 1,
       "session_key": "P:U045",
@@ -5959,6 +6301,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0191_T000",
@@ -5975,8 +6318,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "会话内容为内部工作日报及日程确认，属于内部人员沟通，非客户咨询或诉求。",
+      "reason": "会话内容为内部工作日报及日程确认，属于内部人员沟通，无客户咨询或诉求。",
       "sent_chars": 72,
       "sent_turns": 3,
       "session_key": "P:U003",
@@ -5984,6 +6328,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0192_T000",
@@ -6014,8 +6359,9 @@
           "turn_idx": 6
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "会话内容涉及内部测试、软著申请规划及内部需求确认，属于内部人员工作沟通。",
+      "reason": "会话内容均为内部工作汇报、测试进度同步及内部需求确认，未出现外部客户咨询或报障。",
       "sent_chars": 296,
       "sent_turns": 7,
       "session_key": "P:U004",
@@ -6023,6 +6369,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0193_T000",
@@ -6032,6 +6379,7 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "rule",
       "reason": "规则命中「硬件采购推销」：依据：具体服务器型号+报价是采购推销群发，客户咨询用不到型号词",
       "sent_chars": 163,
@@ -6041,6 +6389,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0194_T000",
@@ -6071,8 +6420,9 @@
           "turn_idx": 3
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部协调、配合及工作安排，语气轻松且包含内部常用表情，符合内部人员沟通特征。",
+      "reason": "会话内容包含内部协调语气（如“在让他们找”、“需要配合好”）及具体执行时间点，且无具体产品咨询或故障报修细节，符合内部人员工作沟通特征。",
       "sent_chars": 63,
       "sent_turns": 4,
       "session_key": "P:U040",
@@ -6080,6 +6430,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0196_T000",
@@ -6103,8 +6454,9 @@
           "turn_idx": 2
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及SDK版本发布、内部测试直播间及后台功能开发进度，属于内部研发或运维人员的工作沟通，而非外部客户咨询。",
+      "reason": "会话内容涉及内部SDK版本发布、测试直播间链接分享及内部功能开发进度汇报，属于内部工作沟通，无外部客户咨询或诉求。",
       "sent_chars": 139,
       "sent_turns": 4,
       "session_key": "P:U004",
@@ -6112,6 +6464,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0197_T000",
@@ -6121,8 +6474,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息为典型的营销推广文案，包含活动介绍、促销话术及表情符号，属于推销行为而非客户咨询或诉求。",
+      "reason": "对端发送的是带有营销话术（如“名额有限”、“提前省心”）和表情符号的推销/促销信息，属于推销行为，而非客户咨询或报障。",
       "sent_chars": 139,
       "sent_turns": 1,
       "session_key": "P:U046",
@@ -6130,6 +6484,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0198_T001",
@@ -6139,8 +6494,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户确认收到发票，属于对服务结果（开票）的反馈，符合客户身份特征。",
+      "reason": "对端确认收到发票，属于业务办理后的正常反馈，符合客户身份特征。",
       "sent_chars": 18,
       "sent_turns": 2,
       "session_key": "P:U037",
@@ -6148,6 +6504,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0199_T000",
@@ -6157,8 +6514,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "发言者自称“小王”并推销服务、请求合作，属于销售/推销人员，而非咨询或报问题的客户。",
+      "reason": "对端发送的是典型的推销/营销话术（强调月底冲任务、低价服务、请求合作），属于定义中的“推销”类非客户行为。",
       "sent_chars": 152,
       "sent_turns": 1,
       "session_key": "P:U112",
@@ -6166,6 +6524,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0200_T000",
@@ -6189,8 +6548,9 @@
           "turn_idx": 3
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部系统对接（大华/海康SDK）、内部账号流转及内部人员（秦总）沟通，属于内部运维或测试场景，非外部客户咨询。",
+      "reason": "会话内容涉及内部系统对接（大华/海康SDK）、内部账号流转（问丘要账号）、内部日志排查及内部汇报（发给秦总），均为内部运维或开发人员的工作沟通，无外部客户咨询或报障特征。",
       "sent_chars": 146,
       "sent_turns": 4,
       "session_key": "P:U004",
@@ -6198,6 +6558,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0201_T000",
@@ -6207,15 +6568,17 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "发言内容包含内部排查结论（如“功能正常”、“打包需要时间”）及对第三方系统（运动视界微信）的技术状态判断，符合内部运维或客服向同事汇报/解释的口吻，而非客户咨询。",
+      "reason": "会话中既包含对具体用户问题的处理描述（'这人急'、'能下载'），又包含对内部系统/渠道状态的排查（'微信可能有问题'），属于混合场景或内部工作沟通，无法单纯判定为纯客户咨询。",
       "sent_chars": 55,
       "sent_turns": 1,
       "session_key": "P:U004",
       "session_start": "2026-08-27 23:03:22",
-      "verdict": "not_customer"
+      "verdict": "unsure"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0202_T000",
@@ -6225,8 +6588,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "发送方主动推销保险产品并引导购买，属于推销行为，而非咨询或报障的客户。",
+      "reason": "对端发送的是推销保险产品的营销文案，属于推销行为，非客户咨询或报障。",
       "sent_chars": 60,
       "sent_turns": 1,
       "session_key": "P:U045",
@@ -6234,6 +6598,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0203_T000",
@@ -6278,8 +6643,9 @@
           "turn_idx": 8
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "会话内容涉及内部工作安排（软著制作、发版测试、交接）及私人行程，属于内部人员或同事间的沟通，非客户咨询。",
+      "reason": "会话内容涉及内部工作安排（软著制作、发版测试、交接）及私人生活闲聊，无产品咨询或故障报修等客户特征。",
       "sent_chars": 204,
       "sent_turns": 11,
       "session_key": "P:U003",
@@ -6287,6 +6653,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0206_T000",
@@ -6296,8 +6663,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息内容为推销证书办理服务，属于典型的营销/推销行为，而非客户咨询或提诉求。",
+      "reason": "对端主动推销证书办理服务，属于推销行为，非咨询或报障。",
       "sent_chars": 31,
       "sent_turns": 1,
       "session_key": "P:U103",
@@ -6305,6 +6673,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0207_T002",
@@ -6377,15 +6746,17 @@
           "turn_idx": 16
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "用户详细咨询整机配置报价、显卡版本确认、发票开具方式及政采云采购流程，属于典型的产品咨询与采购诉求。",
+      "reason": "会话中既包含具体的整机配置询价（客户行为），又包含关于发票拆分、关联查询及内部采购流程的讨论（疑似内部人员或代办行为），属于混合场景。",
       "sent_chars": 503,
       "sent_turns": 18,
       "session_key": "P:U081",
       "session_start": "2026-08-28 16:11:57",
-      "verdict": "customer"
+      "verdict": "unsure"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0208_T000",
@@ -6437,8 +6808,9 @@
           "turn_idx": 8
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部办公地点（办公室桌面）、内部人员称呼（超哥）及内部转账操作，属于内部工作沟通而非外部客户咨询。",
+      "reason": "会话内容涉及内部办公地点（办公室桌面）、内部人员称呼（超哥）及内部转账操作（验证码），属于内部工作沟通，非外部客户咨询。",
       "sent_chars": 184,
       "sent_turns": 10,
       "session_key": "P:U123",
@@ -6446,6 +6818,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0209_T000",
@@ -6462,8 +6835,9 @@
           "turn_idx": 2
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容为线下取卡及敲门通知，属于内部人员或线下服务人员的日常沟通，非线上产品咨询或业务办理。",
+      "reason": "会话内容为日常生活中的邻里或亲友间沟通（敲门取卡），不涉及任何产品咨询、服务诉求或故障报修，属于纯社交/生活场景。",
       "sent_chars": 31,
       "sent_turns": 3,
       "session_key": "P:U076",
@@ -6471,6 +6845,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0210_T000",
@@ -6480,8 +6855,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息为典型的推销/代办证书广告，属于非客户定义的推销行为。",
+      "reason": "对端发送的是推销证书办理服务的广告信息，属于推销行为，非客户咨询。",
       "sent_chars": 89,
       "sent_turns": 1,
       "session_key": "P:U069",
@@ -6489,6 +6865,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0211_T000",
@@ -6498,8 +6875,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "发言内容包含“冲业绩”、“加班联系您”、“放心来合作”等典型销售话术，表明对端是推销人员而非咨询服务的客户。",
+      "reason": "对端使用“帮您多接几个项目”、“冲业绩”等典型销售话术，属于推销行为，符合非客户定义。",
       "sent_chars": 63,
       "sent_turns": 1,
       "session_key": "P:U112",
@@ -6507,6 +6885,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0212_T000",
@@ -6516,8 +6895,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "发言内容包含推销合作、承诺利润、提供发票及证件等典型B2B销售或业务拓展话术，属于推销/代办类非客户行为。",
+      "reason": "对端正在推销合作机会并强调资金安全与资质，属于典型的推销/业务拓展行为，而非咨询产品或报故障的客户。",
       "sent_chars": 100,
       "sent_turns": 1,
       "session_key": "P:U112",
@@ -6525,6 +6905,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0213_T000",
@@ -6534,8 +6915,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息为典型的推销/广告内容，包含产品列表、联系人及官网链接，属于非客户定义的推销行为。",
+      "reason": "对端发送的是包含产品列表、联系人及官网链接的营销推广信息，属于推销行为，而非客户咨询或报障。",
       "sent_chars": 106,
       "sent_turns": 1,
       "session_key": "P:U060",
@@ -6543,6 +6925,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0214_T011",
@@ -6615,8 +6998,9 @@
           "turn_idx": 82
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "会话内容全为关于全职带娃、家庭分工及行业薪资的私人闲聊，无任何产品咨询或业务诉求。",
+      "reason": "会话内容全为关于全职工作、育儿、家庭关系及行业薪资的纯社交闲聊，无任何产品咨询、服务诉求或故障报修。",
       "sent_chars": 255,
       "sent_turns": 20,
       "session_key": "P:U122",
@@ -6624,6 +7008,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0215_T000",
@@ -6654,8 +7039,9 @@
           "turn_idx": 4
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容为个人身体不适就医及情感交流，属于纯社交闲聊，无产品咨询或业务诉求。",
+      "reason": "会话内容为个人身体不适就医及情感交流，属于纯社交闲聊，无产品咨询或业务诉求。",
       "sent_chars": 85,
       "sent_turns": 5,
       "session_key": "P:U110",
@@ -6663,6 +7049,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0216_T002",
@@ -6672,8 +7059,9 @@
           "turn_idx": 2
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "发送者备注为“李君-工作”，且内容涉及内部项目清点、Git上传及软著申请等具体工作执行细节，属于内部员工或同事间的工作沟通，而非外部客户咨询。",
+      "reason": "会话内容为内部工作待办事项（项目清点、软著申请进度），属于内部人员的工作沟通，非客户咨询或报障。",
       "sent_chars": 92,
       "sent_turns": 3,
       "session_key": "P:U004",
@@ -6681,6 +7069,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0218_T000",
@@ -6690,8 +7079,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息内容为推销广告、报价及催单话术，属于典型的推销/代办行为，而非客户咨询或报障。",
+      "reason": "对端正在推销人脉撮合及广告服务，属于定义中的推销行为，非客户咨询或报障。",
       "sent_chars": 111,
       "sent_turns": 1,
       "session_key": "P:U112",
@@ -6699,6 +7089,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0220_T000",
@@ -6715,15 +7106,17 @@
           "turn_idx": 1
         }
       ],
+      "confirm": "drop",
       "method": "llm",
-      "reason": "用户明确咨询特定监控机位的直播链接，属于典型的产品/服务咨询诉求。",
+      "reason": "二次确认:用户询问的是特定地点（竹溪立交体育公园）的监控直播链接，属于公共安防或政府/市政设施范畴，并非本公司商业产品/服务的客户诉求，且用户自称‘韦山 Billy’而非以公司/单位名义咨询业务，符合非客户本人或无关咨询特征。",
       "sent_chars": 44,
       "sent_turns": 2,
       "session_key": "P:U099",
       "session_start": "2026-08-31 09:44:31",
-      "verdict": "customer"
+      "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0221_T000",
@@ -6733,8 +7126,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户提供了具体的开票信息（名称、税号、地址等），属于典型的财务/发票业务诉求，符合客户定义。",
+      "reason": "对端提供具体的开票信息（单位名称、税号、地址等），属于典型的业务办理诉求，符合客户定义。",
       "sent_chars": 112,
       "sent_turns": 1,
       "session_key": "P:U081",
@@ -6742,6 +7136,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0222_T000",
@@ -6751,8 +7146,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "发言内容包含“冲刺销冠”、“申请活动最低价格”、“给我一个服务的机会”等典型销售话术，表明对端是推销人员而非咨询服务的客户。",
+      "reason": "对端自述为销售（冲刺销冠、申请活动价格），属于推销行为，非客户咨询或报障。",
       "sent_chars": 124,
       "sent_turns": 1,
       "session_key": "P:U112",
@@ -6760,6 +7156,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0223_T000",
@@ -6804,8 +7201,9 @@
           "turn_idx": 5
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部项目投标策略、垫资风险及人际关系，属于内部业务讨论或闲聊，非外部客户咨询。",
+      "reason": "会话内容涉及内部项目评估、垫资风险讨论及同事间闲聊，未出现向服务方咨询产品、报故障或要求操作的行为，属于内部人员沟通。",
       "sent_chars": 141,
       "sent_turns": 6,
       "session_key": "P:U037",
@@ -6813,6 +7211,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0224_T001",
@@ -6829,15 +7228,17 @@
           "turn_idx": 2
         }
       ],
+      "confirm": "drop",
       "method": "llm",
-      "reason": "用户提及“退款”及具体业务场景（医生服务），符合咨询服务或提诉求的客户特征。",
+      "reason": "二次确认:对话内容涉及“医生”、“心脉受损”等医疗场景，明显属于医院或医疗服务机构，而非本公司（通常指软件/互联网/通用企业）的产品或服务，且用户表述为就医体验而非产品故障或业务诉求，判定为非目标客户。",
       "sent_chars": 36,
       "sent_turns": 3,
       "session_key": "P:U110",
       "session_start": "2026-08-31 15:26:24",
-      "verdict": "customer"
+      "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0225_T000",
@@ -6847,8 +7248,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "发言者自称“给您发消息”，语气为主动推销或寻求合作，属于推销/代办类非客户行为。",
+      "reason": "发送方自称“您也能感觉到我的诚意”，并询问对方是差在价格还是效果，这是典型的推销/销售话术，属于非客户中的推销类别。",
       "sent_chars": 82,
       "sent_turns": 1,
       "session_key": "P:U112",
@@ -6856,6 +7258,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0226_T000",
@@ -6893,8 +7296,9 @@
           "turn_idx": 5
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户咨询SDWAN组网概念及联通套餐价格，属于典型的产品与服务咨询行为。",
+      "reason": "对端咨询SD-WAN组网概念及联通线路价格，属于典型的产品与服务咨询行为。",
       "sent_chars": 64,
       "sent_turns": 6,
       "session_key": "P:U050",
@@ -6902,6 +7306,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0227_T000",
@@ -6911,8 +7316,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "会话内容涉及内部压测方案沟通、特定技术故障排查及数据库设计，属于内部研发或运维工作记录，非外部客户咨询。",
+      "reason": "会话内容为内部工作待办事项（压测方案、内部Bug处理、初步设计），属于内部人员的工作沟通，无外部客户咨询或报障特征。",
       "sent_chars": 75,
       "sent_turns": 1,
       "session_key": "P:U004",
@@ -6920,6 +7326,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0228_T000",
@@ -6971,8 +7378,9 @@
           "turn_idx": 7
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部硬件故障排查（怀疑硬盘坏了）、向内部领导（秦总）确认事项以及内部存储策略调整，属于内部运维或技术讨论，而非外部客户咨询。",
+      "reason": "会话内容涉及内部硬件故障排查（硬盘损坏）、内部审批流程（找秦总确认）及内部存储策略制定，且无外部客户咨询或报障迹象，属于内部运维/技术讨论。",
       "sent_chars": 226,
       "sent_turns": 8,
       "session_key": "P:U004",
@@ -6980,6 +7388,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": "公司转让",
       "candidates": [
         {
           "case_candidate_id": "S0230_T000",
@@ -6989,8 +7398,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "用户咨询的是公司股权转让（代办/交易类业务），属于非产品/服务咨询的代办或推销场景，不符合标准客户定义。",
+      "reason": "用户咨询的是公司转让（代办/交易类业务），属于定义中明确排除的“代办”场景，而非产品/服务咨询或故障报修。",
       "sent_chars": 42,
       "sent_turns": 1,
       "session_key": "P:U114",
@@ -6998,6 +7408,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0231_T000",
@@ -7007,8 +7418,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息包含大量营销话术、产品卖点罗列及诱导扫码测额的引导语，属于典型的贷款推销或中介广告，而非客户发起的咨询或诉求。",
+      "reason": "对端发送的是典型的贷款产品推销广告（包含利率、条件、办理方式及扫码测额引导），属于定义中的推销行为，而非咨询或报障。",
       "sent_chars": 104,
       "sent_turns": 1,
       "session_key": "P:U045",
@@ -7016,6 +7428,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0232_T000",
@@ -7025,8 +7438,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户明确提及具体合同金额并发起支付款项的操作请求，符合客户提诉求和报问题的定义。",
+      "reason": "对端明确提及具体合同金额并发起支付第一笔款项的操作请求，符合客户提诉求/要求支付的定义。",
       "sent_chars": 45,
       "sent_turns": 1,
       "session_key": "P:U123",
@@ -7034,6 +7448,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0233_T000",
@@ -7050,8 +7465,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": "drop",
       "method": "llm",
-      "reason": "对话内容涉及内部项目规划、与对方老板的约定以及基于合同进行验收设计，属于内部人员（如项目经理或开发人员）的工作沟通，而非外部客户咨询。",
+      "reason": "二次确认:对端询问“跟对方老板有什么约定”及索要“最终的合同”，表明其身份为项目交付方/供应商/内部人员，而非向本公司购买服务的客户本人。",
       "sent_chars": 82,
       "sent_turns": 2,
       "session_key": "P:U004",
@@ -7059,6 +7475,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0234_T000",
@@ -7082,8 +7499,9 @@
           "turn_idx": 2
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "对端在沟通合同支付条款及维保费用细节，属于典型的商务咨询与诉求提出，符合客户定义。",
+      "reason": "对端在沟通合同支付条款和维保费用，属于典型的商务咨询与诉求提出，符合客户定义。",
       "sent_chars": 129,
       "sent_turns": 3,
       "session_key": "P:U030",
@@ -7091,6 +7509,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0235_T000",
@@ -7107,8 +7526,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "发言者自述为“员工账号”并解释内部工作繁忙，属于内部人员或同事间的沟通，非外部客户咨询。",
+      "reason": "对端明确自述为“员工账号”并解释内部事务（上午事多），属于内部人员或同事间的沟通，非外部客户咨询。",
       "sent_chars": 45,
       "sent_turns": 2,
       "session_key": "P:U029",
@@ -7116,6 +7536,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0236_T000",
@@ -7132,8 +7553,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容为业务方之间关于技术合同登记及签字盖章的内部协作沟通，属于B2B业务对接而非面向终端消费者的客服咨询。",
+      "reason": "对话内容为业务合作方（卖方）之间关于技术合同登记及签字盖章的内部协作沟通，属于B2B业务对接，非面向终端消费者的客服咨询或故障报修。",
       "sent_chars": 110,
       "sent_turns": 2,
       "session_key": "P:U121",
@@ -7141,6 +7563,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0237_T001",
@@ -7157,8 +7580,9 @@
           "turn_idx": 3
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及确认乘坐地铁线路及线下咖啡厅见面，属于线下社交或私人会面场景，非产品咨询或业务办理。",
+      "reason": "会话内容涉及询问具体线路（三号线）及线下见面地点（咖啡厅），属于内部人员线下沟通或社交闲聊，无产品咨询或故障报修特征。",
       "sent_chars": 38,
       "sent_turns": 4,
       "session_key": "P:U141",
@@ -7166,6 +7590,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0238_T000",
@@ -7182,8 +7607,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": "drop",
       "method": "llm",
-      "reason": "对话内容涉及服务器硬件配置（核数、显卡）及内部供货匹配，属于内部运维或采购沟通，非外部客户咨询。",
+      "reason": "二次确认:对端提及“供一批给大数据”及具体硬件配置（24核/32核），表明其身份为供应商或渠道方，正在向本公司供货或进行B2B业务对接，而非客户本人咨询产品。",
       "sent_chars": 51,
       "sent_turns": 2,
       "session_key": "P:U044",
@@ -7191,6 +7617,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0240_T000",
@@ -7200,8 +7627,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "会话内容为内部工作汇报，涉及软著提交、压力测试准备及实习生管理，属于内部人员工作记录。",
+      "reason": "会话内容为内部工作汇报，涉及软著提交、压力测试准备及实习生管理，属于内部人员工作沟通。",
       "sent_chars": 115,
       "sent_turns": 1,
       "session_key": "P:U003",
@@ -7209,6 +7637,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0241_T000",
@@ -7218,15 +7647,17 @@
           "turn_idx": 0
         }
       ],
+      "confirm": "unsure",
       "method": "llm",
-      "reason": "对话内容涉及“整栋楼停”和“亮机卡”，属于内部运维或测试场景的沟通，非外部客户咨询。",
+      "reason": "对端明确描述“整栋楼停”并确认“亮机卡”故障现象，属于典型的报障/咨询行为，符合客户定义。",
       "sent_chars": 24,
       "sent_turns": 2,
       "session_key": "P:U004",
       "session_start": "2026-09-03 09:41:00",
-      "verdict": "not_customer"
+      "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0242_T001",
@@ -7243,8 +7674,9 @@
           "turn_idx": 2
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部硬件配置细节（频率、容量、混插问题）及通过名片添加内部人员，属于内部运维或测试场景，非外部客户咨询。",
+      "reason": "会话内容涉及内部硬件测试反馈（频率/速度/容量）及内部人员添加流程确认，无对外产品咨询或故障报修，属于内部沟通。",
       "sent_chars": 96,
       "sent_turns": 3,
       "session_key": "P:U004",
@@ -7252,6 +7684,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0243_T000",
@@ -7303,8 +7736,9 @@
           "turn_idx": 6
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "会话内容涉及内部项目进度同步、SDK切换、演示准备及内部人员（李妙、黄经理）的工作协调，属于内部工作沟通而非外部客户咨询。",
+      "reason": "会话内容均为内部工作汇报（如“李妙在对”、“追了一下黄经理”、“做明天演示准备”），属于内部人员之间的进度同步，无外部客户咨询或诉求。",
       "sent_chars": 147,
       "sent_turns": 7,
       "session_key": "P:U004",
@@ -7312,6 +7746,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0244_T000",
@@ -7342,15 +7777,17 @@
           "turn_idx": 3
         }
       ],
+      "confirm": "drop",
       "method": "llm",
-      "reason": "用户正在就合同条款（维保费、合约期限）提出具体修改意见并征求对方意见，属于典型的商务咨询与诉求表达。",
+      "reason": "二次确认:对端正在协商合同条款（维保费、合约期限、域名续费），属于商务谈判或内部/合作方沟通，而非客户本人针对产品/服务提具体业务诉求。",
       "sent_chars": 227,
       "sent_turns": 4,
       "session_key": "P:U030",
       "session_start": "2026-09-03 16:31:14",
-      "verdict": "customer"
+      "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0245_T000",
@@ -7360,8 +7797,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "发言者使用“这周客户”指代第三方，表明其身份为内部员工或合作方，而非正在咨询服务的客户本人。",
+      "reason": "发言者使用“这周客户”指代第三方，表明其身份为内部人员或合作方，而非正在咨询或报障的客户本人。",
       "sent_chars": 25,
       "sent_turns": 1,
       "session_key": "P:U058",
@@ -7369,6 +7807,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0246_T000",
@@ -7392,15 +7831,17 @@
           "turn_idx": 2
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及具体的网络硬件故障排查（网线口、交换机松动）及内部操作指令（下载、插拔），属于内部运维或技术支持场景，而非外部客户咨询。",
+      "reason": "会话内容涉及具体的网络故障排查（网线口、交换机、千兆速率），但缺乏明确的身份标识（如工号、客户名称或内部系统指令），无法区分是内部运维在指导他人，还是客户在描述故障现象，符合混合或身份不明场景。",
       "sent_chars": 61,
       "sent_turns": 3,
       "session_key": "P:U004",
       "session_start": "2026-09-03 18:38:10",
-      "verdict": "not_customer"
+      "verdict": "unsure"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0247_T000",
@@ -7466,8 +7907,9 @@
           "turn_idx": 11
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部资源确认、设计人员安排及线下商务洽谈，属于内部协作或B端合作沟通，而非终端客户咨询。",
+      "reason": "会话内容显示对端在安排内部工作（如联系设计、洽谈合作、对接平台），属于内部人员或合作方沟通，而非向客服咨询产品或报障。",
       "sent_chars": 193,
       "sent_turns": 13,
       "session_key": "P:U025",
@@ -7475,6 +7917,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0248_T000",
@@ -7484,15 +7927,17 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "用户提及“钉钉”及“网络卡”等内部办公场景细节，且发送腾讯文档链接进行数据核对，符合内部人员或同事间的工作沟通特征，而非外部客户咨询。",
+      "reason": "会话内容包含内部工作沟通（钉钉网络问题、腾讯文档链接）且缺乏明确的产品咨询或故障报修指向，无法确定对端是内部人员还是客户。",
       "sent_chars": 60,
       "sent_turns": 3,
       "session_key": "P:U123",
       "session_start": "2026-09-04 09:01:58",
-      "verdict": "not_customer"
+      "verdict": "unsure"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0249_T000",
@@ -7502,8 +7947,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部合同签署方（东信）及具体内部人员（龚向卿）的合同进度查询，属于内部业务协调或行政事务，而非外部客户的产品咨询或诉求。",
+      "reason": "对端在提供内部合同签署方信息并建议咨询具体内部人员（龚向卿），属于内部工作沟通或内部人员协作，而非外部客户咨询产品或服务。",
       "sent_chars": 43,
       "sent_turns": 1,
       "session_key": "P:U097",
@@ -7511,6 +7957,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0250_T002",
@@ -7520,8 +7967,9 @@
           "turn_idx": 2
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容是对内部技术人员工作效率的负面评价和抱怨，属于内部人员间的吐槽或管理沟通，而非外部客户对服务或产品的咨询与诉求。",
+      "reason": "会话内容仅为对内部技术人员办事效率的抱怨和吐槽，未涉及具体产品咨询、故障报修或业务诉求，属于内部工作沟通或闲聊。",
       "sent_chars": 33,
       "sent_turns": 4,
       "session_key": "P:U050",
@@ -7529,6 +7977,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0251_T000",
@@ -7538,6 +7987,7 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
       "reason": "该消息为系统自动发送的客服账号升级通知，属于内部运维或系统行为，并非客户发起的咨询或诉求。",
       "sent_chars": 122,
@@ -7547,6 +7997,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0252_T000",
@@ -7556,6 +8007,7 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
       "reason": "该消息为系统自动发送的客服账号升级通知，属于内部运维或系统行为，并非客户发起的咨询或诉求。",
       "sent_chars": 122,
@@ -7565,6 +8017,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0253_T000",
@@ -7588,8 +8041,9 @@
           "turn_idx": 2
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "发言者使用内部术语（如“120码”、“续一天试用”）并直接下达业务指令（“先服务好...后面再给这人续”），表现出对内部流程的掌控权，符合内部客服或运营人员特征。",
+      "reason": "会话内容显示对端在评价第三方用户（“这人”）的信用和消费行为，并指示内部人员调整该第三方的试用权限，属于内部运营或客服处理工单的场景，而非对端本人作为客户进行咨询或报障。",
       "sent_chars": 119,
       "sent_turns": 3,
       "session_key": "P:U004",
@@ -7597,6 +8051,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0254_T000",
@@ -7606,8 +8061,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": "unsure",
       "method": "llm",
-      "reason": "用户抱怨服务速度慢并催促办事，属于典型的客户投诉与诉求表达。",
+      "reason": "用户抱怨服务速度慢、办事墨迹，属于对服务体验的投诉和诉求，符合客户定义。",
       "sent_chars": 26,
       "sent_turns": 3,
       "session_key": "P:U050",
@@ -7615,6 +8071,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0256_T001",
@@ -7687,8 +8144,9 @@
           "turn_idx": 16
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "会话内容包含内部项目协作（Git权限、文档路径）及大量私人生活闲聊（吃饭、修家电），属于内部人员或熟人间的非业务沟通。",
+      "reason": "会话内容包含下班吃饭、内部代码仓库权限分配（git）、同事间闲聊及生活技能分享，属于典型的内部同事或熟人间的非业务性交流，无产品咨询或故障报修。",
       "sent_chars": 322,
       "sent_turns": 17,
       "session_key": "P:U003",
@@ -7696,6 +8154,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0257_T000",
@@ -7768,15 +8227,17 @@
           "turn_idx": 15
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部项目评估、预算确认、协议对接细节及内部账号登录问题，且出现“咸鱼分”、“26号机”等内部或私人事务，符合内部人员沟通特征。",
+      "reason": "会话中明确出现「他们问的阿里云」这类转述客户咨询的话，且内容混合了内部技术对接、报价确认及内部闲聊，符合混合场景判定标准。",
       "sent_chars": 584,
       "sent_turns": 19,
       "session_key": "P:U004",
       "session_start": "2026-09-04 16:31:06",
-      "verdict": "not_customer"
+      "verdict": "unsure"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0258_T000",
@@ -7786,8 +8247,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部合同审核流程及确认，属于内部业务协作或行政事务，非外部客户咨询或诉求。",
+      "reason": "对话内容为内部确认合同审核完毕及流程推进，属于内部工作沟通，无外部客户咨询或诉求特征。",
       "sent_chars": 44,
       "sent_turns": 2,
       "session_key": "P:U123",
@@ -7795,6 +8257,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0259_T000",
@@ -7811,8 +8274,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部技术选型决策、合同约束及团队管理策略，属于内部人员讨论而非外部客户咨询。",
+      "reason": "对话内容涉及内部技术选型决策、合同约束及团队管理策略（如增加接手门槛），属于内部人员讨论，非客户咨询或报障。",
       "sent_chars": 164,
       "sent_turns": 2,
       "session_key": "P:U004",
@@ -7820,6 +8284,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0261_T000",
@@ -7829,8 +8294,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息为典型的客服或营销人员主动发起的自我介绍及索要手机号的话术，属于内部人员或推销行为，而非客户咨询。",
+      "reason": "该消息为典型的客服/营销人员主动发起的自我介绍及索要手机号的话术，属于内部人员或推销行为，而非客户咨询。",
       "sent_chars": 181,
       "sent_turns": 1,
       "session_key": "P:U020",
@@ -7838,6 +8304,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0263_T000",
@@ -7875,15 +8342,17 @@
           "turn_idx": 7
         }
       ],
+      "confirm": "drop",
       "method": "llm",
-      "reason": "用户咨询特定地区（洛杉矶/哈萨克斯坦）的软路由服务可行性、带宽配置及并发人数，属于典型的产品咨询与需求确认。",
+      "reason": "二次确认:对端明确表述为“江南有一个做机械的客户要”，表明其是中间商或代办人员，并非最终使用产品的客户本人。",
       "sent_chars": 96,
       "sent_turns": 8,
       "session_key": "P:U048",
       "session_start": "2026-09-05 17:26:11",
-      "verdict": "customer"
+      "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0264_T000",
@@ -7942,8 +8411,9 @@
           "turn_idx": 7
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户明确咨询特定场地（厢竹体育场）的监控录像下载服务，并反馈摄像头朝向问题，属于典型的产品/服务咨询与诉求。",
+      "reason": "用户明确咨询特定地点（厢竹体育场）的监控录像下载及摄像头朝向问题，属于典型的产品/服务咨询与诉求。",
       "sent_chars": 171,
       "sent_turns": 8,
       "session_key": "P:U139",
@@ -7951,6 +8421,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0265_T000",
@@ -7960,8 +8431,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对端明确询问是否要模拟客服或分析数据，表现出内部测试或开发调试的特征，而非真实客户咨询。",
+      "reason": "对端明确询问是否要模拟客服或分析数据，属于内部测试或技术调试场景，非真实客户咨询。",
       "sent_chars": 83,
       "sent_turns": 1,
       "session_key": "P:U100",
@@ -7969,6 +8441,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0266_T000",
@@ -7992,8 +8465,9 @@
           "turn_idx": 2
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "用户发送淘宝链接并提及“发给妙姐”，属于内部工作沟通或代办事务，非向客服咨询产品或报障。",
+      "reason": "会话内容显示对端在分享淘宝商品链接并提及“发给妙姐”，属于内部工作沟通或同事间协作，非客户咨询或报障。",
       "sent_chars": 96,
       "sent_turns": 3,
       "session_key": "P:U003",
@@ -8001,6 +8475,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0267_T000",
@@ -8017,8 +8492,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容为询问特定二手手机（苹果11）的处理需求，属于内部库存清理、二手回收或内部流转的业务沟通，而非面向外部终端用户的售前咨询或售后报修。",
+      "reason": "对话内容为询问特定二手手机（苹果11）的处理需求，属于推销或业务对接，非咨询产品/服务或报故障的客户行为。",
       "sent_chars": 35,
       "sent_turns": 2,
       "session_key": "P:U039",
@@ -8026,6 +8502,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0268_T000",
@@ -8070,8 +8547,9 @@
           "turn_idx": 5
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户反馈网络丢包、带宽低等具体问题，并提及已投诉，符合客户报问题及提诉求的特征。",
+      "reason": "对端明确询问自己办公室线路的带宽、丢包及网关问题，并提及已投诉，符合客户报障和咨询服务的定义。",
       "sent_chars": 86,
       "sent_turns": 7,
       "session_key": "P:U004",
@@ -8079,6 +8557,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0269_T000",
@@ -8116,15 +8595,17 @@
           "turn_idx": 5
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "会话内容涉及内部技术对接、代码部署方案、网关程序重构及内网穿透配置，属于内部研发或运维协作场景，而非外部客户咨询。",
+      "reason": "会话中既包含内部开发工作（如程序部署、语言选型），又包含具体的网络故障排查（如带宽不足、端口映射配置），属于混合场景。",
       "sent_chars": 240,
       "sent_turns": 6,
       "session_key": "P:U004",
       "session_start": "2026-09-07 09:01:13",
-      "verdict": "not_customer"
+      "verdict": "unsure"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0270_T000",
@@ -8134,8 +8615,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "内容涉及内部工作计划、软著进度检查及内部人员（吴帮勇）的合同事宜，属于内部工作沟通而非外部客户咨询。",
+      "reason": "会话内容为内部工作计划（软著进度、签合同、压测跟进），属于内部人员工作沟通，非客户咨询或报障。",
       "sent_chars": 119,
       "sent_turns": 2,
       "session_key": "P:U003",
@@ -8143,6 +8625,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0271_T000",
@@ -8159,15 +8642,17 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容为内部人员讨论针对特定客户（元境蔡工）的报价策略及内部定价，属于内部沟通而非外部客户咨询。",
+      "reason": "会话中明确出现“元境蔡工问”、“客户问”等转述第三方咨询的话术，属于混合场景，依据规则必须判定为 unsure。",
       "sent_chars": 51,
       "sent_turns": 2,
       "session_key": "P:U123",
       "session_start": "2026-09-07 10:29:31",
-      "verdict": "not_customer"
+      "verdict": "unsure"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0272_T000",
@@ -8177,8 +8662,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息为典型的商家服务推广/广告文案，包含业务列表、联系方式及服务区域，属于推销或内部宣传，而非客户咨询。",
+      "reason": "对端发送的是包含服务项目、维修范围、耗材配送及咨询热线的完整业务推广广告，属于推销行为，而非客户咨询或报障。",
       "sent_chars": 199,
       "sent_turns": 1,
       "session_key": "P:U071",
@@ -8186,6 +8672,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0273_T000",
@@ -8237,8 +8724,9 @@
           "turn_idx": 6
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容为个人生活状态、家庭重心及生理感受的闲聊分享，未涉及任何产品咨询、服务诉求或业务操作。",
+      "reason": "会话内容完全为个人生活、情感及健康状态的闲聊，未涉及任何产品咨询、服务诉求或故障报修。",
       "sent_chars": 161,
       "sent_turns": 7,
       "session_key": "P:U129",
@@ -8246,6 +8734,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0274_T001",
@@ -8255,8 +8744,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容为具体的技术运维操作指令（重启网卡、获取IP），符合内部人员或运维支持场景，而非客户咨询或报障。",
+      "reason": "会话内容为内部技术人员之间的故障排查指令（重启网卡、清缓存），属于内部运维/测试场景，无客户咨询或报障特征。",
       "sent_chars": 32,
       "sent_turns": 2,
       "session_key": "P:U004",
@@ -8264,6 +8754,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0275_T000",
@@ -8287,15 +8778,17 @@
           "turn_idx": 2
         }
       ],
+      "confirm": "drop",
       "method": "llm",
-      "reason": "用户主动咨询高企服务价格及具体年份，并索要资料，符合咨询产品/服务的客户特征。",
+      "reason": "二次确认:用户询问“高企多少钱”及索要资料，符合代办/中介/代跑腿特征（替人问资质/代办），非客户本人咨询本公司产品。",
       "sent_chars": 38,
       "sent_turns": 3,
       "session_key": "P:U120",
       "session_start": "2026-09-07 14:16:12",
-      "verdict": "customer"
+      "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0276_T000",
@@ -8368,8 +8861,9 @@
           "turn_idx": 18
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "会话内容涉及孩子教育、家庭闲聊及私人项目融资探讨，属于纯社交闲聊，无产品咨询或业务诉求。",
+      "reason": "会话内容涉及子女教育、家庭闲聊及私人项目融资讨论，属于纯社交闲聊，无产品咨询或业务诉求。",
       "sent_chars": 370,
       "sent_turns": 19,
       "session_key": "P:U129",
@@ -8377,6 +8871,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0277_T000",
@@ -8407,15 +8902,17 @@
           "turn_idx": 4
         }
       ],
+      "confirm": "drop",
       "method": "llm",
-      "reason": "用户提及与电话沟通、后台数据排查、客户经理及装维人员对接等具体业务处理流程，符合客户报修或咨询服务的特征。",
+      "reason": "二次确认:对端提及“庞总安排”、“开内部会”、“装维”等内部流程及人员调度，且语气为内部工作协调而非客户本人对外提诉求，符合内部/运维/内部沟通特征。",
       "sent_chars": 145,
       "sent_turns": 5,
       "session_key": "P:U004",
       "session_start": "2026-09-07 14:54:43",
-      "verdict": "customer"
+      "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0278_T000",
@@ -8439,8 +8936,9 @@
           "turn_idx": 2
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户反馈网络测试数据（带宽、Ping、丢包）并提及装维人员联系，属于典型的宽带网络故障排查或咨询场景。",
+      "reason": "对端在反馈网络测试数据（带宽、ping、丢包）并提及装维人员，属于典型的宽带/网络服务用户报障或咨询场景。",
       "sent_chars": 84,
       "sent_turns": 3,
       "session_key": "P:U004",
@@ -8448,6 +8946,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0279_T000",
@@ -8471,8 +8970,9 @@
           "turn_idx": 2
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话中说话方主动提出“帮你处理”、“我盯一下”，并索要账号和地址以排查问题，这是典型的客服或运维人员协助用户解决问题的行为，而非客户在咨询或报障。",
+      "reason": "对端使用“我帮你处理”、“我盯一下”等内部运维/客服口吻，且要求提供账号和地址以排查故障，属于内部人员处理工单或协助排查，而非客户在咨询或报障。",
       "sent_chars": 78,
       "sent_turns": 3,
       "session_key": "P:U038",
@@ -8480,6 +8980,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0280_T000",
@@ -8552,15 +9053,17 @@
           "turn_idx": 13
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "用户咨询小程序域名归属、申请费用及安全防护等具体业务问题，符合客户咨询产品/服务的定义。",
+      "reason": "会话中出现“帮他们弄完”、“归属工号的”等转述第三方或内部协作的表述，符合混合场景或内部代办特征，无法确定对端为直接客户。",
       "sent_chars": 222,
       "sent_turns": 15,
       "session_key": "P:U058",
       "session_start": "2026-09-07 15:43:52",
-      "verdict": "customer"
+      "verdict": "unsure"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0281_T000",
@@ -8612,8 +9115,9 @@
           "turn_idx": 9
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户明确咨询直播线路的月租价格、按天租赁可行性及试用期等具体服务细节，符合客户咨询产品/服务的定义。",
+      "reason": "对端明确咨询直播线路的价格、租期及具体使用方案，属于典型的产品咨询行为。",
       "sent_chars": 135,
       "sent_turns": 10,
       "session_key": "P:U054",
@@ -8621,6 +9125,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0282_T000",
@@ -8630,8 +9135,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户咨询产品功能（录音上传时机）并反馈后台数据缺失的问题，符合客户报问题/咨询服务的定义。",
+      "reason": "对端在咨询产品功能（录音上传时机）并反馈后台无录音的问题，符合客户报问题/咨询服务的定义。",
       "sent_chars": 44,
       "sent_turns": 1,
       "session_key": "P:U005",
@@ -8639,6 +9145,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0284_T000",
@@ -8676,15 +9183,17 @@
           "turn_idx": 8
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "对话中明确提到“测试过了”、“我自己这台机”，表明说话者是内部测试人员或开发者在反馈测试环境的问题，而非外部客户。",
+      "reason": "对端明确报告了设备存储权限异常及录音上传失败的具体故障现象，并配合排查，符合客户报问题的定义。",
       "sent_chars": 155,
       "sent_turns": 9,
       "session_key": "P:U005",
       "session_start": "2026-09-08 15:45:56",
-      "verdict": "not_customer"
+      "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0285_T000",
@@ -8701,8 +9210,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部技术架构评估、带宽计算及资源消耗分析，且提及“我们再看看”等内部协作口吻，属于内部技术人员讨论而非客户咨询。",
+      "reason": "会话内容涉及内部技术评估、资源消耗分析及后续观察计划，且使用“我们再看看”等内部协作口吻，无外部客户咨询或报障特征。",
       "sent_chars": 142,
       "sent_turns": 2,
       "session_key": "P:U004",
@@ -8710,6 +9220,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0286_T000",
@@ -8740,8 +9251,9 @@
           "turn_idx": 3
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "对端连续咨询SD-WAN收费、跨境加速方案及专线替换等具体业务问题，符合客户咨询产品与服务的特征。",
+      "reason": "对端连续咨询SD-WAN收费、跨境加速方案及专线替换等具体业务问题，符合客户咨询产品/服务的定义。",
       "sent_chars": 70,
       "sent_turns": 4,
       "session_key": "P:U118",
@@ -8749,6 +9261,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0288_T000",
@@ -8814,8 +9327,9 @@
           "turn_idx": 14
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "对端多次咨询SD-WAN产品详情、苹果账号注册及美区AppID申请等具体业务问题，符合客户咨询产品/服务的定义。",
+      "reason": "对端多次咨询SD-WAN产品详情、询问苹果账号注册及美区AppID申请方法，属于典型的产品咨询与服务诉求。",
       "sent_chars": 747,
       "sent_turns": 15,
       "session_key": "P:U090",
@@ -8823,6 +9337,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0290_T001",
@@ -8860,8 +9375,9 @@
           "turn_idx": 6
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户连续咨询SD-WAN价格、Apple ID注册及独立IP等具体产品与服务细节，符合客户咨询定义。",
+      "reason": "对端连续咨询SD-WAN价格、Apple ID注册及独立IP等具体产品与服务细节，符合客户咨询定义。",
       "sent_chars": 414,
       "sent_turns": 7,
       "session_key": "P:U001",
@@ -8869,6 +9385,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0292_T000",
@@ -8906,8 +9423,9 @@
           "turn_idx": 4
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户咨询产品具体配置（独立IP）、使用场景及兼容性，属于典型的产品咨询行为。",
+      "reason": "对端咨询产品具体配置（独立IP）、使用场景及适用设备，属于典型的产品咨询行为。",
       "sent_chars": 291,
       "sent_turns": 5,
       "session_key": "P:U001",
@@ -8915,6 +9433,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0293_T000",
@@ -8924,8 +9443,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息为典型的产品促销广告文案，属于推销行为，而非客户咨询或提诉求。",
+      "reason": "对端发送的是典型的产品促销广告文案，属于推销行为，而非咨询或报障的客户。",
       "sent_chars": 150,
       "sent_turns": 1,
       "session_key": "P:U022",
@@ -8933,6 +9453,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0294_T000",
@@ -8942,8 +9463,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息为典型的推销/营销话术，包含促销优惠、赠送权益及引导咨询，属于非客户定义的推销行为。",
+      "reason": "对端发送的是推销产品/服务的营销话术，属于推销行为，非客户咨询或报障。",
       "sent_chars": 201,
       "sent_turns": 1,
       "session_key": "P:U112",
@@ -8951,6 +9473,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0297_T000",
@@ -8960,8 +9483,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息为民宿软装节及托管运营服务的营销推广文案，属于推销行为，而非客户咨询或提诉求。",
+      "reason": "该消息为民宿软装服务的营销推广文案，属于推销/广告行为，而非客户咨询或报障。",
       "sent_chars": 130,
       "sent_turns": 1,
       "session_key": "P:U116",
@@ -8969,6 +9493,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0298_T000",
@@ -8978,8 +9503,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对端发送的是论文代写、专著出版等违规服务的推销广告，属于推销行为而非真实客户咨询。",
+      "reason": "对端发送的是论文/专著代写或出版服务的推销广告，属于推销行为，非客户咨询。",
       "sent_chars": 202,
       "sent_turns": 1,
       "session_key": "P:U130",
@@ -8987,6 +9513,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0299_T000",
@@ -9038,8 +9565,9 @@
           "turn_idx": 7
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "会话内容显示发送方在主动推销产品、解释预售规则并承诺留货，符合推销/销售人员的特征，而非咨询或提诉求的客户。",
+      "reason": "会话内容显示对端正在主动推销产品（18系列预售）并引导留货，属于典型的推销/销售行为，而非咨询或报障。",
       "sent_chars": 202,
       "sent_turns": 8,
       "session_key": "P:U065",
@@ -9047,6 +9575,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0300_T000",
@@ -9056,8 +9585,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息为典型的推销/营销话术，包含价格优惠、赠送权益及引导咨询，属于非客户定义的推销行为。",
+      "reason": "对端发送的是推销产品（中标数据/供应商认证）的营销话术，属于推销行为，而非咨询或报障的客户。",
       "sent_chars": 202,
       "sent_turns": 1,
       "session_key": "P:U112",
@@ -9065,6 +9595,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0301_T000",
@@ -9074,8 +9605,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "发送者自称“老板”并邀请他人问价、接单，属于商家或推销方，而非咨询服务的客户。",
+      "reason": "对端发布的是产品报价和接单广告，属于推销/商家行为，而非向客服咨询或报障的客户。",
       "sent_chars": 52,
       "sent_turns": 1,
       "session_key": "P:U065",
@@ -9083,6 +9615,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0302_T000",
@@ -9092,8 +9625,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": "unsure",
       "method": "llm",
-      "reason": "用户询问下载位置，属于典型的产品使用咨询或操作诉求。",
+      "reason": "用户询问下载位置，属于咨询产品使用或获取方式，符合客户定义。",
       "sent_chars": 11,
       "sent_turns": 1,
       "session_key": "P:U028",
@@ -9101,6 +9635,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0303_T002",
@@ -9124,8 +9659,9 @@
           "turn_idx": 4
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "对端连续询问价格、网速及设备需求，符合咨询产品与服务的客户特征。",
+      "reason": "对端连续咨询产品价格、带宽速度及设备需求，符合客户咨询产品/服务的定义。",
       "sent_chars": 262,
       "sent_turns": 5,
       "session_key": "P:U001",
@@ -9133,6 +9669,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0304_T000",
@@ -9142,8 +9679,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对方主动推销外包技术人员岗位，属于招聘/推销行为，非产品咨询或业务诉求。",
+      "reason": "对端明确进行外包人员推销，属于定义中的非客户类别（推销）。",
       "sent_chars": 80,
       "sent_turns": 1,
       "session_key": "P:U101",
@@ -9151,6 +9689,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0305_T000",
@@ -9188,15 +9727,17 @@
           "turn_idx": 4
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "会话前几轮呈现典型客户咨询特征，但最后一轮客服回复明确标注为“测试专用”，属于混合场景。",
+      "reason": "对端连续咨询产品价格、套餐详情、适用平台及流量限制，符合客户咨询产品/服务的定义。",
       "sent_chars": 380,
       "sent_turns": 5,
       "session_key": "P:U001",
       "session_start": "2026-09-20 15:19:46",
-      "verdict": "unsure"
+      "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0306_T000",
@@ -9213,8 +9754,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "用户明确表示“没事了”，且提及“下载录像”及“加你好友”等内部协作或测试场景，非典型客户咨询产品或报障行为。",
+      "reason": "用户明确表示“没事了”，且内容涉及内部操作误解（下载录像加好友），无实际咨询或诉求，属于非客户或内部闲聊。",
       "sent_chars": 34,
       "sent_turns": 2,
       "session_key": "P:U043",
@@ -9222,6 +9764,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0307_T000",
@@ -9287,15 +9830,17 @@
           "turn_idx": 9
         }
       ],
+      "confirm": "drop",
       "method": "llm",
-      "reason": "用户明确咨询高企转让服务、询问价格并尝试议价，符合客户定义。",
+      "reason": "二次确认:对端咨询的是“高企转让”及公司价格，属于代办/中介/公司转让业务，非本公司产品/服务诉求。",
       "sent_chars": 147,
       "sent_turns": 11,
       "session_key": "P:U114",
       "session_start": "2026-09-20 18:51:31",
-      "verdict": "customer"
+      "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0308_T000",
@@ -9305,8 +9850,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户主动咨询SDWAN产品定义及用途，属于典型的产品咨询行为。",
+      "reason": "对端主动咨询SDWAN产品定义及用途，符合客户咨询产品的特征。",
       "sent_chars": 114,
       "sent_turns": 1,
       "session_key": "P:U001",
@@ -9314,6 +9860,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0309_T000",
@@ -9323,6 +9870,7 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "rule",
       "reason": "规则命中「硬件采购推销」：依据：具体服务器型号+报价是采购推销群发，客户咨询用不到型号词",
       "sent_chars": 164,
@@ -9332,6 +9880,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0311_T001",
@@ -9348,8 +9897,9 @@
           "turn_idx": 2
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及实习合同及招聘职位详情，属于招聘或内部事务沟通，非产品咨询或业务诉求。",
+      "reason": "对端在讨论实习合同及招聘相关话题，属于招聘/非业务咨询场景，非产品或服务客户。",
       "sent_chars": 74,
       "sent_turns": 3,
       "session_key": "P:U067",
@@ -9357,6 +9907,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0312_T000",
@@ -9373,8 +9924,9 @@
           "turn_idx": 2
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户反馈网络断开无法连接并寻求解决方案，属于典型的技术故障报修诉求。",
+      "reason": "对端明确报告网络故障（网断了、连不上）并寻求解决，符合客户报问题的定义。",
       "sent_chars": 88,
       "sent_turns": 3,
       "session_key": "P:U001",
@@ -9382,6 +9934,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0313_T000",
@@ -9398,8 +9951,9 @@
           "turn_idx": 1
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "对端反馈产品使用体验差（速度慢）并描述具体故障现象，符合客户报问题的定义。",
+      "reason": "对端明确反馈产品使用体验差（速度慢）并描述具体故障现象，符合客户报问题的定义。",
       "sent_chars": 174,
       "sent_turns": 2,
       "session_key": "P:U001",
@@ -9407,6 +9961,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0314_T000",
@@ -9444,8 +9999,9 @@
           "turn_idx": 6
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户多次反馈网络慢、时断时续并请求排查，符合报问题和提诉求的客户特征。",
+      "reason": "对端明确咨询网速慢、时断时续的问题并要求排查，符合客户报故障/提诉求的定义。",
       "sent_chars": 925,
       "sent_turns": 7,
       "session_key": "P:U001",
@@ -9453,6 +10009,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0315_T000",
@@ -9525,8 +10082,9 @@
           "turn_idx": 11
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "对端主动咨询产品套餐、流量、安装方式、设备详情及公司资质，符合客户咨询产品/服务及提诉求的定义。",
+      "reason": "对端主动咨询套餐价格、流量、安装方式、设备详情及公司资质，符合客户咨询产品/服务的定义。",
       "sent_chars": 1314,
       "sent_turns": 12,
       "session_key": "P:U001",
@@ -9534,6 +10092,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0317_T000",
@@ -9564,8 +10123,9 @@
           "turn_idx": 3
         }
       ],
+      "confirm": "keep",
       "method": "llm",
-      "reason": "用户明确提及支付费用并咨询视频下载操作，符合客户定义，尽管客服回复包含测试标记，但用户行为确认为真实业务咨询。",
+      "reason": "对端明确咨询视频下载流程、支付费用并确认完成下载，属于典型的产品服务咨询与操作诉求。",
       "sent_chars": 276,
       "sent_turns": 4,
       "session_key": "P:U143",
@@ -9573,6 +10133,7 @@
       "verdict": "customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0318_T000",
@@ -9596,8 +10157,9 @@
           "turn_idx": 7
         }
       ],
+      "confirm": "drop",
       "method": "llm",
-      "reason": "对话内容包含“你先吃”、“你在哪里的”等明显的私人社交闲聊，且“咸鱼的”、“怎么卖”语境模糊，不符合标准商业咨询特征，更符合熟人或内部人员间的非正式交流。",
+      "reason": "二次确认:对端询问“怎么卖”、“网络的”并发送SD-WAN图片，符合同行/供应商/渠道谈合作或卖东西给本公司的特征，非客户本人提诉求。",
       "sent_chars": 95,
       "sent_turns": 8,
       "session_key": "P:U007",
@@ -9605,6 +10167,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0324_T002",
@@ -9614,8 +10177,9 @@
           "turn_idx": 2
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "用户仅发送模糊词汇“网络的”及询问归属地，缺乏具体产品咨询或业务诉求，无法排除内部测试或闲聊可能。",
+      "reason": "会话内容极简且模糊，仅涉及网络话题及询问对方归属，缺乏具体的产品咨询、故障报修或明确的服务诉求，无法确定对端是真实客户还是内部测试/闲聊。",
       "sent_chars": 56,
       "sent_turns": 3,
       "session_key": "P:U009",
@@ -9623,6 +10187,7 @@
       "verdict": "unsure"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0327_T000",
@@ -9632,8 +10197,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对端发送的是推销证书办理的广告信息，属于推销行为，非真实客户咨询。",
+      "reason": "对端发送的是推销通信行业证书的广告信息，属于推销行为，符合非客户定义。",
       "sent_chars": 177,
       "sent_turns": 1,
       "session_key": "P:U103",
@@ -9641,6 +10207,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0329_T000",
@@ -9650,8 +10217,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息为典型的推销/营销话术，主动介绍服务并寻求合作，属于非客户定义的推销行为。",
+      "reason": "对端主动推销服务并询问是否需要，属于推销行为，符合非客户定义。",
       "sent_chars": 121,
       "sent_turns": 1,
       "session_key": "P:U112",
@@ -9659,6 +10227,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0330_T000",
@@ -9710,15 +10279,17 @@
           "turn_idx": 8
         }
       ],
+      "confirm": "drop",
       "method": "llm",
-      "reason": "对端明确表达了对产品报价的不满、质疑冒充SDWAN，并提及准备举报，符合客户提诉求和报问题的特征。",
+      "reason": "二次确认:对端提及“自建线路”、“冒充SDWAN”及“乱报价”，表明其身份为同行或竞争对手，而非本公司产品的客户。",
       "sent_chars": 139,
       "sent_turns": 10,
       "session_key": "P:U008",
       "session_start": "2026-09-29 12:32:24",
-      "verdict": "customer"
+      "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0332_T000",
@@ -9735,8 +10306,9 @@
           "turn_idx": 2
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及内部调货、激活返图及溢价等B端业务操作，且客服回复“那算了”表明这是内部人员间的协商或测试，而非面向终端消费者的咨询。",
+      "reason": "会话内容涉及具体型号、价格及“调货”、“溢价”等内部库存与交易术语，且客服回复“那算了”表明这是内部人员之间的沟通或内部测试，而非外部客户咨询。",
       "sent_chars": 103,
       "sent_turns": 5,
       "session_key": "P:U056",
@@ -9744,6 +10316,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0333_T003",
@@ -9816,8 +10389,9 @@
           "turn_idx": 13
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话中明确提及“你的客户你加价卖”、“招代理”及“代理肯定要有利润空间”，表明对端是寻求分销资格的代理商，而非最终消费者。",
+      "reason": "对端明确询问代理价格、利润空间及如何加价转卖，属于寻求代理合作/分销渠道，而非直接购买服务的终端客户。",
       "sent_chars": 696,
       "sent_turns": 15,
       "session_key": "P:U010",
@@ -9825,6 +10399,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0334_T001",
@@ -9862,15 +10437,17 @@
           "turn_idx": 6
         }
       ],
+      "confirm": "drop",
       "method": "llm",
-      "reason": "对话涉及具体的货物提货、价格确认及收货地址提供，符合客户咨询产品/服务及提诉求的特征。",
+      "reason": "二次确认:对话内容涉及线下实物提货、地址确认及价格协商，且客服表示“给其他人”，符合二手交易或线下跑腿/中介场景，非本公司产品/服务的标准客服诉求。",
       "sent_chars": 161,
       "sent_turns": 8,
       "session_key": "P:U056",
       "session_start": "2026-09-29 16:07:47",
-      "verdict": "customer"
+      "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0336_T000",
@@ -9880,8 +10457,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息为典型的推销话术，主动推荐合作并提及优惠活动，属于定义中的推销行为，而非客户咨询或提诉求。",
+      "reason": "对端正在向用户推销合作服务并提及优惠活动，属于典型的推销/代办行为，而非咨询或报障。",
       "sent_chars": 142,
       "sent_turns": 1,
       "session_key": "P:U112",
@@ -9889,6 +10467,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0338_T001",
@@ -9905,15 +10484,17 @@
           "turn_idx": 2
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "用户明确咨询产品计费模式（按流量买断）及具体规格，属于典型的产品咨询行为。",
+      "reason": "会话中明确出现「客户问」的转述字样，符合混合场景或内部转述客户咨询的定义，必须判为 unsure。",
       "sent_chars": 61,
       "sent_turns": 3,
       "session_key": "P:U010",
       "session_start": "2026-09-29 18:27:59",
-      "verdict": "customer"
+      "verdict": "unsure"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0339_T000",
@@ -9923,8 +10504,9 @@
           "turn_idx": 0
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "该消息内容为典型的销售话术（推销服务、报价、询问合作方式），发送者身份为销售人员而非咨询服务的客户。",
+      "reason": "该轮次内容明显是销售方在向潜在客户推销产品、报价并询问合作方式，属于推销行为，而非客户在咨询或报障。",
       "sent_chars": 181,
       "sent_turns": 1,
       "session_key": "P:U112",
@@ -9932,6 +10514,7 @@
       "verdict": "not_customer"
     },
     {
+      "agency_signal": null,
       "candidates": [
         {
           "case_candidate_id": "S0340_T001",
@@ -9962,13 +10545,14 @@
           "turn_idx": 5
         }
       ],
+      "confirm": null,
       "method": "llm",
-      "reason": "对话内容涉及具体商品（苹果）的库存、价格协商及购买意向，符合客户咨询产品/服务的特征。",
+      "reason": "对话内容涉及具体商品（苹果）的库存、价格谈判及内部调货安排，且客服使用内部语气（如“我这里估计还有货”），符合内部人员或经销商之间的业务沟通特征，而非终端客户咨询。",
       "sent_chars": 121,
       "sent_turns": 7,
       "session_key": "P:U056",
       "session_start": "2026-09-29 18:46:12",
-      "verdict": "customer"
+      "verdict": "not_customer"
     }
   ],
   "skipped_sessions": [

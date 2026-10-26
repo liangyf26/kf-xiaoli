@@ -46,19 +46,65 @@ BUDGET_TURNS = 20     # §3.2 会话上下文预算
 BUDGET_CHARS = 2000
 LLM_CONCURRENCY = 8   # 逐会话一次调用，8 路并发（QwenClient 60s 超时自带重试 1 次）
 
-# §11.2 提示词初稿（原文）。prompt_sha256 对该模板全文计算，进缓存键。
+# §11.2 提示词初稿（原文）+ A3 四条反例漏网修复（Chief 2026-10-26 补两条判据）。
+# prompt_sha256 对该模板全文计算，进缓存键。
 PROMPT_TEMPLATE = """你是客服对话分类器。给定一个微信会话的轮次，判断对端是不是客户。
 
 定义：
 - 客户：咨询产品/服务、提诉求、报问题、要求操作（登录/注册/支付/修改数据）。
 - 非客户：内部人员（测试/运维/客服自己）、代办/招聘/租房/推销、纯社交闲聊。
 - 不确定：单看会话无法判断身份，或混合场景（既有测试又有真实咨询）——混合一律 unsure。
+- 会话里出现客户在报故障/问排查，哪怕同时有内部工作聊天，也必须是 unsure 或 customer（不许整段排除）。
+- 对端明确在问自己单位/自己线路的问题，就是客户（哪怕口吻像技术人员）。
+- 会话里出现「他们问的…」「客户问…」「对方问的是…」这类转述客户咨询的话，就是混合场景，必须 unsure，不许整段判 not_customer。
 
 输出 JSON：
 {"verdict": "customer|not_customer|unsure", "reason": "判定依据（一句话）"}
 
 会话轮次：
 {turns}"""
+
+# customer 会话第二道确认（V2 复盘：customer 层 10/15=66.7%，代办/协办混入；Chief 2026-10-26）。
+# 唯一判据「对端是不是客户本人在为本公司产品/服务提诉求」；只对第一轮 customer 的会话跑。
+CONFIRM_PROMPT_TEMPLATE = """你是客服对话质检员。这个会话初判为「对端是客户」，请做第二道确认。
+
+唯一判据：对端（发消息的人）是不是【客户本人】在为本公司的产品/服务提诉求？
+
+判 drop（不是客户本人）：
+- 代办/中介/代跑腿：帮别人问、替别人办、代交材料/资料、代盖章收章、代办资质、
+  公司转让、替人问纳税等级/税种、马甲账号（一般纳税人/小规模）代运营
+- 同行/渠道/供应商：卖东西给我们、谈合作分成、同行交流
+- 内部/测试/运维：自己人测试、内部派活、内部项目沟通
+- 纯社交、招聘、通知、求职
+
+判 keep：对端以自己/本单位名义咨询产品、报故障、要求操作（登录/注册/支付/修改数据）、买服务。
+拿不准或混合 → unsure（宁可疑，交人工二判）。
+
+输出 JSON：
+{"confirm": "keep|drop|unsure", "reason": "判定依据（一句话）"}
+
+会话轮次：
+{turns}"""
+
+# 规则侧代办特征（整会话级、多词组合，禁单词命中）：命中 = 会话标记 agency_signal
+# （只作触发与审计，不直接排除——最终排除由确认轮按「对端是否客户本人」判）。
+AGENCY_CONFIRM_TRIGGERS = [
+    ("材料代交", r"(材料|资料).{0,6}(代交|代提交|代上传|帮你交)|(代交|代提|帮交).{0,8}(材料|资料)"),
+    ("盖章代收", r"盖章.{0,8}(给|寄|发|收)|代.{0,2}盖.{0,2}章|章.{0,4}盖好.{0,6}(寄|发|给)"),
+    ("资质代办", r"资质.{0,6}(代办|帮办)|(代办|帮办).{0,6}资质"),
+    ("公司转让", r"公司转让|转让公司|公司.{0,4}过户"),
+    ("纳税替问", r"纳税.{0,4}(等级|类型|税种).{0,8}(问|咨询|了解)|一般纳税人.{0,6}(转让|代办|马甲)"),
+    ("马甲代运营", r"马甲.{0,8}(一般纳税人|小规模|代运营|运营)|(代运营|挂靠).{0,8}(马甲|店铺|账号)"),
+]
+
+# A3 §4.1 四条必须放行反例所在会话（B1 实测；兜底断言：verdict 不许 not_customer，
+# 最差 unsure——Reviewer 审出 LLM 层漏网，Chief 2026-10-26 认定 P1）。
+A3_MUST_PASS_SESSIONS = [
+    ("P:U005", "2026-09-08 15:45:56"),   # 060-0002 授予所有访问权限后存储显示✔了（customer）
+    ("P:U041", "2026-08-03 07:49:19"),   # 060-0031 移动互联互通堵了（≥unsure）
+    ("P:U123", "2026-08-05 08:55:35"),   # 060-0048 用你QQ的账号登录可以下载（customer）
+    ("P:U004", "2026-09-04 16:31:06"),   # 060-0006 他们问的阿里云（unsure）
+]
 
 # §11.1 规则特征（整会话级）。只用「客户为什么不会这么说」的高确定性特征；
 # 禁止把 测试|test、多少钱|价格、移动|电信|联通 这类客户也会说的词当排除依据（§4.1）。
@@ -82,10 +128,23 @@ NOT_CUSTOMER_SESSION_RULES = [
 ]
 
 VERDICTS = ("customer", "not_customer", "unsure")
+CONFIRM_VALUES = ("keep", "drop", "unsure")
 
 
 def prompt_sha256() -> str:
     return hashlib.sha256(PROMPT_TEMPLATE.encode("utf-8")).hexdigest()
+
+
+def confirm_prompt_sha256() -> str:
+    return hashlib.sha256(CONFIRM_PROMPT_TEMPLATE.encode("utf-8")).hexdigest()
+
+
+def agency_signal(text: str) -> str | None:
+    """代办/协办特征（整会话级）：窗口文本命中 → 返回特征名（触发确认轮/审计，不直接排除）。"""
+    for name, pattern in AGENCY_CONFIRM_TRIGGERS:
+        if re.search(pattern, text):
+            return name
+    return None
 
 
 def render_turn(t: dict) -> str:
@@ -145,10 +204,15 @@ def rule_hit(text: str) -> tuple[str, str] | None:
 
 
 def cache_key(canon_sha: str, p_sha: str, model_config: dict,
-              session_key: str, session_start: str) -> str:
-    """§4.3 缓存键：四要素全进键——任何一个变化都视为新判定（V4 的根基）。"""
-    payload = json.dumps([canon_sha, p_sha, model_config, session_key, session_start],
-                         sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+              session_key: str, session_start: str, confirm_p_sha: str = "") -> str:
+    """§4.3 缓存键：四要素全进键——任何一个变化都视为新判定（V4 的根基）。
+
+    二次确认轮（Chief 2026-10-26）另加 confirm_prompt_sha256：确认提示词一变，
+    已判 customer 的会话必须重跑确认，不能沿用旧 keep/drop。
+    """
+    payload = json.dumps(
+        [canon_sha, p_sha, confirm_p_sha, model_config, session_key, session_start],
+        sort_keys=True, ensure_ascii=False, separators=(",", ":"))
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
@@ -165,6 +229,21 @@ def parse_verdict(text: str) -> dict | None:
     if v not in VERDICTS:
         return None
     return {"verdict": v, "reason": str(d.get("reason", ""))[:200]}
+
+
+def parse_confirm(text: str) -> dict | None:
+    """从确认轮输出提取 {confirm, reason}；confirm 非法/无 JSON → None。"""
+    m = re.search(r"\{[^{}]*\}", text, re.S)
+    if not m:
+        return None
+    try:
+        d = json.loads(m.group())
+    except json.JSONDecodeError:
+        return None
+    v = d.get("confirm")
+    if v not in CONFIRM_VALUES:
+        return None
+    return {"confirm": v, "reason": str(d.get("reason", ""))[:200]}
 
 
 class ScreenCache:
@@ -190,41 +269,76 @@ class ScreenCache:
             tmp.replace(self.path)
 
 
+async def _llm_json(client, prompt: str, sem: asyncio.Semaphore, parser) -> dict | None:
+    """一次 LLM 调用 + 解析；网络失败/解析失败都返回 None（由调用方重试与兜底）。"""
+    async with sem:
+        ret = await client.generate([{"role": "user", "content": prompt}])
+    return parser(ret.get("response", "")), ret.get("response", "")
+
+
 async def judge_llm(client, window_text: str, sem: asyncio.Semaphore) -> dict:
     """LLM 判一个会话：解析失败重试 1 次，再失败兜底 unsure（不许丢会话）。"""
     prompt = PROMPT_TEMPLATE.replace("{turns}", window_text)
-    async with sem:
-        for attempt in (1, 2):
-            try:
-                ret = await client.generate([{"role": "user", "content": prompt}])
-                parsed = parse_verdict(ret.get("response", ""))
-            except Exception as e:                      # 网络/超时：QwenClient 已重试1次
-                parsed = None
-                err = str(e)
-                if attempt == 2:
-                    return {"verdict": "unsure",
-                            "reason": f"LLM 调用失败兜底 unsure：{err[:120]}"}
-                continue
-            if parsed is not None:
-                return parsed
+    for attempt in (1, 2):
+        try:
+            parsed, raw = await _llm_json(client, prompt, sem, parse_verdict)
+        except Exception as e:                          # 网络/超时：QwenClient 已重试1次
             if attempt == 2:
                 return {"verdict": "unsure",
-                        "reason": f"LLM 输出解析失败兜底 unsure：{ret.get('response', '')[:100]}"}
+                        "reason": f"LLM 调用失败兜底 unsure：{str(e)[:120]}"}
+            continue
+        if parsed is not None:
+            return parsed
+        if attempt == 2:
+            return {"verdict": "unsure",
+                    "reason": f"LLM 输出解析失败兜底 unsure：{raw[:100]}"}
     return {"verdict": "unsure", "reason": "LLM 输出解析失败兜底 unsure"}  # 不可达
+
+
+async def confirm_llm(client, window_text: str, sem: asyncio.Semaphore) -> dict:
+    """customer 会话第二道确认：解析失败重试 1 次，再失败兜底 unsure（不静默 keep）。"""
+    prompt = CONFIRM_PROMPT_TEMPLATE.replace("{turns}", window_text)
+    for attempt in (1, 2):
+        try:
+            parsed, raw = await _llm_json(client, prompt, sem, parse_confirm)
+        except Exception as e:
+            if attempt == 2:
+                return {"confirm": "unsure",
+                        "reason": f"确认轮调用失败兜底 unsure：{str(e)[:120]}"}
+            continue
+        if parsed is not None:
+            return parsed
+        if attempt == 2:
+            return {"confirm": "unsure",
+                    "reason": f"确认轮解析失败兜底 unsure：{raw[:100]}"}
+    return {"confirm": "unsure", "reason": "确认轮解析失败兜底 unsure"}
+
+
+_CACHE_FIELDS = ("verdict", "reason", "method", "sent_turns", "sent_chars",
+                 "oversized", "confirm", "agency_signal")
 
 
 async def judge_sessions(client, model_config: dict, jobs: list, cache: ScreenCache,
                          trace: bool) -> list[dict]:
-    """jobs = [(canon_idx, session, cand_idxs)]；返回逐会话判定记录（canonical 序）。"""
+    """jobs = [(canon_idx, session, cand_idxs)]；返回逐会话判定记录（canonical 序）。
+
+    第一轮 customer 的会话再跑确认轮（Chief 2026-10-26）：drop → verdict 改
+    not_customer、reason 前缀「二次确认:」；keep/unsure 维持原 verdict。
+    规则命中的会话不进确认轮。
+    """
     sem = asyncio.Semaphore(LLM_CONCURRENCY)
     p_sha = prompt_sha256()
+    cp_sha = confirm_prompt_sha256()
     canon_sha = model_config["canonical_sha256"]
     results: list = [None] * len(jobs)
     pending: list = []
 
+    def _key(s) -> str:
+        return cache_key(canon_sha, p_sha, model_config, s["session_key"], s["start_time"],
+                         cp_sha)
+
     for k, (ci, s, cand_idxs) in enumerate(jobs):
-        key = cache_key(canon_sha, p_sha, model_config, s["session_key"], s["start_time"])
-        hit = cache.get(key)
+        hit = cache.get(_key(s))
         if hit is not None:
             results[k] = {**hit, "from_cache": True}
         else:
@@ -238,19 +352,26 @@ async def judge_sessions(client, model_config: dict, jobs: list, cache: ScreenCa
             nonlocal done
             kept, chars, oversized = build_screen_window(s["turns"], cand_idxs)
             text = "\n".join(render_turn(s["turns"][i]) for i in kept)
+            sig = agency_signal(text)
             hit = rule_hit(text)
             if hit is not None:
                 rec = {"verdict": "not_customer", "reason": f"规则命中「{hit[0]}」：{hit[1]}",
                        "method": "rule", "sent_turns": len(kept), "sent_chars": chars,
-                       "oversized": oversized}
+                       "oversized": oversized, "confirm": None, "agency_signal": sig}
             else:
                 v = await judge_llm(client, text, sem)
-                rec = {"verdict": v["verdict"], "reason": v["reason"], "method": "llm",
-                       "sent_turns": len(kept), "sent_chars": chars, "oversized": oversized}
-            key = cache_key(canon_sha, p_sha, model_config, s["session_key"], s["start_time"])
-            await cache.put(key, {kk: rec[kk] for kk in
-                                  ("verdict", "reason", "method", "sent_turns", "sent_chars",
-                                   "oversized")})
+                confirm = None
+                verdict, reason = v["verdict"], v["reason"]
+                if verdict == "customer":
+                    c = await confirm_llm(client, text, sem)
+                    confirm = c["confirm"]
+                    if confirm == "drop":
+                        verdict = "not_customer"
+                        reason = f"二次确认:{c['reason']}"
+                rec = {"verdict": verdict, "reason": reason, "method": "llm",
+                       "sent_turns": len(kept), "sent_chars": chars, "oversized": oversized,
+                       "confirm": confirm, "agency_signal": sig}
+            await cache.put(_key(s), {kk: rec[kk] for kk in _CACHE_FIELDS})
             results[k] = {**rec, "from_cache": False}
             done += 1
             if done % 20 == 0:
@@ -262,7 +383,8 @@ async def judge_sessions(client, model_config: dict, jobs: list, cache: ScreenCa
             kept, chars, _ov = build_screen_window(s["turns"], cand_idxs)
             results[k] = {"verdict": None, "reason": "（无缓存，--trace 不调 LLM）",
                           "method": None, "sent_turns": len(kept), "sent_chars": chars,
-                          "oversized": False, "from_cache": False}
+                          "oversized": False, "confirm": None, "agency_signal": None,
+                          "from_cache": False}
     return results
 
 
@@ -291,11 +413,28 @@ def collect_jobs(sessions, cap: int, q059: set) -> tuple:
     return canon, canon_sha, jobs, skipped, funnel
 
 
+def assert_a3_must_pass(sessions_out: list[dict]) -> None:
+    """P1 兜底（Chief 2026-10-26）：A3 四条反例所在会话 verdict 不许 not_customer。
+
+    这四条在本库里是有候选的会话；jobs 里找不到（窗口对不上）同样抛错，
+    不许静默跳过。合成库测试不含这四条，不触发。
+    """
+    by = {(x["session_key"], x["session_start"]): x for x in sessions_out}
+    bad = []
+    for sk, ss in A3_MUST_PASS_SESSIONS:
+        rec = by.get((sk, ss))
+        if rec is None or rec["verdict"] == "not_customer":
+            bad.append(f"{sk}|{ss} verdict={(rec or {}).get('verdict')}")
+    if bad:
+        raise AssertionError("A3 必须放行会话被判 not_customer 或缺失：" + "；".join(bad))
+
+
 def build_payload(canon, canon_sha, jobs, results, skipped, funnel, cap, model_config) -> dict:
     p_sha = prompt_sha256()
     # A3 §5.2：screened_* 单位 = 候选条目数，三者之和 == total_candidates；
     # 会话层面计数不入 meta（用 sessions[].verdict 现算）。
     entry_counts = {"customer": 0, "not_customer": 0, "unsure": 0}
+    confirm_counts = {"keep": 0, "drop": 0, "unsure": 0}
     total_cands = total_chars = 0
     oversized: list[dict] = []
     sessions_out = []
@@ -327,9 +466,16 @@ def build_payload(canon, canon_sha, jobs, results, skipped, funnel, cap, model_c
             "method": rec["method"],
             "sent_turns": rec["sent_turns"],
             "sent_chars": rec["sent_chars"],
+            "confirm": rec.get("confirm"),
+            "agency_signal": rec.get("agency_signal"),
             "candidates": cands,
         })
+        if rec.get("confirm") in confirm_counts:
+            confirm_counts[rec["confirm"]] += 1
     assert sum(entry_counts.values()) == total_cands, "screened_* 之和 != total_candidates"
+    if any((s["session_key"], s["start_time"]) in
+           {(sk, ss) for sk, ss in A3_MUST_PASS_SESSIONS} for _, s, _ in jobs):
+        assert_a3_must_pass(sessions_out)
     private = sum(1 for s in canon if s["session_key"].startswith("P:"))
     assert len(sessions_out) + len(skipped) == private, "len(sessions)+len(skipped) != 私聊会话数"
     payload = {
@@ -339,6 +485,8 @@ def build_payload(canon, canon_sha, jobs, results, skipped, funnel, cap, model_c
             "model_config": {k: model_config[k] for k in
                              ("provider", "model", "temperature", "top_p")},
             "prompt_sha256": p_sha,
+            "confirm_prompt_sha256": confirm_prompt_sha256(),
+            "confirm_pass": confirm_counts,
             "total_sessions_all": len(canon),
             "private_sessions": private,
             "sessions_with_candidates": len(jobs),
@@ -399,8 +547,10 @@ async def run_screen(args) -> int:
     print(f"候选条目: {m['total_candidates']} 条（customer+unsure 的条目数见 V1 复算命令）")
     print(f"上下文预算: 送入 {m['context_budget']['total_sent_chars']} 字符"
           f"（≤{BUDGET_CHARS}/会话）")
+    cp = m["confirm_pass"]
+    print(f"二次确认（会话数）: keep {cp['keep']} / drop {cp['drop']} / unsure {cp['unsure']}")
     print(f"产物: {args.output}（model={model_name}, provider={provider}, "
-          f"prompt_sha={prompt_sha256()[:12]}…）")
+          f"prompt_sha={prompt_sha256()[:12]}… confirm_sha={confirm_prompt_sha256()[:12]}…）")
     return 0
 
 
@@ -424,7 +574,8 @@ def cmd_trace(args) -> int:
         key = cache_key(prod["meta"]["canonical_sha256"], prompt_sha256(),
                         {**prod["meta"]["model_config"], "canonical_sha256":
                          prod["meta"]["canonical_sha256"]},
-                        s["session_key"], s["start_time"])
+                        s["session_key"], s["start_time"],
+                        prod["meta"].get("confirm_prompt_sha256", confirm_prompt_sha256()))
         hit = cache.get(key)
         kept, chars, _ov = build_screen_window(s["turns"], cand_idxs)
         p = prod_by_key.get((s["session_key"], s["start_time"]))
