@@ -21,15 +21,18 @@ END_BLUE_SWITCH = "blue_switch"    # ④ 蓝方主动换题
 
 
 class Pose:
-    """蓝方出的一题。followup=True 表示同一话题的追问。"""
+    """蓝方出的一题。followup=True 表示同一话题的追问；cid=题集编号，judge_point=场景硬断言。"""
 
     def __init__(self, question: str, reason: str = "", followup: bool = False,
-                 switch: bool = False, open_question: bool = False):
+                 switch: bool = False, open_question: bool = False,
+                 cid: str = "", judge_point: list | None = None):
         self.question = question
         self.reason = reason
         self.followup = followup
         self.switch = switch
         self.open_question = open_question
+        self.cid = cid
+        self.judge_point = judge_point
 
 
 class Answer:
@@ -79,7 +82,7 @@ def _retry(answer_fn, question: str, attempts: int, backoff: list[float], sleep,
 
 
 def run_game(game: int, config: dict, pose_fn, answer_fn, search_fn,
-             on_turn, sleep=time.sleep) -> dict:
+             on_turn, sleep=time.sleep, scope_judge=None) -> dict:
     """跑一局。on_turn(record) 负责落盘。返回 {turns, expected, void}。"""
     match = config.get("match", {})
     mode = match.get("mode", "fixed")
@@ -124,7 +127,9 @@ def run_game(game: int, config: dict, pose_fn, answer_fn, search_fn,
             continue
 
         judged = classify_turn(pose.question, answer.answer, answer.sources, answer.path,
-                               scope, search_fn, open_question=pose.open_question)
+                               scope, search_fn, open_question=pose.open_question,
+                               scope_judge=scope_judge, cid=pose.cid,
+                               judge_point=pose.judge_point)
         blue += judged["blue_point"]
         red += judged["red_point"]
         if judged["blue_point"]:

@@ -19,9 +19,10 @@ def _config(**over):
     return cfg
 
 
-def _run(pose, answer, search=lambda q: [], **over):
+def _run(pose, answer, search=lambda q: [], scope_judge=None, **over):
     seen = []
-    out = run_game(1, _config(**over), pose, answer, search, seen.append, sleep=lambda s: None)
+    out = run_game(1, _config(**over), pose, answer, search, seen.append,
+                   sleep=lambda s: None, scope_judge=scope_judge)
     return out, seen
 
 
@@ -309,3 +310,96 @@ def test_run_writes_round_report(tmp_path):
     assert "无效样本率" in report and "比分" in report and "能判题占比" in report
     ok, _ = recompute(round_dir)
     assert ok and code == 0
+
+
+# ---- 归类裁判第二段：范围模型判定 + 题集判据 ----------------------------------
+
+
+def test_scope_rule_hit_skips_model():
+    calls = []
+
+    def judge(q):
+        calls.append(q)
+        return {"status": "in", "basis": "不该被调用"}
+
+    out, _ = _run(lambda t, f: Pose("SDWAN 多少钱"), lambda q: Answer("不知道"), lambda q: [],
+                  scope_judge=judge, match={"mode": "fixed", "questions": 1})
+    assert calls == []                          # 规则命中不调模型，省调用
+    assert out["turns"][0]["blue_point"] == 1   # 直接进有库/无库判定
+
+
+def test_scope_model_in_scope_then_scores():
+    def judge(q):
+        return {"status": "in", "basis": "流量套餐咨询属于业务范围"}
+
+    out, _ = _run(lambda t, f: Pose("50拼车流量到底多少", cid="F3"),
+                  lambda q: Answer("50拼车是100G/月",
+                                   sources=["售前问题 · 咨询和顾虑 / 问题18"]),
+                  lambda q: [_Hit()], scope_judge=judge,
+                  match={"mode": "fixed", "questions": 1})
+    t = out["turns"][0]
+    assert t["red_point"] == 1 and t["end"] == "judged"
+    assert "模型判定: 流量套餐咨询属于业务范围" in t["classification"]["basis"]
+    assert t["classification"]["has_kb"] is True
+    assert t["classification"]["facts_ok"]["ok"] is True
+
+
+def test_scope_model_out_of_scope():
+    def judge(q):
+        return {"status": "out", "basis": "问的是天气，不在业务范围"}
+
+    out, _ = _run(lambda t, f: Pose("今天天气怎么样"), lambda q: Answer("晴"), lambda q: [],
+                  scope_judge=judge, match={"mode": "fixed", "questions": 1})
+    t = out["turns"][0]
+    assert t["classification"]["verdict"] == "out_of_scope" and t["scored"] is False
+    assert "模型判定: 问的是天气，不在业务范围" in t["classification"]["basis"]
+    assert t["blue_point"] == 0 and t["red_point"] == 0
+
+
+def test_scope_model_failure_falls_back():
+    def judge(q):
+        raise TimeoutError("蓝方超时")
+
+    out, _ = _run(lambda t, f: Pose("网断了先干啥"), lambda q: Answer("重启"), lambda q: [],
+                  scope_judge=judge, match={"mode": "fixed", "questions": 1})
+    t = out["turns"][0]
+    assert t["classification"]["verdict"] == "out_of_scope" and t["scored"] is False
+    assert "模型判定失败" in t["classification"]["basis"]
+    assert "TimeoutError" in t["classification"]["basis"]
+
+
+def test_parse_scope_reply():
+    from tests.adversarial.run_round import _parse_scope_reply
+    got = _parse_scope_reply("结论：范围内；依据：流量套餐咨询属于业务范围")
+    assert got == {"status": "in", "basis": "流量套餐咨询属于业务范围"}
+    got = _parse_scope_reply("结论：范围外；依据：纯闲聊问候")
+    assert got["status"] == "out" and got["basis"] == "纯闲聊问候"
+    assert _parse_scope_reply("我觉得还行吧")["status"] == "error"
+    assert _parse_scope_reply("")["status"] == "error"
+
+
+def test_scope_prompt_has_business_scope():
+    from tests.adversarial.classify import scope_prompt
+    p = scope_prompt("50拼车流量多少")
+    assert "拼车" in p and "开票" in p and "结论：范围内或范围外" in p and "依据" in p
+
+
+def test_local_search_uses_real_kb_labels():
+    from pathlib import Path
+
+    from tests.adversarial.run_round import _local_search
+    search = _local_search(Path("data/sdwan-new.md"))
+    hits = search("那个50拼车 流量到底多少")
+    assert hits and all("问题" in h.label for h in hits)
+
+
+def test_planned_pose_carries_cid(monkeypatch, tmp_path):
+    import tests.adversarial.run_round as rr
+    monkeypatch.setattr(rr, "_ask_blue",
+                        lambda blue, prompt, fallback: ("50拼车流量多少", "追问F3"))
+    cfg = {"match": {"mode": "fixed", "questions": 1, "seed": 42},
+           "styles_dir": "tests/adversarial/scenarios/styles",
+           "blue": {"base": "http://blue", "model": "b"}}
+    pose_fn = rr._planned_pose(cfg, 1, tmp_path)
+    pose = pose_fn(0, 0)
+    assert pose.cid and isinstance(pose.judge_point, list)

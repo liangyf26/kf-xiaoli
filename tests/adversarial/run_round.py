@@ -135,17 +135,20 @@ def _blue_questions(config: dict, n: int, kb: Path) -> list[dict]:
         prompt = blue_prompt(spec, card, config["match"]["seed"])
         text, reason = _ask_blue(blue, prompt, spec["template"])
         out.append({"text": text, "reason": reason, "style_id": spec["style_id"],
-                    "prompt": prompt})
+                    "prompt": prompt, "intent": spec["intent"],
+                    "judge_points": spec["judge_points"]})
     (kb.parent / "blue_prompts.jsonl").write_text(
         "".join(json.dumps(q, ensure_ascii=False) + "\n" for q in out), encoding="utf-8")
     return out
 
 
-def _ask_blue(blue: dict, prompt: str, fallback: str) -> tuple[str, str]:
+def _blue_chat(blue: dict, prompt: str, timeout: float = 60,
+               temperature: float | None = None) -> str:
+    """蓝方模型单轮对话（/chat/completions）。网络/格式错误原样抛；key 只从环境变量取。"""
     body = json.dumps({
-        "model": blue["model"], "temperature": blue.get("temperature", 0.7),
-        "messages": [{"role": "user", "content":
-                      "按这个风格卡出一道客户问题，只输出两行：题面：...\n理由：...\n" + prompt}],
+        "model": blue["model"],
+        "temperature": blue.get("temperature", 0.7) if temperature is None else temperature,
+        "messages": [{"role": "user", "content": prompt}],
     }).encode()
     headers = {"Content-Type": "application/json"}
     key = os.environ.get("QWEN_BLUE_API_KEY", "")
@@ -153,9 +156,15 @@ def _ask_blue(blue: dict, prompt: str, fallback: str) -> tuple[str, str]:
         headers["Authorization"] = f"Bearer {key}"
     req = urllib.request.Request(
         blue["base"].rstrip("/") + "/chat/completions", data=body, headers=headers)
-    with urllib.request.urlopen(req, timeout=60) as resp:
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
         data = json.loads(resp.read())
-    content = data["choices"][0]["message"]["content"].strip()
+    return data["choices"][0]["message"]["content"].strip()
+
+
+def _ask_blue(blue: dict, prompt: str, fallback: str) -> tuple[str, str]:
+    content = _blue_chat(
+        blue,
+        "按这个风格卡出一道客户问题，只输出两行：题面：...\n理由：...\n" + prompt)
     question, reason = fallback, content
     for line in content.splitlines():
         if line.startswith("题面："):
@@ -163,6 +172,59 @@ def _ask_blue(blue: dict, prompt: str, fallback: str) -> tuple[str, str]:
         elif line.startswith("理由："):
             reason = line.removeprefix("理由：").strip()
     return question, reason
+
+
+def _parse_scope_reply(text: str) -> dict:
+    """解析范围裁判答复 → {"status": "in"|"out"|"error", "basis": 依据原文}。"""
+    content = (text or "").strip()
+    if "范围外" in content:
+        status = "out"
+    elif "范围内" in content:
+        status = "in"
+    else:
+        return {"status": "error", "basis": content[:120] or "空答复"}
+    basis = content
+    for mark in ("依据：", "依据:"):
+        if mark in content:
+            basis = content.split(mark, 1)[1].strip()
+            break
+    basis = basis.splitlines()[0].strip() if basis else ""
+    return {"status": status, "basis": basis or content[:120]}
+
+
+def _scope_judge(config: dict, timeout: float = 60):
+    """任务书§归类裁判1 第二段：规则未命中时问蓝方模型（每题最多一次，失败不抛）。
+
+    返回 judge(question) -> {"status","basis"}；蓝方未配置时返回 None（只走规则段）。
+    """
+    blue = config.get("blue") or {}
+    if not blue.get("base"):
+        return None
+    from tests.adversarial.classify import scope_prompt
+
+    def judge(question: str) -> dict:
+        try:
+            content = _blue_chat(blue, scope_prompt(question), timeout=timeout, temperature=0)
+        except Exception as exc:
+            return {"status": "error", "basis": f"{type(exc).__name__}: {exc}"}
+        return _parse_scope_reply(content)
+
+    return judge
+
+
+def _local_search(kb: Path):
+    """任务书§归类裁判2 检索入口：对轮目录 kb 副本做进程内 search_top（与实例同库）。"""
+    from types import SimpleNamespace
+
+    from backend.knowledge import KnowledgeBase, source_label
+
+    kb_obj = KnowledgeBase(kb)
+
+    def search(question: str) -> list:
+        return [SimpleNamespace(label=source_label(qa.section, qa.number))
+                for qa in kb_obj.search_top(question, 3)]
+
+    return search
 
 
 def _ws_answer(port: int, timeout_s: float):
@@ -215,6 +277,8 @@ def run(config: dict, out_root: Path, questions: int | None = None,
     if not dry_run and spawn_fn:
         proc = spawn_fn(kb_copy, config["red"])
     posed = _planned_pose(config, n, kb_copy) if pose_fn is None and not dry_run else pose_fn
+    real_search = search_fn or (_local_search(kb_copy) if kb_copy is not None else None)
+    scope_judge = None if dry_run else _scope_judge(config)
     games = []
     try:
         for game_no in range(1, config["match"]["games"] + 1):
@@ -230,8 +294,8 @@ def run(config: dict, out_root: Path, questions: int | None = None,
                 _broadcast_turn(_box, _game, record)
 
             outcome = run_game(game_no, config, posed or _dry_pose,
-                               answer_fn or _dry_answer, search_fn or (lambda q: []),
-                               on_turn, sleep=lambda s: None)
+                               answer_fn or _dry_answer, real_search or (lambda q: []),
+                               on_turn, sleep=lambda s: None, scope_judge=scope_judge)
             games.append({"game": game_no, "expected": n, "turns": outcome["turns"]})
             box.emit(game_no, "summary",
                      f"game {game_no}: 题 {len(outcome['turns'])} 无效 {outcome['invalid']}")
@@ -257,7 +321,8 @@ def _planned_pose(config: dict, n: int, kb: Path | None):
             return None
         cursor["i"] += 1
         item = planned[i]
-        return Pose(question=item["text"], reason=item["reason"])
+        return Pose(question=item["text"], reason=item["reason"],
+                    cid=item["intent"], judge_point=item["judge_points"])
 
     return pose
 
