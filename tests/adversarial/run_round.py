@@ -370,9 +370,12 @@ def main(argv=None) -> int:
     ap.add_argument("--config", default="tests/adversarial/round.yaml")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--questions", type=int, default=None)
+    ap.add_argument("--seed", type=int, default=None, help="覆盖配置里的 match.seed（换题面稳定性对照用）")
     ap.add_argument("--out", default="runs/adversarial")
     args = ap.parse_args(argv)
     config = load_config(Path(args.config))
+    if args.seed is not None:
+        config["match"]["seed"] = args.seed
     if args.dry_run:
         round_dir, code = run(config, Path(args.out), args.questions, dry_run=True)
     else:

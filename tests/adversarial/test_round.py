@@ -420,3 +420,17 @@ def test_planned_pose_resolves_expect_hit(monkeypatch, tmp_path):
     pose = rr._planned_pose(cfg, 1, kb)(0, 0)
     hits = [w for _, jp in pose.judge_point for w in jp.get("expect_hit") or []]
     assert hits and all("问题" in w for w in hits)      # 短语已变来源标签
+
+
+def test_cli_seed_overrides_config(monkeypatch, tmp_path):
+    import tests.adversarial.run_round as rr
+    captured = {}
+
+    def fake_run(cfg, out, questions=None, dry_run=False, **kw):
+        captured["seed"] = cfg["match"]["seed"]
+        return tmp_path, 0
+
+    monkeypatch.setattr(rr, "run", fake_run)
+    code = rr.main(["--config", "tests/adversarial/round.yaml", "--seed", "7",
+                    "--out", str(tmp_path), "--dry-run"])
+    assert code == 0 and captured["seed"] == 7
