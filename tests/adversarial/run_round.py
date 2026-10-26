@@ -242,6 +242,7 @@ def run(config: dict, out_root: Path, questions: int | None = None,
     box.flush()
     summary = match_log.summarize(games)
     match_log.write_summary(round_dir, summary)
+    match_log.write_report(round_dir, summary, games)
     return round_dir, (0 if summary["balanced"] else 3)
 
 

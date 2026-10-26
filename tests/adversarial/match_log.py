@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import subprocess
 import sys
 from datetime import datetime
@@ -110,6 +111,85 @@ def summarize(games: list[dict]) -> dict:
 def write_summary(round_dir: Path, summary: dict) -> Path:
     path = round_dir / "summary.json"
     path.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+    return path
+
+
+def _p90(values: list) -> float:
+    """nearest-rank P90；空集返回 0。"""
+    if not values:
+        return 0
+    ordered = sorted(values)
+    return ordered[max(0, math.ceil(0.9 * len(ordered)) - 1)]
+
+
+def write_report(round_dir: Path, summary: dict, games: list[dict]) -> Path:
+    """round_report.md：无效样本率、红方作答耗时（均值/P90）、能判题占比、比分与胜负分布。
+
+    所有数字都从 games（=已落盘 turns.jsonl 的同一批记录）现算，可用 --recompute 对账。
+    """
+    turns = [t for g in games for t in g["turns"]]
+    invalid = [t for t in turns if t.get("invalid")]
+    answered = [t for t in turns if not t.get("invalid") and "answer" in t]
+    latencies = [t["latency_ms"] for t in answered if t.get("latency_ms") is not None]
+    judged_turns = [t for t in answered if isinstance(t.get("classification"), dict)]
+    judged_ok = [t for t in judged_turns if t["classification"].get("scored")]
+    blue_total = sum(t.get("blue_point", 0) for t in turns)
+    red_total = sum(t.get("red_point", 0) for t in turns)
+    blue_wins = sum(1 for t in turns if t.get("blue_point", 0) > 0)
+    red_wins = sum(1 for t in turns if t.get("red_point", 0) > 0)
+    no_score = sum(1 for t in turns if not t.get("invalid")
+                   and t.get("blue_point", 0) == 0 and t.get("red_point", 0) == 0)
+
+    def pct(part: int, whole: int) -> str:
+        return f"{part / whole * 100:.1f}%" if whole else "n/a"
+
+    avg = round(sum(latencies) / len(latencies)) if latencies else 0
+    meta = {}
+    meta_path = round_dir / "meta.json"
+    if meta_path.exists():
+        try:
+            meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            meta = {}
+    match_cfg = (meta.get("config") or {}).get("match") or {}
+    lines = [
+        f"# #061 对局报告：{round_dir.name}",
+        "",
+        f"- 生成：{datetime.now().isoformat(timespec='seconds')}",
+        f"- 配置：mode={match_cfg.get('mode', '')} questions={match_cfg.get('questions', '')}"
+        f" target_score={match_cfg.get('target_score', '')} seed={match_cfg.get('seed', '')}"
+        "（commit/端点/温度/kb 副本 sha256 见 meta.json）",
+        f"- 数据来源：game_*/turns.jsonl（逐题）、summary.json、outbox.jsonl（直播）",
+        f"- 复算：`.venv/bin/python -m tests.adversarial.match_log --recompute {round_dir}`",
+        "",
+        "## 三项指标",
+        "",
+        "| 指标 | 值 |",
+        "|---|---|",
+        f"| 无效样本率 | {len(invalid)}/{len(turns)}（{pct(len(invalid), len(turns))}） |",
+        f"| 红方作答耗时 | 平均 {avg}ms，P90 {round(_p90(latencies))}ms"
+        f"（n={len(latencies)}，nearest-rank，取重试后成功那次；无效题不计入） |",
+        f"| 能判题占比 | {len(judged_ok)}/{len(judged_turns)}"
+        f"（{pct(len(judged_ok), len(judged_turns))}，verdict ∈ no_kb/red_scored/blue_scored） |",
+        "",
+        "## 比分与胜负分布",
+        "",
+        f"- 比分：红方 {red_total} / 蓝方 {blue_total}（target_score={match_cfg.get('target_score', '')}）",
+        f"- 胜负分布：蓝方得分 {blue_wins}、红方得分 {red_wins}、双方 0 分 {no_score}"
+        f"、无效 {len(invalid)}（合计 {len(turns)} 题）",
+        "",
+        "## 逐题一览",
+        "",
+        "| 局/题 | 判定 | 蓝分 | 红分 | 耗时ms | 结果 |",
+        "|---|---|---|---|---|---|",
+    ]
+    for t in turns:
+        verdict = (t.get("classification") or {}).get("verdict", "-") if not t.get("invalid") else "invalid"
+        lines.append(
+            f"| {t.get('game')}/{t.get('seq')} | {verdict} | {t.get('blue_point', 0)}"
+            f" | {t.get('red_point', 0)} | {t.get('latency_ms', '-')} | {t.get('end', '')} |")
+    path = round_dir / "round_report.md"
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return path
 
 

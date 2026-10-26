@@ -212,3 +212,100 @@ def test_ask_kf_rejects_bad_ids(tmp_path):
         take("9", questions, set())
     with pytest.raises(ValueError, match="已答过"):
         take("1", questions, {"1"})
+
+
+# ---- 阶段 3：逐题耗时与 round_report.md --------------------------------------
+
+
+def test_deadline_records_latency():
+    from tests.adversarial.match import _call_with_deadline
+
+    def answer(q):
+        import time
+        time.sleep(0.02)
+        return Answer("好")
+
+    got = _call_with_deadline(answer, "q", 5)
+    assert not got.error and got.latency_ms >= 15
+
+
+def test_deadline_timeout_records_latency():
+    from tests.adversarial.match import _call_with_deadline
+
+    def answer(q):
+        import time
+        time.sleep(0.3)
+        return Answer("晚了")
+
+    got = _call_with_deadline(answer, "q", 0.05)
+    assert got.error.startswith("TimeoutError") and got.latency_ms >= 45
+
+
+def test_deadline_exception_records_latency():
+    from tests.adversarial.match import _call_with_deadline
+
+    def answer(q):
+        raise ConnectionError("断连")
+
+    got = _call_with_deadline(answer, "q", 5)
+    assert "ConnectionError" in got.error and got.latency_ms is not None
+
+
+def test_turn_records_carry_latency():
+    out, _ = _run(lambda t, f: Pose("SDWAN 多少钱"), lambda q: Answer("不知道"), lambda q: [])
+    assert isinstance(out["turns"][0]["latency_ms"], int) and out["turns"][0]["latency_ms"] >= 0
+
+
+def test_invalid_turn_records_latency():
+    def answer(q):
+        raise RuntimeError("5xx")
+
+    out, _ = _run(lambda t, f: Pose("SDWAN"), answer,
+                  match={"mode": "fixed", "questions": 1},
+                  retry={"per_question": 0, "backoff_s": []})
+    assert out["turns"][0]["invalid"] is True
+    assert out["turns"][0]["latency_ms"] is not None
+
+
+def test_write_report_metrics(tmp_path):
+    from tests.adversarial.match_log import write_report
+    games = [{"game": 1, "expected": 4, "turns": [
+        {"game": 1, "seq": 1, "invalid": False, "answer": "a1", "latency_ms": 1000, "end": "red_lost",
+         "blue_point": 1, "red_point": 0, "classification": {"verdict": "no_kb", "scored": True}},
+        {"game": 1, "seq": 2, "invalid": False, "answer": "a2", "latency_ms": 3000, "end": "judged",
+         "blue_point": 0, "red_point": 1, "classification": {"verdict": "red_scored", "scored": True}},
+        {"game": 1, "seq": 3, "invalid": False, "answer": "a3", "latency_ms": 2000, "end": "followups_full",
+         "blue_point": 0, "red_point": 0, "classification": {"verdict": "unscored", "scored": False}},
+        {"game": 1, "seq": 4, "invalid": True, "error": "TimeoutError: 超过 120.0s",
+         "latency_ms": 120000, "end": "invalid", "blue_point": 0, "red_point": 0},
+    ]}]
+    path = write_report(tmp_path, summarize(games), games)
+    text = path.read_text(encoding="utf-8")
+    assert "| 无效样本率 | 1/4（25.0%） |" in text
+    assert "平均 2000ms，P90 3000ms（n=3" in text
+    assert "| 能判题占比 | 2/3（66.7%" in text
+    assert "红方 1 / 蓝方 1" in text
+    assert "蓝方得分 1、红方得分 1、双方 0 分 1、无效 1（合计 4 题）" in text
+    assert "| 1/4 | invalid | 0 | 0 | 120000 | invalid |" in text
+
+
+def test_write_report_empty_turns(tmp_path):
+    from tests.adversarial.match_log import write_report
+    path = write_report(tmp_path, summarize([]), [])
+    text = path.read_text(encoding="utf-8")
+    assert "| 无效样本率 | 0/0（n/a） |" in text and "（n=0" in text
+
+
+def test_run_writes_round_report(tmp_path):
+    cfg = {"mode": "program",
+           "match": {"games": 1, "mode": "fixed", "questions": 1, "seed": 1, "max_followups": 0},
+           "kb": {"seed_path": "missing.md"},
+           "broadcast": {"level": "off", "max_per_sec": 2, "enabled": False},
+           "scope": ["SDWAN"], "retry": {"per_question": 0, "backoff_s": []}}
+    round_dir, code = run(cfg, tmp_path, dry_run=True,
+                          pose_fn=lambda t, f: Pose("SDWAN 多少钱"),
+                          answer_fn=lambda q: Answer("不知道"))
+    report = (round_dir / "round_report.md").read_text(encoding="utf-8")
+    assert "无效样本率" in report and "比分" in report and "能判题占比" in report
+    ok, _ = recompute(round_dir)
+    assert ok and code == 0

@@ -33,29 +33,36 @@ class Pose:
 
 
 class Answer:
-    def __init__(self, answer: str = "", sources=None, path: str = "", error: str = ""):
+    def __init__(self, answer: str = "", sources=None, path: str = "", error: str = "",
+                 latency_ms: float | None = None):
         self.answer = answer
         self.sources = sources or []
         self.path = path
         self.error = error
+        self.latency_ms = latency_ms      # 本次尝试耗时（ms），由 _call_with_deadline 计时
 
 
 def _call_with_deadline(answer_fn, question: str, timeout_s: float) -> Answer:
-    """单题截止时间。函数自己超时、卡死或抛错都变成带 error 的答案。"""
+    """单题截止时间。函数自己超时、卡死或抛错都变成带 error 的答案，并记录本次尝试耗时。"""
     done: queue.Queue = queue.Queue(maxsize=1)
 
     def work() -> None:
+        started = time.monotonic()
         try:
-            done.put(answer_fn(question))
+            result = answer_fn(question)
         except Exception as exc:                       # 断连/5xx/超时都进重试
-            done.put(Answer(error=f"{type(exc).__name__}: {exc}"))
+            result = Answer(error=f"{type(exc).__name__}: {exc}")
+        result.latency_ms = round((time.monotonic() - started) * 1000)
+        done.put(result)
 
     thread = threading.Thread(target=work, daemon=True)
+    started = time.monotonic()
     thread.start()
     try:
         return done.get(timeout=timeout_s)
     except queue.Empty:
-        return Answer(error=f"TimeoutError: 超过 {timeout_s}s")
+        return Answer(error=f"TimeoutError: 超过 {timeout_s}s",
+                      latency_ms=round((time.monotonic() - started) * 1000))
 
 
 def _retry(answer_fn, question: str, attempts: int, backoff: list[float], sleep,
@@ -111,6 +118,7 @@ def run_game(game: int, config: dict, pose_fn, answer_fn, search_fn,
         if answer.error:
             emit({"question": pose.question, "reason": pose.reason, "invalid": True,
                   "error": answer.error, "retries": retries, "scored": False,
+                  "latency_ms": answer.latency_ms,
                   "blue_point": 0, "red_point": 0, "end": "invalid"})
             topic, followups = topic + 1, 0
             continue
@@ -130,6 +138,7 @@ def run_game(game: int, config: dict, pose_fn, answer_fn, search_fn,
         emit({"question": pose.question, "reason": pose.reason, "answer": answer.answer,
               "sources": answer.sources, "path": answer.path, "retries": retries,
               "invalid": False, "classification": judged, "end": end,
+              "latency_ms": answer.latency_ms,
               "blue_point": judged["blue_point"], "red_point": judged["red_point"],
               "scored": judged["scored"]})
         if end:
