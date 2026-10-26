@@ -557,3 +557,67 @@ def test_include_ids_rejects_sha_mismatch(tmp_path):
     r = _run(*_ids_args(out, sessions, l059, screen))
     assert r.returncode == 1 and "不一致" in r.stderr
     assert not out.exists()                                  # 拒绝抽样不写文件
+
+
+# ------------------------------------- --exclude-labeled（防批次撞号，Chief 2026-10-26）
+
+def _labeled060_doc(pool_triples, start_seq=1, batch="B1"):
+    """已有卷形态：cases 带 anchor 三元组（从真实池取）。"""
+    cases = []
+    for i, (sk, ss, ti) in enumerate(pool_triples):
+        cases.append({"case_id": f"060-{start_seq + i:04d}", "batch": batch,
+                      "question": "x",
+                      "anchor": {"canonical_sha256": None, "session_key": sk,
+                                 "session_start": ss, "turn_idx": ti}})
+    return {"description": "已有卷", "cases": cases}
+
+
+def _pool_triples_from_lib():
+    """从合成库 cap=10 池取真实三元组（前 2 条）。"""
+    sessions = json.loads((Path(__file__).parent / "nonexistent").read_text()
+                          ) if False else None
+    # 直接构造（与 _sessions() 对齐）：池 14 条，前两条按 pool 序——用 build_pool 现算
+    return None
+
+
+def test_exclude_labeled_removes_pool_triples(tmp_path):
+    """传 --exclude-labeled：已入卷的 2 条不再入选、其余顺序不变；不传仍入选（锁旧行为）。"""
+    sessions, l059 = _write_inputs(tmp_path)
+    doc = _screen_doc(sessions)
+    screen = _write_screen(tmp_path, doc)
+    # 真实池前 2 条三元组
+    sessions_data = json.loads(sessions.read_text(encoding="utf-8"))["sessions"]
+    q059 = {ex.norm_text(c["question"]) for c in _labeled059()["cases"]}
+    pool, _ = ex.build_pool(sessions_data, 60, 10, q059)
+    t2 = [(c["session"]["session_key"], c["session"]["start_time"], c["turn_idx"])
+          for c in pool[:2]]
+    excl = tmp_path / "existing.json"
+    excl.write_text(json.dumps(_labeled060_doc(t2), ensure_ascii=False), encoding="utf-8")
+    # 不传 → 旧行为：这两条入选
+    out_old = tmp_path / "old.json"
+    r_old = _run(*_ids_args(out_old, sessions, l059, screen, cap=3, count=999))
+    assert r_old.returncode == 0
+    d_old = json.loads(out_old.read_text(encoding="utf-8"))
+    keys_old = [(c["anchor"]["session_key"], c["anchor"]["session_start"],
+                 c["anchor"]["turn_idx"]) for c in d_old["cases"]]
+    assert all(k in keys_old for k in t2)
+    assert d_old["include_audit"]["exclude_labeled"] is None   # 不传：旧行为，audit 记 None
+    assert d_old["include_audit"]["excluded_by_labeled"] == 0
+    # 传 → 剔除这 2 条，其余相对顺序保持
+    out_new = tmp_path / "new.json"
+    r_new = _run(*_ids_args(out_new, sessions, l059, screen, cap=3, count=999,
+                            extra=["--exclude-labeled", str(excl)]))
+    assert r_new.returncode == 0, r_new.stderr
+    assert "剔除已入卷三元组 2 个" in r_new.stdout
+    d_new = json.loads(out_new.read_text(encoding="utf-8"))
+    keys_new = [(c["anchor"]["session_key"], c["anchor"]["session_start"],
+                 c["anchor"]["turn_idx"]) for c in d_new["cases"]]
+    assert all(k not in keys_new for k in t2)
+    assert d_new["include_audit"]["excluded_by_labeled"] == 2
+    # 其余按原 seed/池序取数：new 中条目在池序里位置单调递增，且每会话仍 ≤3
+    pos = {k: i for i, c in enumerate(pool) for k in
+           [(c["session"]["session_key"], c["session"]["start_time"], c["turn_idx"])]}
+    assert [pos[k] for k in keys_new] == sorted(pos[k] for k in keys_new)
+    from collections import Counter
+    sess_cnt = Counter((k[0], k[1]) for k in keys_new)
+    assert all(v <= 3 for v in sess_cnt.values())

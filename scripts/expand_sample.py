@@ -254,6 +254,30 @@ def _sample_include_ids(args, sessions, q059, canon_sha) -> int:
     matched = [c for c in pool if tkey(c) in triples]
     unmatched = sorted(t for t in triples if t not in pool_keys)
 
+    # --exclude-labeled：已有卷条目的三元组从候选剔除（在每会话上限截取前），
+    # 防 B2 与 B1 抽重（同一 cap=10 池 + 同 seed 会取到同一批，Chief 2026-10-26）
+    excluded_by_labeled: list = []
+    if args.exclude_labeled:
+        try:
+            exd = json.loads(resolve(args.exclude_labeled).read_text(encoding="utf-8"))
+        except FileNotFoundError:
+            print(f"--exclude-labeled 文件不存在: {args.exclude_labeled}", file=sys.stderr)
+            return 1
+        for c in exd.get("cases", []):
+            a = c.get("anchor") or {}
+            if not a:
+                continue                        # 059 形态条目无 anchor，跳过
+            if a.get("canonical_sha256") and a["canonical_sha256"] != canon_sha:
+                print(f"⚠️ exclude 卷 case {c.get('case_id')} 的 canonical_sha256 与当前库不一致"
+                      f"（锚点失效，剔除清单可能不准）", file=sys.stderr)
+            excluded_by_labeled.append((a.get("session_key"), a.get("session_start"),
+                                        a.get("turn_idx")))
+        excluded_set = set(excluded_by_labeled)
+        before = len(matched)
+        matched = [c for c in matched if tkey(c) not in excluded_set]
+        print(f"--exclude-labeled {args.exclude_labeled}: 剔除已入卷三元组 "
+              f"{len(excluded_by_labeled)} 个（命中池内 {before - len(matched)} 个）")
+
     picked, cnt = [], Counter()
     for c in matched:                                   # pool 序（shuffle 后），逐条过上限
         k = (c["session"]["session_key"], c["session"]["start_time"])
@@ -275,6 +299,8 @@ def _sample_include_ids(args, sessions, q059, canon_sha) -> int:
         "matched_triples": len(matched),
         "unmatched_triples": len(unmatched),
         "unmatched_list": [f"{sk}|{ss}|T{ti}" for sk, ss, ti in unmatched],
+        "exclude_labeled": args.exclude_labeled,
+        "excluded_by_labeled": len(excluded_by_labeled),
         "per_session_cap": args.per_session,
         "picked": len(picked),
         "batch_tag": batch_tag,
@@ -571,6 +597,9 @@ def main(argv=None) -> int:
                          "(session_key,session_start,turn_idx) 三元组入样（任务书-060b §7.2）")
     sp.add_argument("--count", type=int, default=None,
                     help="--include-ids 模式：最多取多少条（不足则全取）")
+    sp.add_argument("--exclude-labeled", default=None,
+                    help="--include-ids 模式：已有卷（如 labeled_060.json）——其中条目的"
+                         "(session_key,session_start,turn_idx) 三元组从候选剔除，防批次撞号")
     sp.add_argument("--out", "--output", dest="out", default=DEFAULT_OUT)
     sp.add_argument("--sessions", default=DEFAULT_SESSIONS)
     sp.add_argument("--labeled-059", default=DEFAULT_LABELED_059)
