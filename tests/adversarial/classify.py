@@ -69,11 +69,15 @@ def classify_turn(question: str, answer: str, sources: list | None, path: str,
         result["basis"] += "；检索: 意图兜底"      # 复盘可区分：生产同款意图路径接住的错字/零相关题
     ok, missing = facts_ok(cid, answer, keywords)
     result["facts_ok"] = {"ok": ok, "missing": missing}
-    result["has_kb"] = bool(result["top3"]) and ok
-    if not result["has_kb"]:
-        why = "top3 无命中" if not result["top3"] else f"facts_ok 未对上 {missing}"
-        result["basis"] += f"；{why}"
+    if not result["top3"]:                             # 判定侧检索为空 = 真缺口
+        result["has_kb"] = False
+        result["basis"] += "；top3 无命中"
         result.update(scored=True, blue_point=1, verdict="no_kb")
+        return result
+    result["has_kb"] = True                            # 检索有结果 = 有库
+    if not ok:                                         # 有库但答错（关键词未覆盖）≠ 无库
+        result["basis"] += f"；facts_ok 未对上 {missing}"
+        result.update(scored=True, blue_point=1, verdict="blue_scored")
         return result
 
     if judge_point:

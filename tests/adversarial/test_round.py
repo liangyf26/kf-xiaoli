@@ -344,6 +344,35 @@ def test_scope_model_in_scope_then_scores():
     assert t["classification"]["facts_ok"]["ok"] is True
 
 
+def test_no_kb_only_when_top3_empty():
+    def judge(q):
+        return {"status": "in", "basis": "业务范围内"}
+
+    out, _ = _run(lambda t, f: Pose("50拼车流量到底多少", cid="F3"),
+                  lambda q: Answer("这个真不知道", sources=[]),
+                  lambda q: [], scope_judge=judge,
+                  match={"mode": "fixed", "questions": 1})
+    t = out["turns"][0]
+    assert t["classification"]["verdict"] == "no_kb"
+    assert t["classification"]["has_kb"] is False
+    assert "top3 无命中" in t["classification"]["basis"]
+
+
+def test_kb_hit_wrong_answer_is_blue_scored_not_no_kb():
+    def judge(q):
+        return {"status": "in", "basis": "业务范围内"}
+
+    out, _ = _run(lambda t, f: Pose("50拼车流量到底多少", cid="F3"),
+                  lambda q: Answer("不知道", sources=[]),
+                  lambda q: [_Hit()], scope_judge=judge,
+                  match={"mode": "fixed", "questions": 1})
+    t = out["turns"][0]
+    cls = t["classification"]
+    assert cls["verdict"] == "blue_scored"      # 有库答错 ≠ no_kb，口径要分开
+    assert cls["has_kb"] is True
+    assert "facts_ok 未对上" in cls["basis"]
+
+
 def test_scope_model_out_of_scope():
     def judge(q):
         return {"status": "out", "basis": "问的是天气，不在业务范围"}
