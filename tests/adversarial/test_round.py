@@ -113,6 +113,20 @@ def test_unbalanced_round_exits_3(tmp_path):
     assert code == 3
 
 
+def test_error_log_lands_in_round_dir(tmp_path):
+    """#061 P1：outbox 写失败时错误日志必须在 <round_id>/ 里，不能落到上一级。"""
+    round_dir = tmp_path / "20261027-010000"
+    round_dir.mkdir()
+    (round_dir / "outbox.jsonl").mkdir()      # 把 outbox 变成目录，追加写必抛 IsADirectoryError
+    box = Outbox(round_dir, level="all", max_per_sec=10, clock=lambda: 0)
+    assert box.emit(1, "open", "hello") == 1
+    errors = round_dir / "broadcast_errors.jsonl"
+    assert errors.exists()
+    note = json.loads(errors.read_text(encoding="utf-8").splitlines()[0])
+    assert note["seq"] == 1 and "Is a directory" in note["error"]
+    assert not (round_dir.parent / "broadcast_errors.jsonl").exists()
+
+
 def test_broadcast_error_falls_back_to_stderr(tmp_path, capsys):
     box = Outbox(tmp_path, level="all", max_per_sec=10, clock=lambda: 0)
     # outbox 的父目录是文件，两条日志都写不了，必须落到 stderr

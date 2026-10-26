@@ -68,7 +68,8 @@ class Outbox:
             return True
         except OSError as exc:
             note = {"error": str(exc), "seq": record.get("seq"), "text": record.get("text", "")}
-            target = self.dir.parent / "broadcast_errors.jsonl"
+            # #061 P1：错误日志落本轮目录 runs/adversarial/<round_id>/，不是上一级
+            target = self.dir / "broadcast_errors.jsonl"
             try:
                 with target.open("a", encoding="utf-8") as fh:
                     fh.write(json.dumps(note, ensure_ascii=False) + "\n")
