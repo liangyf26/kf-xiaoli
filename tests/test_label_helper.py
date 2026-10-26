@@ -752,6 +752,8 @@ def test_work_doc_060_block_key_and_readonly_context(tmp_path, kb):
     labeled, work = _prepare_060(tmp_path, kb, Q6)
     doc = work.read_text(encoding="utf-8")
     assert "## 060-0001. 怎么查流量" in doc
+    # 060 卷 header 的 skip_reason 提示用 case_id 版，不误导 Writer
+    assert "duplicate_of:<case_id>" in doc and "duplicate_of:<idx>" not in doc
     # 第 1 条 context=[]：只读区要有「无上文」的明确说法（任务书 §6：[] 合法）
     assert "（无上文" in doc
     # context 行是只读提示（不作为字段解析、写回不碰）

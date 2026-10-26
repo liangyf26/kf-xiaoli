@@ -278,7 +278,7 @@ def _header_lines(kb: KnowledgeBase, kb_path: Path, total: int, now: datetime | 
         ">                  / S skip（不进分母）/ K 安全组（不进知识考核）",
         "> `选择`: A / B / C（可多选，如 A,C）；X:来源串（手填来源，仍校验在库）；",
         ">         N:refuse / N:handoff；S（必填 skip_reason）；K",
-        f"> `skip_reason`: S 必填 {SKIP_REASON_HINT}；K 可不填（写 security）",
+        f"> `skip_reason`: S 必填 {SKIP_REASON_HINT_060 if zero6 else SKIP_REASON_HINT}；K 可不填（写 security）",
         "> `expected_keywords`: 仅 P 必填，中英文逗号分隔，每个词须能在所选来源的标题或正文里找到",
         "> `should_answer`: 可留空（P→是，其余→否）；填了会与处置核对",
         *extra_060,
