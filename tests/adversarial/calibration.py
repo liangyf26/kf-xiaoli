@@ -31,6 +31,7 @@
 """
 import asyncio
 import contextlib
+import os
 import sys
 from pathlib import Path
 
@@ -42,7 +43,8 @@ from backend.knowledge import KnowledgeBase
 from backend.orchestrator.handlers import handle_faq_match
 from tests.adversarial.judge import judge_d1, judge_d2, judge_d3a, judge_d3b, judge_d4
 
-NEW_KB = KnowledgeBase(PROJECT_ROOT / "data" / "sdwan-new.md")
+NEW_KB = KnowledgeBase(
+    Path(os.environ.get("KB_CANDIDATE_PATH") or (PROJECT_ROOT / "data" / "sdwan-new.md")))
 OLD_KB = KnowledgeBase(PROJECT_ROOT / "data" / "sdwan.md")
 
 # 期望矩阵（16 格，#038 裁定后的定义；D1 口径 #041 用户拍板更新）

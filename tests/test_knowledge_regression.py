@@ -16,6 +16,7 @@
 """
 import asyncio
 import hashlib
+import os
 import re
 import sys
 from pathlib import Path
@@ -29,7 +30,8 @@ from backend.orchestrator.handlers import (_customer_view, _extract_sources,
                                            _knowledge_section_text, handle_faq_match)
 from backend.orchestrator.prompt_builder import PromptBuilder
 
-NEW_KB = KnowledgeBase(PROJECT_ROOT / "data" / "sdwan-new.md")
+NEW_KB = KnowledgeBase(
+    Path(os.environ.get("KB_CANDIDATE_PATH") or (PROJECT_ROOT / "data" / "sdwan-new.md")))
 OLD_KB = KnowledgeBase(PROJECT_ROOT / "data" / "sdwan.md")
 
 # (ID, query, 允许命中的 (section, number) 集合——多数单目标；C2/L1 题集明说多选一)

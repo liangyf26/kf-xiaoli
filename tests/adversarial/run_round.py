@@ -81,11 +81,18 @@ def _red_temperature(root: Path) -> float | None:
     return None
 
 
+def _kb_seed(config: dict) -> Path:
+    """局间修库后以最新对抗版本起隔离实例（阶段4）；无版本时回退 kb.seed_path。"""
+    from tests.adversarial.kb_pipeline import latest_version
+    latest = latest_version(Path(config["kb"]["work_dir"]))
+    return latest or Path(config["kb"]["seed_path"])
+
+
 def _copy_kb(config: dict, round_dir: Path) -> Path:
     """演练只用副本。O_EXCL 要求目标不存在，所以每轮用自己的文件名。"""
     from tests.adversarial.start_isolated import gate_copy
 
-    src = Path(config["kb"]["seed_path"])
+    src = _kb_seed(config)
     dst = Path(config["kb"]["work_dir"]) / round_dir.name / src.name
     dst.parent.mkdir(parents=True, exist_ok=True)
     dst.unlink(missing_ok=True)
