@@ -3037,20 +3037,20 @@
           "turn_idx": 2
         }
       ],
-      "expected_action": "handoff",
+      "expected_action": "",
       "expected_emotion": "",
       "expected_intent": "",
       "expected_keywords": [],
       "expected_sources": [],
-      "label_note": "客户要:要 25 年的高企转让资源|依据:R4-属资质转让业务，库内无对应条目，需人工对接",
-      "needs_context": false,
+      "label_note": "判到:D1|高企资质转让（买 25 年高企），属代办/公司转让，非我方产品诉求（Chief 10-26 同 0109/0110 裁定，原 Writer 标 N:handoff）",
+      "needs_context": null,
       "question": "我想要25年的高企",
       "reviewed": true,
-      "reviewer": "Writer",
+      "reviewer": "Chief",
       "security_flag": false,
       "session_id": "S274",
       "should_answer": false,
-      "skip_reason": "",
+      "skip_reason": "not_customer",
       "source": "biz_wx_message.sql 2026-09-20 18:51:31"
     },
     {
@@ -3070,20 +3070,20 @@
           "turn_idx": 0
         }
       ],
-      "expected_action": "handoff",
+      "expected_action": "",
       "expected_emotion": "",
       "expected_intent": "",
       "expected_keywords": [],
       "expected_sources": [],
-      "label_note": "客户要:问笔记本的高配低配有什么区别|依据:R4-上文为联想 YOGA 笔记本选购，属硬件采购业务，库内无对应条目",
-      "needs_context": true,
+      "label_note": "判到:D1|联想 YOGA 笔记本高低配，硬件采购与我方 SDWAN 产品无关（Chief 10-26 同 0109/0110 裁定，原 Writer 标 N:handoff）",
+      "needs_context": null,
       "question": "你这个高配和低配是什么概念？",
       "reviewed": true,
-      "reviewer": "Writer",
+      "reviewer": "Chief",
       "security_flag": false,
       "session_id": "S095",
       "should_answer": false,
-      "skip_reason": "",
+      "skip_reason": "not_customer",
       "source": "biz_wx_message2.sql 2026-08-15 19:59:30"
     },
     {
@@ -3454,20 +3454,20 @@
           "turn_idx": 0
         }
       ],
-      "expected_action": "handoff",
+      "expected_action": "",
       "expected_emotion": "",
       "expected_intent": "",
       "expected_keywords": [],
       "expected_sources": [],
-      "label_note": "客户要:追问上文所说广西高企是哪一年的|依据:R4-属高企资质转让业务，库内无对应条目，需人工对接",
-      "needs_context": true,
+      "label_note": "判到:D1|追问高企资质年份，属高企转让，非我方产品诉求（Chief 10-26 同 0109/0110 裁定，原 Writer 标 N:handoff）",
+      "needs_context": null,
       "question": "哪一年的",
       "reviewed": true,
-      "reviewer": "Writer",
+      "reviewer": "Chief",
       "security_flag": false,
       "session_id": "S282",
       "should_answer": false,
-      "skip_reason": "",
+      "skip_reason": "not_customer",
       "source": "biz_wx_message2.sql 2026-09-07 14:16:12"
     },
     {
