@@ -127,10 +127,11 @@ def _spawn_isolated(kb: Path, port: int, red: dict, log: Path) -> subprocess.Pop
     return proc
 
 
-def _blue_questions(config: dict, n: int, kb: Path) -> list[dict]:
+def _blue_questions(config: dict, n: int, kb: Path, ask_blue=None) -> list[dict]:
     """风格池定题干，蓝方模型只负责改写成题面，并说明为什么选这张卡。"""
     from tests.adversarial.scenarios.style_sampler import blue_prompt, load_styles, sample
 
+    ask = ask_blue or _ask_blue
     styles_dir = Path(config.get("styles_dir", "tests/adversarial/scenarios/styles"))
     styles = load_styles(styles_dir)
     specs = sample(config["match"]["seed"], n, styles)
@@ -140,7 +141,7 @@ def _blue_questions(config: dict, n: int, kb: Path) -> list[dict]:
     for spec in specs:
         card = by_style[spec["style_id"]]
         prompt = blue_prompt(spec, card, config["match"]["seed"])
-        text, reason = _ask_blue(blue, prompt, spec["template"])
+        text, reason = ask(blue, prompt, spec["template"])
         out.append({"text": text, "reason": reason, "style_id": spec["style_id"],
                     "prompt": prompt, "intent": spec["intent"],
                     "judge_points": spec["judge_points"]})
@@ -333,7 +334,68 @@ def run(config: dict, out_root: Path, questions: int | None = None,
     summary = match_log.summarize(games)
     match_log.write_summary(round_dir, summary)
     match_log.write_report(round_dir, summary, games)
+    _run_heldout(config, round_dir, kb_copy, scope_judge, real_search, answer_fn, box)
     return round_dir, (0 if summary["balanced"] else 3)
+
+
+def _train_rate(round_dir: Path) -> float:
+    """训练局红方得分率，与 held-out 同口径：red / (in_scope 且 scored)。"""
+    red = scored = 0
+    for tf in sorted(Path(round_dir).glob("game_*/turns.jsonl")):
+        for line in tf.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            cls = (json.loads(line).get("classification") or {})
+            if cls.get("in_scope") and cls.get("scored"):
+                scored += 1
+                red += 1 if cls.get("verdict") == "red_scored" else 0
+    return red / scored if scored else 0.0
+
+
+def _run_heldout(config: dict, round_dir: Path, kb_copy, scope_judge, search_fn,
+                 answer_fn, box) -> dict | None:
+    """阶段 5：held-out 封存题复测（round.yaml heldout.enabled 时局末自动跑）。
+
+    失败只记录不坏局（封存题生成/红方作答都是额外调用，主局结果不受影响）。"""
+    cfg = config.get("heldout") or {}
+    if not cfg.get("enabled") or kb_copy is None:
+        return None
+    try:
+        from tests.adversarial import heldout as ho
+        from tests.adversarial.scenarios.style_sampler import resolve_expect_hit
+        kb_obj = _kb_object(kb_copy)
+
+        def _resolve(jp: dict) -> dict:
+            if kb_obj is not None:
+                got = resolve_expect_hit(jp, kb_obj.qa_pairs)
+                if got is not None:
+                    return got
+            return {k: v for k, v in jp.items() if k != "expect_hit"}
+
+        def _answer(q: str) -> dict:
+            ans = answer_fn(q)                     # 真局 answer_fn 返回 Answer 对象
+            if isinstance(ans, dict):
+                return ans
+            return {"answer": getattr(ans, "answer", "") or "",
+                    "sources": list(getattr(ans, "sources", None) or []),
+                    "path": getattr(ans, "path", "") or "llm_generation"}
+
+        gen = ho.generate(config)
+        res = ho.run(gen["dir"], _answer, search_fn, config.get("scope") or [],
+                     scope_judge=scope_judge, resolve_fn=_resolve)
+        train = _train_rate(round_dir)
+        cmp = ho.compare(train, res["red_rate"])
+        ho.report_section(round_dir, cmp, {"dir": gen["dir"], "n": res["n"],
+                                           "seed": gen["seed"]})
+        if box is not None:
+            box.emit(0, "heldout",
+                     f"封存题 red_rate={res['red_rate']:.0%}｜训练局 {train:.0%}｜差 {cmp['diff_pp']}pp"
+                     f"｜{'疑似死记' if cmp['suspected_memorization'] else '未见疑似死记'}")
+        return {"heldout": {**res, "train_rate": train, **cmp}}
+    except Exception as exc:                       # noqa: BLE001
+        if box is not None:
+            box.emit(0, "heldout", f"held-out 复测失败（只记录）: {type(exc).__name__}: {exc}")
+        return None
 
 
 def _kb_object(kb: Path | None):
