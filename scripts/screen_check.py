@@ -96,41 +96,71 @@ def _layer_sample(cands: list, n: int, seed: int) -> list:
     return [items[i] for i in idxs]
 
 
+def _session_window(sessions_by_key: dict, sk: str, ss: str, cand_idxs: list) -> dict:
+    """渲染筛选时送入模型的同一窗口（候选轮 + 前 3 客户轮，最后 20 轮）。"""
+    s = sessions_by_key.get((sk, ss))
+    if s is None:
+        return {"sent_turns": 0, "sent_chars": 0, "window_text": "（sessions.json 找不到该会话）"}
+    kept, chars, _ov = sc.build_screen_window(s["turns"], cand_idxs)
+    return {"sent_turns": len(kept), "sent_chars": chars,
+            "window_text": "\n".join(sc.render_turn(s["turns"][i]) for i in kept)}
+
+
 def cmd_sample(args) -> int:
+    """V2 抽查（任务书 §6 定稿）：customer 层按会话、not_customer 层按条目。"""
     screen = _load(args.screen)
-    per_layer = [int(x) for x in args.sample.split(",")]
-    if len(per_layer) != 2:
-        print("--sample 形如 15,15（customer 层,not_customer 层）", file=sys.stderr)
-        return 2
-    layers = {"customer": [], "not_customer": []}
+    sessions_by_key = {(s["session_key"], s["start_time"]): s
+                       for s in es.canonical_sessions(_load(args.sessions)["sessions"])}
+    n_sessions, n_items = args.sample_sessions, args.sample_items
+    cust_frame = sorted((x for x in screen.get("sessions", [])
+                         if x.get("verdict") == "customer" and x.get("confirm") == "keep"),
+                        key=lambda x: (x["session_start"], x["session_key"]))
+    notc_items = []
     for x in screen.get("sessions", []):
-        if x.get("verdict") in layers:
+        if x.get("verdict") == "not_customer":
             for c in x.get("candidates", []):
-                layers[x["verdict"]].append({**c, "layer": x["verdict"]})
+                notc_items.append({**c, "layer": "not_customer"})
     samples = []
-    layer_n = {}
-    for layer, n in zip(("customer", "not_customer"), per_layer):
-        picked = _layer_sample(layers[layer], n, args.seed)
-        layer_n[layer] = len(picked)
-        for c in picked:
-            samples.append({
-                "sample_id": f"V2-{len(samples) + 1:03d}",
-                "session_key": c["session_key"],
-                "session_start": c["session_start"],
-                "turn_idx": c["turn_idx"],
-                "question": c["question"],
-                "layer": layer,               # 只进文件供 --check；盲判走 --print-blind
-                "writer_answer": None,        # 是/否：对端是不是客户
-            })
+    for x in (cust_frame[i] for i in _evenly(cust_frame, n_sessions, args.seed)):
+        win = _session_window(sessions_by_key, x["session_key"], x["session_start"],
+                              [c["turn_idx"] for c in x.get("candidates", [])])
+        samples.append({
+            "sample_id": f"V2-{len(samples) + 1:03d}",
+            "unit": "session",
+            "session_key": x["session_key"],
+            "session_start": x["session_start"],
+            "layer": "customer",
+            "sent_turns": win["sent_turns"],
+            "sent_chars": win["sent_chars"],
+            "window_text": win["window_text"],
+            "writer_answer": None,     # 是/否：该会话有没有我方业务范围内的客户诉求
+        })
+    layer_n = {"customer": len(samples)}
+    for c in _layer_sample(notc_items, n_items, args.seed):
+        samples.append({
+            "sample_id": f"V2-{len(samples) + 1:03d}",
+            "unit": "item",
+            "session_key": c["session_key"],
+            "session_start": c["session_start"],
+            "turn_idx": c["turn_idx"],
+            "question": c["question"],
+            "layer": "not_customer",
+            "writer_answer": None,     # 是/否：这条原话的对端是不是客户
+        })
+    layer_n["not_customer"] = len(samples) - layer_n["customer"]
+    layer_frame = {"customer": len(cust_frame), "not_customer": len(notc_items)}
     total_reviewed_possible = sum(layer_n.values())
     data = {
-        "description": "#060b V2 条目级抽查盲稿（Writer 填 writer_answer；--check 算准确率）",
+        "description": ("#060b V2 抽查盲稿（customer 层会话级、not_customer 层条目级；"
+                        "Writer 填 writer_answer；--check 算准确率）"),
         "screen_source": args.screen,
         "screen_meta_cap": screen.get("meta", {}).get("cap"),
-        "sample_spec": args.sample,
+        "sample_spec": f"sessions={n_sessions},items={n_items}",
         "seed": args.seed,
-        "layer_frame": {k: len(v) for k, v in layers.items()},
+        "layer_frame": layer_frame,
         "layer_n": layer_n,
+        "layer_note": {k: "总体不足 15" for k in layer_n
+                       if layer_frame[k] < (n_sessions if k == "customer" else n_items)},
         "samples": samples,
     }
     if total_reviewed_possible < MIN_TOTAL_REVIEWED:
@@ -140,9 +170,9 @@ def cmd_sample(args) -> int:
     merged = json.loads(out.read_text(encoding="utf-8")) if out.exists() else {}
     merged.update(data)
     out.write_text(json.dumps(merged, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"V2 盲稿: customer 层框 {len(layers['customer'])} 抽 {layer_n['customer']}；"
-          f"not_customer 层框 {len(layers['not_customer'])} 抽 {layer_n['not_customer']}"
-          f"（seed={args.seed}，同会话≤2）→ {args.output}")
+    print(f"V2 盲稿: customer 层（会话）框 {layer_frame['customer']} 抽 {layer_n['customer']}；"
+          f"not_customer 层（条目）框 {layer_frame['not_customer']} 抽 {layer_n['not_customer']}"
+          f"（seed={args.seed}，条目同会话≤2）→ {args.output}")
     if data.get("insufficient"):
         print(f"⚠️ {data['insufficient']}")
     return 0
@@ -267,8 +297,13 @@ def cmd_print_blind(args) -> int:
     """盲判清单：只打印题目/会话轮次，不含系统判定（Writer 照此填，别看文件里的 layer）。"""
     data = _load(args.print_blind_file)
     for s in data.get("samples", []):
-        print(f"[{s['sample_id']}] {s['session_key']}|{s['session_start']}#T{s['turn_idx']}")
-        print(f"  客户原话: {s['question']}")
+        if s.get("unit") == "session":
+            print(f"[{s['sample_id']}] {s['session_key']}|{s['session_start']}"
+                  f"（{s['sent_turns']} 轮）")
+            print(s["window_text"])
+        else:
+            print(f"[{s['sample_id']}] {s['session_key']}|{s['session_start']}#T{s['turn_idx']}")
+            print(f"  客户原话: {s['question']}")
     audit = data.get("session_audit", {}).get("entries", [])
     for i, e in enumerate(audit, 1):
         print(f"[V2b-{i:02d}] {e['session_key']}|{e['session_start']}（{e['sent_turns']} 轮）")
@@ -286,9 +321,11 @@ def main(argv=None) -> int:
                     help="核 V2 条目级准确率")
     ap.add_argument("--check-audit", dest="check_audit_file", default=None, metavar="FILE",
                     help="核 V2b 会话级误剔率")
-    ap.add_argument("--sample", default=None, help="V2 每层条数，形如 15,15")
     ap.add_argument("--audit-sessions", action="store_true", help="生成 V2b 会话盲复核稿")
-    ap.add_argument("--sample-sessions", type=int, default=10, help="V2b 抽几个会话（默认 10）")
+    ap.add_argument("--sample-sessions", type=int, default=15,
+                    help="V2 customer 层抽几个会话（默认 15；配合 --audit-sessions 时为 V2b 的 10）")
+    ap.add_argument("--sample-items", type=int, default=15,
+                    help="V2 not_customer 层抽几条（默认 15，同会话最多 2 条）")
     ap.add_argument("--seed", type=int, default=60)
     ap.add_argument("--print-blind", dest="print_blind_file", default=None, metavar="FILE",
                     help="打印盲判清单（不含系统判定）")
@@ -300,11 +337,10 @@ def main(argv=None) -> int:
     if args.check_audit_file:
         return cmd_check_audit(args)
     if args.audit_sessions:
+        if "--sample-sessions" not in sys.argv:
+            args.sample_sessions = 10          # V2b 默认 10，与 V2 的 15 区分
         return cmd_audit(args)
-    if args.sample:
-        return cmd_sample(args)
-    ap.print_help()
-    return 2
+    return cmd_sample(args)
 
 
 if __name__ == "__main__":

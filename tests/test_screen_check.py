@@ -19,14 +19,19 @@ def _cand(sk, ss, ti, q):
             "session_start": ss, "turn_idx": ti, "question": q}
 
 
-def _screen_doc(cust, notc, unsure=(), cap=10):
-    """cust/notc/unsure: [(sk, ss, turn_idx, question)] 列表，按会话聚合成 screen 形态。"""
+def _screen_doc(cust, notc, unsure=(), cap=10, confirm="keep"):
+    """cust/notc/unsure: [(sk, ss, turn_idx, question)] 列表，按会话聚合成 screen 形态。
+
+    customer 会话默认 confirm=keep（V2 会话级抽样框的条件）；传 confirm=None 可造
+    「verdict=customer 但未 keep」的会话，验证它们不进抽样框。
+    """
     sessions = {}
     for sk, ss, ti, q, v in ([(a, b, c, d, "customer") for a, b, c, d in cust]
                              + [(a, b, c, d, "not_customer") for a, b, c, d in notc]
                              + [(a, b, c, d, "unsure") for a, b, c, d in unsure]):
         s = sessions.setdefault((sk, ss), {"session_key": sk, "session_start": ss,
                                            "verdict": v, "reason": "t", "method": "llm",
+                                           "confirm": confirm if v == "customer" else None,
                                            "sent_turns": 1, "sent_chars": 5,
                                            "candidates": []})
         s["candidates"].append(_cand(sk, ss, ti, q))
@@ -50,19 +55,31 @@ def _run(*args):
 # ------------------------------------------------------------- V2 条目级抽查
 
 def test_v2_layer_sampling_frame_and_cap(tmp_path):
-    """customer 层 3 条（<15 全取）；not_customer 层 40 条（10 会话各 4）→ 等距 15、
-    同会话 ≤2；unsure 不进任何层。"""
+    """customer 层 3 个会话（<15 全取，答题卡带窗口）；not_customer 层 40 条
+    （10 会话各 4）→ 等距 15、同会话 ≤2；unsure 与 confirm 非 keep 的不进框。"""
     cust = [(f"P:C{i}", f"2026-01-01 09:0{i:02d}:00", 0, f"客户题{i}") for i in range(3)]
     notc = [(f"P:N{i}", f"2026-01-02 09:{i:02d}:00", j, f"非客{i}-{j}")
             for i in range(10) for j in range(4)]
     unsure = [("P:U1", "2026-01-03 09:00:00", 0, "不确定题")]
-    screen = _write(tmp_path / "screen.json", _screen_doc(cust, notc, unsure))
+    doc = _screen_doc(cust, notc, unsure)
+    doc["sessions"].append({"session_key": "P:DROP", "session_start": "2026-01-04 09:00:00",
+                            "verdict": "customer", "confirm": "unsure", "reason": "t",
+                            "method": "llm", "candidates": [
+                                _cand("P:DROP", "2026-01-04 09:00:00", 0, "未 keep")]})
+    screen = _write(tmp_path / "screen.json", doc)
+    sessions = _write(tmp_path / "sessions.json",
+                      _sessions_doc([(sk, ss) for sk, ss, _, _ in cust]))
     out = tmp_path / "check030.json"
-    r = _run("--screen", str(screen), "--output", str(out), "--sample", "15,15", "--seed", "60")
+    r = _run("--screen", str(screen), "--sessions", str(sessions), "--output", str(out),
+             "--sample-sessions", "15", "--sample-items", "15", "--seed", "60")
     assert r.returncode == 0, r.stderr
     d = json.loads(out.read_text(encoding="utf-8"))
     assert d["layer_n"] == {"customer": 3, "not_customer": 15}
     assert d["layer_frame"] == {"customer": 3, "not_customer": 40}
+    cust_samples = [s for s in d["samples"] if s["layer"] == "customer"]
+    assert all(s["unit"] == "session" and s["window_text"] for s in cust_samples)
+    assert all("verdict" not in s and "confirm" not in s for s in cust_samples)
+    assert "总体不足 15" in d["layer_note"]["customer"]
     from collections import Counter
     n_layer = [s for s in d["samples"] if s["layer"] == "not_customer"]
     cnt = Counter((s["session_key"]) for s in n_layer)
@@ -78,11 +95,14 @@ def test_v2_insufficient_marks_no_pass(tmp_path):
     cust = [("P:C1", "2026-01-01 09:00:00", i, f"客户题{i}") for i in range(3)]
     notc = [("P:N1", "2026-01-02 09:00:00", i, f"非客{i}") for i in range(4)]
     screen = _write(tmp_path / "screen.json", _screen_doc(cust, notc))
+    sessions = _write(tmp_path / "sessions.json",
+                      _sessions_doc([("P:C1", "2026-01-01 09:00:00")]))
     out = tmp_path / "check030.json"
-    r = _run("--screen", str(screen), "--output", str(out), "--sample", "15,15", "--seed", "60")
+    r = _run("--screen", str(screen), "--sessions", str(sessions), "--output", str(out),
+             "--sample-sessions", "15", "--sample-items", "15", "--seed", "60")
     assert r.returncode == 0
     d = json.loads(out.read_text(encoding="utf-8"))
-    assert "样本不足·待补" in d["insufficient"]   # 3+4=7 < 10（同会话≤2 裁后实际更少）
+    assert "样本不足·待补" in d["insufficient"]   # 1 会话 + 2 条 = 3 < 10
     r2 = _run("--check", str(out))
     assert r2.returncode == 1 and "样本不足" in r2.stdout
 
@@ -92,8 +112,11 @@ def test_v2_check_accuracy(tmp_path):
     cust = [(f"P:C{i}", f"2026-01-01 09:{i:02d}:00", 0, f"客户题{i}") for i in range(10)]
     notc = [(f"P:N{i}", f"2026-01-02 09:{i:02d}:00", 0, f"非客{i}") for i in range(10)]
     screen = _write(tmp_path / "screen.json", _screen_doc(cust, notc))
+    sessions = _write(tmp_path / "sessions.json",
+                      _sessions_doc([(sk, ss) for sk, ss, _, _ in cust]))
     out = tmp_path / "check030.json"
-    r = _run("--screen", str(screen), "--output", str(out), "--sample", "15,15", "--seed", "60")
+    r = _run("--screen", str(screen), "--sessions", str(sessions), "--output", str(out),
+             "--sample-sessions", "15", "--sample-items", "15", "--seed", "60")
     d = json.loads(out.read_text(encoding="utf-8"))
     for i, s in enumerate(d["samples"]):
         wrong = i in (0, 10)                               # 每层各错 1
@@ -172,9 +195,12 @@ def test_print_blind_hides_verdict(tmp_path):
     cust = [("P:C1", "2026-01-01 09:00:00", 0, "客户题")]
     notc = [("P:N1", "2026-01-02 09:00:00", 0, "非客题")]
     screen = _write(tmp_path / "screen.json", _screen_doc(cust, notc))
+    sessions = _write(tmp_path / "sessions.json",
+                      _sessions_doc([("P:C1", "2026-01-01 09:00:00")]))
     out = tmp_path / "check030.json"
-    _run("--screen", str(screen), "--output", str(out), "--sample", "15,15", "--seed", "60")
+    _run("--screen", str(screen), "--sessions", str(sessions), "--output", str(out),
+         "--sample-sessions", "15", "--sample-items", "15", "--seed", "60")
     r = _run("--print-blind", str(out))
     assert r.returncode == 0
-    assert "客户题" in r.stdout and "非客题" in r.stdout
+    assert "P:C1 的会话内容" in r.stdout and "非客题" in r.stdout
     assert "customer" not in r.stdout and "not_customer" not in r.stdout   # 盲：不泄层

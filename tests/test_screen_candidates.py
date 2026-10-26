@@ -24,7 +24,7 @@ def _turn(speaker, text, bot="", human="", time="2026-01-01 10:00:00"):
             "human_reply": human, "time": time}
 
 
-def _sess(key, start, turns, sid="S0"):
+def _sess(key, start, turns, sid="SYNTH-NEVER-IN-LABELED"):
     return {"session_id": sid, "session_key": key, "start_time": start,
             "source_file": "biz_wx_message.sql", "turns": turns}
 
@@ -251,6 +251,179 @@ def test_agency_signal_does_not_exclude():
     text = "[客户] 您这边有广西南宁纳税的公司转让吗"
     assert sc.rule_hit(text) is None
     assert sc.agency_signal(text) == "公司转让"
+
+
+def _guard_fixture():
+    """四条必放行会话各 1 个候选 + 对应判定记录，可直接喂 build_payload。"""
+    canon, jobs, results = [], [], []
+    for i, (sk, ss) in enumerate(sc.A3_MUST_PASS_SESSIONS):
+        s = {"session_key": sk, "start_time": ss,
+             "turns": [{"text": f"第{i}条必放行原话", "speaker": "customer"}]}
+        canon.append(s)
+        jobs.append((i, s, [0]))
+        results.append({"verdict": "customer", "reason": "ok", "method": "llm",
+                        "sent_turns": 1, "sent_chars": 10, "oversized": False,
+                        "confirm": "keep", "agency_signal": None})
+    return canon, jobs, results
+
+
+def test_build_payload_rejects_must_pass_not_customer():
+    """P1-1：四条必放行之一判 not_customer 时，build_payload 必须抛错、不返回产物。
+
+    走生产入口而非孤立的 assert_a3_must_pass——删掉 build_payload 里的守卫调用，
+    这条测试变红（反向验证破坏点）。
+    """
+    canon, jobs, results = _guard_fixture()
+    results[1]["verdict"] = "not_customer"          # 060-0031 所在会话
+    mc = {"provider": "x", "model": "m", "temperature": 0.0, "top_p": 1.0}
+    try:
+        sc.build_payload(canon, "sha", jobs, results, [], {}, 10, mc)
+    except AssertionError as e:
+        assert "P:U041" in str(e)
+    else:
+        raise AssertionError("build_payload 放行了 not_customer 的必放行会话")
+
+
+def test_anchor_protection_rewrites_drop_to_unsure():
+    """r4：已标 N 的会话被判 drop 时，build_payload 必须改写成 unsure。
+
+    走生产入口。删掉 build_payload 里的 apply_anchor_protection 调用，
+    这条测试变红（反向验证破坏点）。
+    """
+    s = {"session_key": "P:UX", "start_time": "2026-02-02 09:00:00",
+         "turns": [{"text": "已标 handoff 的原话", "speaker": "customer"}]}
+    canon, jobs = [s], [(0, s, [0])]
+    results = [{"verdict": "not_customer", "reason": "二次确认:非我方业务", "method": "llm",
+                "sent_turns": 1, "sent_chars": 10, "oversized": False,
+                "confirm": "drop", "agency_signal": None}]
+    protected = {(s["session_key"], s["start_time"])}
+    mc = {"provider": "x", "model": "m", "temperature": 0.0, "top_p": 1.0}
+    payload = sc.build_payload(canon, "sha", jobs, results, [], {}, 10, mc,
+                               protected_sessions=protected)
+    out = payload["sessions"][0]
+    assert out["verdict"] == "unsure", "受保护会话的 drop 没被改写"
+    assert out["confirm"] == "unsure"
+    assert out["reason"].startswith("主卷锚点保护:")
+    assert payload["meta"]["anchor_protection"]["rewritten"] == 1
+    assert payload["meta"]["confirm_pass"]["drop"] == 0
+
+
+def test_drop_stale_clients_closes_old_connection():
+    """P2：换连接前必须 aclose 旧的 AsyncClient，不能只替换字典。"""
+    closed = []
+
+    class FakeAsyncClient:
+        async def aclose(self):
+            closed.append(self)
+
+    class Client:
+        def __init__(self):
+            self._clients = {object(): FakeAsyncClient(), object(): FakeAsyncClient()}
+
+    client = Client()
+    n = asyncio.run(sc.drop_stale_clients(client))
+    assert n == 2 and len(closed) == 2
+    assert list(client._clients.values()) == []
+    assert asyncio.run(sc.drop_stale_clients(FakeQwenClient())) == 0   # 桩没有连接池
+
+
+def test_close_error_does_not_become_unsure(tmp_path, monkeypatch):
+    """P2 第二轮：aclose 抛异常不得吞成 unsure。判定仍来自 generate，池被清空，计数 1。"""
+    sc.CLIENT_CLOSE_ERRORS = 0
+
+    class BoomClient:
+        async def aclose(self):
+            raise RuntimeError("关闭失败")
+
+    class Client:
+        def __init__(self, *a, **k):
+            self.temperature = 0.0
+            self._clients = {object(): BoomClient()}
+
+        async def generate(self, messages):
+            return {"response": json.dumps({"verdict": "customer", "reason": "桩判"},
+                                           ensure_ascii=False)}
+
+    monkeypatch.setattr("backend.llm.client.QwenClient", Client)
+    sp = _write_sessions(tmp_path, [
+        _sess("P:CL", "2026-04-04 09:00:00",
+              [_turn("customer", "关闭失败也不该变 unsure", time="2026-04-04 09:00:00")])])
+    out = tmp_path / "screen.json"
+    rc = sc.main(["--sessions", str(sp), "--labeled-059", str(_write_059(tmp_path)),
+                  "--output", str(out), "--cache", str(tmp_path / "cache.json"),
+                  "--model", "stub"])
+    assert rc == 0
+    d = json.loads(out.read_text(encoding="utf-8"))
+    assert d["sessions"][0]["verdict"] == "customer"       # 来自 generate，不是兜底
+    assert d["sessions"][0]["method"] == "llm"
+    assert d["meta"]["client_close_errors"] == 1
+
+
+def test_close_error_counter_resets_each_run(tmp_path, monkeypatch):
+    """P2 第三轮：同一进程连跑两次，第二次的 client_close_errors 不带第一次的数。
+
+    测试自身不清零，验证的就是 run_screen 入口会清零。去掉那行清零，本测试变红。
+    """
+    sc.CLIENT_CLOSE_ERRORS = 7       # 故意留一个上次运行的残留
+
+    class Boom:
+        async def aclose(self):
+            raise RuntimeError("关闭失败")
+
+    boom = {"on": True}
+
+    class Client:
+        def __init__(self, *a, **k):
+            self.temperature = 0.0
+            self._clients = {object(): Boom()} if boom["on"] else {}
+
+        async def generate(self, messages):
+            return {"response": json.dumps({"verdict": "not_customer", "reason": "桩"},
+                                           ensure_ascii=False)}
+
+    monkeypatch.setattr("backend.llm.client.QwenClient", Client)
+    sp = _write_sessions(tmp_path, [
+        _sess("P:CR", "2026-05-05 09:00:00",
+              [_turn("customer", "计数器要按次清零", time="2026-05-05 09:00:00")])])
+    l59 = _write_059(tmp_path)
+
+    def run(tag):
+        out = tmp_path / f"screen_{tag}.json"
+        rc = sc.main(["--sessions", str(sp), "--labeled-059", str(l59),
+                      "--output", str(out), "--cache", str(tmp_path / f"cache_{tag}.json"),
+                      "--model", "stub"])
+        assert rc == 0
+        return json.loads(out.read_text(encoding="utf-8"))["meta"]["client_close_errors"]
+
+    assert run("first") == 1
+    boom["on"] = False
+    assert run("second") == 0
+
+
+def test_per_call_timeout_skips_without_caching(tmp_path, monkeypatch):
+    """P2：单次调用超时 → 该会话不写缓存、产物 meta.timed_out_sessions 有清单。"""
+    class Hanging:
+        def __init__(self, *a, **k):
+            self.temperature = 0.0
+
+        async def generate(self, messages):
+            await asyncio.sleep(5)
+            return {"response": "{}"}
+
+    monkeypatch.setattr("backend.llm.client.QwenClient", Hanging)
+    sp = _write_sessions(tmp_path, [
+        _sess("P:HZ", "2026-03-03 09:00:00",
+              [_turn("customer", "这条会超时的咨询", time="2026-03-03 09:00:00")])])
+    out, cache = tmp_path / "screen.json", tmp_path / "cache.json"
+    rc = sc.main(["--sessions", str(sp), "--labeled-059", str(_write_059(tmp_path)),
+                  "--output", str(out), "--cache", str(cache), "--model", "stub",
+                  "--per-call-timeout", "0.2"])
+    assert rc == 0
+    d = json.loads(out.read_text(encoding="utf-8"))
+    assert d["sessions"][0]["method"] == "timeout"
+    assert d["meta"]["timed_out_sessions"] == [
+        {"session_key": "P:HZ", "session_start": "2026-03-03 09:00:00"}]
+    assert not cache.exists() or json.loads(cache.read_text())["entries"] == {}
 
 
 def test_a3_must_pass_guard_raises_on_not_customer():

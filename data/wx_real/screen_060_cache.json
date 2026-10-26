@@ -8092,6 +8092,5786 @@
    "oversized": false,
    "confirm": "drop",
    "agency_signal": null
+  },
+  "494abedac81588ac4d0b4f2725a665e18097d2ea3e8908203b335dd9c9411cde": {
+   "verdict": "not_customer",
+   "reason": "规则命中「转账验证码」：依据：整段只有验证码文本、无业务问题，是转发验证码不是咨询",
+   "method": "rule",
+   "sent_turns": 8,
+   "sent_chars": 134,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "87c8e82e264969ba4fe85b63c56c7b29b5848dfb143baf1fdf420aec40a01ff1": {
+   "verdict": "not_customer",
+   "reason": "规则命中「招聘/面试通知」：依据：SDWAN 客户咨询不会出现面试/入职/月薪/报到——这是 HR 通知语境",
+   "method": "rule",
+   "sent_turns": 1,
+   "sent_chars": 127,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "a7c4da3ce0b8260d8dd687302d1dd42bf850e477c74f57afab891f656780a4cc": {
+   "verdict": "not_customer",
+   "reason": "规则命中「招聘/面试通知」：依据：SDWAN 客户咨询不会出现面试/入职/月薪/报到——这是 HR 通知语境",
+   "method": "rule",
+   "sent_turns": 2,
+   "sent_chars": 238,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "74cf8bb11c6870a35b2182edaaa5b70b75b52fcbdfe84b8ed98b0e83f47ebf5f": {
+   "verdict": "not_customer",
+   "reason": "规则命中「招聘/面试通知」：依据：SDWAN 客户咨询不会出现面试/入职/月薪/报到——这是 HR 通知语境",
+   "method": "rule",
+   "sent_turns": 3,
+   "sent_chars": 53,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "d32aa64f7fd3aa3dde413b8309bbd39188068c202d2d158aefe915e9dfffdc61": {
+   "verdict": "not_customer",
+   "reason": "规则命中「招聘/面试通知」：依据：SDWAN 客户咨询不会出现面试/入职/月薪/报到——这是 HR 通知语境",
+   "method": "rule",
+   "sent_turns": 5,
+   "sent_chars": 82,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "f108e1cf06a347a9a23d290e12b53be732f0a808fdd2b5165aea0a61902de861": {
+   "verdict": "not_customer",
+   "reason": "规则命中「群发营销」：依据：模板化营销句式，真实客户不会主动发",
+   "method": "rule",
+   "sent_turns": 1,
+   "sent_chars": 180,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "c6353a7491a83bf67cac06b1b7073fb861a077a91040bb2aa2c584aaa7d62abc": {
+   "verdict": "not_customer",
+   "reason": "规则命中「招聘/面试通知」：依据：SDWAN 客户咨询不会出现面试/入职/月薪/报到——这是 HR 通知语境",
+   "method": "rule",
+   "sent_turns": 2,
+   "sent_chars": 626,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "22b684c38da37bf34125e75fcc123e2b918c3bbb50fffc5d12dbff0854834a94": {
+   "verdict": "not_customer",
+   "reason": "规则命中「硬件采购推销」：依据：具体服务器型号+报价是采购推销群发，客户咨询用不到型号词",
+   "method": "rule",
+   "sent_turns": 9,
+   "sent_chars": 432,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "d41f2abeaaa181c37a56922711699481129f85a75912d502af37d0b9b4d63e30": {
+   "verdict": "not_customer",
+   "reason": "规则命中「硬件采购推销」：依据：具体服务器型号+报价是采购推销群发，客户咨询用不到型号词",
+   "method": "rule",
+   "sent_turns": 1,
+   "sent_chars": 90,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "1f0fdf0ea910715cc68c23cfc7054e16a6646ad0daf9a4795302cde756cc277c": {
+   "verdict": "not_customer",
+   "reason": "规则命中「硬件采购推销」：依据：具体服务器型号+报价是采购推销群发，客户咨询用不到型号词",
+   "method": "rule",
+   "sent_turns": 5,
+   "sent_chars": 302,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "4f438a0ac74229ac7587f91b29c3972d92be5881d519a0ad0143de345e46e367": {
+   "verdict": "not_customer",
+   "reason": "规则命中「硬件采购推销」：依据：具体服务器型号+报价是采购推销群发，客户咨询用不到型号词",
+   "method": "rule",
+   "sent_turns": 1,
+   "sent_chars": 163,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "15e19d1a287d5247ebec3a6b8ece237671b59eb66e380a460be8a8e5745dbe9d": {
+   "verdict": "not_customer",
+   "reason": "规则命中「硬件采购推销」：依据：具体服务器型号+报价是采购推销群发，客户咨询用不到型号词",
+   "method": "rule",
+   "sent_turns": 1,
+   "sent_chars": 164,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "8641830c68cece8a3ac17b5c215999b819a31289d97eb802106f93e1df7d662b": {
+   "verdict": "not_customer",
+   "reason": "对端主动推销企业资质完善服务，属于定义中的推销行为，非咨询或报障。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 310,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "16c9a07c528272462fa9235bee8652725b8f5ed35c20191bc95926bd604db0b7": {
+   "verdict": "not_customer",
+   "reason": "会话内容显示对端在推销软著申请服务并提及内部定价策略，属于推销/内部人员行为，而非客户咨询。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 108,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "eeda23d2e6a4365610fa1f97627685823cbafec3d470081b2ace6d48de6338c1": {
+   "verdict": "not_customer",
+   "reason": "对端正在向用户推销合作机会并提及公司庆典活动，属于典型的推销/业务拓展行为，而非咨询产品或报故障的客户。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 155,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "23d5ed069533d66ff46fcf91fd6f6ba0604b3e30498b3934876cf270ea7dc2f4": {
+   "verdict": "not_customer",
+   "reason": "对端主动推销会员及合作服务，属于推销行为，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 131,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "cd6ec9b333faf652258646a906c382410f194d9cf79969d665ec97043f1167ae": {
+   "verdict": "not_customer",
+   "reason": "对端使用“催催您”、“大胆合作”等销售话术，明显是推销/业务拓展人员，而非咨询产品或报故障的客户。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 99,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "052865918fed70eb5e8f53f88eeeddb5f9a0b13e665ac58bd1c823aea106e4a0": {
+   "verdict": "not_customer",
+   "reason": "会话内容显示对端是主动联系用户、推销GEO服务的销售人员（小梁），属于推销/代办类非客户行为。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 526,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "9c69eb2b9606fcf3f407e4b70b1be90eb5c651524339a8028cb18fab74fdbf40": {
+   "verdict": "not_customer",
+   "reason": "会话内容明确标注为“政策监控测试”及“test”，属于内部测试或自动化脚本行为，非真实客户咨询。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 89,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "4fd5b946a3cbab73b53006baa4e4dcdd686fc0c3797e00997b1fe14fb5991661": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是推销会员服务及报价的营销话术，属于推销行为，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 129,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "431dfc7dbe19a929de2e31d6cc53ca42c8a2393a86c26b95570f2a0b5e9e2714": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是关于ISO认证机构缩减和档期紧张的推销/营销信息，属于推销行为，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 202,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "542e3979e6752f41f98aa74fb017523f96c7114a849be70ba893231f74eeb552": {
+   "verdict": "not_customer",
+   "reason": "发言方为推销人员，正在向对方进行业务推广和促成交易，属于非客户角色。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 156,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "e4ea769facf0a6007c0644ec05e20f6dc9969d0aa0873d15ab6cecf0f497e699": {
+   "verdict": "not_customer",
+   "reason": "对端正在推销合作渠道并试图促成签约，属于典型的推销/代办行为，而非咨询产品或报故障的客户。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 158,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "5b1215bd659d33158ae1c6f094346c5c718bfdd4c5697e79a78551fa85a1f8fe": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是内部业务调整通知，属于内部人员或管理方发布的信息，而非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 109,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "ad15022b5a56cd4dbf55ecc149fddb10f078920e6632970db463b4d5a02fb6fc": {
+   "verdict": "not_customer",
+   "reason": "会话中一方在主动询问对方是阿里云新用户还是老用户，这是典型的销售/客服向潜在客户核实身份的话术，表明对端是内部销售人员而非客户。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 53,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "afd3f30fc405f442a899d5707f361f820afa3c6bd6561c05f89c89289db060a4": {
+   "verdict": "unsure",
+   "reason": "会话前半部分涉及具体的网络互联互通故障排查，符合客户报障特征，但后半部分突然转为个人职场危机（被辞退、谋后路）的闲聊，属于混合场景，无法单纯判定为纯客户咨询或纯内部闲聊。",
+   "method": "llm",
+   "sent_turns": 7,
+   "sent_chars": 175,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "d58ac89d186c97996be3d455516fc4025bae3aa9237674808a6ec25c4661a06a": {
+   "verdict": "unsure",
+   "reason": "会话内容极简且缺乏具体业务上下文，无法区分是真实客户咨询还是内部测试/闲聊，符合不确定定义。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 47,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "8ea85ca33f4a96e4ca162d78a2b88d7ef427b90d3cb2c5089d76183d44b7903d": {
+   "verdict": "not_customer",
+   "reason": "会话内容均为内部工作进度同步（专利申报、采购下单、财务转账及开票），无对外客户咨询或报障特征。",
+   "method": "llm",
+   "sent_turns": 9,
+   "sent_chars": 238,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "ea7d0d2ba03e847397eab8fa966dbfb094afe432c3c682830c22297dc59aa2a3": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部利润策略、报价规则及内部人员（李经理）对接，属于内部工作沟通或B2B业务洽谈，非终端客户咨询。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 111,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": "盖章代收"
+  },
+  "749740fb61f2dbc3b04a70b1d1a23114010351607e6b7d3bd6e05cdf5ccb93f7": {
+   "verdict": "unsure",
+   "reason": "会话内容涉及V6地址、接口配置及运营商故障排查，属于典型的技术运维或内部协作场景，且缺乏明确的客户咨询或报修特征，无法确定对端身份。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 105,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "08fd7a41e2a05930f907b3403230cdedb87c51b8185e9243d2ff07bffda97a9c": {
+   "verdict": "not_customer",
+   "reason": "会话内容全为对某社会新闻/单位内部纠纷的闲聊与吐槽，未涉及任何产品咨询、服务诉求或故障报修。",
+   "method": "llm",
+   "sent_turns": 19,
+   "sent_chars": 378,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "c82ea93e583712471eebd51d8fa5bfc1c7fa3643e9e2f068e8319d7fb14af065": {
+   "verdict": "not_customer",
+   "reason": "对话内容涉及内部业务运营（直播运行、收成方案、收账方式）及内部人员称呼（徐总），属于内部工作沟通，非外部客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 86,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "6b791b2b204461fa560531e918a11e8b75fac798deffd1b1ff0cdf63521bbdbd": {
+   "verdict": "not_customer",
+   "reason": "会话内容为内部工作汇报（拜访客户、修补漏洞），属于内部人员沟通，非对端作为客户发起的咨询或诉求。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 40,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "275df90a6d01236d1f4f47023da07bdadf5c7603ef3ec99980852b51b4ae15a1": {
+   "verdict": "unsure",
+   "reason": "会话中明确出现“元境蔡工问我”、“客户问”等转述第三方咨询的话术，属于混合场景或内部沟通，符合不确定判定标准。",
+   "method": "llm",
+   "sent_turns": 6,
+   "sent_chars": 120,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "11f0049745c394ca38ddeb1194c3cdc337439f6665d05b379d2d4c0315e69ac2": {
+   "verdict": "not_customer",
+   "reason": "对端主动推销物联网卡并提及免费测试卡，属于典型的推销行为，符合非客户定义。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 38,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "3d7253903d0ec53d8ed54787d18e468001dc15605d472c93705d0f051c184533": {
+   "verdict": "not_customer",
+   "reason": "对端自述为从事公司转让业务的中介，目的是寻找货源（收公司）而非咨询自身业务问题，属于B2B业务对接或推销，非终端客户。",
+   "method": "llm",
+   "sent_turns": 9,
+   "sent_chars": 132,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": "公司转让"
+  },
+  "7cbd106efef755b8bddfdbab72f2d961b01383a7cf7df562c8030fa77e94153f": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部合同核对、需求变更确认及内部款项结算，属于内部工作沟通，无对外客户咨询或报障特征。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 80,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "c92ec9b155e1b21249d92da806e10b674f9bacbcb68212900107fa8417cf635c": {
+   "verdict": "not_customer",
+   "reason": "会话内容显示对端在进行内部技术排查（如IP暴力破解、杀毒软件设置）并发送内部需求报价表，属于内部人员工作沟通，无外部客户咨询特征。",
+   "method": "llm",
+   "sent_turns": 10,
+   "sent_chars": 188,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "e63711c7d72b0592c561289965f707e520a10b59cb1317fd90511c70aee78eca": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部人员之间的物品交接（华为P20手机）及内部事务沟通（SDWAN项目取消、询问号码归属），未出现对外部客户的产品咨询、故障报修或业务诉求，属于内部工作交流。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 65,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "3cd99c0f92412c33e28420431811d573e4856dd801d2f1731b22e17d14802104": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部合同细节、人员到岗安排及内部沟通（如“超哥”、“邹总”），属于内部工作协调，非外部客户咨询。",
+   "method": "llm",
+   "sent_turns": 9,
+   "sent_chars": 153,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "489b5e87eac354c5459bd8879be1f00c71a17f9415d13847ef58db51338425e1": {
+   "verdict": "not_customer",
+   "reason": "会话内容显示对端在询问是否继续拉线、确认打印版本及送件，属于内部协作或供应商对接场景，而非客户咨询产品或报障。",
+   "method": "llm",
+   "sent_turns": 7,
+   "sent_chars": 96,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "f1ff8c001dab3b289e8e8f8a5aa057289c2fdc1b7d0eb8f218d90cb128333bfc": {
+   "verdict": "not_customer",
+   "reason": "会话内容详细描述了岗位职责、工作内容（QQ群运营、工单系统操作）及办公环境，属于招聘或岗位介绍场景，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 123,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "8084c20e51b47c2f55bf93c8ad5f841f71037d0685da15c9a3e2d2d4cd34fbbe": {
+   "verdict": "not_customer",
+   "reason": "会话内容显示对端在解释套餐规则、办理限制及副卡资费，属于客服或内部人员向他人（可能是同事或测试人员）讲解业务逻辑，而非客户在咨询或报障。",
+   "method": "llm",
+   "sent_turns": 8,
+   "sent_chars": 253,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "cb97791155706648b1b1108b4661770aa12fb643668025ffe9930c02c6a30d33": {
+   "verdict": "unsure",
+   "reason": "会话内容涉及具体业务（AI大赛、SDWAN）的添加操作，但缺乏上下文无法判断对端是内部测试人员还是真实客户，且单轮对话无法排除内部工作场景。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 40,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "7a647b321b190a0bef2499e6259635fe8e8b5d5db0d44f6b013ec3bfb9970c2f": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及走私、内部竞争策略及私人闲聊，属于非业务咨询的社交或内部交流，无产品/服务诉求。",
+   "method": "llm",
+   "sent_turns": 20,
+   "sent_chars": 390,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "f998f62f884064c497b991068d97db47369a23eae21881435a6bf7e0b9d5424f": {
+   "verdict": "not_customer",
+   "reason": "发言者自称“我们这边老师”，表明其身份为内部员工或合作方，正在抱怨内部响应速度，属于内部工作沟通而非外部客户咨询。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 38,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "768b2a9527b7a95498255efb21fed28c94505748f06dfb402acfef4f4b4f12e6": {
+   "verdict": "not_customer",
+   "reason": "对话内容为内部人员讨论与另一家公司（数广）的人员配置变动及合同执行细节，属于内部工作沟通，非外部客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 104,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "323022b635e1e13cda13f602c069fd9788da308dab961b344b04f3555d19b468": {
+   "verdict": "not_customer",
+   "reason": "对端在陈述内部系统功能（管理后台、账单导出等）及内部人员（李君、经理）的操作状态，属于内部工作汇报或测试反馈，无外部客户咨询或报障特征。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 153,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "b2bbd0ddaa51e1ade12c1047e91decacb4c504bb5309f59221c8c33251af118b": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部请示流程、合同微调及会议安排，属于内部工作沟通，无对外客户咨询或报障特征。",
+   "method": "llm",
+   "sent_turns": 9,
+   "sent_chars": 143,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "2fa25a03ff1ec32b921a67811f7c68319c9ecf4c3a87d08c2e2e77e7926f1020": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是推销AI落地诊断服务的营销文案，属于推销行为，非客户咨询。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 81,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "b1916fc687cbf846af9da831cda93254cce4f0a8c152e0795a139f07a5ff30b8": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是关于GEO营销和智能家居获客的业务宣传/推销文案，属于非客户定义中的推销行为。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 187,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "8a980af1756c84445877d5810edd987e44e8468d0796d15e3222cd03fbbeabef": {
+   "verdict": "not_customer",
+   "reason": "会话中明确出现“测试”、“内部用”字样，且内容涉及内部链接分享及内部功能状态说明，属于内部人员沟通。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 252,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "a471bb0a0557e9ea5f5275dfb56574da9a9ace81eadac77377292030b9fab255": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是包含服务项目、维修范围、耗材配送及咨询热线的完整业务推广文案，属于推销或广告行为，而非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 203,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "549330b49a19f14d1e67ba1a38cd2470f6e7bd5bbfed9a3dd053d381814451cb": {
+   "verdict": "not_customer",
+   "reason": "会话内容为内部工作待办事项（系统材料修改、现场核查准备），属于内部人员的工作沟通，无对外服务或咨询特征。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 39,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "b3168137728a6c57aee66f1ab3e4214d951e9d72f78b344ee2120fe2eba21357": {
+   "verdict": "not_customer",
+   "reason": "对端明确提供软件技术人员外包服务，属于推销/招聘行为，符合非客户定义。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 93,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "b158f65d64213d1ab33e9987f44246729710d8f8f4582e46173c8b4d94cece05": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部项目合规性讨论、审计驻场应对及内部沟通策略（如“自己消化”、“电话说”），属于内部人员或合作方内部协调，非外部客户咨询产品或服务。",
+   "method": "llm",
+   "sent_turns": 10,
+   "sent_chars": 512,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "fbef2ad6b54e4171691f2515ec1a0e2fb715c2e594313aa16c0532a832f1f433": {
+   "verdict": "not_customer",
+   "reason": "会话内容显示对端正在向用户发送指令，要求补充上传纳税记录截图以完成合格投资者认证，这是典型的客服/业务人员引导客户操作的行为，而非客户在咨询或报障。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 117,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "b202b4e7f1ef51ae8af2d73a28a34760cbf38232794a8b375a36a10037eb4dd4": {
+   "verdict": "not_customer",
+   "reason": "对端自述正在处理内部服务商服务器故障，属于内部运维/技术人员的工作沟通，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 41,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "2d51b9ad218df27b661e085f2b8f4a88dedf04802d0fb35d8f11bba92317ac38": {
+   "verdict": "not_customer",
+   "reason": "对话内容涉及内部代码结构、服务器路径、重构任务及Git管理，且称呼为“超哥”，属于内部技术人员之间的开发沟通，非外部客户咨询。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 256,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "8ab069260a2abdceef8b4297d095d32a87108ada8eeed92bf43464213866c0e2": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部设备交接、文档更新及工作指令，属于内部人员协作场景，无外部客户咨询或报障特征。",
+   "method": "llm",
+   "sent_turns": 8,
+   "sent_chars": 170,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "a30248973abce43ac01fc713c8ec4a5590ebb034cb93c3b071110507e67499d1": {
+   "verdict": "not_customer",
+   "reason": "对话内容为内部工作指令（要求专注签合同），无产品咨询或故障报修，属于内部人员沟通。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 22,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "afd0a10d8e6781b536de96234207aa0ab73270a1482017cc5020cff802082444": {
+   "verdict": "not_customer",
+   "reason": "该消息为内部工作进度同步（催合同流程），属于内部人员之间的沟通，非客户咨询或诉求。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 13,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "1cc672ac123ece95f8cbe95556de8cc41f7315ef2cd86dbe86e288ee17dbceea": {
+   "verdict": "not_customer",
+   "reason": "对端主动推销法律顾问服务并赠送诉讼案件，属于典型的推销行为，符合非客户定义。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 118,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "4006c5524011a9745962217d37c412579afd4476c0b414fd6139565cf0523b87": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是代办ISO认证和3A认证的推销广告，属于定义中的非客户类别（代办/推销）。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 78,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "2f68eb9808c7997a10474c10b0a0c6f6b8b42f9c3a4635fdaba1fdae27f8f115": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及带红酒、洗澡、天气闲聊等私人社交话题，属于纯社交闲聊，无产品咨询或业务诉求。",
+   "method": "llm",
+   "sent_turns": 8,
+   "sent_chars": 101,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "d33e52d646e6ab2df686d968e82a184de2e22a5a9ac11b4b88e71e40c9408946": {
+   "verdict": "not_customer",
+   "reason": "会话内容显示对端正在管理内部团队（如“带他们一周”、“上考核”、“确认回复正确再让他们发出去”），属于内部人员的工作沟通，而非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 20,
+   "sent_chars": 337,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "b676cc346b3fdee007d5b0104f16523a7894af4192336a0e6d486dda91a293db": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是推销算力设备/硬件的营销广告，属于定义中的推销类非客户行为。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 47,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "528760d62f9259f39c24810e550b8842dc504f2dabe61f646d1f7b1e6ba3f486": {
+   "verdict": "unsure",
+   "reason": "会话仅包含身份自报和确认语，缺乏具体的咨询、报障或诉求内容，无法判断对端是真实客户还是内部测试人员。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 23,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "f2a17cb11c5e9a38b9d39b3d392d2248e457ffe449ae882c928c1612df35b385": {
+   "verdict": "not_customer",
+   "reason": "该消息为内部人员向客服同步发票开具进度的工作通知，属于内部协作而非客户咨询或诉求。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 13,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "affe901a1034c60343e670203bd0c1d9c6c07c6da5f4299c572c413491b95e07": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是关于GEO优化和自媒体运营的推销广告，属于定义中的推销行为，非客户咨询。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 136,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "c9d7cc0df948e668263e37d2c514adde4d43007649af6b7535c99b91158fe2aa": {
+   "verdict": "not_customer",
+   "reason": "对端在讨论内部成本构成、利润空间及如何向第三方报价，属于内部商务或项目内部沟通，非外部客户咨询。",
+   "method": "llm",
+   "sent_turns": 20,
+   "sent_chars": 273,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "124e649034a61f685827465bc002f6e0fdac94410774e269c16671625617d417": {
+   "verdict": "not_customer",
+   "reason": "对端在陈述其内部方案审批流程及与第三方（审计部门、科长）的沟通进度，属于业务进展同步或闲聊，未向客服提出咨询、报障或操作诉求。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 122,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "a797da7a2f309f7b4cd1bada45325f9c77dbda831ece68021785ac8451c54acf": {
+   "verdict": "unsure",
+   "reason": "会话内容极度简短且语义模糊，缺乏具体的产品、服务或故障背景，无法判断是内部指令还是客户诉求。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 14,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "264df022ddc62782afa39f6a1e5acac5d96278ce1da2938a56252a80e0e474e4": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部账号使用策略、内部人员（永晏）指令及内部文档分享，属于内部工作沟通，无对外客户咨询或诉求特征。",
+   "method": "llm",
+   "sent_turns": 6,
+   "sent_chars": 95,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "a46b8bb42032078771755f7a917a16dd3fc447af8557bf11f2ed3eca56f336a5": {
+   "verdict": "not_customer",
+   "reason": "对端主动推销音视频设备及系统集成服务，属于推销行为，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 178,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "1052d7d9b8a22b4f03765c2bc31f58c76e667d423c18b7475f1ff888f9ef3cfd": {
+   "verdict": "not_customer",
+   "reason": "会话内容为熟人间的闲聊及内部技术方案讨论（SD-WAN组网、云主机搭建），无咨询产品、报故障或要求客服操作等典型客户行为。",
+   "method": "llm",
+   "sent_turns": 11,
+   "sent_chars": 293,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "9205331bc8aacc0374b7a54f9d3f8dbdc4e3ab5da7edb41ae02fa2156e6e466c": {
+   "verdict": "unsure",
+   "reason": "会话中出现了「他们自己注册认证吗」及「我跟他聊一下」等转述第三方（客户）咨询及内部沟通的话术，符合混合场景或内部人员代问的特征，依据规则判定为 unsure。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 87,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "f3fb976d240e4ee208037e8b1427f9c5b1c676dfd0587738b03043659038bc01": {
+   "verdict": "not_customer",
+   "reason": "对端主动推销法律服务并提及“贵司”，表明其身份为外部供应商或推销人员，而非咨询产品或报故障的客户。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 91,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "46cdad42628716abca22596f7bafa5ece7d0997e0eeed3aae4a76d8910bf231d": {
+   "verdict": "not_customer",
+   "reason": "会话内容显示对端在主动查询欠费、询问房屋出租意向并协助对接租赁部，符合物业/客服工作人员向业主（房主）沟通的特征，而非客户向服务方咨询。",
+   "method": "llm",
+   "sent_turns": 11,
+   "sent_chars": 280,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "dfa974a3685144348280949d962062bb1b3bb65c36ec572e2b9452f9b64987e8": {
+   "verdict": "not_customer",
+   "reason": "会话内容仅为内部人员确认收到特定款项（专利费用）的工作记录，无咨询、报障或业务办理诉求，属于内部工作沟通。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 39,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "ff4d23df9442c4227cdca5c1afaf58c45b2aea25c9a3f9aa19cd2c3ce06c52ae": {
+   "verdict": "not_customer",
+   "reason": "会话内容显示对端正在推销房屋代运营管理服务（二八分成），属于定义中的推销/代办类非客户行为。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 80,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "049bfe3da9b23daabcb0f45fce2da9f1877e1dc3a744bdc8326f39bf12ecaab3": {
+   "verdict": "not_customer",
+   "reason": "对话内容涉及内部人员招聘、合同签署及社保要求，属于内部行政或HR事务，非外部客户咨询产品或服务。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 60,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "1d3fde37d9dd3ec979aaa5b2bad30a4c64c5d27c63d4fa6995d7e1f36e9ff61d": {
+   "verdict": "not_customer",
+   "reason": "对端在分享使用体验并对比不同AI工具（zcode与claude）的性能，属于纯社交闲聊或技术讨论，未提出具体的产品咨询、故障报修或业务诉求。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 101,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "d84806134058e94c0226848e2a923b2bc544e94b3559e294efbf064582d43849": {
+   "verdict": "not_customer",
+   "reason": "会话内容为纯社交闲聊（游泳、调侃），未涉及任何产品咨询、故障报修或业务诉求。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 34,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "946af01ca6346b576c08fa63b71b7aa987e7a829807466ec2fbac95b1d69ce53": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及儿童用药剂量、具体药物名称及家庭日常对话，属于纯社交闲聊或私人生活分享，无任何产品咨询、服务诉求或故障报修。",
+   "method": "llm",
+   "sent_turns": 6,
+   "sent_chars": 70,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "c1a751ea00a7815d043826cd393f1532bf0623b50527a2f128c128073b9d0191": {
+   "verdict": "not_customer",
+   "reason": "对端陈述的是内部服务器（西江服务器）的运维操作结果（BIOS时间同步），属于内部技术/运维人员的工作汇报，而非外部客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 38,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "827e48ced010a2547c309e071eb9210351881b1e6b13daac5a3ddf1dfedde955": {
+   "verdict": "unsure",
+   "reason": "会话内容极简且包含内部协作指令（“你先问下吧”），无法确定对端是真实客户咨询还是内部测试/转述场景，符合混合或身份不明判定标准。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 26,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "31fde98805433160a70461a8ba83117128412a2e0c1ceeba01ad114fd016e7e4": {
+   "verdict": "not_customer",
+   "reason": "会话内容为内部工作进度同步（确认收到通知、安排缴费时间），无对外咨询或报障特征，属于内部人员沟通。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 53,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "4f61cee0bd87516dbfdcf4ae6e99c3f52698561b502e2d43f92ad2ea0833041d": {
+   "verdict": "not_customer",
+   "reason": "会话内容为熟人间的闲聊及商业合作探讨（如TK直播、供应链、个人状态分享），未出现向服务方咨询产品、报故障或要求操作等典型客户行为。",
+   "method": "llm",
+   "sent_turns": 15,
+   "sent_chars": 319,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "527575e4184b9a53864d683dd83e1cbbf287ef75760aa423b54ae6b228b2c0b8": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及工资发放、内部账户资金归集及余额表更新，属于企业内部财务或行政人员的内部工作沟通，非外部客户咨询。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 86,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "55bb592ab5e1d29610083dacc0e06e899c6fa921b541b255bed3a1e5179fd48b": {
+   "verdict": "not_customer",
+   "reason": "对端在主动提供信托产品的具体发售时间、期限和业绩基准等内部业务信息，属于内部人员同步工作进度或测试场景，而非客户咨询。",
+   "method": "llm",
+   "sent_turns": 6,
+   "sent_chars": 109,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "c4eaf6a8279894ee7708788e3f185edc2f493488bbb56d4e5f4ae4d601e59adf": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部人员之间关于提供公司营业执照、确认系统录入状态及水印要求的行政/内部协作沟通，属于内部工作事务，非外部客户咨询。",
+   "method": "llm",
+   "sent_turns": 6,
+   "sent_chars": 142,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "d57c1d0d97757d5c465b3499849971b4d78354d3f73cf026470656d42fca84c0": {
+   "verdict": "not_customer",
+   "reason": "会话内容主要涉及个人笔记本电脑选购咨询（品牌、尺寸、外观）及宿舍选寝室的策略讨论，属于纯社交闲聊或生活咨询，未涉及对端提供的产品/服务故障、业务办理或内部工作场景。",
+   "method": "llm",
+   "sent_turns": 17,
+   "sent_chars": 556,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "3b1ab70f15a061677e223316d229a6d9a0c6cccd57827f5c3e5cf0116c3f687d": {
+   "verdict": "not_customer",
+   "reason": "对话内容为私人生活安排（安装油烟机）及社交闲聊，未涉及任何产品咨询、服务诉求或故障报修。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 60,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "0131a5cc8201c234c400dd75350c2950819e092ca88af786f79535837fb8976c": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及考察公司规模、判断是否合作及预约时间，属于商务洽谈或内部协作，非产品咨询或故障报修。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 96,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "769eb82d41439fc0bf87d2fd33a8fe0ab139f61624523ef3429a3328c4429811": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是典型的营销推广信息（七夕福利、产品报价），属于推销行为，而非咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 109,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "d97cae3d4ab0c32e133863561ae3e4138f6cd6ebe99bc67d70f0d17a8427183c": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部人员（超哥）协调开票信息、确认额度及内部文档流转，属于内部工作沟通，非外部客户咨询。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 199,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "c8224592953ea45bf134732010f03e5bf162dc152043b55c1d015aa01f9b0a72": {
+   "verdict": "not_customer",
+   "reason": "对端正在推销常年法务合作及包年服务，属于推销行为，符合非客户定义。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 77,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "0273df8d77b9862601634f4e40aa324b24c401449a01bf3a84ca3ad53a3285ca": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是内部工作日报（包含软著提交、需求整理、合同模板等内部事务），属于内部人员汇报工作，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 79,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "7db5246ff80becd7b346f10a0a225f4478c3ba667de4ef76473d17399d6134b9": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是典型的法律业务推销/广告信息，属于定义中的推销类非客户行为。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 53,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "0a771289c96d57830a0b2e7899fb4721a68ec9ac74c278d10b33666827701b17": {
+   "verdict": "not_customer",
+   "reason": "会话内容为系统自动发送的入住指引（房间密码、WiFi、信箱信息），属于服务通知而非客户发起的咨询或诉求。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 266,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "c5644db70501c67cacc9ac01bd8dad81b5e58695118bebe6cdca3528d39f31b4": {
+   "verdict": "not_customer",
+   "reason": "对端正在推销合作服务（如资源搭建、报价谈判等），属于定义中的推销/代办类非客户行为。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 127,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "824fc0d24ddc2cde2d293df1e28f0c2f9b1b8919a7df98805641bf8c1f3317fd": {
+   "verdict": "not_customer",
+   "reason": "会话内容全为家庭琐事、情感表达及日常闲聊，无任何产品咨询、故障报修或业务诉求。",
+   "method": "llm",
+   "sent_turns": 12,
+   "sent_chars": 164,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "bdeb23ab205ab6ef0ef98ccfa1aed26130515ad60d04760fa351276e74f2fbcd": {
+   "verdict": "not_customer",
+   "reason": "用户询问“价格还能不能谈”属于典型的租房或房屋买卖场景，符合非客户定义中的“租房”类别。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 46,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "5b5ebc177d15da900265d60805d6d9705385c0f04659d5cedcf7f55f65596821": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部人员（罗总、蔡工）对接、内部账号注册及内部项目配合关系的调整，属于内部工作协调，非外部客户咨询。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 128,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "7d80b199dda1062945a05e934d364d9fa8fc756c622360c398e1dcd72dab9e16": {
+   "verdict": "not_customer",
+   "reason": "会话内容全为打雷、睡觉、生活琐事等纯社交闲聊，无任何产品咨询或业务诉求。",
+   "method": "llm",
+   "sent_turns": 20,
+   "sent_chars": 229,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "4ac8f637fc297686f18ded4b5bbe16ce0ae5fc98d99a398d00fe3e388afd4b25": {
+   "verdict": "not_customer",
+   "reason": "该消息为物业向业主发送的缴费通知，属于服务方对用户的单向告知，而非用户发起的咨询、报障或诉求，不符合客户定义。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 58,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "a543a01d965c46d707303ab633cb30de151718730d11e756029410ea6c657795": {
+   "verdict": "not_customer",
+   "reason": "会话内容显示对端正在内部协调工作（提及“他们那边”未提供素材、计划制作demo），属于内部人员的工作沟通，而非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 48,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "9ee0cfa86fb649f5587a835d268bc7d03ae32f77e09f5856ad3fff4a670ce4ea": {
+   "verdict": "not_customer",
+   "reason": "会话内容为内部工作汇报，涉及合同对接、内部测试跟进及软著提交等内部事务，无外部客户咨询或诉求。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 160,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": "盖章代收"
+  },
+  "bf912603214553367d6e7f053b63fe6dd47a79bd73256acdf6f03d4ccbd3d359": {
+   "verdict": "not_customer",
+   "reason": "对端自称为云服务商商务经理，主动推销产品优惠并寻求合作，属于典型的推销/非客户行为。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 123,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "454529fba3297c88caa6a3ab23a3713e3b76ce8713a2809673e7c089a32e8250": {
+   "verdict": "not_customer",
+   "reason": "对端明确提及“跟业主签”、“按你们实际服务时长结算”，表明其身份为服务提供方或合作方，而非咨询产品或报故障的客户。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 77,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "ca61a0fac9487a9ed7a1ead424b6db923285e9433134b0a97e42be1992866d03": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部人员处理特定员工（李镇）的账号解绑及内部资源（软著账号、内部微信）的交接，属于内部运维或行政事务，非外部客户咨询。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 127,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "8fe8a17909886a0cfb752fe4d7e17d37c5efa2f5ffdd4a7e5c5eaa46e212bc41": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部人员（姚姚）之间的材料流转、留言沟通及物品借用，属于内部工作协调或社交闲聊，无产品咨询或故障报修等客户特征。",
+   "method": "llm",
+   "sent_turns": 6,
+   "sent_chars": 96,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "5d59c1f76d6e52e876e7144de1750c3d956a335b6b0a123cbd764581326edf63": {
+   "verdict": "not_customer",
+   "reason": "会话内容为家庭成员间的日常沟通与情感倾诉（照顾孩子、身体不适、安排家务），属于纯社交闲聊，无产品咨询或业务诉求。",
+   "method": "llm",
+   "sent_turns": 17,
+   "sent_chars": 217,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "5f0cce6494a359e0ce249ad11d2743b77784ddb21bddf1e5e905c4fff8848de7": {
+   "verdict": "not_customer",
+   "reason": "对话内容为内部工作进度同步（等待合同上会、争取议题），无产品咨询、故障报修或业务诉求，属于内部人员沟通。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 27,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "d9f2a7e8e0b1b8983ad6ab395c592de04cd1d7a5fe027dd8c4a13b74bb179e22": {
+   "verdict": "not_customer",
+   "reason": "会话内容包含内部工作计划（软著、驻场、实习生）及针对内部系统（37）的测试/重启操作，属于内部人员工作沟通。",
+   "method": "llm",
+   "sent_turns": 6,
+   "sent_chars": 101,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "d664603ad20807a98cb0cf1452e89bf9f25d96f12f7d2af821d4cdbd87714b53": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部项目对接、合同签署及付款流程协调，属于内部工作沟通，非外部客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 149,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "7611a5390857509271e36048a187016ce29f6220017eac3b961eaf3a7b8343aa": {
+   "verdict": "not_customer",
+   "reason": "对端在讨论如何向第三方企业（来宾工厂、连锁企业）推销AI服务，并分享自己的销售案例和获客经验，属于内部业务交流或同行探讨，而非向客服咨询自身产品/服务。",
+   "method": "llm",
+   "sent_turns": 20,
+   "sent_chars": 387,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "859e1efebf6bb92d7176b3664af4232ee5fb88fc74889600bb7bf51cbdce4879": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部技术栈（若依plus）、SDK集成及联通云桌面SDWAN测试，属于内部研发或运维人员的工作沟通，无外部客户咨询或报障特征。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 134,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "5e2dbd2be2f1296443a020bf3f3b2211fde07f4381faa1a669b9163538d8c91a": {
+   "verdict": "not_customer",
+   "reason": "该消息为内部工作进度同步（汇报合同审批状态），未包含任何产品咨询、故障报修或业务诉求，属于内部人员沟通。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 30,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "cda8e476fba1c5d6da6d5fba9aed89b38b7faf08421bc97097348a2d3819a198": {
+   "verdict": "not_customer",
+   "reason": "对话内容涉及内部数据核对、修改确认及内部人员间的责任推诿（如‘实际是你自己改的’），属于内部工作沟通，无外部客户咨询或报障特征。",
+   "method": "llm",
+   "sent_turns": 7,
+   "sent_chars": 154,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "673d18213e64f1f17bed6a05932be4b9c53e0e221a24e2d5607567a28d96d0e1": {
+   "verdict": "not_customer",
+   "reason": "用户咨询的是公司转让及迁移服务，属于代办/商业交易范畴，符合非客户定义中的代办/推销类，而非咨询产品/服务或报故障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 61,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": "公司转让"
+  },
+  "881d4d0b94407619c9ca83c15880aa1c56858364a6cfc2587e55d5b3417ee3dd": {
+   "verdict": "not_customer",
+   "reason": "对端主动提供账号密码供登录测试，并询问远程安装及内部人员安排，符合内部人员或测试场景特征，非外部客户咨询。",
+   "method": "llm",
+   "sent_turns": 8,
+   "sent_chars": 161,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "2fe9bf3cf90f6f4feb792d5cb3153df130ce2afd51ad2d25235c000f2ac7f911": {
+   "verdict": "not_customer",
+   "reason": "对端在讨论闲鱼上出售软著服务的定价问题，属于推销/二手交易场景，非咨询产品或报故障。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 74,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "3ef9e7e1176289bcd5fc37cef4b96097915c1ebdff12c253b9154f4e74d09733": {
+   "verdict": "not_customer",
+   "reason": "会话内容主要为闲聊（“随便聊聊”）及关于直播技术实现的讨论，未涉及具体的产品咨询、故障报修或业务诉求，符合非客户定义中的纯社交闲聊或技术探讨。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 88,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "173b694c3ac6b6f3de42bbf4b0479a7aad11ec70794b51f306125da90dea039a": {
+   "verdict": "not_customer",
+   "reason": "会话内容明确提及“测试”和“兼容”，属于内部研发或运维人员的工作沟通，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 44,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "9ec4fa9dbf472e295f796317de03d432c90492f3d8f676df87940a9937623e6d": {
+   "verdict": "not_customer",
+   "reason": "对端正在向用户推销业务经理服务并报价，属于推销行为，符合非客户定义。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 102,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "edbacf496a32a965d748feafa618bef603027612649768503cfba3f2ee7a1e87": {
+   "verdict": "not_customer",
+   "reason": "对端主动推销业务并索要支付，属于推销/代办行为，而非咨询或报障的客户。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 141,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "2e1c7b63d94761f733e60b00bbfbb4c63aec3b0c288fd24ca99ddfe28aea3973": {
+   "verdict": "not_customer",
+   "reason": "对端正在推销合作方案并试图促成签约，属于典型的推销/业务拓展行为，而非咨询产品或报故障的客户。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 145,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "578bf29516b3e9925a2d2a8a86792fe1c7c0a234a3d796847554c5f3087f633a": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是推销学生意外险的广告文案，属于推销行为，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 60,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "b45956ca1d2425368c6fdf5683726b9ba39203530c1710dd3acb446ee61f613c": {
+   "verdict": "not_customer",
+   "reason": "会话内容为内部工作日报及日程确认，属于内部人员沟通，无客户咨询或诉求。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 72,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "c606f2058d033fb83c671b6d1b98e8f92d15705443c0b926886956a5835d15ed": {
+   "verdict": "not_customer",
+   "reason": "会话内容均为内部工作汇报、测试进度同步及内部需求确认，未出现外部客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 7,
+   "sent_chars": 296,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "e6cbc3b94a92d9e6bba38ed49b507c9a6eb9c3ef73d2f2da6199dfa2867fe879": {
+   "verdict": "not_customer",
+   "reason": "会话内容包含内部协调语气（如“在让他们找”、“需要配合好”）及具体执行时间点，且无具体产品咨询或故障报修细节，符合内部人员工作沟通特征。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 63,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "717b1cf4c04fcd8d37df2f68933212695a48db3cde4a591bf5f2613bd0bd82fe": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部SDK版本发布、测试直播间链接分享及内部功能开发进度汇报，属于内部工作沟通，无外部客户咨询或诉求。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 139,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "9b0e43b1bacfff581997e6bf4a9cfbfb5a649caac86490acd34b6c19dc28015c": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是带有营销话术（如“名额有限”、“提前省心”）和表情符号的推销/促销信息，属于推销行为，而非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 139,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "9dc60273034f624f4eaba5a8b2aa6e66523e833fc7883f570e3ca1b1e70a1307": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是典型的推销/营销话术（强调月底冲任务、低价服务、请求合作），属于定义中的“推销”类非客户行为。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 152,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "8c40010b1d9fbcf9004254a1c646c145a51be16b298abc503cebec5c2ff70136": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部系统对接（大华/海康SDK）、内部账号流转（问丘要账号）、内部日志排查及内部汇报（发给秦总），均为内部运维或开发人员的工作沟通，无外部客户咨询或报障特征。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 146,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "199c8e6856e171ba9ff89c64b24fc5eaacc0b02828acf7ce5b76d900e01a2165": {
+   "verdict": "unsure",
+   "reason": "会话中既包含对具体用户问题的处理描述（'这人急'、'能下载'），又包含对内部系统/渠道状态的排查（'微信可能有问题'），属于混合场景或内部工作沟通，无法单纯判定为纯客户咨询。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 55,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "18ea55c86be8873c0d55829dc3fb6110b02b22e067eb7cc9c73f557ef50c8ed2": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是推销保险产品的营销文案，属于推销行为，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 60,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "ea43bd55766d2424a09bba03f62f8ad95b911a5b47e944f89130ba716fd59622": {
+   "verdict": "not_customer",
+   "reason": "对端主动推销证书办理服务，属于推销行为，非客户咨询。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 31,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "7f542f3a0f86da889203e88169b4b2adc793a49a94529fa564261da9880daae9": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部工作安排（软著制作、发版测试、交接）及私人生活闲聊，无产品咨询或故障报修等客户特征。",
+   "method": "llm",
+   "sent_turns": 11,
+   "sent_chars": 204,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "f2c1844cb07cf094170f2e6ab18fcecf24c3cb51e5fbf310e9190e7d55f0da4e": {
+   "verdict": "unsure",
+   "reason": "会话中既包含具体的整机配置询价（客户行为），又包含关于发票拆分、关联查询规避及内部采购流程受阻的讨论（疑似内部人员或代办行为），属于混合场景。",
+   "method": "llm",
+   "sent_turns": 18,
+   "sent_chars": 503,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "9a6f5cdcf64081534dd0286b40102dfe631f97b2ef9a9a676801b1fafb2b7432": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部办公地点（办公室桌面）、内部人员称呼（超哥）及内部转账操作（验证码），属于内部工作沟通，非外部客户咨询。",
+   "method": "llm",
+   "sent_turns": 10,
+   "sent_chars": 184,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "df8a9393b5426004ef8b7036b378331a87a092fa3394172c6b1e3a3afb8d2f73": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是推销证书办理服务的广告信息，属于推销行为，非客户咨询。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 89,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "e459cf6f21932b13271a9580c78089262a594dcf682af20421f8e84eb075524b": {
+   "verdict": "not_customer",
+   "reason": "对话内容为日常生活中的邻里或亲友间沟通（敲门取卡），不涉及任何产品咨询、服务诉求或故障报修，属于纯社交/生活场景。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 31,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "6d502ab0930bef19ba26510fd870541dae4d2c169b33593ce2559a09858b7e22": {
+   "verdict": "not_customer",
+   "reason": "对端使用“帮您多接几个项目”、“放心来合作”等典型销售话术，属于推销行为，符合非客户定义。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 63,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "49094659088d3331421ef11911e66c2a9c2b1b6d8fce0dd45f118d05414acc2d": {
+   "verdict": "not_customer",
+   "reason": "对端正在推销合作机会并强调资金安全与资质，属于典型的推销/业务拓展行为，而非咨询产品或报故障的客户。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 100,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "e4b34834774c633073f9e5f64eb78c009667105388ac46ab38a5b8248f6a700c": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是包含产品列表、联系人及官网链接的营销推广信息，属于推销行为，而非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 106,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "7cd0c67acf5119539abc172ae273a6f079380a916f8a488389623afabe639e5f": {
+   "verdict": "not_customer",
+   "reason": "会话内容全为关于全职工作、育儿、家庭关系及行业薪资的纯社交闲聊，无任何产品咨询、服务诉求或故障报修。",
+   "method": "llm",
+   "sent_turns": 20,
+   "sent_chars": 255,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "16f79be6869bed31f96ad0be45a3e4352f26de854b2e85fb1a25c48c6aad7dc6": {
+   "verdict": "not_customer",
+   "reason": "会话内容为个人身体不适就医及情感交流，属于纯社交闲聊，无产品咨询或业务诉求。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 85,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "18a7da30e0c2d1872af9cf2de35f39e2eaf6ee89d9426b94da808a402ceb51f0": {
+   "verdict": "not_customer",
+   "reason": "会话内容为内部工作待办事项（项目清点、软著申请进度），属于内部人员的工作沟通，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 92,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "bd7bae2bc0bafd01b8fc417a6aff0c7418d9fe9c52e10657a12f65bd3c497d2f": {
+   "verdict": "not_customer",
+   "reason": "对端正在推销人脉撮合及广告服务，属于定义中的推销行为，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 111,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "0218c39e871bd16568534da416e387ddb73cc72af48641aef10d95f263295ee9": {
+   "verdict": "not_customer",
+   "reason": "对端自述为销售（冲刺销冠、申请活动价格），属于推销行为，符合非客户定义。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 124,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "857497cb8ed59dc994f7c4ad484b88f694180aca88ee9753372dedd65c0c54e8": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部项目评估、垫资风险讨论及同事间闲聊，未出现向服务方咨询产品、报故障或要求操作的行为，属于内部人员沟通。",
+   "method": "llm",
+   "sent_turns": 6,
+   "sent_chars": 141,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "dea5975e20674bc1240d0fe1ff43797ee0e2863d3b46ce8ffc0398e883bbd379": {
+   "verdict": "not_customer",
+   "reason": "发送方自称“您也能感觉到我的诚意”，并询问对方是差在价格还是效果，这是典型的推销/销售话术，属于非客户中的推销类别。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 82,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "c5ed9a9732ae831cb54cbfa3b53890b4fd0be4ccafacb398357eb4d863de7c68": {
+   "verdict": "not_customer",
+   "reason": "会话内容为内部工作待办事项（压测方案、内部Bug处理、内部设计），无外部客户咨询或报障特征。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 75,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "b15ebde87e81f106bec01aef151ca54c4c7bc297e95b83b4f2b191d75d6d9733": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部硬件故障排查（硬盘损坏）、内部审批流程（找秦总确认）及内部存储策略制定，且无外部客户咨询或报障迹象，属于内部运维/技术讨论。",
+   "method": "llm",
+   "sent_turns": 8,
+   "sent_chars": 226,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "7361dbd159c20ca330f6e01d2363061d946f68fdaac492ea3e136dbc0f186c99": {
+   "verdict": "not_customer",
+   "reason": "用户咨询的是公司转让（代办/交易类业务），属于定义中明确排除的“代办”场景，而非产品/服务咨询或故障报修。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 42,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": "公司转让"
+  },
+  "c4ed21602afd80a28a136a1f2ae7075aa625e11a1535c135ce1658bcc5842d6b": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是典型的贷款产品推销广告（包含利率、条件、办理方式及扫码测额引导），属于定义中的推销行为，而非咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 104,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "094379138ab5c63fb8843b63ce7439765ccaec64fd7842d8e3af173ed47c1408": {
+   "verdict": "not_customer",
+   "reason": "对端明确自述为“员工账号”，属于内部人员或系统使用者，且仅进行状态告知和礼貌寒暄，无外部客户咨询或报障特征。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 45,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "3e5980b80db28920ca41ae9d73eba17a87f5ceee465222ddc2798d45421f72ed": {
+   "verdict": "not_customer",
+   "reason": "对话内容为业务伙伴间关于技术合同登记及签字盖章的行政流程协调，属于B2B业务协作或内部事务，非典型的产品咨询、故障报修或C端服务诉求。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 110,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "1c691234e5c677893839357acecb27751fbb9e9a134ff8b0d0588396d171c690": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及询问具体线路（三号线）及线下见面地点（咖啡厅），属于内部人员线下沟通或社交闲聊，无产品咨询或故障报修特征。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 38,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "2a89988d0ebfb937dd15f894308c059f94c34d082f4f85faa8796a321077e102": {
+   "verdict": "not_customer",
+   "reason": "会话内容为内部工作汇报，涉及软著提交、压力测试准备及实习生管理，属于内部人员工作沟通。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 115,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "f1f451110fa441e82e5a489c14486cccbb41dca60a59ce4e74af43456856b752": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部硬件测试反馈（频率/速度/容量）及通过名片添加内部人员确认业务归属，属于内部沟通或测试场景，无对外客户咨询特征。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 96,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "6ecd900ce4707fc7c27e19d63e3e741b9dcbf0bd8a56199589d2ce5ac7db57fc": {
+   "verdict": "not_customer",
+   "reason": "会话内容均为内部工作汇报（如“李妙在对”、“追了一下黄经理”、“做明天演示准备”），属于内部人员之间的进度同步，无外部客户咨询或诉求。",
+   "method": "llm",
+   "sent_turns": 7,
+   "sent_chars": 147,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "52c8c814955e0154b74b526adb8b71aa9eb58de8369adef522fe649918504ebd": {
+   "verdict": "not_customer",
+   "reason": "发言者使用“这周客户”指代第三方，表明其身份为内部人员或合作方，而非正在咨询或报障的客户本人。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 25,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "38d8c0b21bae55585c50868dac8b04875b523cb86adcc12698050bbfb50477a0": {
+   "verdict": "unsure",
+   "reason": "会话内容涉及具体的网络故障排查（网线口、交换机、千兆速率），且包含“你先下载”等指令性操作，符合技术人员或内部运维沟通特征，但也可能是客户在描述现场情况，单看文本无法区分是内部协作还是客户报障，属于混合或身份不明场景。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 61,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "de9efb5f0ac456c2bc462ba1dd00a605de7acc3481f4f428c387e1bbe036566a": {
+   "verdict": "not_customer",
+   "reason": "会话内容显示对端在安排内部工作（如联系设计、洽谈合作、对接平台），属于内部人员或合作伙伴的工作沟通，而非外部客户咨询产品或报障。",
+   "method": "llm",
+   "sent_turns": 13,
+   "sent_chars": 193,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "948169cf3cd03116636b192c024d982ce21e70466e3224213c1e7ffc839fdb14": {
+   "verdict": "not_customer",
+   "reason": "对端在指导内部人员联系具体负责人（龚向卿）并查询合同进度，属于内部工作协调或同事间沟通，而非外部客户咨询。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 43,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "81468a3a2be84080cb428b3e6d0a37023a0f8f2e79801d52ce2d5261a20ec76e": {
+   "verdict": "unsure",
+   "reason": "会话内容包含内部工作文档链接及操作失误说明，缺乏明确的产品咨询或故障报修特征，无法确定对端是内部人员还是客户。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 60,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "fbd60e362824d1055cef933534dfb3c0f73dc7c4056a819087d2074c0ae33695": {
+   "verdict": "not_customer",
+   "reason": "会话内容仅为对内部技术人员办事效率的抱怨和吐槽，未涉及具体产品咨询、故障报修或业务诉求，属于内部工作沟通或闲聊。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 33,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "a2f6522ade20fcdb5d4a5763c3c270d339759fe3787f2ba0bba6f7b86c701fac": {
+   "verdict": "not_customer",
+   "reason": "该消息为系统自动发送的客服账号升级通知，属于内部运维或系统行为，并非客户发起的咨询或诉求。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 122,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "5a03fdc2c0448145dd2f6e94ab739837cced58fd2033a0873c78ef6a7ae7f9dc": {
+   "verdict": "not_customer",
+   "reason": "该消息为系统自动发送的客服账号升级通知，属于内部运维或系统行为，并非客户发起的咨询或诉求。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 122,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "9059a27b2612b945c9ba35d535a135a745fbcb5bf7642a93583c40796e9838c8": {
+   "verdict": "not_customer",
+   "reason": "会话内容显示对端在内部讨论另一位用户的信用、压价行为及试用策略，属于内部人员之间的沟通，而非客户直接咨询或报障。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 119,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "96696bbf9b43590f0213edbfa2fb746622ea534b71ed916222e854a466deb363": {
+   "verdict": "not_customer",
+   "reason": "会话内容包含下班吃饭、内部代码仓库权限分配（git）、同事间闲聊及生活技能分享，属于典型的内部同事或熟人间的非业务性社交与工作协作，无客户咨询或报障特征。",
+   "method": "llm",
+   "sent_turns": 17,
+   "sent_chars": 322,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "4d6938c44a93cf9dc0a457fb1088446e8f7a065c3af504848a22f47f863003da": {
+   "verdict": "unsure",
+   "reason": "会话中明确出现「他们问的阿里云」这类转述客户咨询的话，且内容混合了内部技术对接、报价确认及内部闲聊，符合混合场景判定标准。",
+   "method": "llm",
+   "sent_turns": 19,
+   "sent_chars": 584,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "e95960aa5ff6f7a4d9ae41f5e6a9199fc4b9be1df7f5abd496cff2b6c96dfd1e": {
+   "verdict": "not_customer",
+   "reason": "对话内容为内部确认合同审核完毕及流程推进，属于内部工作沟通，无外部客户咨询或诉求特征。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 44,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "d367814c9146a8833df547a1f5e16babe3cc91af23aa98b8c551122c4e89103c": {
+   "verdict": "not_customer",
+   "reason": "对话内容涉及内部技术选型决策、合同约束及团队管理策略（增加接手门槛），属于内部人员讨论，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 164,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "99e365e764f44f8c3c44d3a9110dc4ef68fe33419c8f32f50e090e3078d034e7": {
+   "verdict": "not_customer",
+   "reason": "该消息为典型的客服/营销人员主动发起的自我介绍及索要手机号的话术，属于内部人员或推销行为，而非客户咨询。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 181,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "83cddc16e85cdec855d01d00340d5a3be19d4d51c273d4d809c15effbe6c6c7c": {
+   "verdict": "not_customer",
+   "reason": "对端明确询问是否要模拟客服或分析数据，属于内部测试或技术调试场景，非真实客户咨询。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 83,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "ec35732b6571fab9f69c76f540ca82b05817ef3a7e58b86e71fef14d6bfd49cd": {
+   "verdict": "not_customer",
+   "reason": "用户发送淘宝商品链接并提及“发给妙姐”，属于内部工作沟通或分享行为，未体现向服务方咨询、报障或要求操作等客户特征。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 96,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "16dba88c9e25d010b41be74c7bab2b23e15184eec9bceb391efb0475bed012bc": {
+   "verdict": "not_customer",
+   "reason": "对端询问“苹果11处理机有需求吗”，属于推销或业务拓展行为，而非咨询产品、报故障或提出服务诉求，符合非客户定义中的推销类别。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 35,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "c7a291523c685146f3de1a730ed217e7e4a3f83a8940c928c47dc6123e4ce014": {
+   "verdict": "unsure",
+   "reason": "会话中既包含内部开发工作（如程序部署、语言选型），又包含具体的网络故障排查（如带宽不足、端口映射配置），属于混合场景。",
+   "method": "llm",
+   "sent_turns": 6,
+   "sent_chars": 240,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "50ead43d6dd4335815383515c1dd5cddc61677d641a433e2fb366be28a496b62": {
+   "verdict": "not_customer",
+   "reason": "会话内容为内部工作计划（软著进度、签合同、压测跟进），属于内部人员工作沟通，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 119,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "e5e56d56a5f40772932b2d3c83773be12bce03731e915f74de3f4b5f87815746": {
+   "verdict": "unsure",
+   "reason": "会话中明确出现“元境蔡工问”、“客户问”等转述第三方咨询的话术，属于混合场景，依据规则必须判定为 unsure。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 51,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "bd316a3b64c8deebd06e3e5fbb31faf5f57af90caaf2383417fcd49729abae49": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是包含服务项目、维修范围、耗材配送及咨询热线的完整业务推广广告，属于推销行为，而非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 199,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "0355e56847637b1f2b748ba48726fe520ef588c0b190eb8122cb919a85b7df69": {
+   "verdict": "not_customer",
+   "reason": "会话内容完全为个人生活、情感及健康状态的闲聊，未涉及任何产品咨询、服务诉求或故障报修。",
+   "method": "llm",
+   "sent_turns": 7,
+   "sent_chars": 161,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "9b15282060d53180fd2dbf4c5cb90935107740f5514adad2f1cd31ae4805d4c5": {
+   "verdict": "not_customer",
+   "reason": "会话内容为内部技术人员之间的故障排查指令（重启网卡、清缓存），属于内部运维/测试场景，无客户咨询或报障特征。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 32,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "1366263ced8f03562ac5e857faba76a051c737b2b8d9606377fc5a143bea408a": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及子女教育、家庭闲聊及私人项目融资讨论，属于纯社交闲聊，无产品咨询或业务诉求。",
+   "method": "llm",
+   "sent_turns": 19,
+   "sent_chars": 370,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "f1935df9f8841a1c8e88fe8a85b923a304dcbba91a478f3d78b945c683dc2add": {
+   "verdict": "not_customer",
+   "reason": "对端使用“我帮你处理”、“我盯一下”等内部运维/客服口吻，且要求提供账号和地址以排查故障，属于内部人员处理工单或协助排查，而非客户在咨询或报障。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 78,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "04a15cffb9625997d81701eaa61bb90da5f757a74b903bd7bf0062f435b40ad2": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部技术评估、资源消耗分析及后续观察计划，且出现“我们再看看”等内部协作口吻，属于内部人员讨论技术方案，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 142,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "a0aa1ab4ffb7d0838fabcb8d8424f20992f0f09c8cd6206aa979cb575672dcf3": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是典型的产品促销广告文案，属于推销行为，而非咨询或报障的客户。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 150,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "5908fbaf7339b6731ab0bbbd1b42d552f1da4c054ab00de044f880dd544124ab": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是推销产品/服务的营销话术，属于推销行为，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 201,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "f468418d38335d3425aa9a55c6ba27976f606fcdc982eb737b0a8b1bc6bee937": {
+   "verdict": "not_customer",
+   "reason": "该消息为民宿软装服务的营销推广文案，属于推销/广告行为，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 130,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "f23de2ddcec2aae7c2feb93fc2a6a0ee73039f9cd72bd3396dd4ea2e9a1dd176": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是论文/专著代写或出版服务的推销广告，属于推销行为，非客户咨询。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 202,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "409784dfbad066cbbae04406cb60c97511f897574133ff6cc94c408987208578": {
+   "verdict": "not_customer",
+   "reason": "会话内容显示对端正在主动推销产品（18系列预售）并引导留货，属于典型的推销/销售行为，而非咨询或报障。",
+   "method": "llm",
+   "sent_turns": 8,
+   "sent_chars": 202,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "bdd9d017a4355d1fabdee287f2f19b31ec33ca5fef8cb1964d72634696f50e38": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是推销产品（中标数据/人脉资源）的营销话术，属于推销行为，而非咨询或报障的客户。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 202,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "d8a6b8369c3ccb8c78848c7660d32e72b68666f64726243837274b4bda77f9d5": {
+   "verdict": "not_customer",
+   "reason": "对端发布的是产品报价和接单广告，属于推销/商家行为，而非咨询或报障的客户。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 52,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "3250021d755659377fca0015c6c112a8020d5b62bae6d56519c1af66dfb84c8a": {
+   "verdict": "not_customer",
+   "reason": "对端明确进行外包人员推销，属于定义中的非客户类别（推销）。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 80,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "ca91c4fa47c4c5c3db9c8dfa1723a6145f7525a15d78f674b68bb7d0c58e706f": {
+   "verdict": "not_customer",
+   "reason": "用户明确表示“没事了”，且内容涉及内部操作误解（下载录像加好友），无实际咨询或诉求，属于非客户或内部闲聊。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 34,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "67a14f0c0c65aa2071c5d3e7b5ad996e80e25c8f5cd15ed90919c19e2f601fb0": {
+   "verdict": "not_customer",
+   "reason": "对端在讨论实习合同及招聘相关话题，属于招聘/非业务咨询场景，非产品或服务客户。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 74,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "e47ea48282844b888408af8cc5b8f76041a32ee81baa3ee572215738bf72be4d": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是推销通信行业证书的广告信息，属于推销行为，符合非客户定义。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 177,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "9c78cca67dd647e5741a3c17611106f7036649d848caef55492b0732bb9967df": {
+   "verdict": "unsure",
+   "reason": "会话内容极简且模糊，仅涉及网络话题及询问对方归属，缺乏具体的产品咨询、故障报修或明确的服务诉求，无法确定对端是真实客户还是内部测试/闲聊。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 56,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "f1b40ee8c7bfc41a52727278e2155cf5784a1377ee4b0e65b40595230be0649a": {
+   "verdict": "not_customer",
+   "reason": "对端主动推销服务并询问是否需要，属于推销行为，符合非客户定义。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 121,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "ce59e33b7097037bf4778f746605b37ed75c0ff60c2907882526469cd753baad": {
+   "verdict": "not_customer",
+   "reason": "对端明确询问代理价格、利润空间及如何加价转卖，属于寻求代理合作/分销渠道，而非直接购买服务的终端客户。",
+   "method": "llm",
+   "sent_turns": 15,
+   "sent_chars": 696,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "a777f3202d2f3a6c40bb5d7bac842464be3e1dcf39d9e3a5fe88cb60e161da8d": {
+   "verdict": "not_customer",
+   "reason": "对端正在向用户推销合作服务并提及优惠活动，属于典型的推销/代办行为，而非咨询产品或报故障的客户。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 142,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "c52e15ab5d8d5015045c0bcb1e35d7a31d4932247b862439f18fa316dd7e140f": {
+   "verdict": "unsure",
+   "reason": "会话中明确出现「客户问」的转述字样，且涉及计费咨询，符合混合场景或身份不确定的判定标准。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 61,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "2eb7164dd64d9b8a83ad15c157c5ed63a6d2fd79b3ffe8552376ba871f420031": {
+   "verdict": "not_customer",
+   "reason": "该轮次内容明显是销售方在向潜在客户推销产品、报价并询问合作方式，属于推销行为，而非客户在咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 181,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "32523f93bcafc4645a0051c377c9e8721aae9bd5af9f4db0cfecb17d1bf5be61": {
+   "verdict": "not_customer",
+   "reason": "对话内容涉及具体商品（苹果）的库存、价格谈判及内部调货安排，且客服使用内部语气（如“我这里估计还有货”），符合内部人员或经销商之间的业务沟通特征，而非终端客户咨询。",
+   "method": "llm",
+   "sent_turns": 7,
+   "sent_chars": 121,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "365a37a1ff66b0b159a039c3bfb9833bfbc4e6ca9a602384f1e423d80e6a908b": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端发送的是税务培训及高企/专精特新稽查风险课程推广，属于资质/高企/纳税代办类非本公司业务，且主体为外部讲师/机构，非本公司SDWAN/网络业务客户。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 475,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "f5cdbc0e9738d095502afc7bedaa2853e98566be70329f2ff984a7b24c17f0ec": {
+   "verdict": "customer",
+   "reason": "对端明确咨询产品价格并询问是否可合作一年，属于典型的商务咨询/提诉求行为。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 48,
+   "oversized": false,
+   "confirm": "unsure",
+   "agency_signal": null
+  },
+  "4187735af7e31910212cf0311fcfad4ee04a6f0c07a67840260a9caf6d41c6a2": {
+   "verdict": "customer",
+   "reason": "对端明确提及“开发票”、“请款函”等具体业务诉求，并询问“在哪里认证”的操作指引，符合客户咨询产品/服务及提诉求的定义。",
+   "method": "llm",
+   "sent_turns": 7,
+   "sent_chars": 86,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "f4384d1e20cf8eb09dcd24aedd07e7fa665ecda2b08b01ae459b5981db28783f": {
+   "verdict": "customer",
+   "reason": "对端询问具体功能操作位置（上传电子签章），属于典型的产品使用咨询。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 22,
+   "oversized": false,
+   "confirm": "unsure",
+   "agency_signal": null
+  },
+  "2eda1b7b35b0966b4dee2167369703aac821fed4754b024a86b864f58d2196a0": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端以甲方/采购方身份提出具体的付款比例、质保金及合同审核要求，属于商务谈判或内部项目沟通，而非向本公司（乙方）咨询SDWAN/网络线路等产品的服务或报障，且主体明确为交易对手方而非本公司客户。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 320,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "79af937980ee68b267d010e66acd92a452683142a499965be4712f3f4aca5471": {
+   "verdict": "customer",
+   "reason": "对端在咨询备案申请书的下载方式及登录操作，属于典型的产品/服务咨询与操作诉求。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 59,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "6ee658998952e89bf9e1a841a7d1b16d18eab3362f75774d059b39ee51f659bb": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端诉求为咨询“跨境电商”培训/学习，该业务不属于本公司SDWAN、网络线路、带宽等核心业务范围，且非内部测试或纯社交，符合非本公司业务判据。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 91,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "928623a753c2c18597f65fff70abed24e8b9d4db43329397a6208cd275abd379": {
+   "verdict": "customer",
+   "reason": "对端明确咨询系统登录故障及联系人修改的具体操作方法，符合客户提诉求和报问题的定义。",
+   "method": "llm",
+   "sent_turns": 7,
+   "sent_chars": 143,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "92a66846f526d99998ae9fc555612b900f939e1b531f577b82b8eb82258ccaf4": {
+   "verdict": "unsure",
+   "reason": "会话内容涉及合同比例（25% vs 30%）及“不谈了”的表述，既可能是客户在抱怨或确认商务条款，也可能是内部人员讨论业务规则或模拟客户场景，单看文本无法确定对端身份。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 58,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "589a629ce47dc4f360dcfd7833d7a8e3ac30264e688a082912ebc7551db8595c": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端发送的是公司开票/收款信息，并提及“安排货款”、“帮您订货”，表明对端是供应商或销售方，正在向本公司（作为买方）催款或确认订单，而非本公司客户在提业务诉求。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 139,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "c1d83578139582c9e6b1fb2bc7859f3ae76a1fc781f1d05393168eef97275399": {
+   "verdict": "customer",
+   "reason": "对端在咨询产品报价、要求修改报价单内容（表头、列、价格、功能描述）并提及签合同及盖章流程，属于典型的客户采购/咨询行为。",
+   "method": "llm",
+   "sent_turns": 20,
+   "sent_chars": 233,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": "盖章代收"
+  },
+  "e71bfd13c1612a5e18f60a8eed2d58717c4223749b4c0ca511a68316d3afd82e": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端诉求为高企认定材料准备，属于明确非本公司业务（资质/高企代办），且主体为办理该业务的同行或代办方，符合drop条件。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 39,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "c9d51e5ee09f6237d2953ca479cf8da4d8c1135ac911ae4c25d1e3d521ff3be3": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端正在处理房屋交接、设施检查及电费缴纳等物业/租赁事务，完全不属于SDWAN、网络线路、带宽等本公司业务范围。",
+   "method": "llm",
+   "sent_turns": 13,
+   "sent_chars": 418,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "a769b39f3b6879c276ebdf3e1148f86bfe72b4b4ffa127adcb0d4f2d6fe4716d": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端诉求为取消桂林银行幸运卡，属于银行业务，明确不属于本公司SDWAN、网络线路等业务范围。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 59,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "212b322d424198f59001c7b40f910f35c434aab2540514a008b79693f041f588": {
+   "verdict": "unsure",
+   "reason": "LLM 输出解析失败兜底 unsure：{\"verdict\": \"not_customer\", \"reason\": \"会话中一方提供专业解答（如解释立减金规则、建议尝试储蓄卡支付），另一方提出具体疑问，符合客服与用户咨询的场景，但根据题目定",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 119,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "7b11fd871a38465eeb9436a6f24e9ff1fac21adedac1f4fd7a6be794100a5099": {
+   "verdict": "customer",
+   "reason": "对端明确提出开具发票的诉求并提供了完整的开票信息，属于典型的客户业务办理行为。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 139,
+   "oversized": false,
+   "confirm": "unsure",
+   "agency_signal": null
+  },
+  "fb0e4b2b689136d959c206ff6ff3ec0116e069844659d8dc832f59b3e5c1d423": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端讨论的是自研源码、数据库选型、服务器硬件性能及视频转码等软件研发与硬件采购细节，属于非本公司业务（硬件采购/非SDWAN业务），且语境显示为内部技术评审或第三方项目沟通，非本公司客户提诉求。",
+   "method": "llm",
+   "sent_turns": 8,
+   "sent_chars": 245,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "1c6fbec553c5c037e143ab0d8c460f20b58f665648a940462d37f0abf901ad5c": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端主体为第三方（学校）采购人员，诉求核心为硬件采购（台式机/显卡）及政采云流程，且涉及非本公司业务的发票拆分操作，不符合本公司SDWAN/网络服务业务范围。",
+   "method": "llm",
+   "sent_turns": 20,
+   "sent_chars": 340,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "d486a1aade1f4fce61d4fb3bb2fcf9a83f46efd80b3af3a2ac57382773ce03e7": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端诉求为在政采云上架群晖NAS硬件设备，属于硬件采购/销售业务，且明确提及“厂家”身份，非本公司SDWAN/网络线路等核心业务。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 124,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "6f4ee283d506e074ee69e5dfd5c0db17a5d59cdc4ab1b19cf9fa1f70b9f03755": {
+   "verdict": "customer",
+   "reason": "对端在确认具体的费用计算（4500*0.12=540）及是否有其他费用，属于典型的咨询产品/服务收费的诉求。",
+   "method": "llm",
+   "sent_turns": 8,
+   "sent_chars": 167,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "dd6f9ad4de38ed5f8e351bd413cf2b57d4dc8b752c7adf6f1fb23dcb5f286c4b": {
+   "verdict": "customer",
+   "reason": "对端在确认具体的发票金额、税额及开票对象，属于典型的业务咨询与数据核对诉求。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 79,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "b9e395799cf4c5df2fa173192edf6827e708fb9a183285be6d87b09c3b88b55d": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端咨询的是联想笔记本硬件配置及购买建议，属于硬件采购，明确不属于本公司SDWAN、网络线路等业务范围。",
+   "method": "llm",
+   "sent_turns": 6,
+   "sent_chars": 199,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "735c485e89aa8d863e48b9e16cacb8e1d9d847574c11cc131e5da1c9a66119f4": {
+   "verdict": "customer",
+   "reason": "对端明确咨询云电脑账号的具体配置及价格，属于典型的产品咨询行为。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 47,
+   "oversized": false,
+   "confirm": "unsure",
+   "agency_signal": null
+  },
+  "5db9a11077689de9227613289e9ecd92680067a0094fec4d76d34b9496dc0e9f": {
+   "verdict": "customer",
+   "reason": "对端提及账号注册成功及更新公司信息，属于典型的客户业务操作咨询或状态确认。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 29,
+   "oversized": false,
+   "confirm": "unsure",
+   "agency_signal": null
+  },
+  "917ced56b9a277f43c3e9a7ddd02f5fa36a692263d9c0ad0e62d591eabf77de0": {
+   "verdict": "customer",
+   "reason": "对端在咨询具体的费用收取标准及发票开具流程，属于典型的产品/服务咨询行为。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 75,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "b485c79f62def2999951ea3d78b640d5a0737f9dfd649bee508a3f9d8ee1a50d": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对话内容涉及房屋漏水、上水管道及爬梯子检查，属于物业维修或生活琐事，完全不属于SDWAN、网络线路、带宽等本公司业务范围。",
+   "method": "llm",
+   "sent_turns": 10,
+   "sent_chars": 139,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "e90988d30dcbe8047e8c7d5f6fb2bf85f3982d073a6121faa82518b2b6d4c578": {
+   "verdict": "customer",
+   "reason": "对端明确提及签订服务合同、提供开票资料并咨询税率及业务合作，属于典型的商务咨询与交易诉求。",
+   "method": "llm",
+   "sent_turns": 12,
+   "sent_chars": 392,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": "马甲代运营"
+  },
+  "bd3a0ab199fdce6316b00e9a74e5ce717410b3ac875a736d64a6d20ff00672ab": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端诉求为信用卡注销及转接银行客服，明确属于银行业务，非本公司SDWAN/网络/域名等业务范围。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 34,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "9dccd86ff5c47393251cbb7720d97bf148852efb3992095a29fd7d62e6a5b366": {
+   "verdict": "not_customer",
+   "reason": "二次确认:诉求涉及“数据局奖补”及“指导费用”，属于政府补贴代办或咨询业务，明确不属于本公司SDWAN、网络线路、备案等核心业务范围，且非内部沟通。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 22,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "d8f21737a35ff146ab473a58e3daf76b8542532fb115a2e9d146e8b6d07e7f70": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端明确提及采购“企业级硬盘”、“显卡”、“组装机”等硬件设备，且提到“找外地的商”、“难售后”，属于硬件采购业务，明确不属于本公司SDWAN/网络线路/带宽等业务范围。",
+   "method": "llm",
+   "sent_turns": 20,
+   "sent_chars": 307,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "53061452617dcbac41458284b1aad0f7ee0f2b0727bed2cae28f5f49b8ba5872": {
+   "verdict": "customer",
+   "reason": "对端明确咨询产品具体参数（带宽、流量限制、IP归属），符合客户咨询定义。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 54,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "34fae8f06226627c98e514adead3c30301a89c042112f6ed23588620e9ecfb29": {
+   "verdict": "customer",
+   "reason": "对端主动提出寄送合同并要求提供地址，属于典型的商务合作或业务办理诉求，符合客户定义。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 91,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "62c25482827f6a3abd074098846bbc992f7595acd0931c420cbeec75d1a24009": {
+   "verdict": "customer",
+   "reason": "对端明确咨询SD-WAN跨境专线产品并指定了具体地域（广西南宁江南区），符合客户咨询产品/服务的定义。",
+   "method": "llm",
+   "sent_turns": 6,
+   "sent_chars": 58,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "3614e7c58c014cc256e52d30ba5e30a76c5585667f24adc93a82bc2f981a74e4": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端咨询的是个人电话卡（SIM卡）无信号问题，属于运营商通信服务范畴，不属于本公司SDWAN、网络线路、带宽、IP/账号等核心业务范围，且非替第三方办理。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 125,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "d918294e56bf209a5d42263e1b3aa8ec8f88b7beda04b9eb523fea6e75012d88": {
+   "verdict": "customer",
+   "reason": "对端明确提出了换绑手机号的业务诉求，并提供了账号信息，符合客户定义。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 55,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "2aff581e44f9c4ab7df8feb2968cd675902f437be637a29b37c5bdf30d3edc98": {
+   "verdict": "customer",
+   "reason": "对端在询问内部安全事件（孙总扫描漏洞、VPN IP注册行为），属于报问题/提诉求，符合客户定义。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 75,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "289d31951811fc75434b881c0c6c2f53988b1a7f972130bd62a744c8efdf529d": {
+   "verdict": "customer",
+   "reason": "对端明确咨询摄像头直播的收费标准及具体操作流程，属于典型的产品/服务咨询行为。",
+   "method": "llm",
+   "sent_turns": 10,
+   "sent_chars": 189,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "86a56d7c7ccba5e20e64c3c488f5a4aedffbb6ca2d287fdf164122221827ff87": {
+   "verdict": "customer",
+   "reason": "用户反馈网络状态（公网IP异常），属于报故障/提诉求，符合客户定义。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 17,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "53fa86dc1cfd10600f394dc9961552ab350141598d3abcf19b90f625a28a7040": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端提供的是硬盘（拆机盘）的型号与含税价格，属于硬件采购/二手交易范畴，且明确非本公司SDWAN/网络线路等业务，符合drop条件。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 48,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "3bdf8ba69662a564aafad5ca28b2e77670bcb6286544f6e4f5aaef4ffd782d5d": {
+   "verdict": "customer",
+   "reason": "对端确认收到发票，属于业务办理后的正常反馈，符合客户身份特征。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 18,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "2d6ae5f46e6b57ca84d95d289ab0e004a37184405d9903e264a3ae174ec5f581": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端咨询的是第三方TK直播的AI语音插件及PC端接入，属于软件工具使用咨询，不属于本公司SDWAN、网络线路、带宽、直播线路（指底层网络资源）等核心业务范围，且未体现为本公司产品提诉求。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 52,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "8a86a1380add380ca5b6a87ee3f5178145a2624e815fb0c487d55ea97ea8d1a7": {
+   "verdict": "customer",
+   "reason": "对端明确咨询特定监控机位的直播链接，属于典型的产品/服务咨询诉求。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 44,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "3feb2eb6c889573cf179097a3107969b945c1df36392ea757f2d7d0dc9d3a053": {
+   "verdict": "customer",
+   "reason": "对端提供具体的开票信息（单位名称、税号、地址等），属于典型的业务办理诉求，符合客户定义。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 112,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "0121b7baec4c22941b0e6cb42416de50a14a979e05105c1a2564d36e35a2f8ee": {
+   "verdict": "customer",
+   "reason": "对端咨询SDWAN组网概念及联通线路价格，属于典型的产品与服务咨询行为。",
+   "method": "llm",
+   "sent_turns": 6,
+   "sent_chars": 64,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "2d970744f558e4c453cffe62d6423835c6892ff7bdda3c70ec3af0fbd847e972": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端提及“退款医生”、“心脉受损”等医疗场景词汇，明显属于医疗行业内部沟通或患者对话，与本公司SDWAN/网络业务无关，且主体非本公司客户。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 36,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "b9a1019dea95fad3faa5d19861a2bd28725a7b45cfea76dee995a6fff6bdfc7d": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端咨询的是“养殖场”的规划及合同验收，属于农业/养殖行业业务，明确不属于本公司SDWAN、网络线路、带宽等IT基础设施业务范围。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 82,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "06c436946769f5bd0cf4832cb64188ff225e79715d83944564cfbaf233d6b0b6": {
+   "verdict": "customer",
+   "reason": "对端明确提及具体合同金额并发起支付第一笔款项的操作请求，符合客户提诉求/要求支付的定义。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 45,
+   "oversized": false,
+   "confirm": "unsure",
+   "agency_signal": null
+  },
+  "80e3aad7a5520cd8f7b32f81a8b9e3c44b5ef222e8e1332f769d214532405082": {
+   "verdict": "customer",
+   "reason": "对端在沟通合同支付条款和维保费用，属于典型的商务咨询与诉求提出，符合客户定义。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 129,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "55359da2912a10c2345e3cf50f24a05b963b20fea621721a7839de4b2853fe33": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端讨论的是服务器硬件配置（24核/32核CPU）及供货需求，属于硬件采购或同行供货业务，且主体为供应商/同行，非本公司SDWAN/网络服务客户。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 51,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "e851b705739fd8f03d4c3e46d1aad6cb17aaa139e73337cc2e4440aa14d2aa3d": {
+   "verdict": "customer",
+   "reason": "对端在咨询并协商合同条款（维保费、期限、签约方式），属于典型的业务咨询与诉求提出。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 227,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "8f842577868ef6893c3b2c8cf6f158c0da52e100317a71f124ec5d31c7325e94": {
+   "verdict": "customer",
+   "reason": "对端明确描述“整栋楼停”并确认“亮机卡”故障现象，属于典型的报障/咨询行为，符合客户定义。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 24,
+   "oversized": false,
+   "confirm": "unsure",
+   "agency_signal": null
+  },
+  "36b53dcf8e3640e40ea699944d3308adce38b15fd5ab6eb087e1a5c0b8223c30": {
+   "verdict": "customer",
+   "reason": "用户抱怨服务速度慢、办事墨迹，属于对服务体验的投诉和诉求，符合客户定义。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 26,
+   "oversized": false,
+   "confirm": "unsure",
+   "agency_signal": null
+  },
+  "22b648589ec4ea14374faf20b81b51b8ac3fa6e1973e68fef9126a6f4e1c91e6": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端明确表述为“江南有一个做机械的客户要”，表明其是替第三方（客户）咨询，且自身身份为渠道/中介，非本公司客户本人。",
+   "method": "llm",
+   "sent_turns": 8,
+   "sent_chars": 96,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "c23f4ccc87bf64874b7e804a68a140b2b6f1a2a59020d0758fce38d3e3152cf6": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端诉求为下载体育场球场监控录像，属于公共区域安防监控范畴，明确不属于SDWAN、网络线路、带宽、直播线路、IP/账号、备案、域名证书等本公司业务范围。",
+   "method": "llm",
+   "sent_turns": 8,
+   "sent_chars": 171,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "9548b78e24e0ac1d47560a30a63509ac56fdfbb6fb4d4fce312616094142b9b1": {
+   "verdict": "customer",
+   "reason": "对端明确询问自己办公室线路的带宽、丢包及网关问题，并提及已投诉，符合客户报障和咨询服务的定义。",
+   "method": "llm",
+   "sent_turns": 7,
+   "sent_chars": 86,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "9f936576b23ec5d07a133290f409877c31792c1bbc374b964052d97fececd1da": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端咨询的是“高企”（高新技术企业认定）代办费用，属于明确排除的资质代办业务，且非本公司SDWAN/网络/备案等核心业务范围。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 38,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "1dd7a7cea84bb99799c1caf67c16d47cd163a6ca8c98e1664fb892a2a98fb467": {
+   "verdict": "customer",
+   "reason": "对端在描述业务故障（数据上传异常）、提及内部会议安排及具体的客户经理/装维人员跟进流程，符合客户报障及跟进诉求的特征。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 145,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "37ec763ec6141f23f6908eae95e45a6bd8335816594ea3ef36c5914e537783e9": {
+   "verdict": "customer",
+   "reason": "用户反馈网络测试数据（带宽、Ping、丢包）并提及装维人员联系，属于典型的宽带故障排查或咨询场景。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 84,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "1feab444fc376c2636253efc9a3e4306661f676bf90bbb346445889ec028e8e9": {
+   "verdict": "unsure",
+   "reason": "会话中出现“帮他们弄完”、“归属工号的”等转述第三方或内部协作的表述，符合混合场景或内部代办特征，无法确定对端为直接客户。",
+   "method": "llm",
+   "sent_turns": 15,
+   "sent_chars": 222,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "8446666426ce01802ba38d1b7405746a07d4939a108e2bfad8b6b5421081641d": {
+   "verdict": "customer",
+   "reason": "对端明确咨询直播线路的价格、租期及具体使用方案，属于典型的产品咨询行为。",
+   "method": "llm",
+   "sent_turns": 10,
+   "sent_chars": 135,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "c1d62b9ae59bf0ced05313aa9f8cda45e8a904f3d5b877e7742b66b14a8609e7": {
+   "verdict": "customer",
+   "reason": "对端在咨询产品功能（录音上传时机）并反馈后台无录音的问题，符合客户报问题/咨询服务的定义。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 44,
+   "oversized": false,
+   "confirm": "unsure",
+   "agency_signal": null
+  },
+  "18e58b82f44c8a48f78211f39e86604c088b971463ac0e162886cd0b710bde6d": {
+   "verdict": "customer",
+   "reason": "对端明确报告了设备存储权限异常及录音上传失败的具体故障现象，并配合排查，符合客户报问题的定义。",
+   "method": "llm",
+   "sent_turns": 9,
+   "sent_chars": 155,
+   "oversized": false,
+   "confirm": "unsure",
+   "agency_signal": null
+  },
+  "70219ab71f19ba3b6e6a890a81ac7b7daac344dd519ccceb57c8de37e132e016": {
+   "verdict": "customer",
+   "reason": "对端连续咨询SD-WAN收费、跨境加速方案及专线替换等具体业务问题，符合客户咨询产品/服务的定义。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 70,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "0934c0093b3c49e633a1d27daa8ee5c6db62255f7e5ce9c4f9ff6c846261a0f4": {
+   "verdict": "customer",
+   "reason": "对端连续咨询SD-WAN价格、Apple ID注册及独立IP等具体产品与服务细节，符合客户咨询定义。",
+   "method": "llm",
+   "sent_turns": 7,
+   "sent_chars": 414,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "ad3c004f49fd9d2b7ac869fc483699630c52321376b0cc896616bfbdbc6a1f26": {
+   "verdict": "customer",
+   "reason": "对端多次咨询SD-WAN产品详情、询问苹果账号注册及美区AppID申请方法，并询问服务商地址，符合客户咨询产品与服务及提诉求的定义。",
+   "method": "llm",
+   "sent_turns": 15,
+   "sent_chars": 747,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "46f517731b46bbef6290b1e7bfd7135e1fc2f0b74f87c567869854641b6258b0": {
+   "verdict": "customer",
+   "reason": "对端咨询产品具体配置（独立IP）、使用场景及适用设备，属于典型的产品咨询行为。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 291,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "8ca298a3a811112f241bd15ecabb809e2e67b32766b83fa7532c1cbbc14a4baf": {
+   "verdict": "customer",
+   "reason": "对端连续咨询产品价格、速度及设备需求，符合客户咨询产品/服务的定义。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 262,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "ff9bfa0d27739a21e36be060135a2b4187a46c9ab73cd8343f304c2a2a8947b5": {
+   "verdict": "customer",
+   "reason": "用户询问下载位置，属于咨询产品使用或获取方式，符合客户定义。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 11,
+   "oversized": false,
+   "confirm": "unsure",
+   "agency_signal": null
+  },
+  "79834dcf794cb8e8ccb017e49d858a68a7508f873074670f7733950458679cfc": {
+   "verdict": "customer",
+   "reason": "对端连续咨询产品价格、套餐详情、适用平台及流量限制，符合客户咨询产品/服务的定义。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 380,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "8eebe517306d8b0026bcc6e4fa8bd1a7dc9a49bfca6c76f48e04ac961586d0d5": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端明确咨询“高企转让”及价格，属于资质/公司转让代办业务，非本公司SDWAN/网络/备案等业务范围，且主体为寻求该非本公司业务的客户。",
+   "method": "llm",
+   "sent_turns": 11,
+   "sent_chars": 147,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "d6222fd7d05185a60b0fa2e0e7d13554810d53d29a8ee2cc7bc4f6f8b1dea5fe": {
+   "verdict": "customer",
+   "reason": "对端主动咨询SDWAN产品定义及用途，符合客户咨询产品的特征。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 114,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "ff970897f2093828b70dfc703716cf7bd44bbc89fba20403afaa273486faaa0e": {
+   "verdict": "customer",
+   "reason": "对端明确报告网络故障（网断了、连不上）并寻求解决，符合客户报问题的定义。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 88,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "72780ad7981bd7c393260435c49b7f52b4191b22d02679faca3bb77c1f5cd502": {
+   "verdict": "customer",
+   "reason": "对端明确反馈产品使用体验差（速度慢）并描述具体故障现象，符合客户报问题的定义。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 174,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "30c5d2a87ee221507c046da5af359ce21ef18a399fa042a8ed008ec2f37d5bc9": {
+   "verdict": "customer",
+   "reason": "对端明确咨询网速慢、时断时续的问题并要求协助排查，符合客户报故障/提诉求的定义。",
+   "method": "llm",
+   "sent_turns": 7,
+   "sent_chars": 925,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "0a5741a2b490f6fc9be4761832c66efe452267c5ab40f49daf07d845e88afbf7": {
+   "verdict": "customer",
+   "reason": "对端主动咨询套餐价格、流量、安装方式、设备详情及公司资质，符合客户咨询产品/服务的定义。",
+   "method": "llm",
+   "sent_turns": 12,
+   "sent_chars": 1314,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "794041f66bab08e0bf5bbbe142bc803fe7f66fe94c667fd253049acecb0d1552": {
+   "verdict": "not_customer",
+   "reason": "二次确认:诉求为下载足球比赛视频，属于体育内容服务，明确不属于SDWAN、网络线路、带宽等本公司业务范围。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 276,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "f38ec0c6f4ffee47ca97c57a0cb75bb64f9a302d96fc6fc48d340740db7a94de": {
+   "verdict": "customer",
+   "reason": "对端明确询问产品（网络/SD-WAN）的销售方式及价格，符合咨询产品/服务的客户定义。",
+   "method": "llm",
+   "sent_turns": 8,
+   "sent_chars": 95,
+   "oversized": false,
+   "confirm": "unsure",
+   "agency_signal": null
+  },
+  "f410796cb0069dcd4efb38bc3d45ebaaec0ae82f5e03e8d8a880631f599c7231": {
+   "verdict": "customer",
+   "reason": "对端明确提及“自建的线路”并投诉“乱报价”、“冒充sdwan”，符合客户报问题及提诉求的定义。",
+   "method": "llm",
+   "sent_turns": 10,
+   "sent_chars": 139,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "32ced84bdb291882a0001b2dd16510bfb8fc404ace3ce90d72d5b600c3c8a1d3": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及具体型号、价格及“调货”、“溢价”等内部库存与交易术语，且客服回复“那算了”表明这是内部人员之间的沟通或内部测试，而非外部客户咨询。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 103,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "c25d213277f94e84623930f3670217b44f5e03bdef8079c0670a70c4f3656399": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对话内容涉及实物提货、地址及价格确认，属于硬件采购或物流交易，且客服表示“给其他人”，明显不属于SDWAN、网络线路等本公司业务范围。",
+   "method": "llm",
+   "sent_turns": 8,
+   "sent_chars": 161,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "dbffa615d1d6b0bb61d4ecd6e70286b82e38ce554a5efe7a733fea0399294e97": {
+   "verdict": "not_customer",
+   "reason": "规则命中「转账验证码」：依据：整段只有验证码文本、无业务问题，是转发验证码不是咨询",
+   "method": "rule",
+   "sent_turns": 8,
+   "sent_chars": 134,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "ec3d923def1933ef6f28b72763e81293ce92f662537f5934751d0a62a025e4b9": {
+   "verdict": "not_customer",
+   "reason": "规则命中「招聘/面试通知」：依据：SDWAN 客户咨询不会出现面试/入职/月薪/报到——这是 HR 通知语境",
+   "method": "rule",
+   "sent_turns": 1,
+   "sent_chars": 127,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "898d933a0a5644415c7c8d1687f0cacfd21a04baa7cc6bb3fd1006b109a08237": {
+   "verdict": "not_customer",
+   "reason": "规则命中「招聘/面试通知」：依据：SDWAN 客户咨询不会出现面试/入职/月薪/报到——这是 HR 通知语境",
+   "method": "rule",
+   "sent_turns": 2,
+   "sent_chars": 238,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "56c059811556204ab52d00c597311dc87bf893fd16409cb8f4d5bbae88c9af0a": {
+   "verdict": "not_customer",
+   "reason": "规则命中「招聘/面试通知」：依据：SDWAN 客户咨询不会出现面试/入职/月薪/报到——这是 HR 通知语境",
+   "method": "rule",
+   "sent_turns": 3,
+   "sent_chars": 53,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "e1de216e0cc574ba0e260e1d42792bdbf529a6c3de4878fb5fd6b222e1f19c02": {
+   "verdict": "not_customer",
+   "reason": "规则命中「招聘/面试通知」：依据：SDWAN 客户咨询不会出现面试/入职/月薪/报到——这是 HR 通知语境",
+   "method": "rule",
+   "sent_turns": 5,
+   "sent_chars": 82,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "984fa21cd28aa2fecfacbbbfe5a6a80ea64948d8b637aa769df87ea6c3a2c6c6": {
+   "verdict": "not_customer",
+   "reason": "规则命中「群发营销」：依据：模板化营销句式，真实客户不会主动发",
+   "method": "rule",
+   "sent_turns": 1,
+   "sent_chars": 180,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "a57d840beabcb495aa38b5a3ceeed775a6b185683b8d03215840de47ad37be77": {
+   "verdict": "not_customer",
+   "reason": "规则命中「招聘/面试通知」：依据：SDWAN 客户咨询不会出现面试/入职/月薪/报到——这是 HR 通知语境",
+   "method": "rule",
+   "sent_turns": 2,
+   "sent_chars": 626,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "41ee431f89b94c8c2c2e48abce97fd816875b2237a4f5cda86179702d6c7020d": {
+   "verdict": "not_customer",
+   "reason": "规则命中「硬件采购推销」：依据：具体服务器型号+报价是采购推销群发，客户咨询用不到型号词",
+   "method": "rule",
+   "sent_turns": 9,
+   "sent_chars": 432,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "20c13cb5a574965de658bfe62f229381f79dfddb4d54f9f05e2be7cb163ced3e": {
+   "verdict": "not_customer",
+   "reason": "规则命中「硬件采购推销」：依据：具体服务器型号+报价是采购推销群发，客户咨询用不到型号词",
+   "method": "rule",
+   "sent_turns": 1,
+   "sent_chars": 90,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "247e01782fa044a160337f56c38eeb169fbdedb1aea392405c717edb9f966076": {
+   "verdict": "not_customer",
+   "reason": "规则命中「硬件采购推销」：依据：具体服务器型号+报价是采购推销群发，客户咨询用不到型号词",
+   "method": "rule",
+   "sent_turns": 5,
+   "sent_chars": 302,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "91fa7cb78319a1a8c0f0a6cfc3f8723cd43fef3044b82116c12dfe633fffb354": {
+   "verdict": "not_customer",
+   "reason": "规则命中「硬件采购推销」：依据：具体服务器型号+报价是采购推销群发，客户咨询用不到型号词",
+   "method": "rule",
+   "sent_turns": 1,
+   "sent_chars": 163,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "3f9cc6653acc7a06dde480a83ae013920a11cd836a2022237520796eb29b55f9": {
+   "verdict": "not_customer",
+   "reason": "规则命中「硬件采购推销」：依据：具体服务器型号+报价是采购推销群发，客户咨询用不到型号词",
+   "method": "rule",
+   "sent_turns": 1,
+   "sent_chars": 164,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "3b8258eab5cf472591a85c9dd378339aa9f02ec30b33344d83c3a044c3bcac1a": {
+   "verdict": "not_customer",
+   "reason": "会话内容显示对端在推销软著申请服务并提及内部定价策略，属于推销/内部人员行为，而非客户咨询。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 108,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "948d802cefc68705935e9a07a0e790948b2be24fc68e27e78a18193180b330a9": {
+   "verdict": "not_customer",
+   "reason": "对端主动推销企业资质完善服务，属于定义中的推销行为，非咨询或报障。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 310,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "aa86272f5266453ef1866aab972d88059da86e1d888c98bb7974fdb53da26499": {
+   "verdict": "not_customer",
+   "reason": "对端主动推销会员及合作服务，属于推销行为，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 131,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "675cc2f45c9667f4c380758dcf688a49d30cd0d0450ea288a877c2f641ccd97b": {
+   "verdict": "not_customer",
+   "reason": "对端使用“催催您”、“大胆合作”等销售话术，明显是推销人员而非咨询服务的客户。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 99,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "4b297abda5de2490369352bdb317d20988b2fa8f2fdaac503a98f0fbcd2d1d25": {
+   "verdict": "not_customer",
+   "reason": "对端正在向用户推销合作机会并提及公司庆典活动，属于典型的推销/业务拓展行为，而非咨询产品或报故障的客户。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 155,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "c73d8736448eadebcf9ebf9659d662a74490e941e52621c0e558f5a894c05493": {
+   "verdict": "not_customer",
+   "reason": "会话内容显示对端是主动联系用户、推销GEO服务的销售人员（小梁），属于推销/代办类非客户行为。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 526,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "f135c92fc54eff1cef7ed1362a18ba0d13c855f382a7e4836cc904d6388b4e9b": {
+   "verdict": "not_customer",
+   "reason": "会话内容明确标注为“政策监控测试”及“test”，属于内部测试或自动化脚本行为，非真实客户咨询。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 89,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "b58498fe9c96e781c372e53dc0d15e79722702ddf693aebdb06a0298467715b1": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是推销会员服务及报价的营销话术，属于推销行为，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 129,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "64f3fbdbf176e3887b5daaa11cea30d5f46679e1cfaf5a47f66b8dfc9af939ac": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是关于ISO认证机构缩减和档期紧张的推销/营销信息，属于推销行为，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 202,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "c2bc79a4fc33c6fda2a76014b6fbc516cb9f251f54577c8a8a236349faa37ba6": {
+   "verdict": "not_customer",
+   "reason": "发言方为推销人员，正在向对方进行业务推广和促成交易，属于非客户角色。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 156,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "79a6f1f353019b593b54c93ca5a970e125807dd01f594d6163fab4b747ceef96": {
+   "verdict": "not_customer",
+   "reason": "对端正在推销合作渠道并试图促成签约，属于典型的推销/业务拓展行为，而非咨询产品或报故障的客户。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 158,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "d243e4ca6046692f978769e62d040c141f8901453eabec76fc9b800cf5104e7e": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是内部业务调整通知，属于内部人员或管理方发布的信息，而非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 109,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "86da6795df3f4037eb895f649f57fedf990cfcd6ff04b1d92e193e9a8d75362f": {
+   "verdict": "not_customer",
+   "reason": "会话中一方在主动报价并询问对方是否为阿里云新用户，这是典型的销售/客服向潜在客户推销的话术，而非客户在咨询或报障。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 53,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "574559ad6d927fdf858295b382eff1afa23078c4c35338f6d98cfdc2238788f4": {
+   "verdict": "unsure",
+   "reason": "会话内容极简且缺乏具体业务上下文，无法区分是真实客户咨询还是内部测试/闲聊，符合不确定定义。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 47,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "b9929ab1fba22ffdb6cd6159d29b185c5f337cb9574932b0a7ca9d9bb72ba35a": {
+   "verdict": "unsure",
+   "reason": "会话前半部分涉及具体的网络互联互通故障排查，符合客户报障特征，但后半部分突然转为个人职场危机（被辞退、谋后路）的闲聊，属于混合场景，无法单纯判定为纯业务咨询或纯内部闲聊。",
+   "method": "llm",
+   "sent_turns": 7,
+   "sent_chars": 175,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "4066df9e28e62f7551eaa77e027a3ca9a51d896b2454593fb807bf07603dbc46": {
+   "verdict": "not_customer",
+   "reason": "会话内容均为内部工作进度同步（如专利申报、采购询价、财务对账），无外部客户咨询或报障特征。",
+   "method": "llm",
+   "sent_turns": 9,
+   "sent_chars": 238,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "03572e72575650842c67ab397f4832a47216e4b8dea02bde13e86ae676636a4c": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部利润策略、报价规则及内部人员（李经理）对接，属于内部工作沟通或B2B业务洽谈，非终端客户咨询。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 111,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": "盖章代收"
+  },
+  "15f642ca2bc8a722318ab943b7a6faa86d66233ab12f9ddb3137e40795d723ca": {
+   "verdict": "unsure",
+   "reason": "会话内容涉及V6地址、接口配置及运营商故障排查，属于典型的技术运维或内部协作场景，且缺乏明确的客户咨询或报修特征，无法确定对端身份。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 105,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "ca5aaf8c9e14bed19b520085676bfc81292f58022c1336ebcd7d3edca0fcda0d": {
+   "verdict": "not_customer",
+   "reason": "会话内容全为对某社会新闻/单位内部纠纷的闲聊与吐槽，未涉及任何产品咨询、服务诉求或故障报修。",
+   "method": "llm",
+   "sent_turns": 19,
+   "sent_chars": 378,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "693eea25a50aadf002a09c082735a2f59afb69f1b515f140bd41545ad21a266f": {
+   "verdict": "not_customer",
+   "reason": "对话内容涉及内部业务运营（直播运行、收成方案、收账方式）及内部人员称呼（徐总），属于内部工作沟通，非外部客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 86,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "ed74da35d90f556736766e8898972591ef43805ab675aa2510eb604bbd1f9376": {
+   "verdict": "not_customer",
+   "reason": "会话内容均为内部工作汇报（拜访客户、修补漏洞），属于内部人员沟通，非对端作为客户发起的咨询或诉求。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 40,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "7f5f68e12ef5630712588195e888724a9db9434e94381ab624677ce00fd9a8e7": {
+   "verdict": "unsure",
+   "reason": "会话中明确出现“元境蔡工问我”、“客户问”等转述第三方咨询的话术，属于混合场景或内部沟通，符合不确定判定标准。",
+   "method": "llm",
+   "sent_turns": 6,
+   "sent_chars": 120,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "54c6092e41effc9460dea202738cdfacf12bf0776d5e83fe7e3b798fcff6ea87": {
+   "verdict": "not_customer",
+   "reason": "对端主动推销物联网卡并提及免费测试卡，属于典型的推销行为，符合非客户定义。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 38,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "767e4455e9447a275d6bc522d039b74c6679904e545c72c0a17ec7ecdb796f8b": {
+   "verdict": "not_customer",
+   "reason": "对端自述为从事公司转让业务的中介，目的是寻找货源（收公司）而非咨询自身业务问题，属于B2B业务对接或推销，非终端客户。",
+   "method": "llm",
+   "sent_turns": 9,
+   "sent_chars": 132,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": "公司转让"
+  },
+  "db6d54ece01d802a4d7f761c560443ecdd11ff45846a90e34639a2d82928430a": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部合同核对、需求变更确认及内部款项结算，属于内部工作沟通，无对外客户咨询或报障特征。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 80,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "f6ddafc3db77c05f30751be018ee8c5a02f363480b82e77c95befa88e3e41ba1": {
+   "verdict": "not_customer",
+   "reason": "会话内容显示对端在进行内部技术排查（如IP暴力破解、杀毒软件设置）并发送内部需求报价表，属于内部人员工作沟通，无外部客户咨询特征。",
+   "method": "llm",
+   "sent_turns": 10,
+   "sent_chars": 188,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "f480278c3e84598481762e47ba746e3c6344d6089e0c8925b621a3539877b2ef": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部人员之间的物品交接（华为P20手机）及内部事务沟通（SDWAN项目取消、询问号码归属），未出现对外部客户的产品咨询、故障报修或业务诉求，属于内部工作交流。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 65,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "f19b72e94c041c5f0d99e90d6aaf8b5e0bb23a1a8d15b075e1684a5dce703bc3": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部合同细节、人员到岗安排及内部沟通（如“超哥”、“邹总”），属于内部工作协调，非外部客户咨询。",
+   "method": "llm",
+   "sent_turns": 9,
+   "sent_chars": 153,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "98b11bc9b35ecdc4c6f27295a8952679a98a48f98bbf8cfc4ebc4c619ab361d6": {
+   "verdict": "not_customer",
+   "reason": "会话内容显示对端在询问是否继续拉线、确认打印版本及送件，属于内部协作或供应商对接场景，而非客户咨询产品或报障。",
+   "method": "llm",
+   "sent_turns": 7,
+   "sent_chars": 96,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "643396c7e6bcc04a17488986455a8b8cadd86442631c185f9840f1ea419d10cf": {
+   "verdict": "not_customer",
+   "reason": "会话内容显示对端在解释套餐规则、办理限制及副卡资费，语气为向他人推销或解释业务，符合内部人员或代办人员特征，而非客户咨询。",
+   "method": "llm",
+   "sent_turns": 8,
+   "sent_chars": 253,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "74fac264b5fddca76b07866e835003962297fbabd17b85e76853c46c43245aae": {
+   "verdict": "not_customer",
+   "reason": "会话内容详细描述了岗位职责、工作内容（QQ群运营、工单系统操作）及办公环境，属于招聘或岗位介绍场景，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 123,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "6cc58ee39b95abd43588735c3435a1998d65c679171847251cc02b582c2291cb": {
+   "verdict": "unsure",
+   "reason": "会话内容涉及具体业务（AI大赛、SDWAN）的添加操作，但缺乏上下文无法区分是内部测试/运维在配置系统，还是客户在咨询/要求添加服务，属于混合或身份不明场景。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 40,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "daf6f0e2f1cc6d0d596f56cc4cf9ece58d52472a8afcd57e31db85fbe9057bd4": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及走私、内部竞争策略及私人闲聊，属于非业务咨询的社交或内部交流，无产品/服务诉求。",
+   "method": "llm",
+   "sent_turns": 20,
+   "sent_chars": 390,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "37e8df9ed9a907e73a73befbc6e84dc46cea27b6354b9e29516758a73b9cf422": {
+   "verdict": "not_customer",
+   "reason": "发言者自称“我们这边老师”，表明其身份为内部员工或合作方，正在抱怨内部响应速度，属于内部工作沟通而非外部客户咨询。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 38,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "8a37a6c845f4e82db6431d9a24610be0cf08e4217a73ba19344b88433fc86a70": {
+   "verdict": "not_customer",
+   "reason": "对话内容为内部人员讨论与另一家公司（数广）的人员配置变动及合同执行细节，属于内部工作沟通，非外部客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 104,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "d0eda4cf8132f956f1d6905db55fbe3a2f13274bde35c402e3c13b0a5b09bc0d": {
+   "verdict": "not_customer",
+   "reason": "对端在陈述内部系统功能（管理后台、账单导出等）及内部人员（李君、经理）的操作状态，属于内部工作汇报或测试反馈，无外部客户咨询或报障特征。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 153,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "f71b5e56073e95eb6209674022666faa36f35ee5dae1fb2e6d348ae4e3fcda71": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部请示流程、合同微调及会议安排，属于内部工作沟通，无对外客户咨询或报障特征。",
+   "method": "llm",
+   "sent_turns": 9,
+   "sent_chars": 143,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "67fa9102bd11a1fdf9e6cb01504102db4414a1da53e3c80f7c9349f77741580d": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是典型的营销推广文案（推销AI落地诊断服务），属于定义中的推销/非客户行为。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 81,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "8169e8e38ee73a6c0d66011fe1566c5f0e5f5097b97d08dad3fa51d7e1acc3ae": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是关于GEO营销和智能家居获客的业务宣传/推销内容，属于非客户定义的推销类行为。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 187,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "73cce0e943bd42576d14a0cddac020ac03312ebde1c7651f4d4f6d34f693a8e7": {
+   "verdict": "not_customer",
+   "reason": "会话中明确出现“测试”、“内部用”字样，且内容涉及内部链接分享及内部功能状态说明，属于内部人员沟通。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 252,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "1d48d2a4d1c6938a369706583fe077f997e327b8c9c9955c18d89410f064ff2e": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是包含服务项目、维修范围、耗材配送及咨询热线的完整业务推广文案，属于推销或广告行为，而非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 203,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "c459ebc711eae24bf5d203081abdbee1d3f71b36f7040a8e84b7f1ead7475737": {
+   "verdict": "not_customer",
+   "reason": "会话内容为内部工作待办事项（系统材料修改、现场核查准备），属于内部人员的工作沟通，无对外服务或咨询特征。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 39,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "7a4696655b55a24eddb29dbdb78161a17300d9fc87ff79b720f8b0ac19e3d2d8": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部项目合规性讨论、审计驻场应对及内部沟通策略（如“自己消化”、“电话说”），属于内部人员或合作方内部协调，非外部客户咨询产品或服务。",
+   "method": "llm",
+   "sent_turns": 10,
+   "sent_chars": 512,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "9f483d210692f18f807a3b720bb06f0b3a15c4780f6d694877c0b4f8fb24f90e": {
+   "verdict": "not_customer",
+   "reason": "对端明确提供软件技术人员外包服务，属于推销/招聘行为，符合非客户定义。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 93,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "a6ca31a7d55ce96dc148e7df117d62f5e516ecf3a73369a1de8c143b9eb725a2": {
+   "verdict": "unsure",
+   "reason": "会话内容极度简短且语义模糊，缺乏具体的产品、服务或故障背景，无法判断是内部指令还是客户诉求。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 14,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "eb67fdcb03a4806711e8dc6a0220cf3fcc83ce99230508e98b57b52a4a60ccec": {
+   "verdict": "not_customer",
+   "reason": "对话中“客户”标签下的发言者表现出内部采购或项目负责人的特征（如讨论成本构成、利润空间、内部决策流程“丢给他们”、“要我们采再说”），而非最终终端用户咨询产品或服务。",
+   "method": "llm",
+   "sent_turns": 20,
+   "sent_chars": 273,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "d19e1018c7a0e1b283269b9eaabedecadf446db4a5cf28f039dbf1aa5d2b183a": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部账号使用策略、内部人员（永晏）指令及内部文档分享，属于内部工作沟通，无对外客户咨询或诉求特征。",
+   "method": "llm",
+   "sent_turns": 6,
+   "sent_chars": 95,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "581585c75ce3ccf6aa6c4f7bd129519d92b739740c92192fe0a0f6d563718487": {
+   "verdict": "unsure",
+   "reason": "会话中出现了「他们自己注册认证吗」及「我跟他聊一下」等转述第三方（客户）咨询及内部沟通的话术，符合混合场景定义。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 87,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "dc5b08894dfeef07213638ed26a42fd1cd7bb2df2c81cfcf59caa0af0ed99244": {
+   "verdict": "not_customer",
+   "reason": "对端主动推销音视频设备及系统集成服务，属于推销行为，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 178,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "abf4e676a19314496344739c2df6ecfaf11eace6e365099de31abc390b82d7ca": {
+   "verdict": "not_customer",
+   "reason": "会话内容为熟人间的闲聊及内部技术方案讨论（SD-WAN组网、云主机搭建），无咨询产品、报故障或要求客服操作等典型客户行为。",
+   "method": "llm",
+   "sent_turns": 11,
+   "sent_chars": 293,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "bb45d2b1c97168b63b50dfd16cfcf7b0cb193852767d264d963597d193137b19": {
+   "verdict": "not_customer",
+   "reason": "对端主动推销法律服务并提及“贵司”，表明其身份为外部供应商或推销人员，而非咨询产品或报故障的客户。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 91,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "b718fc798f84afda7ff00e5b127ae31e6df337b59cb95f1b716112aab6a26e7f": {
+   "verdict": "not_customer",
+   "reason": "会话内容显示对端在主动查询欠费、询问房屋出租意向并协助对接租赁部，符合物业/客服工作人员向业主（房主）沟通的特征，而非客户向服务方咨询。",
+   "method": "llm",
+   "sent_turns": 11,
+   "sent_chars": 280,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "0cdd2561cea85ea57c80866df5c74b762dbd8d57be9682e753a73c1eb701cf86": {
+   "verdict": "not_customer",
+   "reason": "会话内容仅为内部人员确认收到特定款项（专利费用）的工作记录，无咨询、报障或业务办理诉求，属于内部工作沟通。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 39,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "2502b00f19db9dcce25dee91bc9eabefc41bc2800b3da196f222e2ea8146d025": {
+   "verdict": "not_customer",
+   "reason": "会话内容显示对端正在推销房屋代运营管理服务（二八分成），属于定义中的推销/代办类非客户行为。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 80,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "6f429c1f4a04b110d5acd7687e73f9f19be1fffd7e73b1dbf85ac8991a558aa8": {
+   "verdict": "not_customer",
+   "reason": "对话内容涉及内部人员招聘、合同签署及社保要求，属于内部行政或HR事务，非外部客户咨询产品或服务。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 60,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "1a58ad2e3b0ae4afa24067265f866c36d8ddc5e216cfcc1fce922625f4a01205": {
+   "verdict": "not_customer",
+   "reason": "对端在对比不同AI工具（zcode与claude）的技术特性，属于内部技术讨论或闲聊，未涉及具体业务咨询、故障报修或操作诉求。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 101,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "375200b02bdf8db164e63a33a95afbbe3a1c8b83d0af359f513c3729616c8574": {
+   "verdict": "not_customer",
+   "reason": "会话内容为纯社交闲聊（游泳、调侃），未涉及任何产品咨询、故障报修或业务诉求。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 34,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "0f565de47e46aaf2492059100105e9b0f7d9bf4c762b5529d0efbd4d3430f774": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及儿童用药剂量、具体药物名称及家庭日常对话，属于纯社交闲聊或私人生活分享，无任何产品咨询、服务诉求或故障报修。",
+   "method": "llm",
+   "sent_turns": 6,
+   "sent_chars": 70,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "86757fc90b966981ce38a628dd0aa91e40b692499d489876c1cee2622be0a5a0": {
+   "verdict": "not_customer",
+   "reason": "对端陈述的是内部服务器（西江服务器）的运维操作结果（BIOS时间同步），属于内部技术/运维人员的工作汇报，而非外部客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 38,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "f3e69982b2d53c0d036aada496d50e1fe5f2b40d130424abd0eb134321987731": {
+   "verdict": "unsure",
+   "reason": "会话内容极简且包含内部协作指令（“你先问下吧”），无法确定对端是真实客户咨询还是内部测试/转述场景，符合混合或身份不明判定标准。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 26,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "8c04b190f4290e11d336c5f74c41bd6ef0c2cb98989b7266dd1fa2c8a0e4f27b": {
+   "verdict": "not_customer",
+   "reason": "会话内容为内部工作进度同步（确认收到通知、安排缴费时间），无对外咨询或报障特征，属于内部人员沟通。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 53,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "9a73bd48597196a525adfc96bd2a8382cfbfac659c9f5d76ca87559986b5fe03": {
+   "verdict": "not_customer",
+   "reason": "会话内容为熟人间的闲聊及商业合作探讨（如TK直播、供应链、个人状态分享），未出现向服务方咨询产品、报故障或要求操作等典型客户行为。",
+   "method": "llm",
+   "sent_turns": 15,
+   "sent_chars": 319,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "9b617c33786fea31f3ec5add3dff576a08b4f81340e55c25c9a10f25a3a30b96": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及工资发放、内部账户资金归集及余额表更新，属于企业内部财务或行政人员的内部工作沟通，非外部客户咨询。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 86,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "60530d02d68360eec55e6674daf2f3e08102d4e28157bb383bae57da138af6ab": {
+   "verdict": "not_customer",
+   "reason": "对端在主动提供信托产品的具体发售时间、期限及业绩基准等内部业务信息，属于内部人员同步工作进度或测试场景，而非客户咨询。",
+   "method": "llm",
+   "sent_turns": 6,
+   "sent_chars": 109,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "ca8e4375be8be5cefe642b799fb58c6e140abe43dbb57fb3053337e64ccf72ec": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部人员之间关于提供公司营业执照、确认系统录入状态及水印要求的行政/内部协作沟通，属于内部工作事务，非外部客户咨询。",
+   "method": "llm",
+   "sent_turns": 6,
+   "sent_chars": 142,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "d9fec48c6f42ca46a594b43853894deb663096451f01fda19507398403e02615": {
+   "verdict": "not_customer",
+   "reason": "会话内容主要涉及个人选购笔记本电脑（华硕/联想）的咨询及宿舍选寝室的策略讨论，属于个人生活/购物咨询，非针对特定企业产品或服务的B端/专业客户咨询，且无内部测试或混合场景特征。",
+   "method": "llm",
+   "sent_turns": 17,
+   "sent_chars": 556,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "d6d67de605fbd5cdebb671e54952fd6dd7e96a6d73db221fcb0f49b37ba6b265": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及考察公司规模、判断是否合作及预约时间，属于商务洽谈或内部协作，非产品咨询或故障报修。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 96,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "aff1d3d8b2ae2c726fa0bd65884c53515427ee2367d406fc325abca9b7181e83": {
+   "verdict": "not_customer",
+   "reason": "对话内容为私人生活安排（安装油烟机）及社交闲聊，未涉及任何产品咨询、服务诉求或故障报修。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 60,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "e3719da12c03ec8508416c19e3e2218e67f6e70d748fbec0c4d81a97cc9ab6e7": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部人员（超哥）协调开票信息、确认额度及内部文档流转，属于内部工作沟通，非外部客户咨询。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 199,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "368b7d2b4bff66b9a7f5365bf8284ed8e1ef29a42f25c9ad213304e265415d21": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是典型的营销推广信息（推销软著、证书、认证等服务），属于定义中的“推销”类非客户行为。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 109,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "848d76202882544a97d2dafaf852a46da5719a5c3dfa4b4ae82185a5c2dae3cc": {
+   "verdict": "not_customer",
+   "reason": "对端正在推销常年法务合作及包年服务，属于推销行为，符合非客户定义。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 77,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "8fe539e3f33daa4f6faf5e8faf3a2df491d2f0bc2aa3d756bcf4b787da826cc3": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是内部工作日报（包含软著提交、需求整理、合同模板等内部事务），属于内部人员汇报工作，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 79,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "fa971b6d9aea995c3167d82c4c7b16db559af36084b288383e2a68a283350df3": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是典型的法律业务推销/广告信息，属于定义中的推销类非客户行为。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 53,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "8f2ef16e939195c37a3d9cf6a257254de0fcd050d8d10032a6910f9fabe2c41c": {
+   "verdict": "not_customer",
+   "reason": "会话内容为系统自动发送的入住指引（房间密码、WiFi、信箱信息），属于服务通知而非客户发起的咨询或诉求。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 266,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "6294f916944789016a12f8dfd67b599aa03bb5b9b1d32e619dfca43583e4dc27": {
+   "verdict": "not_customer",
+   "reason": "对端正在推销合作服务（如资源搭建、报价谈判等），属于典型的推销/代办行为，而非咨询或报障的客户。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 127,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "cddf99b87209659ebac1c4dad51a86c2bc4f15bfac32faac383d340ac771c5af": {
+   "verdict": "not_customer",
+   "reason": "会话内容全为家庭琐事、情感表达及日常闲聊，无任何产品咨询、故障报修或业务诉求。",
+   "method": "llm",
+   "sent_turns": 12,
+   "sent_chars": 164,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "cbc4614e047f683af39e1973eef03825533d4122c8fdea8400c9952ba398fe79": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部人员（罗总、蔡工）对接、内部账号注册及内部项目配合关系的调整，属于内部工作协调，无外部客户咨询或报障特征。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 128,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "0c9a3a70af4286f2953d1da18fa596961eed584c57ed1e7b08110e3d22fe50f4": {
+   "verdict": "not_customer",
+   "reason": "用户询问“价格还能不能谈”且提到“我自己住”，符合租房/推销场景，属于非客户定义中的代办/租房/推销类。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 46,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "188ab752a3402587803caf399fc9806183e2409bf069642ba505d505ebac3665": {
+   "verdict": "not_customer",
+   "reason": "会话内容全为打雷、睡觉、生活琐事等纯社交闲聊，无任何产品咨询或业务诉求。",
+   "method": "llm",
+   "sent_turns": 20,
+   "sent_chars": 229,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "b6ec56a0a9637bc1bff31438b1f87db02cdf75fd196d10dbd6fa107f6b32ce6b": {
+   "verdict": "not_customer",
+   "reason": "该消息为物业向业主发送的缴费通知，属于服务方对用户的单向告知，而非用户发起的咨询、报障或诉求，不符合客户定义。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 58,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "1106b0364f965b0234b3b9736d02257d56da0fbdc25cfc242f150168e8270a07": {
+   "verdict": "not_customer",
+   "reason": "会话内容显示对端正在内部协调工作（提及“他们那边”未提供素材、计划制作demo），属于内部人员的工作沟通，而非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 48,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "ab49b9846f8944f04df2f198bd4b49475ab482a0beb4ab11f47ce50fc4766adf": {
+   "verdict": "not_customer",
+   "reason": "会话内容为内部工作汇报，涉及合同对接、内部测试跟进及软著提交等内部事务，无外部客户咨询或诉求。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 160,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": "盖章代收"
+  },
+  "599d4a3d41d514565b319bf7eff7a4334a43291bc0dda1425064cb38dfe571f7": {
+   "verdict": "not_customer",
+   "reason": "对端自称为云服务商商务经理，主动推销产品优惠并寻求合作，属于典型的推销/代办行为，非客户咨询。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 123,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "0407917da3551853db4197b9d45e2f6c9cacc1ba9dfa64bf91911f8af9feab79": {
+   "verdict": "not_customer",
+   "reason": "对端明确提及“跟业主签”、“按你们实际服务时长结算”，表明其身份为服务提供方或合作方，而非咨询产品或报故障的客户。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 77,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "90c7f1d68518b67f6376f03d390add06163caa36189c8f622797e4c608e26908": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部人员（李镇）处理离职或换机时的账号解绑及资产交接，属于内部运维或行政事务，非外部客户咨询。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 127,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "fb39bf33895bead6fede6e7417ee57954cc8f9b2a4d8fabd3f540ca335cf1a55": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部人员（姚姚）之间的材料流转、留言沟通及物品借用，属于内部工作协调或社交闲聊，无产品咨询或故障报修等客户特征。",
+   "method": "llm",
+   "sent_turns": 6,
+   "sent_chars": 96,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "cd5b063d73b1159c31eb0e5eb0bbecd604fb9d972ac403dba2a5a75c7333de12": {
+   "verdict": "not_customer",
+   "reason": "会话内容为家庭成员间的日常沟通与情感表达（抱怨孩子吵闹、身体不适、安排家务），属于纯社交闲聊，无产品咨询或业务诉求。",
+   "method": "llm",
+   "sent_turns": 17,
+   "sent_chars": 217,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "c432f4140e751f37e99bd37eb480045723b67c6c4de4b92b2a1cd6854171c703": {
+   "verdict": "not_customer",
+   "reason": "对话内容为内部工作进度同步（等待合同上会、争取议题），无产品咨询、故障报修或业务诉求，属于内部人员沟通。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 27,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "10fc511f92bef61640269dba217bea8cba0bc39f5c7ac75e93f29d1cbe7b640d": {
+   "verdict": "not_customer",
+   "reason": "会话内容包含内部工作计划（软著、驻场、实习生）及针对内部系统（37）的测试/重启操作，属于内部人员工作沟通。",
+   "method": "llm",
+   "sent_turns": 6,
+   "sent_chars": 101,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "cbb6692967563439060be784beeb1d3f0a26a0b2fdf4e703bb8b34bb93fdee8d": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部项目对接、合同签署及付款流程协调，属于内部工作沟通，非外部客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 149,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "ac263fe3ec3eb25e6826dcacb28eb65782363ee4ace7944aabcd800f6523d765": {
+   "verdict": "not_customer",
+   "reason": "对端在讨论如何向第三方企业（来宾工厂、连锁企业）推销AI服务，并分享自己的销售案例和获客经验，属于内部业务交流或同行探讨，而非向客服咨询自身产品/服务。",
+   "method": "llm",
+   "sent_turns": 20,
+   "sent_chars": 387,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "a1552029c953431be022f0a3f165f1b77a6da9da0fea153e57961f9a7dfe3ade": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部技术栈（若依plus）、SDK集成及联通云桌面SDWAN测试，属于内部研发或运维人员的工作沟通，无外部客户咨询或报障特征。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 134,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "071fb1e9eaa86e8b61081746421ab96f0137c156c8339336dd49da69f947ce60": {
+   "verdict": "not_customer",
+   "reason": "该消息为内部工作进度同步（汇报合同审批状态），未包含任何产品咨询、故障报修或业务诉求，属于内部人员沟通。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 30,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "7ddf3076d4398a83e989b1a00d594c7295f9d4e969487a2d65be56064c761e9e": {
+   "verdict": "not_customer",
+   "reason": "对话内容涉及内部数据核对、修改确认及内部人员间的责任推诿（如‘实际是你自己改的’），属于内部工作沟通，无外部客户咨询或报障特征。",
+   "method": "llm",
+   "sent_turns": 7,
+   "sent_chars": 154,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "0f2c2728411aa4f5c86d845250ad7a522b65f5574b0d58e716c5a8d9415399cb": {
+   "verdict": "not_customer",
+   "reason": "用户咨询的是公司转让及迁移服务，属于代办/商业交易范畴，符合非客户定义中的代办/推销类，而非咨询产品或报故障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 61,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": "公司转让"
+  },
+  "5635162a7e31953848bd607cd5ea75fdc04add60e79b5fb8466343f3c5b4ccd8": {
+   "verdict": "not_customer",
+   "reason": "对端主动提供账号密码供登录测试，并询问远程安装及内部人员安排，符合内部人员或测试场景特征，非外部客户咨询。",
+   "method": "llm",
+   "sent_turns": 8,
+   "sent_chars": 161,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "4360d1434fcd4d6f7efe1c5c3e5d6f8154114bae540f5ed7cc0dfd9fe8a4afc5": {
+   "verdict": "not_customer",
+   "reason": "对端在讨论闲鱼上出售软著服务的定价问题，属于推销/二手交易场景，非咨询产品或报故障。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 74,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "26511bbc1ace399666337e0fb51b079ce23703faf33734b4061076067bb2432a": {
+   "verdict": "not_customer",
+   "reason": "会话内容主要为闲聊及内部功能测试/讨论（如自动回复、直播接入），无明确的产品咨询、故障报修或业务诉求，符合非客户定义。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 88,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "685048dbebc9d38abe41e91f12de428c80b23449115415ca540b6436dac7d9d3": {
+   "verdict": "not_customer",
+   "reason": "会话内容明确提及“测试”和“兼容”，属于内部研发或运维人员的工作沟通，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 44,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "e3e6f21dfd7011e56ac97efb58a8190f2407e1ac818b96359d2cd9e3c6f468a9": {
+   "verdict": "not_customer",
+   "reason": "对端正在向用户推销业务经理服务并报价，属于推销行为，符合非客户定义。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 102,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "a1734a5dcb06028bb7cb81b16d9b51f5d62da08152558edb147b0e5ea0cf7c56": {
+   "verdict": "not_customer",
+   "reason": "对端主动推销业务并索要支付，属于推销/代办行为，而非咨询或报障的客户。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 141,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "9c57c0b6d2a3028440cc7e37abd69680c73df5fe4d2b547c2ae7a06de368a88a": {
+   "verdict": "not_customer",
+   "reason": "对端正在推销合作方案并试图促成签约，属于典型的推销/业务拓展行为，而非咨询产品或报故障的客户。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 145,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "8cf72a4afa4ff347ad12267e838318ad5d0d2ec347ade0a6e6bd0f9b42f58e6b": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是推销学生意外险的广告文案，属于推销行为，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 60,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "5ecddd3b70e46a047b46be0f2fb353058cd5bc51a74e5efc31eb7e7e4bd2d9fd": {
+   "verdict": "not_customer",
+   "reason": "会话内容为内部工作日报及日程确认，属于内部人员沟通，无客户咨询或诉求。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 72,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "1248d64155429bfaf9ae9b12d1eebab362e1065e89a76ac432709b09a5510201": {
+   "verdict": "not_customer",
+   "reason": "会话内容均为内部工作汇报、测试进度同步及内部需求确认，未出现外部客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 7,
+   "sent_chars": 296,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "98f0e5c7f4bf2eb3187472852d9eb5e9415fd9236c39cfa21490cf18f0979f46": {
+   "verdict": "not_customer",
+   "reason": "会话内容显示对端在协调内部人员（“在让他们找”）并确认工作配合及时间节点，属于内部工作沟通或项目对接，无产品咨询或故障报修等客户特征。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 63,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "af61020b5222a5b2ae9af749b7e0278d312a0f23bcac86bef8b9ca7b98e6234d": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部SDK版本发布、测试直播间链接分享及内部功能开发进度汇报，属于内部工作沟通，无外部客户咨询或诉求。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 139,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "600d48993ffeddb6b2bb14085fcf5e028e92d159615ddf50877105ebbc1e2548": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是带有营销话术（如“名额有限”、“提前省心”）和表情符号的推销/促销信息，属于推销行为，而非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 139,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "80d778ceeee7e05ced004b032b6b1fd0f17c076feca05262961e9e51b1e68947": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是典型的推销/营销话术（强调月底冲任务、低价服务、请求合作），属于定义中的“推销”类非客户行为。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 152,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "7ac3db00664862b85f2ddf11b5e6fef5221d0342d89a307ca6bcdaf47e6d6fc1": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部系统对接（大华/海康SDK）、内部账号流转（问丘要账号）、内部日志排查及内部汇报（发给秦总），均为内部运维或开发人员的工作沟通，无外部客户咨询或报障特征。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 146,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "981d2d6a276533f38479ec44fd2d8c9dd27be26105c38809ff70271c909a1c76": {
+   "verdict": "unsure",
+   "reason": "会话中既包含对具体用户问题的处理描述（'这人急'、'能下载'），又包含对内部系统/渠道状态的排查（'微信可能有问题'），符合混合场景或内部工作沟通特征，无法单纯判定为纯客户咨询。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 55,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "8b67bc414a8972297e9f421bae79877f9b2116233ddb4732536edfe079eca43f": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是推销保险产品的营销文案，属于推销行为，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 60,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "5b3f1b3f4d08bc494166609fe1e3977c54954a537e65ee06f0bb69f54acd43a6": {
+   "verdict": "not_customer",
+   "reason": "对端主动推销证书办理服务，属于推销行为，非客户咨询。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 31,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "46b8e0a79f839d95b167c82e7ce7452ec6f737948b44c7f77c2e04d321950564": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部工作安排（软著制作、发版测试、交接）及私人生活闲聊，无产品咨询或故障报修等客户特征。",
+   "method": "llm",
+   "sent_turns": 11,
+   "sent_chars": 204,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "0a35675d37c45fe44f463d88d917f2e078a4b8e7aaa696c37cf4fd2f96a69c9f": {
+   "verdict": "not_customer",
+   "reason": "对端自述正在处理SDWAN服务商服务器故障，属于内部运维或技术人员的工作沟通，而非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 41,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "a794624e47a2dc7deaeb36412101a23fcd6cd337efc5b8c84b312012a508ff68": {
+   "verdict": "not_customer",
+   "reason": "会话内容显示对端正在向用户发送指令，要求补充上传纳税记录截图以完成合格投资者认证，这是典型的客服/业务人员引导客户操作的行为，而非客户在咨询或报障。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 117,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "ff47a7658a543c25d2148457a17cb7bc4e1136c320d490a716cd9cc2066b1818": {
+   "verdict": "not_customer",
+   "reason": "对话内容涉及内部代码结构、服务器路径、重构任务及Git管理，且称呼为“超哥”，属于内部技术人员之间的开发沟通，非外部客户咨询。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 256,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "68a7c022054423a527c236635acaea3d732c1d228b8aa123b60267ebc10b5216": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部设备交接、文档更新及工作指令，属于内部人员协作场景，无外部客户咨询或报障特征。",
+   "method": "llm",
+   "sent_turns": 8,
+   "sent_chars": 170,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "6ab839c03fceb1138627d5384910c2b1da2bc9e06227cd42ed219196d4e87e70": {
+   "verdict": "not_customer",
+   "reason": "对话内容为内部工作指令（要求专注签合同），无产品咨询或故障报修，属于内部人员沟通。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 22,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "8689cea6268c0f5a1956f22ddda10afdf101d8a7239082c3c556d968bc9a734b": {
+   "verdict": "not_customer",
+   "reason": "会话中一方在提供支付规则解释和操作建议（如‘只能用储蓄卡’、‘试着用储蓄卡支付’），另一方在质疑规则来源（‘哪里写的啊’），整体呈现客服解答用户咨询或内部测试/培训场景，缺乏典型客户报故障或强烈诉求特征，且无明确外部客户身份标识，更符合内部沟通或非典型客户交互，但根据定义中‘非客户’包含内部人员及非咨询类，此处更偏向于客服对用户的标准回复或内部模拟，故判为 not_customer 或 unsur",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 119,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "921753f7d26071a25932b287955592f48b3bf332943801213db26a76abd060ef": {
+   "verdict": "not_customer",
+   "reason": "该消息为内部工作进度同步（催合同流程），属于内部人员沟通，非客户咨询或诉求。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 13,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "856c754219b37f2888920069d0c7d142855c12a02e3dfada0a7f46c793d448b2": {
+   "verdict": "not_customer",
+   "reason": "对端主动推销法律顾问服务并赠送诉讼案件，属于典型的推销行为，符合非客户定义。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 118,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "6a30a4521bcf45bd64da13f9ed62114bc4e66a6268855c511fdcfa2c27346384": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是ISO认证和3A认证的代办推销广告，属于定义中的非客户类别（代办/推销）。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 78,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "6bda8347f46e6743efe72689b0877278a869e4eb0d7c44b9bdc786c50a1012b3": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及带红酒、洗澡、天气闲聊等私人社交话题，属于纯社交闲聊，无产品咨询或业务诉求。",
+   "method": "llm",
+   "sent_turns": 8,
+   "sent_chars": 101,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "4d15a0002817c498ed9f2400337ba52ad95b4a9dbf09e62ad605df71226c3d2e": {
+   "verdict": "not_customer",
+   "reason": "会话内容显示对端正在管理内部团队（提及“带他们”、“上考核”、“培训”），讨论的是内部人员能力、招聘背景及内部工作安排，属于内部人员或管理者的工作沟通，而非外部客户咨询。",
+   "method": "llm",
+   "sent_turns": 20,
+   "sent_chars": 337,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "8aee7b3154f8c68beee87175ca90f5ab93178c282cc2c94a1b709ea19318d952": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是推销算力设备/硬件的营销广告，属于定义中的推销类非客户行为。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 47,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "87aea402eb70633a021f3b0925ddcbf9ddedc39576e721e71c36d6b02a2bf3d6": {
+   "verdict": "unsure",
+   "reason": "会话仅包含身份自报和简短确认，缺乏具体的咨询、报障或诉求内容，无法判断对端是真实客户还是内部测试人员。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 23,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "09a8e7db3af9bf0f57e918c531f43bac4138fa78996491f0b53846f542ac70ec": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是关于GEO优化和自媒体运营的推销广告，属于定义中的推销行为，非客户咨询。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 136,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "41b24f24e5358ff4cbbf9f5164874c5873fcb96da23a2a012392f8f358248758": {
+   "verdict": "not_customer",
+   "reason": "该消息为内部人员向客服同步工作进度（告知发票已开具），属于内部协作或状态更新，而非客户发起的咨询或诉求。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 13,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "6f4b70dc54749d93a7ab71e13c9f99b0e744f7513258cd28a9ae2a642251cffa": {
+   "verdict": "not_customer",
+   "reason": "对端在陈述其内部方案推进、审计流程及与领导沟通的工作进展，属于内部业务汇报或闲聊，未向客服提出咨询、报障或操作诉求。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 122,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "df78ffbf32addc35777fe3caa9ba2bdb4b45496266361a2eb2ad0b94893b6035": {
+   "verdict": "unsure",
+   "reason": "会话内容涉及合同比例（25% vs 30%）及“不谈了”的表述，既可能是客户在抱怨或确认商务条款，也可能是内部人员讨论业务规则或模拟客户场景，单看文本无法确定对端身份。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 58,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "ac012d833041733f5c37551616d5d50889060e361fd9c227d68aa00aa0fb88d2": {
+   "verdict": "unsure",
+   "reason": "会话中既包含具体的整机配置询价（客户行为），又包含关于发票拆分、关联查询及内部采购流程的讨论（疑似内部人员或代办行为），属于混合场景。",
+   "method": "llm",
+   "sent_turns": 18,
+   "sent_chars": 503,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "5ba932356980be1ae44824c9386a151b7d350e4e9785cd4199de5ebd6b26c1b7": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部资金转账、验证码获取及办公物品交接，且使用内部称呼（超哥），属于内部人员间的业务协作或操作，非外部客户咨询。",
+   "method": "llm",
+   "sent_turns": 10,
+   "sent_chars": 184,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "43a049892abc331a66c2fc0b4510c5fe07fbd894540d4fc9c06e81a89a1f84c5": {
+   "verdict": "not_customer",
+   "reason": "对话内容为日常生活中的邻里或亲友间沟通（敲门取卡），不涉及任何产品咨询、服务诉求或故障报修，属于纯社交/生活场景。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 31,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "89aaf807139eccb9cc50ee505f16a8a88cec82728160d48e430e01a5d2fe6be1": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是推销证书办理服务的广告信息，属于推销行为，非客户咨询。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 89,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "3b4777524fd197bc8bec4779c8131af4b970873b375de7e0decf1941c55a0eef": {
+   "verdict": "not_customer",
+   "reason": "对端使用“帮您多接几个项目”、“放心来合作”等典型销售话术，属于推销行为，符合非客户定义。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 63,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "bda87bdaa05dab253500c72dc90d7b475ac6a3ca5932c3546eb79dd0ec53cd04": {
+   "verdict": "not_customer",
+   "reason": "对端正在推销合作机会并强调资金安全与资质，属于典型的推销/业务拓展行为，而非咨询产品或报故障的客户。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 100,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "05e9e559e1127b9d1598778d817668731833c2903e4c32fe9992a4dc3232c75d": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是包含产品列表、联系人及官网链接的营销推广信息，属于推销行为，而非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 106,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "7754cbae62c3b4c0501cd92f87c224a948078f595b662189ad61de4b0a04bf72": {
+   "verdict": "not_customer",
+   "reason": "会话内容全为关于全职工作、育儿、家庭关系及行业薪资的纯社交闲聊，无任何产品咨询、服务诉求或故障报修。",
+   "method": "llm",
+   "sent_turns": 20,
+   "sent_chars": 255,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "f180daa2a19cef1a88c7bc67ea9a304cd31cdb1904e334f19f5fc969bf20cb2e": {
+   "verdict": "not_customer",
+   "reason": "会话内容为个人身体不适就医及情感交流，属于纯社交闲聊，无产品咨询或业务诉求。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 85,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "aa5b0316b0b54fd0258a4b94ba1c4221a6912870792bbb8380c8f915af8e2cf3": {
+   "verdict": "not_customer",
+   "reason": "会话内容为内部工作待办事项（项目清点、软著申请进度），属于内部人员的工作沟通，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 92,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "e793752fc6eb199271fc8cc1b31431646c67416c53370909824bf95f92ee3daf": {
+   "verdict": "not_customer",
+   "reason": "对端正在推销人脉撮合及广告服务，属于定义中的推销行为，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 111,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "3e255d2aad53369719f2e05e53cc25671f2d52b31edb34b9c7a7dd8459b01c1a": {
+   "verdict": "not_customer",
+   "reason": "对端自述为销售（冲刺销冠、申请活动价格），属于推销行为，非咨询或报障的客户。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 124,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "8504c53032581d6540aa51eba37fe9aa4ebf14e19b740c22bb5a581a554fc3d5": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部项目评估、垫资风险讨论及同事间闲聊，未出现向服务方咨询产品、报故障或要求操作的行为，属于内部人员沟通。",
+   "method": "llm",
+   "sent_turns": 6,
+   "sent_chars": 141,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "abae3d868629e5f04cd0744fcb935d346c9507f6c9d58bc1e3268d3e0f8ef920": {
+   "verdict": "not_customer",
+   "reason": "发送方自称“您”并询问对方是差在价格还是效果，明显是推销/销售人员在向潜在客户（即接收方）进行营销，而非客户在咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 82,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "5621d91602b501135d5c5fa602328f13e138e84d922ca7c3ca7a69a11741ea82": {
+   "verdict": "not_customer",
+   "reason": "会话内容为内部工作待办事项（压测方案、内部Bug处理、内部设计），无对外客户咨询或报障特征。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 75,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "94cf28918d8f76847254bd1f80ae66abc28f913e9b68193dbfcf24dfa1eea708": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端发送的是税务培训及高企/专精特新稽查风险课程推广，属于资质/高企/税务代办类非本公司业务，且主体为外部讲师/机构，非本公司SDWAN/网络业务客户。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 475,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "cadc48b5ffde55d879b9d5a8e4f70d86db1df7ea8c923702f940da9a72f2da93": {
+   "verdict": "customer",
+   "reason": "对端明确咨询产品价格并询问是否可合作一年，属于典型的商务咨询/提诉求行为。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 48,
+   "oversized": false,
+   "confirm": "unsure",
+   "agency_signal": null
+  },
+  "20ae27ee474c52bb910f86188f0a330bf386777dde1d7f622a5b4edab4c3a118": {
+   "verdict": "customer",
+   "reason": "对端明确提及“开发票”、“请款函”等具体业务诉求，并询问“在哪里认证”的操作指引，符合客户咨询产品/服务及提诉求的定义。",
+   "method": "llm",
+   "sent_turns": 7,
+   "sent_chars": 86,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "0443c3df29425b5833c10ef51359bd5cc1cacbb41195a7221203e2ab950733c5": {
+   "verdict": "customer",
+   "reason": "对端询问具体功能操作位置（上传电子签章），属于典型的产品使用咨询。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 22,
+   "oversized": false,
+   "confirm": "unsure",
+   "agency_signal": null
+  },
+  "4000b7471e8266bc4fdc7cef4275758f8f1338aec10339c4ce8f4eaf7b5d8b70": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端以甲方/采购方身份提出具体的付款比例、质保金及合同审核要求，属于商务谈判或内部项目沟通，而非向本公司（乙方）咨询SDWAN/网络线路等产品的服务或报障，主体为买方而非寻求服务的客户。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 320,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "09d60d8385211cf93a09aa678a73fb7add8f810177331053e18384051d44bbd9": {
+   "verdict": "customer",
+   "reason": "对端在咨询备案申请书的下载方式及登录操作，属于典型的产品/服务咨询与操作诉求。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 59,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "ded78a0d7fdb4b397a8942b21e9996d7dfda86379adb4ebac5400480cdb5d47e": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端诉求为咨询“跨境电商”培训/学习，该业务明确不属于本公司SDWAN、网络线路、带宽等业务范围，且非内部测试或纯社交，符合drop条件。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 91,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "02bec6ce34f230100660de0a1bca7ceb9c330dc2cbfcb686fd7d0ce349555041": {
+   "verdict": "customer",
+   "reason": "对端明确咨询系统登录故障及联系人修改的具体操作方法，符合客户提诉求和报问题的定义。",
+   "method": "llm",
+   "sent_turns": 7,
+   "sent_chars": 143,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "ffb3fa20a99559ff2c5c1d4eedda5daf74fdc7f2aa67263d8aa2b1eb074e945c": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端发送的是公司开票/收款信息，并提及“安排货款”、“帮您订货”，表明对端是供应商或销售方，正在向本公司（作为买方）催款或确认订单，而非本公司客户在提业务诉求。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 139,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "60004be245b3927ff3c6aa1395764f6d1b0dfe501a3e5f7e2d1e6d16cad19545": {
+   "verdict": "customer",
+   "reason": "对端在咨询产品报价、要求修改报价单内容（表头、列、价格、功能描述）并提及签合同及盖章流程，属于典型的客户采购/咨询行为。",
+   "method": "llm",
+   "sent_turns": 20,
+   "sent_chars": 233,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": "盖章代收"
+  },
+  "ace3d318aedfd0530e9dce0f679c5548ae2f239f0504e2959081abe7e3e25e74": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端诉求为高企认定材料准备及系统操作，属于资质代办业务，明确不属于本公司SDWAN/网络/备案等业务范围，且主体为办理该非本公司业务的客户。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 39,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "04422e873f54cd6af495b1844a0f22c8436d4bde0d326c1fa14e455e25f49d8e": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端诉求为房屋设施检查、电费缴纳及物品清点，属于物业或租赁管理范畴，明确不属于本公司SDWAN、网络线路、带宽等业务范围。",
+   "method": "llm",
+   "sent_turns": 13,
+   "sent_chars": 418,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "74be6a6b7ab4b9df7686a6fece8a3b6775a2ab1c7a02ac53235c4e062ece5c11": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端诉求为取消桂林银行幸运卡，属于银行业务，明确不属于本公司SDWAN、网络线路等业务范围。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 59,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "edb4009a0b1d8f0e6e07ac7b01068ab5f3b8e30c16cb166bd07416600be440f9": {
+   "verdict": "customer",
+   "reason": "对端明确提出开具发票的诉求并提供了完整的开票信息，属于典型的客户业务请求。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 139,
+   "oversized": false,
+   "confirm": "unsure",
+   "agency_signal": null
+  },
+  "da34fd6870044e58ed2ca2da6d7dd44f564e708eaf9d713d8e0e8b38eae877dd": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端讨论的是自研软件源码、数据库选型、视频转码及服务器硬件性能等软件开发与硬件采购细节，且明确提及“第三方硬件/网络”及“自研部分”，表明其主体为软件开发商或内部技术团队，而非向本公司咨询SDWAN/网络线路等通信服务，属于非本公司业务范畴。",
+   "method": "llm",
+   "sent_turns": 8,
+   "sent_chars": 245,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "48275bf20613f4b4005865bfa3d8228a828f9d959a5b1b20bb46a8f52fc97f11": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端主体为同行/渠道（提及“政采云”、“推掉”、“找两个不同的公司来开”发票等典型渠道商行为），且核心诉求为硬件采购（台式机/显卡）及非本公司业务的发票拆分，不符合本公司SDWAN/网络服务业务范围。",
+   "method": "llm",
+   "sent_turns": 20,
+   "sent_chars": 340,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "841d24bb2ed905698832b0ed3db5ca45b5e0025ba60ad2ed7eed8bb6ef0fbc2b": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端诉求为在政采云上架群晖NAS（硬件采购/服务器），明确不属于本公司SDWAN、网络线路、带宽等业务范围，且主体为供应商/渠道方而非客户本人。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 124,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "8fb23dc761591124bf8ac655b3add55c0daa229c6d255470edf583ee6fbea1a6": {
+   "verdict": "customer",
+   "reason": "对端在确认具体的费用计算（4500*0.12=540）及是否有其他费用，属于典型的咨询产品/服务收费的诉求。",
+   "method": "llm",
+   "sent_turns": 8,
+   "sent_chars": 167,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "acaf96187a1e35ce0a3072282d894c44edac155286db06c7110437c0fe1a09c4": {
+   "verdict": "customer",
+   "reason": "对端在确认具体的发票金额、税额及开票对象，属于典型的业务咨询与数据核对诉求。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 79,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "7eb40edbf741a7e394e843a4c05cb29f412ac992001c94b9c2c434575cb1cee1": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端咨询的是联想笔记本硬件配置及购买建议，属于硬件采购，明确不属于本公司SDWAN、网络线路等业务范围。",
+   "method": "llm",
+   "sent_turns": 6,
+   "sent_chars": 199,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "deea1dad922fe6d56aff978146a661bcf4c66abb89a62469cf57e6f706a94ecd": {
+   "verdict": "customer",
+   "reason": "对端明确咨询云电脑账号的具体配置及价格，属于典型的产品咨询行为。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 47,
+   "oversized": false,
+   "confirm": "unsure",
+   "agency_signal": null
+  },
+  "fa508ca82b74bcfb925ca4c80c0142de85b7c1addd946d90e407960ff05d869e": {
+   "verdict": "customer",
+   "reason": "对端提及账号注册成功及更新公司信息，属于典型的客户业务操作咨询或状态确认。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 29,
+   "oversized": false,
+   "confirm": "unsure",
+   "agency_signal": null
+  },
+  "56db11760ad4c6c55b8257fd0743cf7a1cda1fe3247ffa48eb3cc91ee8034dab": {
+   "verdict": "customer",
+   "reason": "对端在咨询具体的费用收取标准及发票开具流程，属于典型的产品/服务咨询行为。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 75,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "2e9bd7ea4c7b039f4cbde9ecc2a1e2039ee2dddd5c92efc8187303cd58521015": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对话内容涉及房屋漏水、上水管道及爬梯子检查，属于物业维修或生活琐事，完全不属于SDWAN、网络线路、带宽等本公司业务范围。",
+   "method": "llm",
+   "sent_turns": 10,
+   "sent_chars": 139,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "47ca879e1872fd49d05f48419716cc839e41b597c9c15fd9fc755b4dc808cd16": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端诉求为信用卡注销及转接银行客服，属于银行业务，明确不属于本公司SDWAN、网络线路等业务范围。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 34,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "bc794b36aad87aa8ce9770b4ca8b2f62ca784e95f3dc8b213b17e15d914bce99": {
+   "verdict": "customer",
+   "reason": "对端明确提及签订服务合同、提供开票资料并咨询税率及业务合作，属于典型的商务咨询与交易诉求。",
+   "method": "llm",
+   "sent_turns": 12,
+   "sent_chars": 392,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": "马甲代运营"
+  },
+  "04b680af63fe579f57bbcf53d5f028f08b4f6dcaee9ad236c8bf2b24ae924640": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端明确提及采购“企业级硬盘”、“显卡”、“主板”及“组装机”，属于硬件采购业务，且提到“找外地的商”、“难售后”，符合判 drop 中关于硬件采购及非本公司业务（SDWAN/网络线路等）的排除条件。",
+   "method": "llm",
+   "sent_turns": 20,
+   "sent_chars": 307,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "1db7bf97f1bce815eea61bb142f697e762d22d43851ef6a7bad4c482a45f256f": {
+   "verdict": "not_customer",
+   "reason": "二次确认:诉求涉及“数据局奖补”及“指导费用”，属于政府补贴申报或资质代办业务，明确不属于本公司SDWAN、网络线路、带宽等核心业务范围。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 22,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "6bffa16f4fb5280be8d0417431a491820514bac1a15258f7a7189c43ce766cf4": {
+   "verdict": "customer",
+   "reason": "对端主动要求提供地址以寄送合同进行签字盖章，属于明确的业务办理诉求。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 91,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "224b40ad28e7c0fa7f4d7dca6a16972f47d419260ad591870a18330e994f3e59": {
+   "verdict": "customer",
+   "reason": "对端明确咨询产品具体参数（带宽、流量限制、IP归属），符合客户咨询定义。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 54,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "f955447494b09c577518fde617e2bcb2ba15b6c61637e9bc73c2305c8022ee6d": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端咨询的是个人电话卡（SIM卡）无信号问题，属于运营商通信服务范畴，不属于本公司SDWAN、网络线路、带宽、IP/账号等核心业务范围，且非替本单位办理业务。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 125,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "ad996becf46a333e8b2c2e75e0a00dfd1b16c34694853ce96420d5b59c9b3da1": {
+   "verdict": "customer",
+   "reason": "对端明确咨询SD-WAN跨境专线产品并指定了具体地域（广西南宁江南区），符合客户咨询产品/服务的定义。",
+   "method": "llm",
+   "sent_turns": 6,
+   "sent_chars": 58,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "2a6233aaa853e46da67cbdf9f63aca21f60eb9724870fbb2966c8d85fba52537": {
+   "verdict": "customer",
+   "reason": "对端明确提出了换绑手机号的业务诉求，并提供了账号信息，符合客户定义。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 55,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "f885368889c8d3311de60012d873fc0e0ba93ee9cd2c8d799dadf29d28264d65": {
+   "verdict": "customer",
+   "reason": "对端在询问内部安全事件（孙总扫描漏洞、VPN IP注册行为），属于报问题/提诉求，符合客户定义。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 75,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "97500cd11fe79b385c1300a93e87acfeb553167301cf3462bb81f8cb62548617": {
+   "verdict": "customer",
+   "reason": "对端明确咨询摄像头直播的收费标准及具体操作流程，属于典型的产品/服务咨询行为。",
+   "method": "llm",
+   "sent_turns": 10,
+   "sent_chars": 189,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "84b8ff2fec137c4e1a1884964cc15691bd76ba01043b524cd091221fc0a833a3": {
+   "verdict": "customer",
+   "reason": "用户反馈网络状态（公网IP异常），属于报故障/提诉求，符合客户定义。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 17,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "1edc187e5c522eb4583f74025827356eb4acd6b9d3af6cc40459d40d2e6898c9": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端提供的是硬盘（存储硬件）的型号及含税价格，属于硬件采购或二手交易范畴，明确不属于本公司SDWAN、网络线路、带宽等业务范围。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 48,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "c42b283134c5a734f2ab33c3497dfd42c9b06daca469c735e1a169e07c4c2f89": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端咨询的是“tk直播实时ai语音回复插件”及PC端接入，属于第三方软件/插件的使用咨询，不属于本公司SDWAN、网络线路、带宽、直播线路（指网络传输链路）等核心业务范围，且未体现为本公司产品提诉求。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 52,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "249b08999c45abcc99a7f8264b6b433a31b8f06f4ae55fb9b9205981332879fc": {
+   "verdict": "customer",
+   "reason": "对端确认收到发票，属于业务办理后的正常反馈，符合客户身份特征。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 18,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "a807bace5e68cd88baa0265701b9478c22c2f8d936db11840d234e1dc1f521e2": {
+   "verdict": "customer",
+   "reason": "对端明确咨询特定监控机位的直播链接，属于典型的产品/服务咨询诉求。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 44,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "eac492ad809da72ae86e651e652c87af299dc2dcfa52a88983870c8f1a738351": {
+   "verdict": "customer",
+   "reason": "对端提供具体的开票信息（单位名称、税号、地址等），属于典型的业务办理诉求，符合客户定义。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 112,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "3f3b024985f28dccb6c3bf0986a16ea360f26a377ada67c951203bf14ca5c7d9": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端提及“退款医生”、“心脉受损”等医疗相关词汇，诉求明显属于医疗领域，完全不属于本公司SDWAN、网络线路等业务范围。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 36,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "e3d56d19293ccdde05afbf2b2be5cbc984d73fe84f06fef2c35b643c1775ce34": {
+   "verdict": "customer",
+   "reason": "对端咨询SD-WAN组网概念及联通线路价格，属于典型的产品与服务咨询行为。",
+   "method": "llm",
+   "sent_turns": 6,
+   "sent_chars": 64,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "b14d516d066c2c4500f9e37bbc2e84a911363504f40701d05710cf7bd99fec85": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部硬件故障排查（硬盘损坏）、内部审批流程（找秦总确认）及内部存储策略制定，且无外部客户咨询或报障迹象，属于内部运维/技术讨论。",
+   "method": "llm",
+   "sent_turns": 8,
+   "sent_chars": 226,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "495063e58aba5f4c610c9b8d0f35ff2dde39fa99f3ce01d0b2979c405b87153f": {
+   "verdict": "not_customer",
+   "reason": "用户咨询的是公司转让（代办/交易类业务），属于定义中明确排除的“代办”场景，而非产品/服务咨询或故障报修。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 42,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": "公司转让"
+  },
+  "25d082e94aaf2f64c7975a369e502d5d526e1e9d1860395623f6eb94af881dbf": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是典型的贷款产品推销广告（包含利率、条件、办理方式及扫码测额引导），属于定义中的推销行为，而非咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 104,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "a43aecd32a1da25ce4054cd12a5269eada07ff0cfbd239c4c0a9068fb1d64852": {
+   "verdict": "customer",
+   "reason": "对端明确提及具体合同金额并发起支付第一笔款项的操作请求，符合客户提诉求/要求支付的定义。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 45,
+   "oversized": false,
+   "confirm": "unsure",
+   "agency_signal": null
+  },
+  "f0cbb8c0e2578f69100fa267f165bdf380f6d2aa81f094f3d558ada0647a3bba": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端咨询的是“养殖场规划”及“合同验收”，属于农业/软件项目范畴，明确不属于本公司SDWAN、网络线路、带宽等通信业务，且非内部测试或纯社交。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 82,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "4c3d47c22b4ee7b581c9097f2aa468ec3834bc78141e9a79be48585308e70767": {
+   "verdict": "customer",
+   "reason": "对端在沟通合同支付条款和维保费用，属于典型的商务咨询与诉求提出，符合客户定义。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 129,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "923ae58db400c1838801e8b46582d908abe93463fcc6e09d06001177f25931d3": {
+   "verdict": "not_customer",
+   "reason": "对端明确自述为“员工账号”，属于内部人员或系统使用者，且仅进行状态告知与礼貌寒暄，无外部客户咨询或报障特征。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 45,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "303a3e1a7d7021655baccd4c639b47e83749e72d9792979a7ea32db23a40b741": {
+   "verdict": "not_customer",
+   "reason": "对话内容为业务合作方（卖方）之间关于技术合同登记及签字盖章的内部协作沟通，属于B2B业务对接，非面向终端消费者的客服咨询或故障报修。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 110,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "c5d6a11e3433ac88914114eb64d03f5792f6c377b87a5a85bf89c96079eae93b": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及询问具体线路（三号线）及线下见面地点（咖啡厅），属于内部人员线下沟通或社交闲聊，无产品咨询或故障报修特征。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 38,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "23f391df9d11991ffa94dc243ffd9977df65b74b87d26d3fd06a8140b617fe8a": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端提及“供一批给大数据”及具体硬件配置（24核/32核），表明其身份为硬件供应商或渠道商，且诉求涉及硬件采购/供货，属于非本公司业务的同行/渠道行为。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 51,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "7846dc99be119ba1345f138c849904327ce9436d1478cf4b1d8426aeeae5f939": {
+   "verdict": "not_customer",
+   "reason": "会话内容为内部工作汇报，涉及软著提交、压力测试准备及实习生管理，属于内部人员工作沟通。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 115,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "9498899b5603c186957f3b062faf2468882c6c471a2998aafa2cd6b8ffba0677": {
+   "verdict": "customer",
+   "reason": "对端明确描述“整栋楼停”并确认“亮机卡”故障现象，属于典型的报障/咨询行为，符合客户定义。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 24,
+   "oversized": false,
+   "confirm": "unsure",
+   "agency_signal": null
+  },
+  "cee1b427171987819ac1b772302dbe2c6d6df3172640833f3b49327d818614a1": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部硬件测试反馈（频率/速度/容量）及通过名片添加内部人员确认业务归属，属于内部沟通或测试场景，无对外客户咨询特征。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 96,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "f069e3d7376afda8a7f5d3442122984a870aaab4f1e288a1897f053ca3e54193": {
+   "verdict": "not_customer",
+   "reason": "会话内容均为内部工作汇报（如“李妙在对”、“追了一下黄经理”、“做明天演示准备”），属于内部人员之间的进度同步，无外部客户咨询或诉求。",
+   "method": "llm",
+   "sent_turns": 7,
+   "sent_chars": 147,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "f7359011c614df039c111cc5e84a9dac92f831e0bcfeffe985cdfcfe3e61d32c": {
+   "verdict": "customer",
+   "reason": "对端在咨询协议条款修改及费用支付方式，属于典型的产品/服务咨询与诉求提出。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 227,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "bf86acb533c1c66fbc2f88910c8b1ed66ef74324017ce4d8e5673b467d936f21": {
+   "verdict": "not_customer",
+   "reason": "发言者使用“这周客户”指代第三方，表明其身份为内部人员或合作方，而非正在咨询或报障的客户本人。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 25,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "cd434c78f47a53424f8b5bdc4b0b40d6565d0084b600fa67f8a8ea842e06aa5c": {
+   "verdict": "unsure",
+   "reason": "会话内容涉及具体的网络故障排查（网线口、交换机、千兆速率），但缺乏明确的身份标识（如工号、客户名称或内部系统指令），无法区分是内部运维在指导他人，还是客户在描述故障现象，符合混合或身份不明场景。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 61,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "8cef41bc3a35615801ea38bc55ded852c9655db4c239748293ae7d8f11839878": {
+   "verdict": "not_customer",
+   "reason": "会话内容显示对端在协调内部资源（设计、平台对接）、安排线下洽谈及内部沟通，属于内部工作协作或B端合作伙伴沟通，而非终端客户咨询产品或报障。",
+   "method": "llm",
+   "sent_turns": 13,
+   "sent_chars": 193,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "b81efcf31eeca6f536efad2962c62e34c6918fa23921445daecf8159c35a9e32": {
+   "verdict": "unsure",
+   "reason": "会话内容包含内部工作痕迹（如“我撤错了”暗示操作失误或内部沟通）以及具体的业务数据链接，但缺乏明确的客户身份标识或典型的咨询/报障语境，属于混合或身份不明场景。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 60,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "9332bf46700ee531d9538ede159efbea7c8bf28a5f0104aa8cc182f696a45549": {
+   "verdict": "not_customer",
+   "reason": "对端在指导内部人员联系具体负责人（龚向卿）并查询合同进度，属于内部工作协调或同事间沟通，而非外部客户咨询。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 43,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "0ec20e45c9f079058b3431f9e3cf18aacce7d3e8351bff92a3f310ba411969f7": {
+   "verdict": "not_customer",
+   "reason": "会话内容仅为对内部技术人员办事效率的抱怨和吐槽，未涉及具体产品咨询、故障报修或业务诉求，属于内部工作沟通或闲聊。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 33,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "67020aad0381addac012f7cd84476937b2186786e57c6ed2c836973e44d9b1e8": {
+   "verdict": "not_customer",
+   "reason": "该消息为系统自动发送的客服账号升级通知，属于内部运维或系统行为，并非客户发起的咨询或诉求。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 122,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "4e9e70b16aa51277bd85a2f7bd5404c42927c7c73b296a2fd978458837ea3606": {
+   "verdict": "not_customer",
+   "reason": "该消息为系统自动发送的客服账号升级通知，属于内部运维或系统行为，并非客户发起的咨询或诉求。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 122,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "3e169882ecbffb18f57e2e87218c8904dd4e21035dee3f7e6c57445c4e10c12e": {
+   "verdict": "not_customer",
+   "reason": "会话内容显示对端在评价第三方用户（“这人”）的信用和消费行为，并指示内部人员调整该第三方的试用权限，属于内部运营或客服处理工单的场景，而非对端本人作为客户进行咨询或报障。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 119,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "a4bed6b040ac0a779cfd339cfbbfd08970a75f9d3edd4068fb538f9a1c20fedd": {
+   "verdict": "customer",
+   "reason": "用户抱怨服务速度慢、办事墨迹，属于对服务体验的投诉和诉求，符合客户定义。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 26,
+   "oversized": false,
+   "confirm": "unsure",
+   "agency_signal": null
+  },
+  "20e3b4fe6577f5dacc6e1056c4b93ef85dd0b888d82436130aecebffd5e82b86": {
+   "verdict": "not_customer",
+   "reason": "会话内容包含下班吃饭、内部代码仓库权限分配（git）、同事间闲聊及生活技能分享，属于典型的内部同事或熟人间的非业务性社交与工作协作，无客户咨询或报障特征。",
+   "method": "llm",
+   "sent_turns": 17,
+   "sent_chars": 322,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "22c8262a8661ce881b6b0ac3569fceaf3c97e0d5dedc66ee91ed72b8481e4241": {
+   "verdict": "unsure",
+   "reason": "会话中明确出现「他们问的阿里云」这类转述客户咨询的话，且内容混合了内部技术对接、报价确认及内部闲聊，符合混合场景判定标准。",
+   "method": "llm",
+   "sent_turns": 19,
+   "sent_chars": 584,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "c35510cc2649dc19641719a4225ce61995672803a45d95e21639ba98268503dd": {
+   "verdict": "not_customer",
+   "reason": "对话内容为内部确认合同审核完毕及流程推进，属于内部工作沟通，无外部客户咨询或诉求特征。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 44,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "929b15f778730e72fa5694c82af994e1aaf669cb6f2b6b44748aa8112548f2d8": {
+   "verdict": "not_customer",
+   "reason": "对话内容涉及内部技术选型决策、合同约束及团队管理策略（增加接手门槛），属于内部人员讨论，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 164,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "e04d7794d0309b56788409b70be6c34c270ea5d83c487c831b675ba4f1a805b1": {
+   "verdict": "not_customer",
+   "reason": "该消息为典型的客服/营销人员主动发起的自我介绍及索要手机号的话术，属于内部人员或推销行为，而非客户咨询。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 181,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "2b893846629e2038c4e61c163e510b1d783a8853244f826697227cb83ad1c33e": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端明确表述为替第三方（江南区做机械的客户）咨询定制网络方案，属于替第三方办事，符合drop条件。",
+   "method": "llm",
+   "sent_turns": 8,
+   "sent_chars": 96,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "216c3b18a1c9253a6cb839b90fffec22353d5de1adce474776455b8ba73a3d19": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端诉求为下载体育场球场监控录像，属于公共区域安防监控范畴，明确不属于SDWAN、网络线路、带宽、直播线路等本公司业务范围。",
+   "method": "llm",
+   "sent_turns": 8,
+   "sent_chars": 171,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "fc79356ab11cd409693de006ba18113dc85be8ad6aa86cbfbd24211d9b801e09": {
+   "verdict": "not_customer",
+   "reason": "对端明确询问是否要模拟客服或分析数据，属于内部测试或技术调试场景，非真实客户咨询。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 83,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "95db0e0638ae03f199c5915865cc34480b3a42d3e5d06c3113699cca8dcb025a": {
+   "verdict": "not_customer",
+   "reason": "会话内容显示对端在分享淘宝商品链接并提及“发给妙姐”，属于内部工作沟通或同事间协作，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 96,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "ab7890f7491016d6ad2687fb998bb01b23033140eaad02025d52b221866248bf": {
+   "verdict": "not_customer",
+   "reason": "对端询问“苹果11处理机有需求吗”，属于推销或业务拓展行为，而非咨询产品、报故障或提出服务诉求，符合非客户定义中的推销类别。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 35,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "f26bb8f8b491d942ab58d06ff8f46eaac508efab944f4b91a9a0bf17fbdc8f2c": {
+   "verdict": "customer",
+   "reason": "对端明确询问自己办公室线路的带宽、丢包及网关问题，并提及已投诉，符合客户报障和咨询服务的定义。",
+   "method": "llm",
+   "sent_turns": 7,
+   "sent_chars": 86,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "ee017d87117b9abe04c541cb157157eca307ab6cd99173879c7a462c59f78a27": {
+   "verdict": "unsure",
+   "reason": "会话中既包含内部技术对接（如程序部署、语言选型、内部文档分享），又包含针对具体线路（联通宽带）的故障排查和端口映射配置，属于混合场景。",
+   "method": "llm",
+   "sent_turns": 6,
+   "sent_chars": 240,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "a8dac1aedbdd6d8838d473624f59f4097e272ecdc10c6fa10138b400fbe36566": {
+   "verdict": "not_customer",
+   "reason": "会话内容为内部工作计划（软著进度、签合同、压测跟进），属于内部人员工作沟通，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 119,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "4718fa0b07db9dd02b14e0961b16dbd853f61436dba85603853149b62bdeca75": {
+   "verdict": "unsure",
+   "reason": "会话中明确出现“元境蔡工问”、“客户问”等转述第三方咨询的话术，属于混合场景，依据规则必须判定为 unsure。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 51,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "3084110eec4d10f2432eb1e6915a05b57b9bc2c9a6778d8ba57e5a6d84319a7d": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是包含服务项目、维修范围、耗材配送及咨询热线的完整业务推广广告，属于推销行为，而非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 199,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "10d2d3f123de9a3545b311f1bd561ac1958dd4749d7c8f9d2ef2594981f8e3e1": {
+   "verdict": "not_customer",
+   "reason": "会话内容完全为个人生活、情感及健康状态的闲聊，未涉及任何产品咨询、服务诉求或故障报修。",
+   "method": "llm",
+   "sent_turns": 7,
+   "sent_chars": 161,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "24c1c410aaa51ecbaaa2b74c159ee16d2c9a3e19a4ce4db876b203fbccad6256": {
+   "verdict": "not_customer",
+   "reason": "会话内容为内部技术人员之间的故障排查指令（重启网卡、清缓存），属于内部运维/测试场景，无客户咨询或报障特征。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 32,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "7b7de4054b23cce44c889afd382351fc12f3577bf704c85c52e66aa72ef9ff7b": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端咨询的是“高企”（高新技术企业认定）代办费用，属于明确排除的资质代办业务，且非本公司SDWAN/网络/备案等核心业务范围。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 38,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "79306c1c882bf8c13d02f66c08da17fba7b39ef379ba00f82007d459305c9b0f": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及子女教育、家庭闲聊及私人项目融资讨论，属于纯社交闲聊，无产品咨询或业务诉求。",
+   "method": "llm",
+   "sent_turns": 19,
+   "sent_chars": 370,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "e8d3907a5c0be84fc98c12246203070e4ad7a8437c60303a8908e114d841815e": {
+   "verdict": "customer",
+   "reason": "对端在描述业务故障（数据上传异常）、提及内部会议安排及具体的客户经理/装维人员跟进流程，符合客户报障及跟进诉求的特征。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 145,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "f4842112c3f103cf8c9eb11bb8295e721ec0e007c7f74eb5c7f6ad1f6c70a806": {
+   "verdict": "customer",
+   "reason": "对端在反馈网络测试数据（带宽、ping、丢包）并提及装维人员，属于典型的宽带/网络服务用户报障或咨询场景。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 84,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "ad511ab25b73682842c9c7304a22500175d0640ed5bb167d46cf8aad85f87e65": {
+   "verdict": "not_customer",
+   "reason": "对端使用“我帮你处理”、“我盯一下”等内部运维/客服口吻，且要求提供账号和地址以排查故障，属于内部人员处理工单或协助排查，而非客户在咨询或报障。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 78,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "ef99fe8a507f5bce2879116599bf7f55cd02d3dbf6a00a5bf6a1d171361fac5f": {
+   "verdict": "customer",
+   "reason": "对端在咨询小程序域名归属、申请费用及安全防护等具体业务问题，符合客户咨询产品/服务的定义。",
+   "method": "llm",
+   "sent_turns": 15,
+   "sent_chars": 222,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "9c33f75353f16ff73ae365422e785ad266956a45fabf5e2e3d5852f0dcf6953c": {
+   "verdict": "customer",
+   "reason": "对端明确咨询直播线路的月租价格、按天租赁可行性及试用期等具体服务细节，符合客户咨询产品/服务的定义。",
+   "method": "llm",
+   "sent_turns": 10,
+   "sent_chars": 135,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "526eb5764e49d8b612f09efef37f2624d163c35c23f1f787be57974a1b20a159": {
+   "verdict": "customer",
+   "reason": "对端在咨询产品功能（录音上传时机）并反馈后台无录音的问题，符合客户报问题/咨询服务的定义。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 44,
+   "oversized": false,
+   "confirm": "unsure",
+   "agency_signal": null
+  },
+  "7e6fcd6d3438f4edcd5420b6e639521816b508f8d9a95550771edd27835caa28": {
+   "verdict": "customer",
+   "reason": "对端明确报告了设备存储权限异常及录音上传失败的具体故障现象，并配合排查，符合客户报问题的定义。",
+   "method": "llm",
+   "sent_turns": 9,
+   "sent_chars": 155,
+   "oversized": false,
+   "confirm": "unsure",
+   "agency_signal": null
+  },
+  "faabf7c5542e584c6be9bec6bb88f3b87f29e99b3a488ceafc2ddf89c809d9dc": {
+   "verdict": "not_customer",
+   "reason": "会话内容涉及内部技术评估、资源消耗分析及后续观察计划，且出现“我们再看看”等内部协作口吻，属于内部人员讨论技术方案，无外部客户咨询或报障特征。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 142,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "f2062da519e98d8de2cdd235383d50d8ab583dff093938bf0741f58eb209d5da": {
+   "verdict": "customer",
+   "reason": "对端连续咨询SD-WAN收费、跨境加速方案及专线替换等具体业务问题，符合客户咨询产品/服务的定义。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 70,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "75e716d948f0cc9e29d3e55978ac4e434f164d9486f061f359d3da6afba40933": {
+   "verdict": "customer",
+   "reason": "对端多次咨询SD-WAN产品详情、询问苹果账号注册及美区AppID申请方法，属于典型的产品咨询与服务诉求。",
+   "method": "llm",
+   "sent_turns": 15,
+   "sent_chars": 747,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "5616950855b9fc06dbe0a87b6cb5e4edab03833d4eb26bdafad4a266860b8758": {
+   "verdict": "customer",
+   "reason": "对端连续咨询SD-WAN价格、Apple ID注册及独立IP等具体产品与服务细节，符合客户咨询定义。",
+   "method": "llm",
+   "sent_turns": 7,
+   "sent_chars": 414,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "383aabcb48c12098ec6117a6a4772596ed3fcbc904a572aac1c2d7299dde877f": {
+   "verdict": "customer",
+   "reason": "对端咨询产品具体配置（独立IP）、使用场景及适用设备，属于典型的产品咨询行为。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 291,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "a364d2b67ed8cbf06b050b57f7a0dbdc8fdcfc1d92866bed39c7d135968db459": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是典型的产品促销广告文案，属于推销行为，而非咨询或报障的客户。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 150,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "b2e8420337d76a6405e954d5cb8c83c235f800d6af7900f423658acbfad7ad06": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是推销产品/服务的营销话术，属于推销行为，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 201,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "efabf74203dbac744867b7c3435fb401a15e70eb92516c4906518b824816a441": {
+   "verdict": "not_customer",
+   "reason": "该消息为民宿软装服务的营销推广文案，属于推销/广告行为，非客户咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 130,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "7281ea03632be78349c6e9d8b210000ff421f77cf1a07da819af8cbb82dcfbd6": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是论文/专著代写或出版服务的推销广告，属于推销行为，非客户咨询。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 202,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "97bd402dd6f458896effeb63a184bf29ec0657cfa98689dec6539ccdd02f6b9f": {
+   "verdict": "not_customer",
+   "reason": "会话内容显示对端正在主动推销产品（18系列预售）并引导留货，属于典型的推销/销售行为，而非咨询或报障。",
+   "method": "llm",
+   "sent_turns": 8,
+   "sent_chars": 202,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "628f1dcdf6dcd3692b9e7f4576aa971e81be0e88f9df4b86f7a51b1304fd2727": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是推销产品（中标数据/供应商认证）的营销话术，属于推销行为，而非咨询或报障的客户。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 202,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "0a712456d79d08d43ccb0915895be01a3da6d22a62af931e0985ae42dceb2ad2": {
+   "verdict": "not_customer",
+   "reason": "对端发布的是产品报价和接单广告，属于推销/商家行为，而非咨询或报障的客户。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 52,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "498cf363c16c797aa326f2b5ac2bd47785d5dce96f91c9e52622c3dd3749a198": {
+   "verdict": "customer",
+   "reason": "用户询问下载位置，属于咨询产品使用或获取方式，符合客户定义。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 11,
+   "oversized": false,
+   "confirm": "unsure",
+   "agency_signal": null
+  },
+  "e33a479007e1f457c58fae9b4e0e38a8cc8b0b015e2345b0c554e5d4b2d67c2e": {
+   "verdict": "customer",
+   "reason": "对端连续咨询产品价格、带宽速度及设备需求，符合客户咨询产品/服务的定义。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 262,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "084543a27ed8a8d2493aa1dc011a5c49c2433cd94e92754125cfe690d43e55e3": {
+   "verdict": "not_customer",
+   "reason": "对端明确进行外包人员推销，属于定义中的非客户类别（推销）。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 80,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "11fa8ffbfaea8dbea2a07463eb0eafd4d64d6731cfd2dd4ea937584b0bf2a855": {
+   "verdict": "customer",
+   "reason": "对端连续咨询产品价格、套餐详情、适用平台及流量限制，符合客户咨询产品/服务的定义。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 380,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "993c93c309a519bab4f364e27dbbd2aba1587cee1a443727a57e56d4b6c0f7bc": {
+   "verdict": "not_customer",
+   "reason": "用户明确表示“没事了”，且内容涉及内部操作误解（下载录像加好友），无实际咨询或诉求，属于非客户或内部闲聊。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 34,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "d5c13fb549c3a1386da0b2997574d390504d09f8513582f06ca444e72782c971": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端明确咨询“高企转让”及公司价格，属于资质/公司转让代办业务，非本公司SDWAN/网络/域名等业务范围，且主体为寻求该非本公司业务的客户。",
+   "method": "llm",
+   "sent_turns": 11,
+   "sent_chars": 147,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "01a8e705b2f2f8421c2c7be2e3749681c9537d3a0ec5f0cb6b096ab779084130": {
+   "verdict": "customer",
+   "reason": "对端主动咨询SDWAN产品定义及用途，属于典型的产品咨询行为。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 114,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "0f5fbac245ecfc8a856141bbef9ebcdfddf2dc823811ab9ef1df2981c5bd0d2c": {
+   "verdict": "not_customer",
+   "reason": "对端在讨论实习合同及招聘相关话题，属于招聘/非业务咨询场景，非产品或服务客户。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 74,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "15d73c596300673465c0689f3892695036b33642e3f5358cb72e32f596808445": {
+   "verdict": "customer",
+   "reason": "对端明确报告网络故障（网断了、连不上）并寻求解决，符合客户报问题的定义。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 88,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "c0741c5e57f624bd342e95bffcd3396b32ca744acfe37ae68a96e8689c53464a": {
+   "verdict": "customer",
+   "reason": "对端明确反馈产品使用体验差（速度慢）并描述具体故障现象，符合客户报问题的定义。",
+   "method": "llm",
+   "sent_turns": 2,
+   "sent_chars": 174,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "f9872cc12d2bf8709ce288546052608bb581866440f0157d741bfa399a67cb73": {
+   "verdict": "customer",
+   "reason": "对端明确咨询网速慢、时断时续的问题并要求排查，符合客户报故障/提诉求的定义。",
+   "method": "llm",
+   "sent_turns": 7,
+   "sent_chars": 925,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "1ffa0569b12b9c56316cfd2c6c1819f977e09c307618f139eb904d0cd3def5f5": {
+   "verdict": "customer",
+   "reason": "对端主动咨询套餐价格、流量、安装方式、设备详情及公司资质，符合客户咨询产品/服务的定义。",
+   "method": "llm",
+   "sent_turns": 12,
+   "sent_chars": 1314,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "f2967c6a1c2ef7a609102e1c81f81b355a9433f7ef4d52eb1fba1334941e33fc": {
+   "verdict": "not_customer",
+   "reason": "二次确认:诉求为下载足球比赛视频，属于体育内容服务，明确不属于SDWAN、网络线路、带宽等本公司业务范围。",
+   "method": "llm",
+   "sent_turns": 4,
+   "sent_chars": 276,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "61b84f83e4dd40320e2e5776c56bd895e2425b54ed3ba70d7cced58feb3f082a": {
+   "verdict": "customer",
+   "reason": "对端明确询问产品（网络/SD-WAN）的销售方式及价格，符合咨询产品/服务的客户定义。",
+   "method": "llm",
+   "sent_turns": 8,
+   "sent_chars": 95,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "4ba38398bc67ce3c140a1085e474b7215aa7e65647b8ac0a047c185f6929e60d": {
+   "verdict": "unsure",
+   "reason": "会话内容极简且模糊，仅涉及网络话题及询问对方归属，缺乏具体的产品咨询、故障报修或明确的服务诉求，无法确定对端是真实客户还是内部测试/闲聊。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 56,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "a3fd4b5bf1756de830d7be90a82202921e5ed5d533edd2307b5861fc348724dd": {
+   "verdict": "not_customer",
+   "reason": "对端发送的是推销通信行业证书的广告信息，属于推销行为，符合非客户定义。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 177,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "2bc4d813bab0ea78746688e9f17fd8c4af4bf7460dcfcf4c52049b463cb587c7": {
+   "verdict": "not_customer",
+   "reason": "对端主动推销服务并询问是否需要，属于推销行为，符合非客户定义。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 121,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "2c727af879241e40f8c43f3f34dbde23ee165a43732159f0a50fdfe359741368": {
+   "verdict": "customer",
+   "reason": "对端明确提及“自建的线路”并投诉“乱报价”、“冒充sdwan”，符合客户报问题及提诉求的定义。",
+   "method": "llm",
+   "sent_turns": 10,
+   "sent_chars": 139,
+   "oversized": false,
+   "confirm": "keep",
+   "agency_signal": null
+  },
+  "7ac0872babcd8814ccd4da8157a2878a24697a47b888733996f74bff747c5228": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对端诉求为苹果手机（硬件）的调货与溢价交易，属于硬件采购，明确不属于本公司SDWAN、网络线路等业务范围。",
+   "method": "llm",
+   "sent_turns": 5,
+   "sent_chars": 103,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "be4db64f4cc52a809940fcc915e0a7fb4d01a764ca2760dc8b79172171dc02f5": {
+   "verdict": "not_customer",
+   "reason": "对端明确询问代理价格、利润空间及如何加价转卖，属于寻求代理合作/分销渠道，而非直接购买服务的终端客户。",
+   "method": "llm",
+   "sent_turns": 15,
+   "sent_chars": 696,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "71bc69e4f621e001f56b6693e0fe45ef54d73ec8f7adcf32a2d8920db5ea8ecd": {
+   "verdict": "not_customer",
+   "reason": "二次确认:对话内容涉及实物提货、地址及价格确认，属于硬件采购或物流交易，且客服表示“给其他人”，明显不属于SDWAN、网络线路等本公司业务范围。",
+   "method": "llm",
+   "sent_turns": 8,
+   "sent_chars": 161,
+   "oversized": false,
+   "confirm": "drop",
+   "agency_signal": null
+  },
+  "33baed630b57574665b43619eea78b404c8daa3db92532d244eca81d26587555": {
+   "verdict": "not_customer",
+   "reason": "对端正在向用户推销合作服务并提及优惠活动，属于典型的推销/代办行为，而非咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 142,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "64f544431f284386efe214a9db1234c240b2fe6219dbbb1f825f5f1748a4bb25": {
+   "verdict": "unsure",
+   "reason": "会话中明确出现「客户问」的转述字样，符合混合场景或内部转述客户咨询的定义，必须判为 unsure。",
+   "method": "llm",
+   "sent_turns": 3,
+   "sent_chars": 61,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "c6d735214025b68c3aa1913da7b71295789a81445d56c39dd00ab33036c29422": {
+   "verdict": "not_customer",
+   "reason": "该轮次内容明显是销售方在向潜在客户推销产品、报价并询问合作方式，属于推销行为，而非客户在咨询或报障。",
+   "method": "llm",
+   "sent_turns": 1,
+   "sent_chars": 181,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
+  },
+  "44603b1076b2519b1e943c0378dcc7dd2582ae42fb1623df266aabbff2c384b4": {
+   "verdict": "not_customer",
+   "reason": "对话内容涉及具体商品（苹果）的库存、价格谈判及内部调货安排，双方语气熟络且包含内部术语（如“我这里估计还有货”），符合内部人员或熟人间的业务沟通特征，而非标准客服与外部客户的咨询关系。",
+   "method": "llm",
+   "sent_turns": 7,
+   "sent_chars": 121,
+   "oversized": false,
+   "confirm": null,
+   "agency_signal": null
   }
  }
 }

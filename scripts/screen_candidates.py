@@ -39,12 +39,13 @@ import expand_sample as es  # noqa: E402  复用 canonical/池构建/规范化�
 
 DEFAULT_SESSIONS = es.DEFAULT_SESSIONS
 DEFAULT_LABELED_059 = es.DEFAULT_LABELED_059
+DEFAULT_LABELED_060 = "data/wx_real/labeled_060.json"
 DEFAULT_OUT = "data/wx_real/screen_060.json"
 DEFAULT_CACHE = "data/wx_real/screen_060_cache.json"
 
 BUDGET_TURNS = 20     # §3.2 会话上下文预算
 BUDGET_CHARS = 2000
-LLM_CONCURRENCY = 8   # 逐会话一次调用，8 路并发（QwenClient 60s 超时自带重试 1 次）
+LLM_CONCURRENCY = 1   # 本地 Qwen 并发超过 1 路会把请求堵到超时（2026-10-26 r4：8 路、2 路均卡死），串行
 
 # §11.2 提示词初稿（原文）+ A3 四条反例漏网修复（Chief 2026-10-26 补两条判据）。
 # prompt_sha256 对该模板全文计算，进缓存键。
@@ -70,15 +71,23 @@ CONFIRM_PROMPT_TEMPLATE = """你是客服对话质检员。这个会话初判为
 
 唯一判据：对端（发消息的人）是不是【客户本人】在为本公司的产品/服务提诉求？
 
-判 drop（不是客户本人）：
-- 代办/中介/代跑腿：帮别人问、替别人办、代交材料/资料、代盖章收章、代办资质、
-  公司转让、替人问纳税等级/税种、马甲账号（一般纳税人/小规模）代运营
-- 同行/渠道/供应商：卖东西给我们、谈合作分成、同行交流
-- 内部/测试/运维：自己人测试、内部派活、内部项目沟通
-- 纯社交、招聘、通知、求职
+本公司业务范围（判 keep/drop 的边界）：SDWAN、网络线路/组网、带宽、直播线路、
+IP/账号、备案、域名证书，以及围绕这些的报障、报价、操作、开票。
+定制网络/专线/带宽方案（含指定地区、指定带宽、软路由）也是本公司业务，
+需要人工报价或定制的同样算，不得以「非标」为由 drop。
 
-判 keep：对端以自己/本单位名义咨询产品、报故障、要求操作（登录/注册/支付/修改数据）、买服务。
-拿不准或混合 → unsure（宁可疑，交人工二判）。
+判 keep：对端以自己或本单位名义，就上述本公司业务提诉求、报故障、问价、要求操作。
+替本单位办事（本公司客户本人的同事代办）也是 keep，不是中介。
+
+判 drop 必须同时满足两点，缺一不可：
+1. 诉求明确不是本公司业务：资质/高企/公司转让代办、纳税与税种代办、
+   硬件采购（服务器/NAS/组装机）、代交与本公司业务无关的材料；
+2. 主体明确：对端是在替第三方办、或自己就是卖这些的同行/渠道。
+内部自己人的测试、派活、项目沟通，以及纯社交、招聘、通知、求职，也判 drop。
+
+判 unsure：主体或业务关系有任何不确定——看不出是在为自己办还是替别人办、
+看不出诉求是不是本公司业务、材料准备/盖章/报销但没说办的是什么。
+含混一律 unsure，不许直接 drop。
 
 输出 JSON：
 {"confirm": "keep|drop|unsure", "reason": "判定依据（一句话）"}
@@ -269,8 +278,39 @@ class ScreenCache:
             tmp.replace(self.path)
 
 
+# aclose 失败的累计次数。连接清理失败只记数，不外抛——否则会被 judge_llm 的
+# 重试兜底吞成 unsure，判定一次都没发生（Reviewer r4-P2 第二轮）。
+CLIENT_CLOSE_ERRORS = 0
+
+
+async def drop_stale_clients(client) -> int:
+    """关掉并清掉 QwenClient 缓存的持久连接，返回关闭条数。
+
+    持久连接在批量筛选里会挂起且不触发超时（2026-10-26 r4 实测，单条重跑却正常），
+    所以每次调用前换新连接。旧连接必须 aclose，不能只替换字典（Reviewer r4 P2）。
+    aclose 抛异常：记一条 warning 和计数，照样移出池子，不往外抛。
+    没有 _clients 的桩客户端原样返回 0。
+    """
+    global CLIENT_CLOSE_ERRORS
+    pool = getattr(client, "_clients", None)
+    if pool is None:
+        return 0
+    closed = 0
+    for old in list(pool.values()):
+        try:
+            await old.aclose()
+            closed += 1
+        except Exception as e:                              # noqa: BLE001
+            CLIENT_CLOSE_ERRORS += 1
+            print(f"  warning: 关闭旧 LLM 连接失败（已移出池，不影响判定）：{e}",
+                  file=sys.stderr, flush=True)
+    pool.clear()
+    return closed
+
+
 async def _llm_json(client, prompt: str, sem: asyncio.Semaphore, parser) -> dict | None:
     """一次 LLM 调用 + 解析；网络失败/解析失败都返回 None（由调用方重试与兜底）。"""
+    await drop_stale_clients(client)
     async with sem:
         ret = await client.generate([{"role": "user", "content": prompt}])
     return parser(ret.get("response", "")), ret.get("response", "")
@@ -319,7 +359,7 @@ _CACHE_FIELDS = ("verdict", "reason", "method", "sent_turns", "sent_chars",
 
 
 async def judge_sessions(client, model_config: dict, jobs: list, cache: ScreenCache,
-                         trace: bool) -> list[dict]:
+                         trace: bool, per_call_timeout: float = 0) -> list[dict]:
     """jobs = [(canon_idx, session, cand_idxs)]；返回逐会话判定记录（canonical 序）。
 
     第一轮 customer 的会话再跑确认轮（Chief 2026-10-26）：drop → verdict 改
@@ -344,6 +384,7 @@ async def judge_sessions(client, model_config: dict, jobs: list, cache: ScreenCa
         else:
             pending.append((k, ci, s, cand_idxs))
 
+    timed_out: list[dict] = []
     if trace and pending:
         print(f"[trace] {len(pending)} 个会话无缓存，--trace 不调 LLM，标 no-cache")
     if not trace:
@@ -359,24 +400,41 @@ async def judge_sessions(client, model_config: dict, jobs: list, cache: ScreenCa
                        "method": "rule", "sent_turns": len(kept), "sent_chars": chars,
                        "oversized": oversized, "confirm": None, "agency_signal": sig}
             else:
-                v = await judge_llm(client, text, sem)
-                confirm = None
-                verdict, reason = v["verdict"], v["reason"]
-                if verdict == "customer":
-                    c = await confirm_llm(client, text, sem)
-                    confirm = c["confirm"]
-                    if confirm == "drop":
-                        verdict = "not_customer"
-                        reason = f"二次确认:{c['reason']}"
-                rec = {"verdict": verdict, "reason": reason, "method": "llm",
-                       "sent_turns": len(kept), "sent_chars": chars, "oversized": oversized,
-                       "confirm": confirm, "agency_signal": sig}
-            await cache.put(_key(s), {kk: rec[kk] for kk in _CACHE_FIELDS})
+                try:
+                    v = await asyncio.wait_for(judge_llm(client, text, sem),
+                                               per_call_timeout or None)
+                    confirm = None
+                    verdict, reason = v["verdict"], v["reason"]
+                    if verdict == "customer":
+                        c = await asyncio.wait_for(confirm_llm(client, text, sem),
+                                                   per_call_timeout or None)
+                        confirm = c["confirm"]
+                        if confirm == "drop":
+                            verdict = "not_customer"
+                            reason = f"二次确认:{c['reason']}"
+                    rec = {"verdict": verdict, "reason": reason, "method": "llm",
+                           "sent_turns": len(kept), "sent_chars": chars, "oversized": oversized,
+                           "confirm": confirm, "agency_signal": sig}
+                except asyncio.TimeoutError:
+                    # 超时不写缓存：下次重跑会再判；清单进 meta，不许静默
+                    timed_out.append({"session_key": s["session_key"],
+                                      "session_start": s["start_time"]})
+                    print(f"  超时跳过 {s['session_key']} {s['start_time']}"
+                          f"（{per_call_timeout:.0f}s，不写缓存）", flush=True)
+                    rec = {"verdict": "unsure",
+                           "reason": f"单次调用超过 {per_call_timeout:.0f}s 跳过，未判定",
+                           "method": "timeout", "sent_turns": len(kept), "sent_chars": chars,
+                           "oversized": oversized, "confirm": None,
+                           "agency_signal": agency_signal(text)}
+            if rec["method"] != "timeout":
+                await cache.put(_key(s), {kk: rec[kk] for kk in _CACHE_FIELDS})
             results[k] = {**rec, "from_cache": False}
             done += 1
             if done % 20 == 0:
-                print(f"  已判定 {done}/{len(pending)} …")
-        await asyncio.gather(*(_one(*t) for t in pending))
+                print(f"  已判定 {done}/{len(pending)} …", flush=True)
+        # 本地 Qwen 并发调度会卡死（2026-10-26 r4：8/2/1 路 gather 全部挂起），逐个顺序判定
+        for t in pending:
+            await _one(*t)
 
     for k, (ci, s, cand_idxs) in enumerate(jobs):
         if results[k] is None:                          # trace 且无缓存
@@ -385,7 +443,7 @@ async def judge_sessions(client, model_config: dict, jobs: list, cache: ScreenCa
                           "method": None, "sent_turns": len(kept), "sent_chars": chars,
                           "oversized": False, "confirm": None, "agency_signal": None,
                           "from_cache": False}
-    return results
+    return results, timed_out
 
 
 def collect_jobs(sessions, cap: int, q059: set) -> tuple:
@@ -413,6 +471,61 @@ def collect_jobs(sessions, cap: int, q059: set) -> tuple:
     return canon, canon_sha, jobs, skipped, funnel
 
 
+def load_anchor_sessions(labeled_paths: list[str]) -> tuple[set, list]:
+    """主卷 P/N 锚点所在会话（Chief r4，2026-10-26）。
+
+    P = expected_action=answer，N = handoff/refuse。060 卷用 anchor 三元组的
+    (session_key, session_start)；059 卷无 anchor，用 session_id + 规范化原话
+    在 canonical 库里唯一匹配，匹配不到的记入 unlocatable（不静默）。
+    返回 (受保护会话集合, 定位不了的条目清单)。
+    """
+    sessions = json.loads(es.resolve(es.DEFAULT_SESSIONS).read_text(encoding="utf-8"))["sessions"]
+    canon = es.canonical_sessions(sessions)
+    by_sid_text: dict = {}
+    for s in canon:
+        for t in s["turns"]:
+            by_sid_text.setdefault(
+                (s.get("session_id"), es.norm_text(t.get("text", ""))), []).append(
+                (s["session_key"], s["start_time"]))
+    protected: set = set()
+    unlocatable: list = []
+    for path in labeled_paths:
+        doc = json.loads(es.resolve(path).read_text(encoding="utf-8"))
+        for i, c in enumerate(doc.get("cases", [])):
+            if c.get("expected_action") not in ("answer", "handoff", "refuse"):
+                continue
+            anchor = c.get("anchor") or {}
+            if anchor.get("session_key") and anchor.get("session_start"):
+                protected.add((anchor["session_key"], anchor["session_start"]))
+                continue
+            hits = {p for p in by_sid_text.get(
+                (c.get("session_id"), es.norm_text(c.get("question", ""))), [])}
+            if len(hits) == 1:
+                protected.add(hits.pop())
+            else:
+                unlocatable.append({"source": path, "index": i,
+                                    "session_id": c.get("session_id"),
+                                    "question": c.get("question", "")[:40]})
+    return protected, unlocatable
+
+
+def apply_anchor_protection(sessions_out: list[dict], protected: set) -> int:
+    """受保护会话不许 not_customer、confirm 不许 drop：命中即改 unsure。
+
+    reason 前缀「主卷锚点保护:」。返回改写条数。
+    """
+    n = 0
+    for s in sessions_out:
+        if (s["session_key"], s["session_start"]) not in protected:
+            continue
+        if s["verdict"] == "not_customer" or s.get("confirm") == "drop":
+            s["reason"] = "主卷锚点保护:" + str(s.get("reason", ""))
+            s["verdict"] = "unsure"
+            s["confirm"] = "unsure"
+            n += 1
+    return n
+
+
 def assert_a3_must_pass(sessions_out: list[dict]) -> None:
     """P1 兜底（Chief 2026-10-26）：A3 四条反例所在会话 verdict 不许 not_customer。
 
@@ -429,7 +542,10 @@ def assert_a3_must_pass(sessions_out: list[dict]) -> None:
         raise AssertionError("A3 必须放行会话被判 not_customer 或缺失：" + "；".join(bad))
 
 
-def build_payload(canon, canon_sha, jobs, results, skipped, funnel, cap, model_config) -> dict:
+def build_payload(canon, canon_sha, jobs, results, skipped, funnel, cap, model_config,
+                  protected_sessions: set | None = None,
+                  unlocatable_anchors: list | None = None,
+                  timed_out: list | None = None) -> dict:
     p_sha = prompt_sha256()
     # A3 §5.2：screened_* 单位 = 候选条目数，三者之和 == total_candidates；
     # 会话层面计数不入 meta（用 sessions[].verdict 现算）。
@@ -476,6 +592,16 @@ def build_payload(canon, canon_sha, jobs, results, skipped, funnel, cap, model_c
     if any((s["session_key"], s["start_time"]) in
            {(sk, ss) for sk, ss in A3_MUST_PASS_SESSIONS} for _, s, _ in jobs):
         assert_a3_must_pass(sessions_out)
+    anchor_rewritten = 0
+    if protected_sessions:
+        anchor_rewritten = apply_anchor_protection(sessions_out, protected_sessions)
+        # 改写后重算条目数（verdict 变了，screened_* 必须跟着变）
+        entry_counts = {"customer": 0, "not_customer": 0, "unsure": 0}
+        confirm_counts = {"keep": 0, "drop": 0, "unsure": 0}
+        for s in sessions_out:
+            entry_counts[s["verdict"]] += len(s["candidates"])
+            if s.get("confirm") in confirm_counts:
+                confirm_counts[s["confirm"]] += 1
     private = sum(1 for s in canon if s["session_key"].startswith("P:"))
     assert len(sessions_out) + len(skipped) == private, "len(sessions)+len(skipped) != 私聊会话数"
     payload = {
@@ -487,6 +613,16 @@ def build_payload(canon, canon_sha, jobs, results, skipped, funnel, cap, model_c
             "prompt_sha256": p_sha,
             "confirm_prompt_sha256": confirm_prompt_sha256(),
             "confirm_pass": confirm_counts,
+            "anchor_protection": {
+                "protected_sessions": len(protected_sessions or []),
+                "rewritten": anchor_rewritten,
+                "unlocatable": unlocatable_anchors or [],
+            },
+            "timed_out_sessions": timed_out or [],
+            "client_close_errors": CLIENT_CLOSE_ERRORS,
+            "temperature0_note": ("温度 0 下无缓存重判不保证字节一致：r3 实测 4/289 条初判"
+                                  "连判两次均偏离已落缓存（P:U032 08-06、P:U093 08-11、"
+                                  "P:U058 09-07、P:U056 09-29）。V4 判据只覆盖有缓存重跑。"),
             "total_sessions_all": len(canon),
             "private_sessions": private,
             "sessions_with_candidates": len(jobs),
@@ -506,6 +642,8 @@ def build_payload(canon, canon_sha, jobs, results, skipped, funnel, cap, model_c
 
 
 async def run_screen(args) -> int:
+    global CLIENT_CLOSE_ERRORS
+    CLIENT_CLOSE_ERRORS = 0          # 每次运行单独计数，不带上同进程上一次的错误数
     sessions = json.loads(es.resolve(args.sessions).read_text(encoding="utf-8"))["sessions"]
     l059 = json.loads(es.resolve(args.labeled_059).read_text(encoding="utf-8"))
     q059 = {es.norm_text(c.get("question")) for c in l059.get("cases", [])}
@@ -529,9 +667,12 @@ async def run_screen(args) -> int:
         client = QwenClient(model=model_name, enable_thinking=False, max_tokens=256)
         client.temperature = args.temperature          # 判定温度覆盖（默认 0.0）
 
-    results = await judge_sessions(client, model_config, jobs, cache, args.trace)
+    results, timed_out = await judge_sessions(
+        client, model_config, jobs, cache, args.trace, args.per_call_timeout)
+    protected, unlocatable = load_anchor_sessions(
+        [args.labeled_059, getattr(args, "labeled_060", DEFAULT_LABELED_060)])
     payload = build_payload(canon, canon_sha, jobs, results, skipped, funnel,
-                            args.cap, model_config)
+                            args.cap, model_config, protected, unlocatable, timed_out)
 
     out_path = es.resolve(args.output)
     out_path.write_text(es.dump_payload(payload), encoding="utf-8")
@@ -602,11 +743,16 @@ def main(argv=None) -> int:
         description="#060b stage-1 会话级筛选（规则只做整会话级排除，LLM 判三值）")
     ap.add_argument("--sessions", default=DEFAULT_SESSIONS)
     ap.add_argument("--labeled-059", default=DEFAULT_LABELED_059)
+    ap.add_argument("--labeled-060", default=DEFAULT_LABELED_060,
+                    help="060 主卷：P/N 锚点所在会话受保护，不许整段 drop")
     ap.add_argument("--cap", type=int, default=10, help="每会话候选上限（任务书 §1 用 10）")
     ap.add_argument("--output", default=DEFAULT_OUT)
     ap.add_argument("--cache", default=DEFAULT_CACHE)
     ap.add_argument("--model", default=None, help="覆盖 settings.MODEL_NAME（进缓存键）")
     ap.add_argument("--temperature", type=float, default=0.0)
+    ap.add_argument("--per-call-timeout", type=float, default=0,
+                    help="单次 LLM 调用限时秒数（0=不限）。超时的会话跳过且不写缓存，"
+                         "清单进 meta.timed_out_sessions，下次重跑会再判")
     ap.add_argument("--resume", action="store_true",
                     help="与不加参数行为一致（命中缓存即跳过；中途失败可直继续跑）")
     ap.add_argument("--trace", action="store_true",
