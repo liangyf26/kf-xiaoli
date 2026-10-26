@@ -2500,20 +2500,20 @@
           "turn_idx": 8
         }
       ],
-      "expected_action": "handoff",
+      "expected_action": "",
       "expected_emotion": "",
       "expected_intent": "",
       "expected_keywords": [],
       "expected_sources": [],
-      "label_note": "客户要:确认用到的域名是否按单域名计费并要整体报价|依据:R4-库内无域名计费条目，属报价事项需人工确认",
-      "needs_context": true,
+      "label_note": "判到:D1|同会话 U058 小程序域名安全防护/资质代办，B1 同会话 0003、0043 已判 not_customer，本条随之（Chief 10-26 按 B2 第二轮盲标分歧裁定，原 Writer 标 N:handoff）",
+      "needs_context": null,
       "question": "我意思是用到的域名算单域名吧",
       "reviewed": true,
-      "reviewer": "Writer",
+      "reviewer": "Chief",
       "security_flag": false,
       "session_id": "S128",
       "should_answer": false,
-      "skip_reason": "",
+      "skip_reason": "not_customer",
       "source": "biz_wx_message2.sql 2026-09-07 15:43:52"
     },
     {
