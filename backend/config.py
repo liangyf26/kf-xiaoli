@@ -62,7 +62,12 @@ class Settings(BaseSettings):
 
     # 话术配置
     FIRST_MESSAGE_GREETING: str = "您好，我是SDWAN智能客服机器人，很高兴为您服务。"
-    NO_ANSWER_MESSAGE: str = "暂时无法回答，需要人工介入"
+    # #062 话术拆分（Chief 2026-10-26 拍板）：纯拒答与转人工是两个动作，两条话术分开。
+    REFUSE_MESSAGE: str = "这个问题我暂时回答不了，您可以换个问法，或稍后再问我。"
+    HANDOFF_MESSAGE: str = "这个问题需要同事确认，已为您转接人工客服。"
+    # 兼容别名：默认兜底=转人工（拿不准一律转人工，不许丢跟进）。
+    # env NO_ANSWER_MESSAGE 仍可整体覆盖兜底话术（tests/test_phase1_units.py 在用）。
+    NO_ANSWER_MESSAGE: str = HANDOFF_MESSAGE
 
     # 决策引擎可选配置
     JEV_API_KEY: str = ""

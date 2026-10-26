@@ -4,6 +4,8 @@
 知识库外拒答。格式统一为 用户：… / AI回复：{"answer": …, "sources": […]}。
 """
 
+from backend.config import settings
+
 _INTENT_HEADER = "以下是与当前问题同类型的客服对话示例，请学习其回答风格与格式："
 
 PRICE_EXAMPLES = f"""{_INTENT_HEADER}
@@ -16,9 +18,9 @@ AI回复：{{"answer": "直播优化线路260元/月（ISP家庭IP，独享，�
 用户：价格表
 AI回复：{{"answer": "价格如下：IDC线路120元/月（独享，社媒TK/FB，5-10兆以上包稳）；ISP家庭IP线路180元/月（独享，对IP有要求选这个）；ISP家庭IP直播优化线路260元/月；5人拼车共享IP单人50元/月。sdwan路由器硬件300元/个。", "sources": ["问题1"]}}
 
-示例3（知识库外拒答）：
+示例3（议价转人工）：
 用户：价格能打八折吗
-AI回复：{{"answer": "暂时无法回答，需要人工介入", "sources": []}}
+AI回复：{{"answer": "{settings.HANDOFF_MESSAGE}", "sources": []}}
 """
 
 TECHNICAL_EXAMPLES = f"""{_INTENT_HEADER}
@@ -31,9 +33,9 @@ AI回复：{{"answer": "请按使用顺序排查：手机拔卡（不插卡）�
 用户：tiktok提示登录不上，提示网络无法连接
 AI回复：{{"answer": "请确认：1.手机已拔卡（不插卡）；2.已切换地区为美国；3.客户端线路开关已打开。按使用顺序重新操作一遍后再试。", "sources": ["问题10", "问题11"]}}
 
-示例3（知识库外拒答）：
+示例3（知识库外纯拒答）：
 用户：我的手机屏幕碎了能修吗
-AI回复：{{"answer": "暂时无法回答，需要人工介入", "sources": []}}
+AI回复：{{"answer": "{settings.REFUSE_MESSAGE}", "sources": []}}
 """
 
 TROUBLESHOOTING_EXAMPLES = f"""{_INTENT_HEADER}
@@ -46,9 +48,9 @@ AI回复：{{"answer": "请检查：1.当前线路带宽是否被其他设备占
 用户：网速有点慢
 AI回复：{{"answer": "线路速度与地区有关：香港>东南亚>欧洲>美国西海岸>美国东海岸，属正常现象。另外请确认使用的是独享带宽线路，拼车共享IP在高峰期会慢。", "sources": ["问题28"]}}
 
-示例3（知识库外拒答）：
+示例3（知识库外纯拒答）：
 用户：我们家宽带是移动的能用吗
-AI回复：{{"answer": "暂时无法回答，需要人工介入", "sources": []}}
+AI回复：{{"answer": "{settings.REFUSE_MESSAGE}", "sources": []}}
 """
 
 USAGE_EXAMPLES = f"""{_INTENT_HEADER}
@@ -76,9 +78,9 @@ AI回复：{{"answer": "可以。推荐260元/月的ISP家庭IP直播优化线�
 用户：支持几个设备
 AI回复：{{"answer": "一条专线支持多台设备，例如1台手机专门直播+几台电脑配合上架链接是可行的。", "sources": ["问题19"]}}
 
-示例3（知识库外拒答）：
+示例3（知识库外纯拒答）：
 用户：支持IPLC专线吗
-AI回复：{{"answer": "暂时无法回答，需要人工介入", "sources": []}}
+AI回复：{{"answer": "{settings.REFUSE_MESSAGE}", "sources": []}}
 """
 
 PURCHASE_EXAMPLES = f"""{_INTENT_HEADER}
@@ -91,9 +93,9 @@ AI回复：{{"answer": "可先开试用体验，满意后购买。付款千元�
 用户：能不能开试用体验
 AI回复：{{"answer": "可以开试用体验，请告知您的使用场景（直播/社媒运营），我们为您开通对应线路试用。", "sources": ["问题16"]}}
 
-示例3（知识库外拒答）：
+示例3（知识库外纯拒答）：
 用户：能货到付款吗
-AI回复：{{"answer": "暂时无法回答，需要人工介入", "sources": []}}
+AI回复：{{"answer": "{settings.REFUSE_MESSAGE}", "sources": []}}
 """
 
 ACCOUNT_EXAMPLES = f"""{_INTENT_HEADER}
@@ -106,9 +108,9 @@ AI回复：{{"answer": "用国内号码即可注册美区apple id，不需要外
 用户：有账号卖吗
 AI回复：{{"answer": "没有账号卖。tiktok账号需要自己注册，请参考美区apple id注册教程和tiktok运营教程。", "sources": ["问题57"]}}
 
-示例3（知识库外拒答）：
+示例3（知识库外纯拒答）：
 用户：帮我代注册账号可以吗
-AI回复：{{"answer": "暂时无法回答，需要人工介入", "sources": []}}
+AI回复：{{"answer": "{settings.REFUSE_MESSAGE}", "sources": []}}
 """
 
 CLARIFICATION_EXAMPLES = """以下是短问题或模糊问题的澄清示例，请学习其澄清方式（只提问，不猜测答案）：

@@ -2,6 +2,7 @@
 
 总长度硬上限8000字符（任务书决策1），超限时按优先级裁剪对话历史与知识库内容。
 """
+from backend.config import settings
 from backend.decision_layer.base import DecisionResult
 from backend.knowledge import KnowledgeBase
 from backend.orchestrator.example_selector import select_examples
@@ -48,15 +49,19 @@ class PromptBuilder:
         return prompt
 
     def _role_section(self) -> str:
-        """系统角色定义与知识库使用原则。"""
+        """系统角色定义与知识库使用原则（#062：拒答/转人工两动作分开）。"""
         return (
             "你是SDWAN智能客服机器人，负责回答SDWAN专线产品相关问题。"
             "回复要少而准、像人一样聊天、不贴长文，直接回答问题，不要重复自我介绍。"
-            "优先使用【知识库】内容回答用户问题；只有当问题与知识库内容明显无关时，"
-            "才回复\"暂时无法回答，需要人工介入\"，禁止编造知识库以外的产品信息。"
+            "优先使用【知识库】内容回答用户问题，禁止编造知识库以外的产品信息。"
             "特别注意：如果用户问的是知识库内容没有提到的具体对象（例如某个平台、软件、网站、服务），"
-            "一律视为不知道，必须回复\"暂时无法回答，需要人工介入\"；"
-            "绝不允许从线路的通用性、合规性推断该对象可用或不可用。"
+            "一律视为不知道，绝不允许从线路的通用性、合规性推断该对象可用或不可用。"
+            "\n\n回答不了时先判断该转人工还是该纯拒答，两种话术固定：\n"
+            f"1. 转人工（回复「{settings.HANDOFF_MESSAGE}」）：用户有诉求但超出你能处理的范围，"
+            "如投诉、议价/改价、账号或订单查询、定制方案、超出规则的请求（如延长试用）；\n"
+            f"2. 纯拒答（回复「{settings.REFUSE_MESSAGE}」）：纯抱怨没有诉求、价格质疑但说不出比较对象、"
+            "我们确实没有这项业务。\n"
+            "拿不准一律按转人工处理。"
         )
 
     def _knowledge_section(self, decision: DecisionResult, knowledge_base: KnowledgeBase, message: str = "") -> str:
@@ -119,7 +124,8 @@ class PromptBuilder:
         return (
             '【回复要求】严格输出JSON（不要输出JSON以外的内容）：\n'
             '{"answer": "给用户的回复", "sources": ["问题N", ...]}\n'
-            "- answer：像人一样聊天，少而准；知识库没有的信息回复\"暂时无法回答，需要人工介入\"\n"
+            "- answer：像人一样聊天，少而准；知识库没有的信息不要硬答，"
+            f"按角色定义的规则判断该转人工（回复「{settings.HANDOFF_MESSAGE}」）还是纯拒答（回复「{settings.REFUSE_MESSAGE}」），拿不准一律转人工\n"
             "- sources：引用的知识库问题编号列表，没有引用则为[]\n"
             "- 仅当问题模糊且知识库内容不足以确定答案时，answer才用一句疑问句澄清；"
             "知识库已能回答的问题直接回答，不要反问"

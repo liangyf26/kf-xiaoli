@@ -180,9 +180,13 @@ def test_run_evaluation_skips_skip_and_security_cases(tmp_path, monkeypatch):
 
 
 def test_markers_are_final_set_with_evidence_only():
-    """定稿口径：refuse 只留 3 条有实证的；无样本的候选串默认不生效。"""
-    assert module.REFUSE_MARKERS == ("暂时无法回答", "无法回答", "知识库里没有")
-    assert len(module.HANDOFF_MARKERS) == 8
+    """定稿口径（#059 定稿 + #062 话术拆分同步）：refuse 只留纯拒答串；候选串默认不生效。"""
+    # #062：产品有纯拒答话术后（REFUSE_MESSAGE「…回答不了…换个问法…」），
+    # 「回答不了」「换个问法」提为正式；「暂时无法回答」移出——旧 canned 整串必含
+    # 「人工介入」会被先判 handoff，留在 refuse 里是死条目。
+    assert module.REFUSE_MARKERS == ("回答不了", "换个问法", "无法回答", "知识库里没有")
+    assert len(module.HANDOFF_MARKERS) == 9
+    assert "同事确认" in module.HANDOFF_MARKERS
     assert "人工介入" in module.HANDOFF_MARKERS and "通知管理群" in module.HANDOFF_MARKERS
     # 候选串留着但默认关闭：不能被当成拒答标记
     assert set(module.REFUSE_MARKERS_CANDIDATES).isdisjoint(module.REFUSE_MARKERS)
@@ -208,7 +212,9 @@ def test_refuse_observed_note_in_payload(tmp_path, monkeypatch):
 
     payload = json.loads(Path(asyncio.run(module.run_evaluation(labeled))).read_text(encoding="utf-8"))
     assert payload["metadata"]["refuse_observed_note"] == module.REFUSE_OBSERVED_NOTE
-    assert "话术设计" in payload["metadata"]["refuse_observed_note"]
+    # #062 后说明随事实更新：观察项性质不变（不进主分母），产品已有纯拒答话术
+    assert "观察项" in payload["metadata"]["refuse_observed_note"]
+    assert "REFUSE_MESSAGE" in payload["metadata"]["refuse_observed_note"]
     # 主准确率只看可考核且非 refuse 的那条
     assert payload["accuracy_metrics"]["answer_accuracy"] == 1.0
     # refuse 题被如实记录成「判成了 handoff」

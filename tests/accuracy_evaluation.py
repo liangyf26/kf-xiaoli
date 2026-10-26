@@ -48,10 +48,12 @@ RESULTS_DIR = PROJECT_ROOT / "tests" / "results"
 # 标记表已由 Chief 2026-10-25 定稿：**每条都必须有代码或真实回复的出处**，
 # 拒绝凭空加词。命令行可用 --handoff-markers / --refuse-markers 临时覆盖。
 HANDOFF_MARKERS = (
-    # backend/orchestrator/handlers.py:201-202 的固定转人工话术（真实回复里就是这个）
+    # backend/orchestrator/handlers.py 固定转人工话术（真实回复里就是这个）；
+    # #062 拆分后为 settings.HANDOFF_MESSAGE「这个问题需要同事确认，已为您转接人工客服。」
     "人工介入",
     "转接人工",
     "人工客服",
+    "同事确认",
     "人工会尽快与您联系",
     # tests/results/batch_test_20261009-155725.json 真实回复：
     # 「…可能需要人工帮你看看线路状态和带宽情况。方便的话我帮你转人工处理？」
@@ -65,8 +67,11 @@ HANDOFF_MARKERS = (
 )
 
 REFUSE_MARKERS = (
-    # backend/config.py:65 NO_ANSWER_MESSAGE / prompt_builder.py 固定话术
-    "暂时无法回答",
+    # #062 拆分后的固定纯拒答话术（settings.REFUSE_MESSAGE，不含「人工」二字）：
+    # 「这个问题我暂时回答不了，您可以换个问法，或稍后再问我。」
+    "回答不了",
+    "换个问法",
+    # 旧 canned / LLM 变体仍可能出现的纯拒答说法（先判 handoff，带「人工」的轮不到它）
     "无法回答",
     # 知识库里没有可直接作答的条目时的自然说法（真实回复见
     # tests/results/batch_test_20261009-155725.json「这个情况知识库里没有直接的排查方案」）
@@ -75,16 +80,18 @@ REFUSE_MARKERS = (
 
 # 无真实样本、**默认关闭**的候选串（Chief 2026-10-25：不许写进默认值，否则误伤
 # 会把正常回答判成拒答）。等真出现这类回复、且确认不误伤后再并入 REFUSE_MARKERS。
-REFUSE_MARKERS_CANDIDATES = ("答不了", "回答不了", "没有这方面的信息", "不清楚", "不知道")
+# （「回答不了」已随 #062 话术拆分提为正式——新纯拒答话术固定含它。）
+REFUSE_MARKERS_CANDIDATES = ("答不了", "没有这方面的信息", "不清楚", "不知道")
 
 # 旧口径：任一类拒答话术都算「拒答」（只给**没有** expected_action 的历史用例兜底，
 # 新补标数据一律走 classify_reply_action 的互斥判定）
 REFUSAL_MARKERS = HANDOFF_MARKERS + REFUSE_MARKERS
 
-# 报告里固定带的一句口径说明（#059 Chief 定：refuse 是观察项）
+# 报告里固定带的一句口径说明（#059 Chief 定：refuse 是观察项；#062 拆分后产品已有
+# 纯拒答话术，说明随事实更新——指标仍不进主分母，反映的是拒答/转人工的区分能力）
 REFUSE_OBSERVED_NOTE = (
-    "refuse 为观察项，当前产品无纯拒答话术（config.py:65 同时含『无法回答』与"
-    "『人工介入』），该指标反映话术设计而非模型能力"
+    "refuse 为观察项，不进主分母；#062 话术拆分后产品已有纯拒答话术"
+    "（config.REFUSE_MESSAGE，不含『人工』），该指标反映模型区分拒答/转人工的能力"
 )
 
 
@@ -218,9 +225,8 @@ async def run_evaluation(cases_file: Path) -> Path:
         print(f"[{i}/{len(cases)}] {case['question']}")
         detailed.append(await evaluate_case(orchestrator, case))
 
-    # #059 Chief 裁决：refuse 类降级为**观察项**——产品固定的无答案话术
-    # （config.py:65「暂时无法回答，需要人工介入」）一句话同时表达拒答与转人工，
-    # 这是话术设计问题、不是模型能力问题，所以不拿它压低主准确率。
+    # #059 Chief 裁决：refuse 类降级为**观察项**，不进主分母（当时产品固定话术
+    # 一句话同时表达拒答与转人工；#062 拆分后话术已分开，该裁决维持不变）。
     refuse_items = [d for d in detailed if d["expected_action"] == "refuse"]
     scored_items = [d for d in detailed if d["expected_action"] != "refuse"]
     # P 组：「答得对不对」——新数据 expected_action=answer；历史用例（无该字段）按 should_answer=true 归入

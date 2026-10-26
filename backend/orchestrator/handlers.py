@@ -94,8 +94,9 @@ async def handle_faq_match(decision: DecisionResult, knowledge_base: KnowledgeBa
     # 不再把 get_by_intent 的 _format 拼接串（【章节】问题N: …【price】内部结构）直发客户。
     pairs = knowledge_base.get_by_intent_pairs(decision.intent, query=message, limit=3)
     if not pairs:
+        # #062：FAQ 两条路径都落空=知识库确实没有对应内容 → 纯拒答（不拉人工）。
         return {
-            "answer": settings.NO_ANSWER_MESSAGE,
+            "answer": settings.REFUSE_MESSAGE,
             "sources": [],
             "path": "faq_match",
         }
@@ -137,8 +138,12 @@ async def handle_llm_generation(
             # 解析降级后answer仍是JSON残片（LLM输出被截断）时视为失败，走重试
             broken_json = answer.startswith("{") and '"answer"' in answer
             if answer and not broken_json:
-                # 拒答=知识未覆盖，不标注来源；正常回答才做来源校验/回填
-                parsed["sources"] = [] if "暂时无法回答" in answer else _resolve_sources(parsed.get("sources"), prompt)
+                # 拒答/转人工=知识未覆盖或需人工跟进，不标注来源；正常回答才做来源校验/回填。
+                # #062：两个动作的话术串任一命中即清空（旧 canned「暂时无法回答」保留兼容）。
+                parsed["sources"] = (
+                    [] if any(m in answer for m in ("暂时无法回答", "回答不了", "转接人工客服"))
+                    else _resolve_sources(parsed.get("sources"), prompt)
+                )
                 parsed["path"] = "llm_generation"
                 parsed["llm_latency_ms"] = result["latency_ms"]
                 return parsed
@@ -148,8 +153,9 @@ async def handle_llm_generation(
             last_error = str(exc)[:200]
             logger.warning("LLM生成失败: %s", last_error)
 
+    # #062：默认兜底=转人工（系统故障属拿不准，必须保跟进，不许丢）。
     return {
-        "answer": settings.NO_ANSWER_MESSAGE,
+        "answer": settings.HANDOFF_MESSAGE,
         "sources": [],
         "path": "llm_generation",
         "error": last_error,
@@ -196,11 +202,8 @@ def _resolve_sources(llm_sources: Any, prompt: str) -> list[str]:
 
 
 async def handle_escalation(decision: DecisionResult, context: Dict[str, Any]) -> Dict[str, Any]:
-    """转人工：安抚+告知转接。"""
-    answer = (
-        "很抱歉给您带来不好的体验。暂时无法回答，需要人工介入。"
-        "已为您标记问题并转接人工客服，请稍候，人工会尽快与您联系。"
-    )
+    """转人工：统一转接话术（#062 话术拆分，文案单一来源 settings）。"""
+    answer = settings.HANDOFF_MESSAGE
     return {
         "answer": answer,
         "sources": [],
