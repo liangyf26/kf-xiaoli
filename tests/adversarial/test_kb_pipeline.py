@@ -163,6 +163,24 @@ def test_reset_backs_up_and_restores_seed(tmp_path):
     assert len(versions) == 1 and versions[0]["version"] == 0 and versions[0]["parent"] is None
 
 
+def test_reset_backup_follows_kb_dir(tmp_path):
+    """备份目录跟随 --kb-dir（kb_dir.parent/_backup）；项目 _backup 无新增。"""
+    kb = tmp_path / "kb"
+    kb.mkdir()
+    (kb / "v1.md").write_text("旧版本", encoding="utf-8")
+    seed = tmp_path / "seed.md"
+    seed.write_text("SEED-CONTENT\n", encoding="utf-8")
+    proj_backup = kp.PROJECT_ROOT / "runs" / "adversarial" / "_backup"
+    before = sorted(p.name for p in proj_backup.iterdir()) if proj_backup.exists() else None
+    rc = kp.main(["reset", "--kb-dir", str(kb), "--seed", str(seed)])
+    assert rc == 0
+    backups = sorted((tmp_path / "_backup").iterdir())
+    assert len(backups) == 1 and (backups[0] / "kb" / "v1.md").read_text(encoding="utf-8") == "旧版本"
+    assert (kb / "v0.md").read_text(encoding="utf-8") == "SEED-CONTENT\n"
+    after = sorted(p.name for p in proj_backup.iterdir()) if proj_backup.exists() else None
+    assert after == before                       # 项目 _backup 未被塞入备份
+
+
 def test_kb_seed_prefers_latest_version(tmp_path):
     """下一局起隔离实例：有 versions.jsonl 用最新版本，无则回退 seed_path。"""
     seed = tmp_path / "seed.md"

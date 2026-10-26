@@ -43,7 +43,6 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 PROPOSALS_FILE = "kb_proposals.jsonl"
 VERSIONS_FILE = "versions.jsonl"
-BACKUP_ROOT = PROJECT_ROOT / "runs" / "adversarial" / "_backup"
 SIM_THRESHOLD = 0.65          # 冲突关题面相似度阈值（实测来源见模块 docstring）
 KINDS = ("新增", "修改", "删除")
 
@@ -384,7 +383,10 @@ def main(argv=None) -> int:
         out = apply(args.kb_dir, args.seed, review_bot=args.review_bot)
         print(json.dumps(out, ensure_ascii=False, default=str))
         return 0 if out.get("applied") else 1
-    out = reset(args.kb_dir, BACKUP_ROOT, args.seed)
+    # 备份目录跟随 --kb-dir（kb_dir.parent/_backup），默认 kb-dir=runs/adversarial/kb
+    # 时仍落 runs/adversarial/_backup；沙盒 --kb-dir 不会往项目目录塞备份
+    #（Chief 复核 2026-10-27：写死项目路径会让多次测试串味）。
+    out = reset(args.kb_dir, Path(args.kb_dir).parent / "_backup", args.seed)
     print(json.dumps(out, ensure_ascii=False))
     return 0
 
