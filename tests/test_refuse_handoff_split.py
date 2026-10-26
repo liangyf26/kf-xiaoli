@@ -225,3 +225,45 @@ def test_few_shot_scripts_aligned_with_settings():
                   COMPARISON_EXAMPLES, PURCHASE_EXAMPLES, ACCOUNT_EXAMPLES):
         assert OLD_CANNED not in block
         assert "暂时无法回答" not in block
+
+
+# ---------------------------------------------------------------- P1-1 sources 误清回归
+
+# 正常回答，但句子里含三个话术片段（Reviewer P1-1 实测场景）
+TRICKY_NORMAL = (
+    "有的朋友说我们回答不了问题、暂时无法回答就要找人工，其实不用"
+    "转接人工客服，IDC线路120元每月、ISP家庭IP线路180元每月。"
+)
+
+
+def _prompt_and_refs():
+    kb = KnowledgeBase(ROOT / "data" / "sdwan-new.md")
+    pb = PromptBuilder()
+    decision = _decision()
+    prompt = pb.build_prompt(message="直播线路多少钱", decision=decision,
+                             context={}, knowledge_base=kb)
+    refs = _extract_sources(_knowledge_section_text(prompt))
+    assert len(refs) >= 3
+    return pb, decision, kb, refs
+
+
+def test_sources_kept_when_normal_answer_contains_script_fragments():
+    """P1-1 回归：正常回答含「回答不了/暂时无法回答/转接人工客服」片段但带
+    有效 KB 来源 → sources 不减（子串匹配会误清，整串相等才清）。"""
+    for frag in ("回答不了", "暂时无法回答", "转接人工客服"):
+        assert frag in TRICKY_NORMAL
+    pb, decision, kb, refs = _prompt_and_refs()
+    llm = _FakeLLM(responses=[json.dumps(
+        {"answer": TRICKY_NORMAL, "sources": refs[:3]}, ensure_ascii=False)])
+    res = _run(handle_llm_generation("直播线路多少钱", decision, {}, llm, pb, kb))
+    assert res["sources"] == refs[:3]
+
+
+def test_template_scripts_still_clear_sources():
+    """P1-1 回归：模板话术（与 settings 话术规范化后整串相等）输出时 sources 必空。"""
+    pb, decision, kb, refs = _prompt_and_refs()
+    for script in (REFUSE, HANDOFF):
+        llm = _FakeLLM(responses=[json.dumps(
+            {"answer": script, "sources": refs[:3]}, ensure_ascii=False)])
+        res = _run(handle_llm_generation("直播线路多少钱", decision, {}, llm, pb, kb))
+        assert res["sources"] == []

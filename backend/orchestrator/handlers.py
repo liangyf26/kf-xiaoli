@@ -12,6 +12,26 @@ from backend.orchestrator.prompt_builder import PromptBuilder
 
 logger = logging.getLogger(__name__)
 
+
+def _normalize_text(text: str) -> str:
+    """去首尾空白 + 连续空白合并成 1 个空格（#062 P1-1 话术整串比对用）。"""
+    return re.sub(r"\s+", " ", (text or "").strip())
+
+
+def _template_scripts() -> frozenset:
+    """模板话术集合（规范化后整串相等才算拒答/转人工回复）。
+
+    #062 P1-1：不再用子串匹配清 sources——正常回答里出现「回答不了」等
+    片段（如「有的问题我回答不了，但线路价格是…」）会误清有效来源。
+    只认与固定话术整串相等的回复：LLM 被系统提示强教固定话术，输出即原文。
+    兜底/escalation/FAQ空池路径不经过此处（它们直接返回话术+sources=[]）。
+    """
+    return frozenset(_normalize_text(t) for t in (
+        settings.REFUSE_MESSAGE,
+        settings.HANDOFF_MESSAGE,
+        "暂时无法回答，需要人工介入",  # 旧 canned 兼容（LLM 偶发输出旧话术时仍清）
+    ))
+
 # 来源标识头（#022）：_format 输出的条目首行形如
 #   有章节：「【售前问题 · 价格】问题1: 标题【price】」
 #   无章节（旧库）：「问题1: 标题【price】」
@@ -138,12 +158,13 @@ async def handle_llm_generation(
             # 解析降级后answer仍是JSON残片（LLM输出被截断）时视为失败，走重试
             broken_json = answer.startswith("{") and '"answer"' in answer
             if answer and not broken_json:
-                # 拒答/转人工=知识未覆盖或需人工跟进，不标注来源；正常回答才做来源校验/回填。
-                # #062：两个动作的话术串任一命中即清空（旧 canned「暂时无法回答」保留兼容）。
-                parsed["sources"] = (
-                    [] if any(m in answer for m in ("暂时无法回答", "回答不了", "转接人工客服"))
-                    else _resolve_sources(parsed.get("sources"), prompt)
-                )
+                # 拒答/转人工=与模板话术规范化后**整串相等**才清来源（#062 P1-1：
+                # 旧子串匹配会把含「回答不了」等片段的正常回答误清）；
+                # 其余回答照常做来源校验/回填。
+                if _normalize_text(answer) in _template_scripts():
+                    parsed["sources"] = []
+                else:
+                    parsed["sources"] = _resolve_sources(parsed.get("sources"), prompt)
                 parsed["path"] = "llm_generation"
                 parsed["llm_latency_ms"] = result["latency_ms"]
                 return parsed
