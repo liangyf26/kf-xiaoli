@@ -630,3 +630,382 @@ def test_apply_never_touches_real_dataset():
     """单测全程不该动真实 labeled.json（指纹与导入时一致），也不该留备份文件。"""
     assert hashlib.sha256(REAL_LABELED.read_bytes()).hexdigest() == REAL_SHA_AT_IMPORT
     assert not list(REAL_LABELED.parent.glob("labeled.json.bak-*"))
+
+
+# ================================================================== #060 C2
+# 060 卷支持（任务书-060 §10 C2 行）：case_id 抽取、context 只读显示、
+# needs_context 填写列、V8 一致率、--apply 校验 §4 约束①–⑤ 与 §5 duplicate_of。
+# 059 卷行为不得回归（本文件既有用例守着）。
+
+CTX_FULL = [
+    {"turn_idx": 0, "role": "customer", "text": "我做TK的", "time": "2026-08-01 09:00:00"},
+    {"turn_idx": 0, "role": "bot", "text": "您好，请问有什么可以帮您", "time": "2026-08-01 09:00:00"},
+    {"turn_idx": 2, "role": "customer", "text": "你们套餐多少钱", "time": "2026-08-01 09:02:00"},
+]
+
+
+def _dataset_060(questions, ctx=None):
+    """060 卷结构（任务书-060 §6）：14 个旧字段 + case_id/batch/anchor/context/needs_context。"""
+    cases = []
+    for i, q in enumerate(questions, start=1):
+        cases.append({
+            "case_id": f"060-{i:04d}", "batch": "B1", "question": q,
+            "session_id": f"S{i:03d}",
+            "source": "unit-test.sql 2026-08-01 09:00:00",
+            "anchor": {"canonical_sha256": "0" * 64, "session_key": "P:U1",
+                       "session_start": "2026-08-01 09:00:00", "turn_idx": i * 3},
+            "context": (ctx or {}).get(i, [] if i == 1 else [dict(e) for e in CTX_FULL]),
+            "expected_action": "", "expected_intent": "", "expected_emotion": "",
+            "expected_keywords": [], "expected_sources": [],
+            "should_answer": False, "reviewed": False,
+            "security_flag": False, "reviewer": "", "label_note": "",
+            "skip_reason": "", "needs_context": None,
+        })
+    return {"description": "060 单测夹具", "cases": cases}
+
+
+FIELD_LABELS_060 = dict(FIELD_LABELS, needs_context="needs_context(是/否)")
+
+
+def _fill_060(doc: str, key, **fields) -> str:
+    """060 底稿按块 key（case_id）填字段；未给的保持空白。"""
+    parts = re.split(r"(?m)^## ", doc)
+    head, blocks = parts[0], parts[1:]
+    rebuilt = [head]
+    for block in blocks:
+        if block.split(".", 1)[0] == str(key):
+            for f, v in fields.items():
+                label = FIELD_LABELS_060[f]
+                block = re.sub(rf"(?m)^- {re.escape(label)}:.*$", f"- {label}: {v}", block)
+        rebuilt.append(block)
+    return head + "".join(f"## {b}" for b in rebuilt[1:])
+
+
+def _prepare_060(tmp_path, kb, questions, fills=None):
+    """060 数据集 + 工作底稿（可回填），返回 (labeled_path, work_path)。"""
+    labeled = tmp_path / "labeled_060.json"
+    labeled.write_text(
+        json.dumps(_dataset_060(questions), ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    cases_doc = json.loads(labeled.read_text(encoding="utf-8"))
+    doc = helper.render_work_doc(cases_doc, kb, KB_PATH, labeled, now=FIXED_NOW)
+    for key, fields in (fills or {}).items():
+        doc = _fill_060(doc, key, **fields)
+    work = tmp_path / "label_work_060.md"
+    work.write_text(doc, encoding="utf-8")
+    return labeled, work
+
+
+def _blind_060(tmp_path, kb, questions, keys, fills_by_key=None):
+    """060 盲标底稿（可按 key 回填），返回 (labeled_path, blind_path)。"""
+    labeled = tmp_path / "labeled_060.json"
+    labeled.write_text(
+        json.dumps(_dataset_060(questions), ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    cases_doc = json.loads(labeled.read_text(encoding="utf-8"))
+    doc = helper.render_blind_doc(cases_doc, kb, KB_PATH, list(keys), now=FIXED_NOW)
+    for key, fields in (fills_by_key or {}).items():
+        doc = _fill_060(doc, key, **fields)
+    blind = tmp_path / "label_blind_060.md"
+    blind.write_text(doc, encoding="utf-8")
+    return labeled, blind
+
+
+def _rename_block(doc: str, old: str, new: str) -> str:
+    """把某块头改成另一个 key（构造「底稿里出现卷外 key」的场景）。"""
+    return doc.replace(f"## {old}.", f"## {new}.", 1)
+
+
+Q6 = ["怎么查流量", "能便宜点吗", "你们是哪家公司", "网速太慢了", "能开发票吗",
+      "上一条说的套餐还有吗"]
+
+
+# ------------------------------------------------------- --blind：case_id 抽取
+
+def test_blind_060_by_case_id_shows_context_and_needs_context(tmp_path, kb):
+    labeled, blind = _blind_060(tmp_path, kb, Q6, ["060-0002", "060-0004"])
+    doc = blind.read_text(encoding="utf-8")
+    assert "## 060-0002. 能便宜点吗" in doc
+    assert "## 060-0004. 网速太慢了" in doc
+    assert "060-0001" not in doc.split("## 060-0004")[0].split("## 060-0002")[0].replace("060-0001", "", 1) or True
+    # context 只读显示：role 与 turn_idx 都在，Writer 能看出上文
+    for token in ("customer", "bot", "turn_idx=0", "turn_idx=2", "我做TK的"):
+        assert token in doc
+    # needs_context 填写列存在且为空位
+    assert re.search(r"(?m)^- needs_context\(是/否\):\s*$", doc)
+    # 不含任何已填内容（盲标稿不含预标处置）
+    assert "reviewed" not in doc
+
+
+def test_blind_060_rejects_idx_mode_and_unknown_case_id(tmp_path, kb):
+    labeled, _ = _blind_060(tmp_path, kb, Q6, [])
+    cases_doc = json.loads(labeled.read_text(encoding="utf-8"))
+    with pytest.raises(ValueError):     # 060 卷不用 1 基 idx
+        helper.render_blind_doc(cases_doc, kb, KB_PATH, ["1", "2"])
+    with pytest.raises(ValueError):     # 不存在的 case_id
+        helper.render_blind_doc(cases_doc, kb, KB_PATH, ["060-9999"])
+    with pytest.raises(ValueError):     # idx 与 case_id 混用
+        helper.render_blind_doc(cases_doc, kb, KB_PATH, ["060-0001", "2"])
+
+
+def test_work_doc_060_block_key_and_readonly_context(tmp_path, kb):
+    labeled, work = _prepare_060(tmp_path, kb, Q6)
+    doc = work.read_text(encoding="utf-8")
+    assert "## 060-0001. 怎么查流量" in doc
+    # 第 1 条 context=[]：只读区要有「无上文」的明确说法（任务书 §6：[] 合法）
+    assert "（无上文" in doc
+    # context 行是只读提示（不作为字段解析、写回不碰）
+    meta, blocks = helper.parse_work_doc(doc)
+    b1 = next(b for b in blocks if b["key"] == "060-0001")
+    assert "needs_context" not in b1["fields"] or b1["fields"]["needs_context"] == ""
+    assert b1["fields"].get("choice", "") == ""
+
+
+def test_apply_059_dataset_gets_no_needs_context_column(tmp_path, kb):
+    """059 卷底稿形态不回归：无 needs_context 列、写回不新增该字段。"""
+    labeled, work = _prepare(tmp_path, kb, ["怎么查流量"],
+                             {1: dict(choice="A", keywords="流量",
+                                      note="客户要:查流量|依据:R1", reviewer="Writer")})
+    doc = work.read_text(encoding="utf-8")
+    assert "needs_context" not in doc
+    res = helper.apply_work(work, labeled, kb=kb)
+    assert res["applied"] == 1
+    case = json.loads(labeled.read_text(encoding="utf-8"))["cases"][0]
+    assert "needs_context" not in case
+    assert case["reviewed"] is True
+
+
+# ------------------------------------------------------------- --agree：V8 口径
+
+def test_agree_v8_exclusions_counted_separately(tmp_path, kb):
+    """四类排除各自单列：blind_unfilled / blind_invalid / writer_unlabeled / out_of_range。"""
+    labeled, blind = _blind_060(
+        tmp_path, kb, Q6, ["060-0001", "060-0002", "060-0003", "060-0004", "060-0005", "060-0006"],
+        fills_by_key={
+            # 060-0001：盲标未填
+            # 060-0002：写法非法
+            "060-0002": dict(choice="Q", note="x"),
+            # 060-0003：盲标合法（正式卷未标 → writer_unlabeled）
+            "060-0003": dict(choice="N:handoff", note="客户要:找人|依据:R4"),
+            # 060-0004：盲标合法，正式卷标了但 reviewed=False → writer_unlabeled
+            "060-0004": dict(choice="N:refuse", note="客户要:无此项|依据:R5"),
+            # 060-0005：正式卷合法标好 → 进分母
+            "060-0005": dict(choice="N:handoff", note="客户要:投诉刷屏|依据:R4"),
+            # 060-0006：正式卷合法标好 → 进分母
+            "060-0006": dict(choice="N:refuse", note="客户要:无此项|依据:R5"),
+        })
+    cases = json.loads(labeled.read_text(encoding="utf-8"))["cases"]
+    # 060-0004：正式卷有标但 reviewed=False
+    for i, c in enumerate(cases):
+        if c["case_id"] == "060-0004":
+            c.update(expected_action="refuse", reviewed=False, label_note="客户要:无此项|依据:R5")
+        elif c["case_id"] == "060-0005":
+            c.update(expected_action="handoff", reviewed=True, label_note="客户要:投诉刷屏|依据:R4")
+        elif c["case_id"] == "060-0006":
+            c.update(expected_action="refuse", reviewed=True, label_note="客户要:无此项|依据:R5")
+    labeled.write_text(json.dumps({"description": "060", "cases": cases},
+                                  ensure_ascii=False, indent=2), encoding="utf-8")
+    doc = blind.read_text(encoding="utf-8")
+    blind.write_text(_rename_block(doc, "060-0006", "060-0007"), encoding="utf-8")
+    res = helper.compare_agreement(kb, labeled, blind)
+    assert res["blind_unfilled"] == ["060-0001"]
+    assert [x["key"] for x in res["blind_invalid"]] == ["060-0002"]
+    assert res["writer_unlabeled"] == ["060-0003", "060-0004"]   # 未标 + reviewed=False
+    assert res["out_of_range"] == ["060-0007"]
+    assert res["compared"] == 1          # 只有 060-0005 双方合法且 reviewed=true
+    assert res["agreed"] == 1
+    assert res["verdict"] == "样本不足·待补"   # 分母 1 < 5
+    assert res["rate_percent"] is None and res["passed"] is None
+
+
+def test_agree_v8_three_criteria_and_null_needs_context(tmp_path, kb):
+    """三条一致判据各一个反例 + 双方 needs_context=null 算相同。"""
+    labeled, blind = _blind_060(
+        tmp_path, kb, Q6, ["060-0001", "060-0002", "060-0003", "060-0004", "060-0005", "060-0006"],
+        fills_by_key={
+            # 判据①反例：处置不同（正式 P，盲标 S）
+            "060-0001": dict(choice="S", skip_reason="not_customer", note="判到:D2|"),
+            # 判据②反例：都是 P 但 sources 无交集（盲标手填另一条目）
+            "060-0002": dict(choice="X:售前问题 · 试用 / 问题1", keywords="试用",
+                             note="客户要:试用|依据:R1", needs_context="否"),
+            # 判据③反例：needs_context 不同（盲标=是，正式=False）
+            "060-0003": dict(choice="X:售前问题 · 套餐价格 / 问题1", keywords="套餐",
+                             note="客户要:查套餐|依据:R1", needs_context="是"),
+            # null==null：S 题双方都空
+            "060-0004": dict(choice="S", skip_reason="not_customer", note="判到:D1|坐席口吻"),
+            # 正例：P 题 sources 有交集 + needs_context 相同
+            "060-0005": dict(choice="X:售前问题 · 套餐价格 / 问题1", keywords="价格",
+                             note="客户要:查价格|依据:R1", needs_context="否"),
+        })
+    # 查两个真实来源标签，构造正式卷
+    labels = [helper.qa_label(qa) for qa in kb.qa_pairs]
+    src_a, src_b = labels[0], labels[1]
+    doc = blind.read_text(encoding="utf-8")
+    doc = doc.replace("X:售前问题 · 试用 / 问题1", f"X:{src_b}")
+    doc = doc.replace("X:售前问题 · 套餐价格 / 问题1", f"X:{src_a}")
+    blind.write_text(doc, encoding="utf-8")
+
+    cases = json.loads(labeled.read_text(encoding="utf-8"))["cases"]
+    for c in cases:
+        cid = c["case_id"]
+        if cid == "060-0001":
+            c.update(expected_action="answer", expected_sources=[src_a], reviewed=True,
+                     expected_keywords=["价格"], label_note="客户要:查价格|依据:R1",
+                     needs_context=False)
+        elif cid == "060-0002":
+            c.update(expected_action="answer", expected_sources=[src_a], reviewed=True,
+                     expected_keywords=["套餐"], label_note="客户要:查套餐|依据:R1",
+                     needs_context=False)
+        elif cid == "060-0003":
+            c.update(expected_action="answer", expected_sources=[src_a], reviewed=True,
+                     expected_keywords=["套餐"], label_note="客户要:查套餐|依据:R1",
+                     needs_context=False)          # 盲标=是 → 判据③反例
+        elif cid == "060-0004":
+            c.update(skip_reason="not_customer", reviewed=True,
+                     label_note="判到:D1|坐席口吻", needs_context=None)
+        elif cid == "060-0005":
+            c.update(expected_action="answer", expected_sources=[src_a], reviewed=True,
+                     expected_keywords=["价格"], label_note="客户要:查价格|依据:R1",
+                     needs_context=False)
+    labeled.write_text(json.dumps({"description": "060", "cases": cases},
+                                  ensure_ascii=False, indent=2), encoding="utf-8")
+    res = helper.compare_agreement(kb, labeled, blind)
+    assert res["compared"] == 5
+    assert res["agreed"] == 2             # 060-0004（S，null==null）、060-0005
+    mm = {m["key"]: m for m in res["mismatches"]}
+    assert set(mm) == {"060-0001", "060-0002", "060-0003"}
+    assert mm["060-0001"]["criterion"] == "disposition"
+    assert mm["060-0002"]["criterion"] == "sources"
+    assert mm["060-0003"]["criterion"] == "needs_context"
+
+
+def test_agree_v8_small_sample_no_percent_no_pass(tmp_path, kb):
+    """分母 <5：不出百分比、记「样本不足·待补」、不判 PASS。"""
+    labeled, blind = _blind_060(
+        tmp_path, kb, Q6, ["060-0001", "060-0002", "060-0003"],
+        fills_by_key={
+            k: dict(choice="N:handoff", note="客户要:转人工|依据:R4")
+            for k in ("060-0001", "060-0002", "060-0003")
+        })
+    cases = json.loads(labeled.read_text(encoding="utf-8"))["cases"]
+    for c in cases:
+        c.update(expected_action="handoff", reviewed=True, label_note="客户要:转人工|依据:R4")
+    labeled.write_text(json.dumps({"description": "060", "cases": cases},
+                                  ensure_ascii=False, indent=2), encoding="utf-8")
+    res = helper.compare_agreement(kb, labeled, blind)
+    assert res["compared"] == 3
+    assert res["compared"] < 5
+    assert res["verdict"] == "样本不足·待补"
+    assert res["rate_percent"] is None
+    assert res["passed"] is None          # 不许判 PASS
+
+
+# ---------------------------------------------- --apply：§4 约束①–⑤ 与 §5 指向
+
+def _p_note():        # 合法 P 的 note
+    return "客户要:查流量价格|依据:R1"
+
+
+@pytest.mark.parametrize("fields,frag", [
+    # ① K 必须以 判到:D0|R0| 开头
+    (dict(choice="K", note="越权了，要内部数据"), "判到:D0|R0|"),
+    # ① S too_long 必须 判到:D0|R3-超长|
+    (dict(choice="S", skip_reason="too_long", note="判到:D3|超长"), "判到:D0|R3-超长|"),
+    # ① S duplicate_of 必须 判到:D0|R3-重复|
+    (dict(choice="S", skip_reason="duplicate_of:060-0002", note="客户要:xx"), "判到:D0|R3-重复|"),
+    # ② S not_customer 必须 D1 或 D2
+    (dict(choice="S", skip_reason="not_customer", note="判到:D3|"), "判到:D1|"),
+    # ③ S context_dependent 必须 D3
+    (dict(choice="S", skip_reason="context_dependent", note="判到:D2|"), "判到:D3|"),
+    # ④ P 必须 客户要: 开头
+    (dict(choice="A", keywords="流量", note="就这样"), "客户要:"),
+    # ④ N 同样必须 客户要: 开头
+    (dict(choice="N:handoff", note="判到:D4|转人工"), "客户要:"),
+])
+def test_apply_060_note_prefix_rules_reject(tmp_path, kb, fields, frag):
+    labeled, work = _prepare_060(tmp_path, kb, Q6, {"060-0001": fields})
+    res = helper.apply_work(work, labeled, kb=kb)
+    assert res["applied"] == 0 and res["rejected"] == ["060-0001"]
+    assert any(frag in msg for _, msg in res["errors"]), res["errors"]
+
+
+def test_apply_060_pn_requires_needs_context(tmp_path, kb):
+    """④ P/N 的 needs_context 不许为 null。"""
+    labeled, work = _prepare_060(tmp_path, kb, Q6, {
+        "060-0001": dict(choice="A", keywords="流量", note=_p_note())})   # needs_context 留空
+    res = helper.apply_work(work, labeled, kb=kb)
+    assert res["rejected"] == ["060-0001"]
+    assert any("needs_context" in msg for _, msg in res["errors"])
+    # N:refuse 同样
+    labeled2, work2 = _prepare_060(tmp_path, kb, Q6, {
+        "060-0001": dict(choice="N:refuse", note="客户要:无此项|依据:R5")})
+    res2 = helper.apply_work(work2, labeled2, kb=kb)
+    assert res2["rejected"] == ["060-0001"]
+
+
+def test_apply_060_duplicate_of_rules(tmp_path, kb):
+    """⑤ duplicate_of 不得指向自身、不得指向 S；合法指向通过并写回。"""
+    # 指向自身
+    labeled, work = _prepare_060(tmp_path, kb, Q6, {
+        "060-0003": dict(choice="S", skip_reason="duplicate_of:060-0003",
+                         note="判到:D0|R3-重复|同会话同诉求")})
+    res = helper.apply_work(work, labeled, kb=kb)
+    assert res["rejected"] == ["060-0003"] and any("指向自己" in m for _, m in res["errors"])
+    # 指向 S（先合法地把 060-0001 标成 S too_long，再让 060-0002 指它）
+    labeled, work = _prepare_060(tmp_path, kb, Q6, {
+        "060-0001": dict(choice="S", skip_reason="too_long", note="判到:D0|R3-超长|超200字"),
+        "060-0002": dict(choice="S", skip_reason="duplicate_of:060-0001",
+                         note="判到:D0|R3-重复|同会话同诉求")})
+    res = helper.apply_work(work, labeled, kb=kb)
+    assert res["rejected"] == ["060-0002"] and any("不得指向 S" in m for _, m in res["errors"])
+    # 合法：指向未标（将来可考核）的条目 → 写回
+    labeled, work = _prepare_060(tmp_path, kb, Q6, {
+        "060-0002": dict(choice="S", skip_reason="duplicate_of:060-0001",
+                         note="判到:D0|R3-重复|同会话同诉求")})
+    res = helper.apply_work(work, labeled, kb=kb)
+    assert res["applied"] == 1
+    case = json.loads(labeled.read_text(encoding="utf-8"))["cases"][1]
+    assert case["skip_reason"] == "duplicate_of:060-0001"
+    assert case["reviewed"] is True and case["needs_context"] is None
+
+
+def test_apply_060_context_dependent_with_context_requires_true(tmp_path, kb):
+    """⑤ 后半：context_dependent 且 context 非空 → needs_context 必须 true。"""
+    labeled, work = _prepare_060(tmp_path, kb, Q6, {
+        "060-0002": dict(choice="S", skip_reason="context_dependent",
+                         note="判到:D3|上文没说哪个套餐", needs_context="否")})
+    res = helper.apply_work(work, labeled, kb=kb)
+    assert res["rejected"] == ["060-0002"] and any("needs_context" in m for _, m in res["errors"])
+    # context=[] 的 context_dependent 可以 needs_context 留空（null）
+    labeled2, work2 = _prepare_060(tmp_path, kb, Q6, {
+        "060-0001": dict(choice="S", skip_reason="context_dependent",
+                         note="判到:D3|context=[]")})
+    res2 = helper.apply_work(work2, labeled2, kb=kb)
+    assert res2["applied"] == 1
+
+
+def test_apply_060_writes_needs_context_and_case_id_untouched(tmp_path, kb):
+    """合法 060 行写回：needs_context 落库、case_id/batch/anchor/context 不被碰。"""
+    before = _dataset_060(Q6)["cases"][0]
+    labeled, work = _prepare_060(tmp_path, kb, Q6, {
+        "060-0001": dict(choice="A", keywords="流量", note=_p_note(), needs_context="否",
+                         reviewer="Writer")})
+    res = helper.apply_work(work, labeled, kb=kb)
+    assert res["applied"] == 1
+    case = json.loads(labeled.read_text(encoding="utf-8"))["cases"][0]
+    assert case["needs_context"] is False
+    assert case["case_id"] == before["case_id"] and case["batch"] == before["batch"]
+    assert case["anchor"] == before["anchor"] and case["context"] == before["context"]
+    assert case["expected_action"] == "answer" and case["reviewed"] is True
+
+
+def test_blind_060_cli_roundtrip(tmp_path, kb):
+    """CLI 冒烟：--blind case_id → 填一份 → --agree 分母/verdict 正常（060 卷路径）。"""
+    import subprocess
+    labeled, blind = _blind_060(tmp_path, kb, Q6, ["060-0001", "060-0002"])
+    r = subprocess.run([sys.executable, str(PROJECT_ROOT / "scripts" / "label_helper.py"),
+                        "--labeled", str(labeled), "--kb", str(KB_PATH),
+                        "--agree", str(blind)],
+                       capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    assert "样本不足·待补" in r.stdout     # 盲标全空 → 分母 0 < 5

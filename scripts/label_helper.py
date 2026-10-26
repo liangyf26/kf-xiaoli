@@ -108,11 +108,14 @@ ACTION_BY_KIND = {
 
 # 底稿里的「元信息」行（以 > 开头），--apply/--agree 用来找回知识库路径。
 META_KB_RE = re.compile(r"^>\s*知识库[:：]\s*(.+?)(?:（.*)?$")
-BLOCK_RE = re.compile(r"^##\s+(\d+)\.\s*(.*?)\s*$")
+# 块头 key：059 卷是 1 基 idx（纯数字），060 卷是 case_id（如 060-0001）
+BLOCK_RE = re.compile(r"^##\s+([0-9A-Za-z\-]+)\.(.*?)\s*$")
 CAND_RE = re.compile(r"^-\s*候选\s*([A-Z])\s*[:：]\s*(.*)$")
 CAND_LABEL_RE = re.compile(r"^`([^`]+)`\s*(.*)$")
 FIELD_RE = re.compile(r"^-\s*([^:：]+?)\s*[:：]\s*(.*)$")
 DUP_RE = re.compile(r"^duplicate_of\s*[:：]\s*(\d+)$")
+DUP_060_RE = re.compile(r"^duplicate_of\s*[:：]\s*(\d+-\d+)$")
+CASE_ID_RE = re.compile(r"^\d+-\d+$")
 
 # 底稿字段名 → 内部键（括号里的提示文字先剥掉再查表）
 FIELD_ALIASES = {
@@ -120,6 +123,7 @@ FIELD_ALIASES = {
     "skip_reason": "skip_reason",
     "expected_keywords": "keywords",
     "should_answer": "should_answer",
+    "needs_context": "needs_context",
     "reviewer": "reviewer",
     "备注": "note",
 }
@@ -127,6 +131,23 @@ FIELD_ALIASES = {
 # 每块固定要写的空位（顺序即底稿顺序）
 FIELD_LABELS = ("选择", "skip_reason", "expected_keywords", "should_answer(是/否)",
                 "reviewer", "备注")
+# 060 卷多一列 needs_context（任务书-060 §6：Writer/盲标填，S/K 可留空=null）
+FIELD_LABELS_060 = ("选择", "skip_reason", "expected_keywords", "should_answer(是/否)",
+                    "needs_context(是/否)", "reviewer", "备注")
+
+# §4 可断言约束①–③：处置 → label_note 必须以之开头的前缀（060 卷 apply 校验）
+NOTE_PREFIX = {
+    "K": "判到:D0|R0|",
+    "too_long": "判到:D0|R3-超长|",
+    "duplicate_of": "判到:D0|R3-重复|",
+    "context_dependent": "判到:D3|",
+    "P/N": "客户要:",
+}
+NOT_CUSTOMER_PREFIXES = ("判到:D1|", "判到:D2|")   # ② S not_customer 两者取一
+
+# V8（任务书-060 §8）：一致率分母下限；低于它不报百分比、不判 PASS
+V8_MIN_DENOMINATOR = 5
+V8_PASS_LINE = 85.0
 
 # should_answer 的容错写法（人工填写，中英文都收）
 TRUE_WORDS = {"是", "y", "yes", "true", "1", "对"}
@@ -197,24 +218,59 @@ def parse_idx_list(raw: str) -> list[int]:
     return list(dict.fromkeys(out))
 
 
+def parse_case_id_list(raw: str) -> list[str]:
+    """`060-0001,060-0002` → case_id 列表（保持书写顺序、去重；060 卷不支持区间）。"""
+    out: list[str] = []
+    for part in re.split(r"[,，\s]+", raw.strip()):
+        if not part:
+            continue
+        if not CASE_ID_RE.match(part):
+            raise ValueError(
+                f"060 卷请用 case_id（形如 060-0001），不支持 1 基 idx / 区间: 「{part}」")
+        out.append(part)
+    return list(dict.fromkeys(out))
+
+
+def parse_needs_context(raw: str) -> tuple[bool | None, str | None]:
+    """needs_context 格子 → (值, 错误)。空=(None,None)=未判；是/否→bool；乱值→错误。"""
+    text = (raw or "").strip()
+    if not text:
+        return None, None
+    value = parse_bool(text)
+    if value is None:
+        return None, f"needs_context 只能填 是/否 或留空（实际「{text}」）"
+    return value, None
+
+
+def is_060_doc(cases: list) -> bool:
+    """数据集是否 060 卷：条目带工具生成的 case_id 字段。"""
+    return bool(cases) and all(c.get("case_id") for c in cases)
+
+
 # --------------------------------------------------------------- 生成底稿
 
 
 def _header_lines(kb: KnowledgeBase, kb_path: Path, total: int, now: datetime | None,
-                  blind: bool) -> list[str]:
+                  blind: bool, zero6: bool = False) -> list[str]:
     stamp = (now or datetime.now()).strftime("%Y-%m-%d %H:%M")
+    vol = "#060" if zero6 else "#059"
+    extra_060 = [] if not zero6 else [
+        "> `needs_context`: D3 是否读了 context 才补全对象——是/否；S/K 可留空(=未判)",
+        "> 上文 context 是只读区（含角色与 turn_idx），改了也不回写；题面同理不许改",
+    ]
     if blind:
         return [
-            "# 盲标底稿（#059 · label_helper.py --blind 生成，给 Reviewer 独立盲标）",
+            f"# 盲标底稿（{vol} · label_helper.py --blind 生成，给 Reviewer 独立盲标）",
             f"> 生成时间: {stamp}",
             f"> 知识库: {kb_path}（{len(kb.qa_pairs)} 条）",
             f"> 抽检条数: {total}",
             "> 本文件不含任何已填内容：只看题面 + 候选，按任务书 §3 R0→R5 自己判。",
             "> 填完: .venv/bin/python scripts/label_helper.py --agree <本文件>",
+            *extra_060,
             "",
         ]
     return [
-        "# 标注工作底稿（#059 · scripts/label_helper.py 生成）",
+        f"# 标注工作底稿（{vol} · scripts/label_helper.py 生成）",
         f"> 生成时间: {stamp}",
         f"> 知识库: {kb_path}（{len(kb.qa_pairs)} 条）",
         f"> 数据集: {total} 条",
@@ -225,10 +281,29 @@ def _header_lines(kb: KnowledgeBase, kb_path: Path, total: int, now: datetime | 
         f"> `skip_reason`: S 必填 {SKIP_REASON_HINT}；K 可不填（写 security）",
         "> `expected_keywords`: 仅 P 必填，中英文逗号分隔，每个词须能在所选来源的标题或正文里找到",
         "> `should_answer`: 可留空（P→是，其余→否）；填了会与处置核对",
-        "> idx 为 1 基序号，对应 labeled.json 的 cases[idx-1]；题面已回显，写回时会核对",
+        *extra_060,
+        ("> idx 为 1 基序号，对应 labeled.json 的 cases[idx-1]；题面已回显，写回时会核对"
+         if not zero6 else
+         "> 块头是 case_id（060 卷不用 1 基 idx）；题面已回显，写回时会核对"),
         "> 写回: .venv/bin/python scripts/label_helper.py --apply",
         "",
     ]
+
+
+def _context_lines(case: dict) -> list[str]:
+    """060 卷 context 只读显示：每条标 role 与 turn_idx，customer/bot/human 分行。"""
+    ctx = case.get("context") or []
+    if not ctx:
+        return ["- 上文(只读): （无上文——目标轮是会话第一轮）"]
+    out = [f"- 上文(只读,共{len(ctx)}条):"]
+    for e in ctx:
+        out.append(f"  · [turn_idx={e.get('turn_idx')}|{e.get('role')}] "
+                   f"{one_line(e.get('text', ''))}")
+    return out
+
+
+def _field_slots(zero6: bool) -> tuple[str, ...]:
+    return FIELD_LABELS_060 if zero6 else FIELD_LABELS
 
 
 def _candidate_lines(cands: list[dict]) -> list[str]:
@@ -246,25 +321,38 @@ def _candidate_lines(cands: list[dict]) -> list[str]:
 
 def render_work_doc(cases_doc: dict, kb: KnowledgeBase, kb_path: Path,
                     labeled_path: Path, now: datetime | None = None) -> str:
-    """生成完整底稿。纯函数：同输入同输出（时间戳显式传入便于测试）。"""
+    """生成完整底稿。纯函数：同输入同输出（时间戳显式传入便于测试）。
+
+    060 卷（带 case_id）块头用 case_id、只读显示 context、多一列 needs_context。
+    """
     cases = cases_doc["cases"]
-    lines = _header_lines(kb, kb_path, len(cases), now, blind=False)
+    zero6 = is_060_doc(cases)
+    lines = _header_lines(kb, kb_path, len(cases), now, blind=False, zero6=zero6)
     missing = 0
     for i, case in enumerate(cases, start=1):
         question = case.get("question", "")
         cands = build_candidates(kb, question)
         if not cands:
             missing += 1
-        lines.append(f"## {i}. {one_line(question)}")
-        lines.append(
-            "- 预标: intent={} · emotion={} · session={}".format(
-                case.get("expected_intent", "") or "（空）",
-                case.get("expected_emotion", "") or "（空）",
+        key = case["case_id"] if zero6 else str(i)
+        lines.append(f"## {key}. {one_line(question)}")
+        if zero6:
+            lines.append("- 卷: batch={} · session={} · 会话开始={}".format(
+                case.get("batch", "") or "（空）",
                 case.get("session_id", "") or "（空）",
+                case.get("anchor", {}).get("session_start", "") or "（空）",
+            ))
+            lines.extend(_context_lines(case))
+        else:
+            lines.append(
+                "- 预标: intent={} · emotion={} · session={}".format(
+                    case.get("expected_intent", "") or "（空）",
+                    case.get("expected_emotion", "") or "（空）",
+                    case.get("session_id", "") or "（空）",
+                )
             )
-        )
         lines.extend(_candidate_lines(cands))
-        for label in FIELD_LABELS:
+        for label in _field_slots(zero6):
             lines.append(f"- {label}:")
         lines.append("")
     lines.append(f"<!-- 候选全空的题目: {missing} / {len(cases)} 条 -->")
@@ -273,20 +361,47 @@ def render_work_doc(cases_doc: dict, kb: KnowledgeBase, kb_path: Path,
 
 
 def render_blind_doc(cases_doc: dict, kb: KnowledgeBase, kb_path: Path,
-                     idxs: list[int], now: datetime | None = None) -> str:
+                     idxs: list, now: datetime | None = None) -> str:
     """生成盲标底稿：只给题面 + 候选 + 空位，不含任何已填内容（也不含预标）。
 
-    Reviewer 拿到的是可独立判的题，而不是 Writer 的结论；--agree 用同一套解析。
+    idxs：059 卷 = 1 基 idx（int/数字串）；060 卷 = case_id 串（060-0001，
+    不用 1 基 idx，混用/未知 case_id 都报错）。060 卷附只读 context 与
+    needs_context 列，Reviewer 才能按 §4 D3 独立判。
     """
     cases = cases_doc["cases"]
-    lines = _header_lines(kb, kb_path, len(idxs), now, blind=True)
-    for idx in idxs:
-        if not 1 <= idx <= len(cases):
-            raise ValueError(f"idx {idx} 越界（数据集 {len(cases)} 条）")
-        case = cases[idx - 1]
-        lines.append(f"## {idx}. {one_line(case.get('question', ''))}")
+    zero6 = is_060_doc(cases)
+    keys = [str(k) for k in idxs]
+    by_key: dict = {}
+    if zero6:
+        bad = [k for k in keys if not CASE_ID_RE.match(k)]
+        if bad:
+            raise ValueError(
+                f"060 卷的 --blind 请用 case_id（形如 060-0001），收到: {bad}（060 卷不用 1 基 idx）")
+        dup = sorted({k for k in keys if keys.count(k) > 1})
+        if dup:
+            raise ValueError(f"case_id 重复: {dup}")
+        by_key = {c["case_id"]: c for c in cases}
+        unknown = [k for k in keys if k not in by_key]
+        if unknown:
+            raise ValueError(f"case_id 不在数据集里: {unknown}（数据集 {len(cases)} 条）")
+    else:
+        for k in keys:
+            if not k.isdigit():
+                raise ValueError(f"059 卷的 --blind 请用 1 基 idx，收到: 「{k}」")
+    lines = _header_lines(kb, kb_path, len(keys), now, blind=True, zero6=zero6)
+    for k in keys:
+        if zero6:
+            case = by_key[k]
+        else:
+            idx = int(k)
+            if not 1 <= idx <= len(cases):
+                raise ValueError(f"idx {idx} 越界（数据集 {len(cases)} 条）")
+            case = cases[idx - 1]
+        lines.append(f"## {k}. {one_line(case.get('question', ''))}")
+        if zero6:
+            lines.extend(_context_lines(case))
         lines.extend(_candidate_lines(build_candidates(kb, case.get("question", ""))))
-        for label in FIELD_LABELS:
+        for label in _field_slots(zero6):
             lines.append(f"- {label}:")
         lines.append("")
     return "\n".join(lines)
@@ -304,22 +419,25 @@ def _split_field(raw: str) -> str | None:
 def parse_work_doc(text: str) -> tuple[dict, list[dict]]:
     """解析底稿 → (元信息, 块列表)。
 
-    块结构：{idx, question, candidates: {letter: {label,title}}, fields: {key: str}}。
-    空行与不认识的行（摘录、预标等）直接跳过；字段值只 strip、不改写。
+    块结构：{key, idx, case_id, question, candidates, fields}。
+    059 卷块头是 1 基 idx（纯数字，idx=int、case_id=None）；060 卷是 case_id
+    （idx=None、case_id=key）。空行与不认识的行（摘录、预标、上文等）直接跳过；
+    字段值只 strip、不改写。
     """
     meta: dict = {}
     blocks: list[dict] = []
 
-    def new_block(idx: int, question: str) -> dict:
-        return {"idx": idx, "question": question.strip(),
-                "candidates": {}, "fields": {}}
+    def new_block(key: str, question: str) -> dict:
+        num = int(key) if key.isdigit() else None
+        return {"key": key, "idx": num, "case_id": None if num is not None else key,
+                "question": question.strip(), "candidates": {}, "fields": {}}
 
     current: dict | None = None
     for raw_line in text.splitlines():
         line = raw_line.rstrip()
         m = BLOCK_RE.match(line)
         if m:
-            current = new_block(int(m.group(1)), m.group(2))
+            current = new_block(m.group(1), m.group(2))
             blocks.append(current)
             continue
         if current is None:
@@ -492,13 +610,72 @@ def _backup(labeled_path: Path, now: datetime | None = None) -> Path:
     return backup
 
 
-def _validate_skip_reason(raw: str, idx: int, total: int) -> tuple[str, list[str]]:
-    """校验 S 的 skip_reason，返回 (归一化值, 错误列表)。"""
+SKIP_REASON_HINT_060 = "not_customer / context_dependent / too_long / duplicate_of:<case_id>"
+
+
+def _note_prefix_error(kind: str, skip_reason_raw: str, note: str) -> str | None:
+    """§4 可断言约束①–④的 label_note 前缀（060 卷）。返回 None=通过，否则=拒写原因。"""
+    if kind == KIND_K:
+        want = NOTE_PREFIX["K"]
+        return None if note.startswith(want) else \
+            f"K 的 label_note 必须以「{want}」开头（§4 约束①）"
+    if kind == KIND_S:
+        v = skip_reason_raw.strip()
+        if v == "too_long":
+            want = NOTE_PREFIX["too_long"]
+            return None if note.startswith(want) else \
+                f"S too_long 的 label_note 必须以「{want}」开头（§4 约束①）"
+        if v.startswith("duplicate_of"):
+            want = NOTE_PREFIX["duplicate_of"]
+            return None if note.startswith(want) else \
+                f"S duplicate_of 的 label_note 必须以「{want}」开头（§4 约束①）"
+        if v == "context_dependent":
+            want = NOTE_PREFIX["context_dependent"]
+            return None if note.startswith(want) else \
+                f"S context_dependent 的 label_note 必须以「{want}」开头（§4 约束③）"
+        if note.startswith(NOT_CUSTOMER_PREFIXES[0]) or note.startswith(NOT_CUSTOMER_PREFIXES[1]):
+            return None
+        return "S not_customer 的 label_note 必须以「判到:D1|」或「判到:D2|」开头（§4 约束②）"
+    # P / N:refuse / N:handoff
+    want = NOTE_PREFIX["P/N"]
+    return None if note.startswith(want) else \
+        f"P/N 的 label_note 必须以「{want}」开头（§4 约束④）"
+
+
+def _validate_skip_reason(raw: str, idx: int, total: int,
+                          cases: list | None = None, zero6: bool = False,
+                          self_key=None) -> tuple[str, list[str]]:
+    """校验 S 的 skip_reason，返回 (归一化值, 错误列表)。
+
+    059 卷：duplicate_of:<1 基 idx>，越界/指向自己拒绝。
+    060 卷：duplicate_of:<case_id>；不得指向自己、不得指向数据集里不存在的
+    case_id、不得指向 S 条目（§5；K 的 skip_reason=security 不算 S，按任务书字面不禁）。
+    """
     errs: list[str] = []
     value = raw.strip()
     if not value:
-        errs.append(f"选择 S 时必须填 skip_reason（{SKIP_REASON_HINT}）")
+        errs.append(f"选择 S 时必须填 skip_reason（{SKIP_REASON_HINT if not zero6 else SKIP_REASON_HINT_060}）")
         return "", errs
+    if zero6:
+        if value in SIMPLE_SKIP_REASONS:
+            return value, errs
+        m = DUP_060_RE.match(value)
+        if m:
+            target = m.group(1)
+            key = self_key if self_key is not None else idx
+            if target == key:
+                errs.append("duplicate_of 不能指向自己")
+            elif cases is not None and not any(c.get("case_id") == target for c in cases):
+                errs.append(f"duplicate_of:{target} 不在数据集里")
+            elif cases is not None:
+                tgt = next(c for c in cases if c.get("case_id") == target)
+                sr = (tgt.get("skip_reason") or "").strip()
+                if sr in SIMPLE_SKIP_REASONS or sr.startswith("duplicate_of"):
+                    errs.append(
+                        f"duplicate_of 不得指向 S（{target} 已是 {sr}）")
+            return f"duplicate_of:{target}", errs
+        errs.append(f"skip_reason「{value}」不合法（{SKIP_REASON_HINT_060}）")
+        return value, errs
     if value in SIMPLE_SKIP_REASONS:
         return value, errs
     m = DUP_RE.match(value)
@@ -532,30 +709,40 @@ def apply_work(work_path: str | Path, labeled_path: str | Path,
     cases_doc = json.loads(labeled_path.read_text(encoding="utf-8"))
     cases = cases_doc["cases"]
     index = label_index(kb)
+    zero6 = is_060_doc(cases)          # 060 卷（带 case_id）：启用 §4①–⑤ 校验与 needs_context
 
     result = {"applied": 0, "skipped": 0, "rejected": [], "errors": [],
               "kinds": {}, "backup": None, "written": False, "fatal": []}
 
-    got = [b["idx"] for b in blocks]
-    expected = list(range(1, len(cases) + 1))
+    # 对齐校验：059 按 1..N 的 idx；060 按 case_id 全集（底稿块头即 case_id）
+    if zero6:
+        got = [b["key"] for b in blocks]
+        expected = [c["case_id"] for c in cases]
+    else:
+        got = [b["idx"] for b in blocks]
+        expected = list(range(1, len(cases) + 1))
     if got != expected:
         missing = [i for i in expected if i not in got]
         extra = [i for i in got if i not in expected]
         dup = sorted({i for i in got if got.count(i) > 1})
+        lbl = "key" if zero6 else "idx"
         result["fatal"].append(
             f"底稿块与数据集不对齐：数据集 {len(cases)} 条，底稿 {len(blocks)} 块；"
-            f"缺失 idx={missing} 越界 idx={extra} 重复 idx={dup}"
+            f"缺失 {lbl}={missing} 越界 {lbl}={extra} 重复 {lbl}={dup}"
         )
         return result
 
+    cases_by_id = {c["case_id"]: c for c in cases} if zero6 else {}
     for block in blocks:
-        idx = block["idx"]
-        case = cases[idx - 1]
+        key = block["key"]
+        # 对外报错用：059 卷报 1 基 idx（int），060 卷报 case_id（字符串）
+        disp = block["idx"] if block["idx"] is not None else block["case_id"]
+        case = cases_by_id[block["case_id"]] if zero6 else cases[block["idx"] - 1]
         fields = block["fields"]
         errs: list[str] = []
 
         if one_line(block["question"]) != one_line(case.get("question", "")):
-            errs.append(f"题面与数据集 cases[{idx - 1}] 不一致（底稿错位？）")
+            errs.append(f"题面与数据集（{key}）不一致（底稿错位？）")
 
         resolved = resolve_choice(block, index)
         errs.extend(resolved["errors"])
@@ -573,6 +760,20 @@ def apply_work(work_path: str | Path, labeled_path: str | Path,
         note = fields.get("note", "").strip()
         skip_reason_raw = fields.get("skip_reason", "").strip()
         sources = resolved["sources"]
+        needs_value, needs_err = parse_needs_context(fields.get("needs_context", ""))
+        if needs_err:
+            errs.append(needs_err)
+
+        # §4 可断言约束①–⑤（只对 060 卷启用；059 的 label_note 是自由文本不动）
+        if zero6 and kind is not None and not errs:
+            prefix_err = _note_prefix_error(kind, skip_reason_raw, note)
+            if prefix_err:
+                errs.append(prefix_err)
+            if kind in (KIND_P, KIND_N_REFUSE, KIND_N_HANDOFF) and needs_value is None:
+                errs.append("P/N 题的 needs_context 必须填（是/否），不许留空（§6 留空规则）")
+            if (kind == KIND_S and skip_reason_raw.strip() == "context_dependent"
+                    and (case.get("context") or []) and needs_value is not True):
+                errs.append("context_dependent 且 context 非空时 needs_context 必须为 true（§4 约束⑤）")
 
         # 先在 record 里攒「要写入的字段」，校验全过才落到 case 上；
         # 任一条不成立就把本行整体拒绝（errs 收口在下面一处，避免半截生效）。
@@ -605,7 +806,9 @@ def apply_work(work_path: str | Path, labeled_path: str | Path,
                           "expected_action": kind.split(":", 1)[1],
                           "security_flag": False, "skip_reason": ""}
             elif kind == KIND_S:
-                skip_value, skip_errs = _validate_skip_reason(skip_reason_raw, idx, len(cases))
+                skip_value, skip_errs = _validate_skip_reason(
+                    skip_reason_raw, block["idx"], len(cases),
+                    cases=cases, zero6=zero6, self_key=key)
                 errs.extend(skip_errs)
                 if keywords:
                     errs.append("S（skip）的 expected_keywords 必须留空")
@@ -626,10 +829,12 @@ def apply_work(work_path: str | Path, labeled_path: str | Path,
                           "security_flag": True, "skip_reason": "security"}
 
         if errs or record is None:
-            result["rejected"].append(idx)
-            result["errors"].extend((idx, e) for e in errs or ["校验未通过"])
+            result["rejected"].append(disp)
+            result["errors"].extend((disp, e) for e in errs or ["校验未通过"])
             continue
 
+        if zero6:
+            record["needs_context"] = needs_value   # 060 卷落库（§6）；059 卷不加该字段
         case.update(record)
         case["reviewed"] = True
         case["reviewer"] = reviewer
@@ -655,59 +860,86 @@ def apply_work(work_path: str | Path, labeled_path: str | Path,
 
 def compare_agreement(kb: KnowledgeBase, labeled_path: str | Path,
                       blind_path: str | Path) -> dict:
-    """盲标底稿 vs labeled.json：按 §7 W3 口径算一致率。
+    """盲标底稿 vs 正式卷：V8 口径（任务书-060 §8；059 卷仍按 §7 W3 兼容）。
 
-    一致 = 处置相同（P / N:refuse / N:handoff / S / K）且若都是 P，双方 sources 有交集。
-    keywords 不比（措辞差异大，由工具校验保底）。
+    分母 = 双方都合法填写且正式卷 reviewed=true 的条目数；排除四类并各自单列：
+    blind_unfilled（盲标选择留空）、blind_invalid（盲标写法非法，含 needs_context 乱值）、
+    writer_unlabeled（正式卷未标或 reviewed=false）、out_of_range（key 找不到）。
+    一致 = ①处置相同（P / N:refuse / N:handoff / S / K）②都是 P 时 sources 有交集
+    ③needs_context 相同（双方都 null 算相同）。keywords、skip_reason 细类不比。
+    分母 < V8_MIN_DENOMINATOR：不出百分比，verdict=样本不足·待补，passed=None（不许判 PASS）。
     """
     labeled_path = Path(labeled_path)
     _, blocks = parse_work_doc(Path(blind_path).read_text(encoding="utf-8"))
-    cases = json.loads(labeled_path.read_text(encoding="utf-8"))["cases"]
+    cases_doc = json.loads(labeled_path.read_text(encoding="utf-8"))
+    cases = cases_doc["cases"]
+    zero6 = is_060_doc(cases)
+    by_key = ({c["case_id"]: c for c in cases} if zero6
+              else {str(i + 1): c for i, c in enumerate(cases)})
     index = label_index(kb)
 
-    res = {"total": 0, "compared": 0, "agreed": 0, "rate": 0.0,
-           "mismatches": [], "blind_unfilled": [], "blind_invalid": [],
+    res = {"total": 0, "compared": 0, "agreed": 0, "rate": 0.0, "rate_percent": None,
+           "verdict": "样本不足·待补", "passed": None, "mismatches": [],
+           "blind_unfilled": [], "blind_invalid": [],
            "writer_unlabeled": [], "out_of_range": []}
 
     for block in blocks:
-        idx = block["idx"]
+        # 对外 key：059 卷报 1 基 idx（int），060 卷报 case_id（字符串）
+        key = block["idx"] if block["idx"] is not None else block["case_id"]
         res["total"] += 1
-        if not 1 <= idx <= len(cases):
-            res["out_of_range"].append(idx)
+        case = by_key.get(block["key"])
+        if case is None:
+            res["out_of_range"].append(key)
             continue
         resolved = resolve_choice(block, index)
-        if resolved["errors"]:
-            res["blind_invalid"].append({"idx": idx, "errors": resolved["errors"]})
+        blind_needs, needs_err = parse_needs_context(block["fields"].get("needs_context", ""))
+        if resolved["errors"] or needs_err:
+            res["blind_invalid"].append({
+                "key": key, "errors": resolved["errors"] + (needs_err and [needs_err] or [])})
             continue
         if resolved["kind"] is None:
-            res["blind_unfilled"].append(idx)
+            res["blind_unfilled"].append(key)
             continue
-        writer = cases[idx - 1]
-        writer_kind = case_kind(writer)
-        if writer_kind is None:
-            res["writer_unlabeled"].append(idx)
+        writer_kind = case_kind(case)
+        if writer_kind is None or not case.get("reviewed"):
+            res["writer_unlabeled"].append(key)
             continue
 
         res["compared"] += 1
+        writer_needs = case.get("needs_context")
         blind_sources = list(resolved["sources"])
-        writer_sources = list(writer.get("expected_sources") or [])
-        same = resolved["kind"] == writer_kind
-        if same and resolved["kind"] == KIND_P:
-            same = bool(set(blind_sources) & set(writer_sources))
-        if same:
+        writer_sources = list(case.get("expected_sources") or [])
+        criterion = None
+        if resolved["kind"] != writer_kind:
+            criterion = "disposition"
+        elif resolved["kind"] == KIND_P and not (set(blind_sources) & set(writer_sources)):
+            criterion = "sources"
+        elif blind_needs != writer_needs:
+            criterion = "needs_context"
+        if criterion is None:
             res["agreed"] += 1
         else:
             res["mismatches"].append({
-                "idx": idx,
+                "key": key, "idx": key,
                 "question": one_line(block["question"]),
-                "writer_kind": writer_kind,
-                "blind_kind": resolved["kind"],
-                "writer_sources": writer_sources,
-                "blind_sources": blind_sources,
+                "criterion": criterion,
+                "writer_kind": writer_kind, "blind_kind": resolved["kind"],
+                "writer_sources": writer_sources, "blind_sources": blind_sources,
+                "writer_needs_context": writer_needs, "blind_needs_context": blind_needs,
             })
 
-    if res["compared"]:
+    if res["compared"] and not zero6:
+        # 059 卷沿用 §7 W3：不算 V8，无 <5 限制
         res["rate"] = round(res["agreed"] / res["compared"], 4)
+        res["rate_percent"] = round(res["rate"] * 100, 1)
+        res["verdict"] = "已判"
+        res["passed"] = None
+    elif res["compared"] >= V8_MIN_DENOMINATOR:
+        # V8（060 卷）：一致率保留 1 位小数；分母达标才判 PASS/未达线
+        res["rate"] = round(res["agreed"] / res["compared"], 4)
+        res["rate_percent"] = round(res["rate"] * 100, 1)
+        res["verdict"] = "已判"
+        res["passed"] = res["rate_percent"] >= V8_PASS_LINE
     return res
 
 
@@ -773,21 +1005,24 @@ def main(argv: list[str] | None = None) -> int:
         if not args.out:
             print("--blind 需要同时给 --out <输出路径>", file=sys.stderr)
             return 2
-        try:
-            idxs = parse_idx_list(args.blind)
-        except ValueError as exc:
-            print(f"idx 列表解析失败: {exc}", file=sys.stderr)
-            return 2
         cases_doc = json.loads(labeled_path.read_text(encoding="utf-8"))
+        zero6 = is_060_doc(cases_doc["cases"])
         try:
-            doc = render_blind_doc(cases_doc, kb, kb_path, idxs)
+            # 060 卷按 case_id 抽（060-0001,…，不用 1 基 idx）；059 卷沿用 1 基 idx
+            keys = (parse_case_id_list(args.blind) if zero6
+                    else parse_idx_list(args.blind))
+        except ValueError as exc:
+            print(f"抽取列表解析失败: {exc}", file=sys.stderr)
+            return 2
+        try:
+            doc = render_blind_doc(cases_doc, kb, kb_path, keys)
         except ValueError as exc:
             print(f"生成盲标底稿失败: {exc}", file=sys.stderr)
             return 2
         out_path = Path(args.out)
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(doc, encoding="utf-8")
-        print(f"盲标底稿已生成: {out_path}（{len(idxs)} 条：{idxs}）")
+        print(f"盲标底稿已生成: {out_path}（{len(keys)} 条：{keys}）")
         print(f"知识库: {kb_path}（{len(kb.qa_pairs)} 条）")
         return 0
 
@@ -797,18 +1032,29 @@ def main(argv: list[str] | None = None) -> int:
             print(f"盲标底稿不存在: {blind_path}", file=sys.stderr)
             return 2
         res = compare_agreement(kb, labeled_path, blind_path)
-        print(f"盲标一致率: {res['agreed']}/{res['compared']} = {res['rate'] * 100:.1f}%"
-              f"（底稿 {res['total']} 条）")
+        if res["verdict"] == "样本不足·待补":
+            print(f"V8 一致率: 样本不足·待补（分母 {res['compared']} < {V8_MIN_DENOMINATOR}，"
+                  f"一致 {res['agreed']}/{res['compared']}）——不判 PASS；"
+                  f"补抽到分母 ≥{V8_MIN_DENOMINATOR} 再按 {V8_PASS_LINE:.0f}% 判")
+        else:
+            state = "PASS" if res["passed"] else "未达线"
+            print(f"V8 一致率: {res['agreed']}/{res['compared']} = "
+                  f"{res['rate_percent']:.1f}%（{state}，线 {V8_PASS_LINE:.0f}%）")
         for key, label in (("blind_unfilled", "盲标未填"), ("blind_invalid", "盲标写法非法"),
-                           ("writer_unlabeled", "正式标注尚未标"), ("out_of_range", "idx 越界")):
+                           ("writer_unlabeled", "正式标注尚未标/reviewed未过"),
+                           ("out_of_range", "key 越界")):
             if res[key]:
-                print(f"{label}: {res[key] if key != 'blind_invalid' else [x['idx'] for x in res[key]]}")
+                shown = res[key] if key != "blind_invalid" else [x["key"] for x in res[key]]
+                print(f"{label}: {shown}（{len(shown)} 条）")
         if res["mismatches"]:
-            print(f"不一致 idx: {[m['idx'] for m in res['mismatches']]}")
+            print(f"不一致 key: {[m['key'] for m in res['mismatches']]}")
             for m in res["mismatches"]:
-                print(f"  idx {m['idx']}: 正式={m['writer_kind']} 盲标={m['blind_kind']}"
-                      f"｜正式来源={m['writer_sources']}｜盲标来源={m['blind_sources']}"
-                      f"｜{m['question'][:40]}")
+                nc = (f"｜needs_context 正式={m['writer_needs_context']} "
+                      f"盲标={m['blind_needs_context']}"
+                      if m["criterion"] == "needs_context" else "")
+                print(f"  {m['key']}[{m['criterion']}]: 正式={m['writer_kind']} "
+                      f"盲标={m['blind_kind']}｜正式来源={m['writer_sources']}"
+                      f"｜盲标来源={m['blind_sources']}{nc}｜{m['question'][:40]}")
         return 0
 
     cases_doc = json.loads(labeled_path.read_text(encoding="utf-8"))
