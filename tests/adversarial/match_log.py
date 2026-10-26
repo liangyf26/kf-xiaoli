@@ -100,7 +100,11 @@ def summarize(games: list[dict]) -> dict:
             "results": len(turns),
             "valid": len(turns) - len(invalid),
             "invalid": len(invalid),
-            "balanced": g["expected"] == len(turns),
+            "stop": g.get("stop", "questions_done"),
+            # race 局 expected=实际题数（target/limit 动态），只要不是断粮中断即完整；
+            # fixed 局 expected=配置题数，短了照旧不对账
+            "balanced": (g["expected"] == len(turns)
+                         and g.get("stop", "questions_done") != "poses_exhausted"),
         })
     balanced = all(g["balanced"] for g in per_game) and bool(per_game)
     return {"games": per_game, "balanced": balanced,
@@ -202,7 +206,8 @@ def recompute(round_dir: Path) -> tuple[bool, str]:
     games = []
     for entry in saved.get("games", []):
         turns = _read_jsonl(round_dir / f"game_{entry['game']}" / "turns.jsonl")
-        games.append({"game": entry["game"], "expected": entry["expected"], "turns": turns})
+        games.append({"game": entry["game"], "expected": entry["expected"],
+                      "turns": turns, "stop": entry.get("stop", "questions_done")})
     fresh = summarize(games)
     if fresh != {k: saved.get(k) for k in fresh}:
         return False, f"不一致: 重算 {fresh} != 记录 { {k: saved.get(k) for k in fresh} }"

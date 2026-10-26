@@ -104,11 +104,14 @@ def run_game(game: int, config: dict, pose_fn, answer_fn, search_fn,
         turns.append(record)
         on_turn(record)
 
+    stop = "questions_done" if mode != "race" else "limit_reached"
     while len(turns) < limit:
         if mode == "race" and max(blue, red) >= target:
+            stop = "target_reached"
             break
         pose = pose_fn(topic, followups)
         if pose is None:
+            stop = "poses_exhausted"
             break
         if followups and pose.switch:
             emit({"question": pose.question, "reason": pose.reason, "invalid": False,
@@ -153,6 +156,6 @@ def run_game(game: int, config: dict, pose_fn, answer_fn, search_fn,
 
     invalid = sum(1 for t in turns if t["invalid"])
     ratio = invalid / len(turns) if turns else 0
-    return {"game": game, "turns": turns, "expected": len(turns),
+    return {"game": game, "turns": turns, "expected": len(turns), "stop": stop,
             "blue": blue, "red": red, "invalid": invalid,
             "void": ratio > 0.1}

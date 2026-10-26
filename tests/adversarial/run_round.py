@@ -137,8 +137,10 @@ def _blue_questions(config: dict, n: int, kb: Path) -> list[dict]:
         out.append({"text": text, "reason": reason, "style_id": spec["style_id"],
                     "prompt": prompt, "intent": spec["intent"],
                     "judge_points": spec["judge_points"]})
-    (kb.parent / "blue_prompts.jsonl").write_text(
-        "".join(json.dumps(q, ensure_ascii=False) + "\n" for q in out), encoding="utf-8")
+    prompts_path = kb.parent / "blue_prompts.jsonl"
+    with prompts_path.open("a" if prompts_path.exists() else "w", encoding="utf-8") as fh:
+        for q in out:                            # race 分批出题时追加，不覆盖前批
+            fh.write(json.dumps(q, ensure_ascii=False) + "\n")
     return out
 
 
@@ -213,16 +215,28 @@ def _scope_judge(config: dict, timeout: float = 60):
 
 
 def _local_search(kb: Path):
-    """任务书§归类裁判2 检索入口：对轮目录 kb 副本做进程内 search_top（与实例同库）。"""
+    """任务书§归类裁判2 检索入口：进程内复刻生产 handle_faq_match 两段——
+    search_top（#023 query 优先）→ 空则意图兜底 get_by_intent_pairs（意图与生产同源，
+    用 RuleBasedEngine._match_intent 关键词推导，不引模型）。兜底条目带 fallback 标记，
+    classify 据此在 basis 落「检索: 意图兜底」供复盘区分。"""
     from types import SimpleNamespace
 
+    from backend.decision_layer.rule_engine import RuleBasedEngine
     from backend.knowledge import KnowledgeBase, source_label
 
     kb_obj = KnowledgeBase(kb)
+    rule = RuleBasedEngine()                     # 生产的规则意图识别（关键词计分，<100ms）
+
+    def _wrap(pairs: list, fallback: bool) -> list:
+        return [SimpleNamespace(label=source_label(qa.section, qa.number), fallback=fallback)
+                for qa in pairs]
 
     def search(question: str) -> list:
-        return [SimpleNamespace(label=source_label(qa.section, qa.number))
-                for qa in kb_obj.search_top(question, 3)]
+        top = kb_obj.search_top(question, 3)
+        if top:
+            return _wrap(top, False)
+        intent, _ = rule._match_intent(question or "")
+        return _wrap(kb_obj.get_by_intent_pairs(intent, query=question, limit=3), True)
 
     return search
 
@@ -255,6 +269,8 @@ def run(config: dict, out_root: Path, questions: int | None = None,
     if questions is not None:
         config["match"]["questions"] = questions
     n = config["match"]["questions"]
+    match_mode = config["match"].get("mode", "fixed")
+    limit = config["match"].get("max_questions", 60) if match_mode == "race" else n
     if not config.get("style_card_version"):
         config["style_card_version"] = _style_fingerprint(config)
     if not dry_run and (config.get("red") or {}).get("temperature") is None:
@@ -276,7 +292,8 @@ def run(config: dict, out_root: Path, questions: int | None = None,
     proc = None
     if not dry_run and spawn_fn:
         proc = spawn_fn(kb_copy, config["red"])
-    posed = _planned_pose(config, n, kb_copy) if pose_fn is None and not dry_run else pose_fn
+    posed = (_planned_pose(config, limit if match_mode == "race" else n, kb_copy)
+             if pose_fn is None and not dry_run else pose_fn)
     real_search = search_fn or (_local_search(kb_copy) if kb_copy is not None else None)
     scope_judge = None if dry_run else _scope_judge(config)
     games = []
@@ -296,7 +313,9 @@ def run(config: dict, out_root: Path, questions: int | None = None,
             outcome = run_game(game_no, config, posed or _dry_pose,
                                answer_fn or _dry_answer, real_search or (lambda q: []),
                                on_turn, sleep=lambda s: None, scope_judge=scope_judge)
-            games.append({"game": game_no, "expected": n, "turns": outcome["turns"]})
+            games.append({"game": game_no,
+                          "expected": outcome["expected"] if match_mode == "race" else n,
+                          "turns": outcome["turns"], "stop": outcome["stop"]})
             box.emit(game_no, "summary",
                      f"game {game_no}: 题 {len(outcome['turns'])} 无效 {outcome['invalid']}")
     finally:
@@ -323,30 +342,40 @@ def _kb_object(kb: Path | None):
 
 
 def _planned_pose(config: dict, n: int, kb: Path | None):
-    planned = _blue_questions(config, n, kb or Path("."))
+    """按需分批出题：fixed 一次补齐 n 题行为不变；race 长局上限 60，一次全计划
+    会浪费几十次蓝方调用，按 match.pose_batch（默认 10）分批补货。"""
+    from tests.adversarial.scenarios.style_sampler import resolve_expect_hit
+
+    batch = int((config.get("match") or {}).get("pose_batch", 10))
     kb_obj = _kb_object(kb)
-    if kb_obj is not None:
-        # 场景断言的 expect_hit 是内容短语（A/B 时代口径），对局判分前先解析成
-        # 来源标签（与生产 sources 同格式，#057 的 resolve_expect_hit 路径）；
-        # 解析不出就剥掉 expect_hit 保留 forbid/route，不让红方吃冤枉分。
-        from tests.adversarial.scenarios.style_sampler import resolve_expect_hit
 
-        def _resolve(jp: dict) -> dict:
-            got = resolve_expect_hit(jp, kb_obj.qa_pairs)
-            return got if got is not None else {k: v for k, v in jp.items()
-                                                if k != "expect_hit"}
+    def _resolve(jp: dict) -> dict:
+        got = resolve_expect_hit(jp, kb_obj.qa_pairs)
+        return got if got is not None else {k: v for k, v in jp.items()
+                                            if k != "expect_hit"}
 
-        for item in planned:
-            item["judge_points"] = [(s, _resolve(jp)) for s, jp in item["judge_points"]]
-    cursor = {"i": 0}
+    state = {"planned": [], "next": 0, "seen": 0}
+
+    def _fill() -> None:
+        take = min(batch, n - state["seen"])
+        items = _blue_questions(config, take, kb or Path("."))
+        if kb_obj is not None:
+            # 场景断言的 expect_hit 是内容短语（A/B 时代口径），判分前解析成来源标签
+            # （与生产 sources 同格式，#057 路径）；解析不出剥 expect_hit 保 forbid/route，
+            # 不让红方吃冤枉分。
+            for item in items:
+                item["judge_points"] = [(s, _resolve(jp)) for s, jp in item["judge_points"]]
+        state["planned"].extend(items)
+        state["seen"] += take
 
     def pose(topic: int, followups: int) -> Pose | None:
         # 阶段 2 每题独立，不沿用上一题做追问；追问编排是阶段 3 的事
-        i = cursor["i"]
-        if i >= len(planned):
+        if state["next"] >= len(state["planned"]) and state["seen"] < n:
+            _fill()
+        if state["next"] >= len(state["planned"]):
             return None
-        cursor["i"] += 1
-        item = planned[i]
+        item = state["planned"][state["next"]]
+        state["next"] += 1
         return Pose(question=item["text"], reason=item["reason"],
                     cid=item["intent"], judge_point=item["judge_points"])
 

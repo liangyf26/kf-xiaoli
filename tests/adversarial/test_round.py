@@ -434,3 +434,78 @@ def test_cli_seed_overrides_config(monkeypatch, tmp_path):
     code = rr.main(["--config", "tests/adversarial/round.yaml", "--seed", "7",
                     "--out", str(tmp_path), "--dry-run"])
     assert code == 0 and captured["seed"] == 7
+
+
+# ---- 意图兜底检索 + race 长局适配 ---------------------------------------------
+
+
+def test_race_target_reached_stop():
+    out, _ = _run(lambda t, f: Pose("SDWAN 多少钱"), lambda q: Answer("不知道"), lambda q: [],
+                  match={"mode": "race", "questions": 6, "max_questions": 6, "target_score": 2})
+    assert out["stop"] == "target_reached" and out["blue"] == 2 and len(out["turns"]) == 2
+
+
+def test_race_balanced_run(tmp_path):
+    cfg = {"mode": "program",
+           "match": {"games": 1, "mode": "race", "questions": 6, "target_score": 2,
+                     "max_questions": 6, "seed": 1, "max_followups": 0},
+           "kb": {"seed_path": "missing.md"},
+           "broadcast": {"level": "off", "max_per_sec": 2, "enabled": False},
+           "scope": ["SDWAN"], "retry": {"per_question": 0, "backoff_s": []}}
+    round_dir, code = run(cfg, tmp_path, pose_fn=lambda t, f: Pose("SDWAN 多少钱"),
+                          answer_fn=lambda q: Answer("不知道"))
+    summary = json.loads((round_dir / "summary.json").read_text(encoding="utf-8"))
+    g = summary["games"][0]
+    assert code == 0 and g["stop"] == "target_reached" and g["balanced"] is True
+    assert g["expected"] == g["results"] == 2
+    ok, _ = recompute(round_dir)
+    assert ok
+
+
+def test_race_poses_exhausted_exits_3(tmp_path):
+    cfg = {"mode": "program",
+           "match": {"games": 1, "mode": "race", "questions": 6, "target_score": 2,
+                     "max_questions": 6, "seed": 1},
+           "kb": {"seed_path": "missing.md"},
+           "broadcast": {"level": "off", "max_per_sec": 2, "enabled": False}}
+    _, code = run(cfg, tmp_path, pose_fn=lambda t, f: None)
+    assert code == 3
+
+
+def test_local_search_intent_fallback():
+    from pathlib import Path
+
+    from tests.adversarial.run_round import _local_search
+    search = _local_search(Path("data/sdwan-new.md"))
+    typo = search("那 五个人 频 多钱啊 是景 能坐不")
+    assert typo and all(getattr(h, "fallback", False) for h in typo)   # 错字题走兜底
+    normal = search("SDWAN 多少钱")
+    assert normal and not any(getattr(h, "fallback", False) for h in normal)
+
+
+def test_classify_marks_fallback_in_basis():
+    from types import SimpleNamespace
+
+    def search(q):
+        return [SimpleNamespace(label="售前问题 · 咨询和顾虑 / 问题18", fallback=True)]
+
+    out, _ = _run(lambda t, f: Pose("50拼车流量多少", cid="F3"),
+                  lambda q: Answer("50拼车是100G/月",
+                                   sources=["售前问题 · 咨询和顾虑 / 问题18"]),
+                  search, scope_judge=lambda q: {"status": "in", "basis": "套餐咨询"},
+                  match={"mode": "fixed", "questions": 1})
+    t = out["turns"][0]
+    assert t["red_point"] == 1
+    assert "检索: 意图兜底" in t["classification"]["basis"]
+
+
+def test_blue_prompts_append_across_batches(monkeypatch, tmp_path):
+    import tests.adversarial.run_round as rr
+    monkeypatch.setattr(rr, "_ask_blue", lambda blue, prompt, fallback: ("题面", "理由"))
+    cfg = {"match": {"mode": "fixed", "questions": 2, "seed": 9, "pose_batch": 1},
+           "styles_dir": "tests/adversarial/scenarios/styles",
+           "blue": {"base": "http://blue", "model": "b"}}
+    pose_fn = rr._planned_pose(cfg, 2, tmp_path / "kb.md")
+    assert pose_fn(0, 0) and pose_fn(1, 0)
+    lines = (tmp_path / "blue_prompts.jsonl").read_text(encoding="utf-8").splitlines()
+    assert len(lines) == 2                              # 分批追加不覆盖前批

@@ -65,6 +65,8 @@ def classify_turn(question: str, answer: str, sources: list | None, path: str,
 
     top = list(search(question) or [])
     result["top3"] = [getattr(item, "label", str(item)) for item in top]
+    if any(getattr(item, "fallback", False) for item in top):
+        result["basis"] += "；检索: 意图兜底"      # 复盘可区分：生产同款意图路径接住的错字/零相关题
     ok, missing = facts_ok(cid, answer, keywords)
     result["facts_ok"] = {"ok": ok, "missing": missing}
     result["has_kb"] = bool(result["top3"]) and ok
