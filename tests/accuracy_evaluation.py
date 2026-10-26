@@ -110,6 +110,30 @@ def is_refusal(answer: str) -> bool:
     return any(marker in answer for marker in REFUSAL_MARKERS)
 
 
+# ---------------------------------------------------------------- #060 C3：context/history
+
+# 060 卷 context.role → main.py:218 会话历史 role（bot/human 都是坐席侧 → assistant）
+ROLE_BY_CONTEXT_ROLE = {"customer": "user", "bot": "assistant", "human": "assistant"}
+
+
+def build_history(case: dict) -> list[dict]:
+    """060 卷条目的 context → 编排器 history（main.py:218 格式 [{role, content}]）。
+
+    顺序按 turn_idx 正序（稳定排序：同 turn_idx 内保持产物相对顺序，即
+    C1 挂载规则的 customer→bot→human）；customer→user、bot/human→assistant；
+    role 不在映射内的条目跳过。059 卷无 context 字段 → []。
+    """
+    entries = sorted(enumerate(case.get("context") or []),
+                     key=lambda pair: (pair[1].get("turn_idx", 0) or 0, pair[0]))
+    out = []
+    for _, e in entries:
+        role = ROLE_BY_CONTEXT_ROLE.get(e.get("role"))
+        if role is None:
+            continue
+        out.append({"role": role, "content": e.get("text", "")})
+    return out
+
+
 async def evaluate_case(orchestrator: Orchestrator, case: dict) -> dict:
     """运行单个标注用例并逐项打分。
 
@@ -117,8 +141,13 @@ async def evaluate_case(orchestrator: Orchestrator, case: dict) -> dict:
     具体内容，宽松口径会被关键词命中误判为正确回答。澄清单列clarification_rate。
     """
     start = time.monotonic()
+    # #060 C3：060 卷条目带 context 字段 → 按 main.py:218 格式传 history；
+    # 059 卷（无该字段）第二参数保持 {} 字面不变——评测口径与历史行为都不动。
+    eval_context: dict = {}
+    if "context" in case:
+        eval_context["history"] = build_history(case)
     try:
-        result = await orchestrator.process(case["question"], {})
+        result = await orchestrator.process(case["question"], eval_context)
         answer = result.get("answer", "")
         sources = result.get("sources", [])
         path = result.get("path", "")
@@ -179,6 +208,11 @@ async def evaluate_case(orchestrator: Orchestrator, case: dict) -> dict:
         "source_pass": source_pass,
         "refusal_pass": refusal_pass,
         "clarified": clarified,
+        # #060 C3：分组键与 history 概况（059 卷为 None/False/0，分组归「(无batch)」等）
+        "batch": case.get("batch"),
+        "needs_context": case.get("needs_context"),
+        "has_context": bool(case.get("context")),
+        "history_turns": len(eval_context.get("history", [])),
     }
 
 
@@ -200,6 +234,71 @@ def load_cases(cases_file: Path) -> tuple[list[dict], dict]:
 
 def _rate(items: list[dict], key: str) -> float:
     return round(sum(1 for d in items if d[key]) / len(items), 4) if items else 0.0
+
+
+def _group_view(items: list[dict]) -> dict:
+    """一组条目的指标视图：与主 metrics 完全同口径，只是分母取该组（#060 C3）。
+
+    refuse 仍为观察项（不进该组分母），单列 refuse_cases / refuse_hits。
+    """
+    refuse_items = [d for d in items if d["expected_action"] == "refuse"]
+    scored = [d for d in items if d["expected_action"] != "refuse"]
+    p_items = [d for d in scored
+               if d["expected_action"] == "answer"
+               or (not d["expected_action"] and d["should_answer"])]
+    handoff_items = [d for d in scored if d["expected_action"] == "handoff"]
+    action_items = p_items + handoff_items
+    source_items = [d for d in p_items if d["expected_sources"]]
+    return {
+        "denominator": len(action_items),                      # 分母 = P + handoff
+        "action_cases": len(action_items),
+        "action_passed": sum(1 for d in action_items if d["answer_pass"]),
+        "action_accuracy": _rate(action_items, "answer_pass"),
+        "answer_cases": len(p_items),
+        "answer_passed": sum(1 for d in p_items if d["answer_pass"]),
+        "answer_accuracy": _rate(p_items, "answer_pass"),
+        "handoff_cases": len(handoff_items),
+        "handoff_hits": sum(1 for d in handoff_items if d["handoff_pass"]),
+        "handoff_accuracy": _rate(handoff_items, "handoff_pass"),
+        "source_scored": len(source_items),
+        "source_passed": sum(1 for d in source_items if d["source_pass"]),
+        "source_accuracy": _rate(source_items, "source_pass"),
+        "refuse_cases": len(refuse_items),
+        "refuse_hits": sum(1 for d in refuse_items if d["refuse_pass"]),
+    }
+
+
+def group_metrics(detailed: list[dict]) -> dict:
+    """按 batch / needs_context / context 是否为空 三视图分组（#060 C3）。
+
+    合并跑 059+060 时总分母只作汇总，这里的分组数才是结论（059 条目无 batch
+    字段，归「(无batch)」组；needs_context 缺失归 null 组）。
+    """
+    by_batch: dict = {}
+    by_nc: dict = {}
+    by_ctx: dict = {}
+    for d in detailed:
+        by_batch.setdefault(d.get("batch") or "(无batch)", []).append(d)
+        nc = d.get("needs_context")
+        by_nc.setdefault("null" if nc is None else ("true" if nc else "false"), []).append(d)
+        by_ctx.setdefault("empty" if not d.get("has_context") else "nonempty", []).append(d)
+    return {
+        "by_batch": {k: _group_view(v) for k, v in sorted(by_batch.items())},
+        "by_needs_context": {k: _group_view(by_nc[k])
+                             for k in ("true", "false", "null") if k in by_nc},
+        "context_contrast": {k: _group_view(by_ctx[k])
+                             for k in ("empty", "nonempty") if k in by_ctx},
+        "note": "合并跑 059+060 时总分母只作汇总，分组数才是结论（任务书-060 §10 C3）",
+    }
+
+
+def _print_group(view: dict, title: str) -> None:
+    print(f"  {title}: 分母 {view['denominator']}"
+          f"｜处置 {view['action_accuracy'] * 100:.1f}%（{view['action_passed']}/{view['action_cases']}）"
+          f"｜P答 {view['answer_passed']}/{view['answer_cases']}"
+          f"｜转人工 {view['handoff_hits']}/{view['handoff_cases']}"
+          f"｜来源 {view['source_passed']}/{view['source_scored']}"
+          f"｜refuse观察 {view['refuse_hits']}/{view['refuse_cases']}")
 
 
 async def run_evaluation(cases_file: Path) -> Path:
@@ -277,6 +376,7 @@ async def run_evaluation(cases_file: Path) -> Path:
     }
 
     out_path = RESULTS_DIR / f"accuracy_eval_{os.environ.get('DECISION_ENGINE', 'default')}_{datetime.now().strftime('%Y%m%d-%H%M%S')}.json"
+    groups = group_metrics(detailed)
     payload = {
         "metadata": {
             "source_file": cases_file.name,
@@ -292,6 +392,9 @@ async def run_evaluation(cases_file: Path) -> Path:
                 "（先判handoff再判refuse，互斥；无expected_action的历史用例沿用任一类拒答话术）。"
                 "澄清反问不计作答（单列clarification_rate）。source: 预期来源任一命中。"
                 "#059：带skip_reason的题（含安全组）整条跳过，不进分母，单列skipped/security。"
+                "#060 C3：带context的条目按main.py:218格式传history（customer→user、"
+                "bot/human→assistant，turn_idx正序）；059卷无context字段行为不变。"
+                "结果按batch/needs_context分组报，合并跑时总分母只作汇总，分组数才是结论。"
             ),
             "refuse_observed_note": REFUSE_OBSERVED_NOTE,
             "handoff_markers": list(HANDOFF_MARKERS),
@@ -299,6 +402,7 @@ async def run_evaluation(cases_file: Path) -> Path:
             "source_meta": file_meta,
         },
         "accuracy_metrics": metrics,
+        "groups": groups,
         "skipped_cases": [
             {
                 "idx": all_cases.index(c) + 1,
@@ -328,6 +432,13 @@ async def run_evaluation(cases_file: Path) -> Path:
     print(f"口径说明: {REFUSE_OBSERVED_NOTE}")
     print(f"跳过: {metrics['skipped']} 条（安全组 {metrics['security']} 条、其他 skip {metrics['skipped_non_security']} 条），不进分母")
     print(f"澄清率: {metrics['clarification_rate'] * 100:.1f}%（{metrics['clarified_cases']}例）")
+    print("分组结果（合并跑时总分母只作汇总，分组数才是结论；refuse 不进分母）:")
+    for title, view in groups["by_batch"].items():
+        _print_group(view, f"batch={title}")
+    for title, view in groups["by_needs_context"].items():
+        _print_group(view, f"needs_context={title}")
+    for title, view in groups["context_contrast"].items():
+        _print_group(view, f"{title}(context)")
     print(f"结果文件: {out_path}")
     return out_path
 
