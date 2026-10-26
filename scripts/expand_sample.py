@@ -209,11 +209,139 @@ def funnel_line(funnel: dict) -> str:
             "→ 序列内重话 {dup_text} / 会话满 {per_session_capped} → 样本序列 {pool}").format(**funnel)
 
 
+def _sample_include_ids(args, sessions, q059, canon_sha) -> int:
+    """--include-ids 模式（任务书-060b A3 §7.2/V3）。
+
+    池从完整 sessions.json 按 screen 的 cap 重建（同 collect_jobs 口径，seed 锁 60），
+    三元组白名单只起过滤作用 → 正常情况全命中、不受 §3.2 裁剪影响；随后按
+    --per-session（抽样每会话上限，V3=3）截取、--count 取前 N 条。
+    匹配不到的三元组：stderr 逐条报警 + 产物 include_audit 记录 + 退出码非 0；
+    不许退化成只按 turn_idx 或只按 question 匹配。
+    """
+    try:
+        screen = json.loads(resolve(args.include_ids).read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        print(f"--include-ids 文件不存在: {args.include_ids}", file=sys.stderr)
+        return 1
+    meta = screen.get("meta", {})
+    if meta.get("canonical_sha256") != canon_sha:
+        print(f"screen_060.json 的 canonical_sha256={str(meta.get('canonical_sha256'))[:16]}… "
+              f"与当前库 {canon_sha[:16]}… 不一致（库已变更，锚点失效），拒绝抽样", file=sys.stderr)
+        return 1
+    if args.seed != 60:
+        print(f"--include-ids 模式池口径锁 seed=60（与 screen_060 同口径），收到 {args.seed}",
+              file=sys.stderr)
+        return 2
+
+    triples: dict = {}
+    for x in screen.get("sessions", []):
+        if x.get("verdict") in ("customer", "unsure"):
+            for c in x.get("candidates", []):
+                triples[(c["session_key"], c["session_start"], c["turn_idx"])] = \
+                    c.get("case_candidate_id", "")
+    if not triples:
+        print("screen_060.json 里没有 verdict∈{customer,unsure} 的候选，0 条可抽",
+              file=sys.stderr)
+        return 1
+
+    # 池按 screen 的 cap 重建（A3 V3：候选池始终由完整 sessions.json 重建）
+    pool, funnel = build_pool(sessions, args.seed, int(meta.get("cap", 10)), q059)
+
+    def tkey(c):
+        return (c["session"]["session_key"], c["session"]["start_time"], c["turn_idx"])
+
+    pool_keys = {tkey(c) for c in pool}
+    matched = [c for c in pool if tkey(c) in triples]
+    unmatched = sorted(t for t in triples if t not in pool_keys)
+
+    picked, cnt = [], Counter()
+    for c in matched:                                   # pool 序（shuffle 后），逐条过上限
+        k = (c["session"]["session_key"], c["session"]["start_time"])
+        if cnt[k] >= args.per_session:
+            continue
+        cnt[k] += 1
+        picked.append(c)
+        if args.count is not None and len(picked) >= args.count:
+            break
+
+    batch_tag = args.batch or "S2"             # B2 分批：--batch B2；缺省 S2（现状一致）
+    start_seq = args.start_seq if args.start_seq is not None else 1
+    batch_cases = [build_case(start_seq + i, batch_tag, c, canon_sha, args.context_turns)
+                   for i, c in enumerate(picked)]
+    audit = {
+        "include_source": args.include_ids,
+        "screen_triples": len(triples),
+        "pool_built_with_cap": int(meta.get("cap", 10)),
+        "matched_triples": len(matched),
+        "unmatched_triples": len(unmatched),
+        "unmatched_list": [f"{sk}|{ss}|T{ti}" for sk, ss, ti in unmatched],
+        "per_session_cap": args.per_session,
+        "picked": len(picked),
+        "batch_tag": batch_tag,
+        "start_seq": start_seq,
+    }
+    if unmatched:                              # 命中的照写，未命中的报警不静默（V3）
+        print(f"⚠️ {len(unmatched)} 个 screen 三元组在池中匹配不到（逐条列出，不许静默）：",
+              file=sys.stderr)
+        for u in audit["unmatched_list"]:
+            print(f"  未命中: {u}", file=sys.stderr)
+
+    out_path = resolve(args.out)
+    sampling = {"mode": "include-ids", "screen_cap": int(meta.get("cap", 10)),
+                "per_session": args.per_session, "count": args.count, "seed": args.seed,
+                "context_turns": args.context_turns}
+    if out_path.exists():
+        payload = json.loads(out_path.read_text(encoding="utf-8"))
+        existing = {c["case_id"]: c for c in payload.get("cases", [])
+                    if c.get("batch") == batch_tag}
+        if existing:
+            new_by_id = {c["case_id"]: c for c in batch_cases}
+            diff_ids = sorted({cid for cid in set(existing) | set(new_by_id)
+                               if existing.get(cid) != new_by_id.get(cid)})
+            if not diff_ids:
+                print(f"{batch_tag} 批已存在且逐字段相同，no-op（不写文件）。")
+                return 2 if unmatched else 0
+            print(f"{batch_tag} 批已存在但内容不同，不写文件。差异 case_id：{', '.join(diff_ids)}",
+                  file=sys.stderr)
+            return 2
+        payload["cases"] = sorted(payload["cases"] + batch_cases, key=lambda c: c["case_id"])
+        payload["sampling"] = sampling
+        payload["include_audit"] = audit
+        payload["funnel"] = funnel
+        out_path.write_text(dump_payload(payload), encoding="utf-8")
+    else:
+        payload = {"description": "060 stage-2 抽样卷（--include-ids 按 screen_060 三元组入样）",
+                   "sampling": sampling, "include_audit": audit,
+                   "funnel": funnel, "cases": batch_cases}
+        out_path.write_text(dump_payload(payload), encoding="utf-8")
+
+    print(f"include-ids: screen 三元组 {len(triples)} → 池命中 {len(matched)} → "
+          f"每会话≤{args.per_session} 截取后 {len(picked)} 条"
+          f"（--count={args.count}）；未命中 {len(unmatched)}（详见 stderr）")
+    if batch_cases:
+        print(f"S2 卷已写入 {args.out}（case_id {batch_cases[0]['case_id']}"
+              f"–{batch_cases[-1]['case_id']}，batch={batch_tag}）")
+    else:
+        print(f"S2 卷已写入 {args.out}（0 条）")
+    return 2 if unmatched else 0
+
+
 def cmd_sample(args) -> int:
     sessions = json.loads(resolve(args.sessions).read_text(encoding="utf-8"))["sessions"]
     l059 = json.loads(resolve(args.labeled_059).read_text(encoding="utf-8"))
     q059 = {norm_text(c.get("question")) for c in l059.get("cases", [])}
     canon_sha = canonical_sha256(sessions)
+    if args.include_ids:
+        return _sample_include_ids(args, sessions, q059, canon_sha)
+    if args.batch is None:
+        print("缺 --batch（批模式必填；按白名单抽样请用 --include-ids）", file=sys.stderr)
+        return 2
+    try:
+        args.batch = int(args.batch)           # 批模式 --batch 是整数（include-ids 模式是标签）
+    except ValueError:
+        print(f"批模式 --batch 要整数批号（收到 {args.batch!r}）；标签名只用于 --include-ids 模式",
+              file=sys.stderr)
+        return 2
     pool, funnel = build_pool(sessions, args.seed, args.per_session, q059)
     print(funnel_line(funnel))
 
@@ -429,10 +557,21 @@ def main(argv=None) -> int:
     sp = sub.add_parser("sample", help="抽第 k 批并追加到产物（追加语义见 §10）")
     sp.add_argument("--seed", type=int, default=60)
     sp.add_argument("--context-turns", type=int, default=5)
-    sp.add_argument("--per-session", type=int, default=3)
+    sp.add_argument("--per-session", "--cap", dest="per_session", type=int, default=3,
+                    help="批模式=每会话抽几条；--include-ids 模式=抽样每会话上限（V3 用 3）")
     sp.add_argument("--batch-size", type=int, default=50)
-    sp.add_argument("--batch", type=int, required=True, help="取第 k 批（1 起）")
-    sp.add_argument("--out", default=DEFAULT_OUT)
+    sp.add_argument("--batch", type=str, default=None,
+                    help="批模式=取第 k 批（整数，1 起）；--include-ids 模式=batch 标签名"
+                         "（如 B2，写进每条 case 的 batch 字段；缺省 S2）")
+    sp.add_argument("--start-seq", type=int, default=None,
+                    help="--include-ids 模式：case_id 起始序号（--start-seq 51 → 060-0051 起；"
+                         "缺省 1）")
+    sp.add_argument("--include-ids", default=None,
+                    help="screen_060.json：verdict∈{customer,unsure} 的候选按"
+                         "(session_key,session_start,turn_idx) 三元组入样（任务书-060b §7.2）")
+    sp.add_argument("--count", type=int, default=None,
+                    help="--include-ids 模式：最多取多少条（不足则全取）")
+    sp.add_argument("--out", "--output", dest="out", default=DEFAULT_OUT)
     sp.add_argument("--sessions", default=DEFAULT_SESSIONS)
     sp.add_argument("--labeled-059", default=DEFAULT_LABELED_059)
     sp.set_defaults(func=cmd_sample)

@@ -1,0 +1,393 @@
+{
+  "description": "#060b V2 条目级抽查盲稿（Writer 填 writer_answer；--check 算准确率）",
+  "screen_source": "data/wx_real/screen_060.json",
+  "screen_meta_cap": 10,
+  "sample_spec": "15,15",
+  "seed": 60,
+  "layer_frame": {
+    "customer": 290,
+    "not_customer": 665
+  },
+  "layer_n": {
+    "customer": 15,
+    "not_customer": 15
+  },
+  "samples": [
+    {
+      "sample_id": "V2-001",
+      "session_key": "P:U001",
+      "session_start": "2026-09-13 07:38:23",
+      "turn_idx": 1,
+      "question": "sdwan多少钱",
+      "layer": "customer",
+      "writer_answer": null
+    },
+    {
+      "sample_id": "V2-002",
+      "session_key": "P:U001",
+      "session_start": "2026-09-21 20:42:41",
+      "turn_idx": 4,
+      "question": "没理由啊，怎么时断时得",
+      "layer": "customer",
+      "writer_answer": null
+    },
+    {
+      "sample_id": "V2-003",
+      "session_key": "P:U004",
+      "session_start": "2026-08-11 08:58:55",
+      "turn_idx": 0,
+      "question": "1. 工业系统提交材料的修改完善上传\n2. 智周万物高企系统材料准备",
+      "layer": "customer",
+      "writer_answer": null
+    },
+    {
+      "sample_id": "V2-004",
+      "session_key": "P:U005",
+      "session_start": "2026-09-08 10:58:59",
+      "turn_idx": 0,
+      "question": "录音上传的时机就只有整个项目打完电话的时候么？后台没有录音，手机上有录音在本地",
+      "layer": "customer",
+      "writer_answer": null
+    },
+    {
+      "sample_id": "V2-005",
+      "session_key": "P:U032",
+      "session_start": "2026-08-04 08:05:18",
+      "turn_idx": 0,
+      "question": "可以的。下周走如何",
+      "layer": "customer",
+      "writer_answer": null
+    },
+    {
+      "sample_id": "V2-006",
+      "session_key": "P:U037",
+      "session_start": "2026-08-19 17:28:52",
+      "turn_idx": 5,
+      "question": "我的几个马甲都是一般纳税人，没有小规模了",
+      "layer": "customer",
+      "writer_answer": null
+    },
+    {
+      "sample_id": "V2-007",
+      "session_key": "P:U042",
+      "session_start": "2026-08-10 17:04:41",
+      "turn_idx": 27,
+      "question": "明天要盖章给过来哦",
+      "layer": "customer",
+      "writer_answer": null
+    },
+    {
+      "sample_id": "V2-008",
+      "session_key": "P:U050",
+      "session_start": "2026-08-31 17:18:49",
+      "turn_idx": 5,
+      "question": "那个是什么价格",
+      "layer": "customer",
+      "writer_answer": null
+    },
+    {
+      "sample_id": "V2-009",
+      "session_key": "P:U058",
+      "session_start": "2026-09-07 15:43:52",
+      "turn_idx": 1,
+      "question": "申请域名一般多少钱？",
+      "layer": "customer",
+      "writer_answer": null
+    },
+    {
+      "sample_id": "V2-010",
+      "session_key": "P:U081",
+      "session_start": "2026-08-13 21:48:39",
+      "turn_idx": 4,
+      "question": "劳心劳力",
+      "layer": "customer",
+      "writer_answer": null
+    },
+    {
+      "sample_id": "V2-011",
+      "session_key": "P:U081",
+      "session_start": "2026-08-17 11:08:35",
+      "turn_idx": 3,
+      "question": "费用怎么收",
+      "layer": "customer",
+      "writer_answer": null
+    },
+    {
+      "sample_id": "V2-012",
+      "session_key": "P:U090",
+      "session_start": "2026-09-09 09:17:31",
+      "turn_idx": 14,
+      "question": "美区appid可以搞吗",
+      "layer": "customer",
+      "writer_answer": null
+    },
+    {
+      "sample_id": "V2-013",
+      "session_key": "P:U118",
+      "session_start": "2026-09-09 07:26:34",
+      "turn_idx": 0,
+      "question": "你们sdwan怎么收费？",
+      "layer": "customer",
+      "writer_answer": null
+    },
+    {
+      "sample_id": "V2-014",
+      "session_key": "P:U132",
+      "session_start": "2026-08-21 11:29:27",
+      "turn_idx": 1,
+      "question": "260包月能给到多大带宽？限流量吗？出口ip是哪里的？",
+      "layer": "customer",
+      "writer_answer": null
+    },
+    {
+      "sample_id": "V2-015",
+      "session_key": "P:U145",
+      "session_start": "2026-08-12 17:51:52",
+      "turn_idx": 1,
+      "question": "公司名称：***企业名***\n税号：***证件号***\n单位地址 ***地址***\n电话号码：***电话***\n开户银行 ***开户行***\n银行账户：4505 0160 4556 0000 0042\n开票代码：5QVWJC",
+      "layer": "customer",
+      "writer_answer": null
+    },
+    {
+      "sample_id": "V2-016",
+      "session_key": "P:U001",
+      "session_start": "2026-08-05 20:58:10",
+      "turn_idx": 0,
+      "question": "QQ群，接信息，打字聊天，客服系统，工单系统，派工单 。Qq群客户运营，打字回答参加政府组织的大赛的问题，上系统填写工单，跟进回复参赛者信息。无外勤，政府单位空调房，有人要对接好沟通好，不是G016，只对接QQ群和客服系统的参赛者问题。",
+      "layer": "not_customer",
+      "writer_answer": null
+    },
+    {
+      "sample_id": "V2-017",
+      "session_key": "P:U003",
+      "session_start": "2026-09-04 16:28:42",
+      "turn_idx": 5,
+      "question": "还是吃好喝好先",
+      "layer": "not_customer",
+      "writer_answer": null
+    },
+    {
+      "sample_id": "V2-018",
+      "session_key": "P:U004",
+      "session_start": "2026-08-24 10:50:53",
+      "turn_idx": 1,
+      "question": "你有叫孙总扫我们内网漏洞吗？好像孙总的vpn的IP，去我们sdwan系统的客户前台页面注册了2个用户",
+      "layer": "not_customer",
+      "writer_answer": null
+    },
+    {
+      "sample_id": "V2-019",
+      "session_key": "P:U004",
+      "session_start": "2026-09-04 16:31:06",
+      "turn_idx": 7,
+      "question": "其他没有什么了",
+      "layer": "not_customer",
+      "writer_answer": null
+    },
+    {
+      "sample_id": "V2-020",
+      "session_key": "P:U018",
+      "session_start": "2026-08-20 17:30:40",
+      "turn_idx": 0,
+      "question": "***姓名***，下午好！这是您家8月份的物业相关费用，识别上方的二维码核对房号支付，谢谢您的支持[玫瑰]",
+      "layer": "not_customer",
+      "writer_answer": null
+    },
+    {
+      "sample_id": "V2-021",
+      "session_key": "P:U032",
+      "session_start": "2026-08-07 08:31:58",
+      "turn_idx": 4,
+      "question": "或者没起来",
+      "layer": "not_customer",
+      "writer_answer": null
+    },
+    {
+      "sample_id": "V2-022",
+      "session_key": "P:U038",
+      "session_start": "2026-09-07 15:41:25",
+      "turn_idx": 1,
+      "question": "账号信息你具体给我，我盯一下，避免再出现这个情况",
+      "layer": "not_customer",
+      "writer_answer": null
+    },
+    {
+      "sample_id": "V2-023",
+      "session_key": "P:U053",
+      "session_start": "2026-08-14 08:54:22",
+      "turn_idx": 1,
+      "question": "群晖25+系列今年我看还有人上架网络设备-功能服务器类别，你现在试试上架能不能审批通过",
+      "layer": "not_customer",
+      "writer_answer": null
+    },
+    {
+      "sample_id": "V2-024",
+      "session_key": "P:U073",
+      "session_start": "2026-08-24 15:18:11",
+      "turn_idx": 2,
+      "question": "您刚才问的哪款算力卡？",
+      "layer": "not_customer",
+      "writer_answer": null
+    },
+    {
+      "sample_id": "V2-025",
+      "session_key": "P:U093",
+      "session_start": "2026-08-11 14:33:22",
+      "turn_idx": 4,
+      "question": "这个券是领取到储蓄卡的，一般是用储蓄卡才能满减的~，您试着用储蓄卡支付看一下能否满减哈",
+      "layer": "not_customer",
+      "writer_answer": null
+    },
+    {
+      "sample_id": "V2-026",
+      "session_key": "P:U110",
+      "session_start": "2026-08-20 22:31:46",
+      "turn_idx": 12,
+      "question": "你的几块钱，等下身痕",
+      "layer": "not_customer",
+      "writer_answer": null
+    },
+    {
+      "sample_id": "V2-027",
+      "session_key": "P:U114",
+      "session_start": "2026-08-04 14:38:23",
+      "turn_idx": 3,
+      "question": "您这边有广西南宁纳税b的公司转让吗",
+      "layer": "not_customer",
+      "writer_answer": null
+    },
+    {
+      "sample_id": "V2-028",
+      "session_key": "P:U123",
+      "session_start": "2026-08-04 15:08:27",
+      "turn_idx": 5,
+      "question": "收到，已完成。",
+      "layer": "not_customer",
+      "writer_answer": null
+    },
+    {
+      "sample_id": "V2-029",
+      "session_key": "P:U123",
+      "session_start": "2026-08-28 16:33:24",
+      "turn_idx": 6,
+      "question": "超哥，卡斯特的款，三次元转出去给对方，方便收验证码么？需要两个验证码",
+      "layer": "not_customer",
+      "writer_answer": null
+    },
+    {
+      "sample_id": "V2-030",
+      "session_key": "P:U146",
+      "session_start": "2026-08-18 12:34:08",
+      "turn_idx": 4,
+      "question": "[握手]互相帮助",
+      "layer": "not_customer",
+      "writer_answer": null
+    }
+  ],
+  "session_audit_spec": {
+    "frame_total": 215,
+    "sampled": 10,
+    "sample_sessions": 10,
+    "seed": 60,
+    "insufficient_frame": false,
+    "false_drop_definition": "盲复核认为该会话含至少一条真实客户诉求（问/要/查/办/投诉）"
+  },
+  "session_audit": {
+    "entries": [
+      {
+        "session_key": "P:U103",
+        "session_start": "2026-07-27 16:00:33",
+        "sent_turns": 5,
+        "sent_chars": 310,
+        "window_text": "[客户] 领导，我这边主要做咱们科技行业完善企业资质服务的，我们和中移/电信都是长期的合作伙伴\n[客户] 您后期企业需要的各类资质 荣誉 这块都是可以完善的\n[客户] 领导，***企业名***，咱们平时也都有在拿项目，然后跟我们同一时间段竞争的对手呀，家里面三体系这块完善的都是比较全面的，看咱们家这块也比较空白，只有一个CMMI软件能力成熟度模型证书\n[客户] 领导，***企业名***，咱们平时也都有在拿项目，然后跟我们同一时间段竞争的对手呀，家里面三体系这块完善的都是比较全面的，看咱们家这块也比较空白，只有一个CMMI软件能力成熟度模型证书\n[客户] 咱们这一块也可以把家里面三体系给它完善一下，这是招投标必须的基本门槛",
+        "writer_answer": null,
+        "writer_reason": ""
+      },
+      {
+        "session_key": "P:U134",
+        "session_start": "2026-08-04 14:31:26",
+        "sent_turns": 1,
+        "sent_chars": 38,
+        "window_text": "[客户] 老板 最近要用物联网卡嘛，提供免费测试卡  有需要的话给您报个价嘛",
+        "writer_answer": null,
+        "writer_reason": ""
+      },
+      {
+        "session_key": "P:U071",
+        "session_start": "2026-08-07 20:31:24",
+        "sent_turns": 1,
+        "sent_chars": 203,
+        "window_text": "[客户] -监控摄像头安装 监控系统维修 网络布线-\n-门禁系统-\n-发票打印机 激光.喷墨彩色一体机打印机-\n-全新电脑组装-\n-门禁系统 对讲机 收银系统-\n\n维修：投影仪 打印机 一体机 复印机 电脑\n《耗材配送》\n硒鼓 墨盒 色带 墨水 加墨 加碳粉 碳带 打印纸 复印纸\n\n\n咨询热线\n***手机号***（南宁区）\n***手机号***（桂林区）\n服务区域：广西全区 \n南宁 桂林 灵川 兴安 全州",
+        "writer_answer": null,
+        "writer_reason": ""
+      },
+      {
+        "session_key": "P:U003",
+        "session_start": "2026-08-13 20:08:29",
+        "sent_turns": 6,
+        "sent_chars": 95,
+        "window_text": "[客户] 我们是不是有一个正式版的ds账号\n[客户] 是不是要赶紧把它用了，不然到时候涨价就不值了\n[客户] [OK]\n[客户] 今天上午动物溯源的摘要和原文\n[客户] 好\n[客户] 永晏让我发群里了",
+        "writer_answer": null,
+        "writer_reason": ""
+      },
+      {
+        "session_key": "P:U081",
+        "session_start": "2026-08-19 08:35:18",
+        "sent_turns": 9,
+        "sent_chars": 432,
+        "window_text": "[客户] 整机配置询价：Intel Ultra9 285K处理器，Z890带WiFi主板，96G DDR5 6400双通道内存，RTX5090D显卡，2T+4T高速固态，16TB企业级机械硬盘，1250W金牌全模组ATX3.0电源，360数显水冷，ATX机箱，27寸4K IPS升降显示器，无光机箱风扇，全新正品\n[客户] 西部数据 24TB WUH722624ALE604\n[客户] 整机配置询价：Intel Ultra9 285K处理器，Z890带WiFi主板，96G DDR5 6400双通道内存，RTX5090D显卡，2T+4T高速固态，16TB企业级机械硬盘，1250W金牌全模组ATX3.0电源，360数显水冷，ATX机箱，27寸4K IPS升降显示器，无光机箱风扇，全新正品  3台\n[客户] 西部数据 24TB WUH722624ALE604 2块\n[客户] 先买硬盘\n[客户] 对，\n[客户] 硬盘你那边能出吧\n[客户] 硬盘这种，你找就可以了\n[客户] 先询价",
+        "writer_answer": null,
+        "writer_reason": ""
+      },
+      {
+        "session_key": "P:U075",
+        "session_start": "2026-08-24 10:30:07",
+        "sent_turns": 1,
+        "sent_chars": 90,
+        "window_text": "[客户] ***企业名***\n主营   工作站  服务器  AI八卡机  24小时在线报价随时发货，有需要报价的可以随时发我  质量售后绝对嘎嘎板正[抱拳][抱拳][抱拳][抱拳]",
+        "writer_answer": null,
+        "writer_reason": ""
+      },
+      {
+        "session_key": "P:U103",
+        "session_start": "2026-08-28 11:37:30",
+        "sent_turns": 1,
+        "sent_chars": 31,
+        "window_text": "[客户] 证书确保一次拿证，终生有效！不下证全额退款，有需要吗",
+        "writer_answer": null,
+        "writer_reason": ""
+      },
+      {
+        "session_key": "P:U003",
+        "session_start": "2026-09-03 09:05:15",
+        "sent_turns": 1,
+        "sent_chars": 115,
+        "window_text": "[客户] 今日工作9月3日\n1，广西启成的软著完成一份文档给君哥看了，新启一份做，找一台新电脑，去提交这家软著，这家有软著账号没？\n2，留校周日上午进行压力测试，准备数据脚本\n3，听实习生呼了么测试总结，工作计划想法，看看人的能力",
+        "writer_answer": null,
+        "writer_reason": ""
+      },
+      {
+        "session_key": "P:U071",
+        "session_start": "2026-09-07 10:51:31",
+        "sent_turns": 1,
+        "sent_chars": 199,
+        "window_text": "[客户] -监控摄像头安装 监控系统维修 网络布线-\n-门禁系统-\n-发票打印机 激光.喷墨彩色一体机打印机-\n-全新电脑组装-\n-门禁系统 对讲机 收银系统-\n\n维修:打印机 一体机 复印机 电脑\n《耗材配送》\n硒鼓 墨盒 色带 墨水 加墨 加碳粉 碳带 打印纸 复印纸\n\n\n咨询热线\n***手机号***（南宁区）\n***手机号***（桂林区）\n服务区域：广西全区 \n南宁 桂林 灵川 兴安 全州",
+        "writer_answer": null,
+        "writer_reason": ""
+      },
+      {
+        "session_key": "P:U112",
+        "session_start": "2026-09-29 18:42:03",
+        "sent_turns": 1,
+        "sent_chars": 181,
+        "window_text": "[客户] 尝试做一年吧，考虑1千次1万次，不如尝试做一次，比地平台的渠道资源，每天的信息以及人脉关系肯定是要比您自己的要广得多的多，您掌握10个项目跟掌握100个项目，做下来的结果效果肯定是不一样的，给您申请最低的价格2500.14个月最大的优惠最好的服务，最大的诚意邀请您，您看您是公司合作，还是个人合作（可以延期到节后开通，服务时间从节后8号开始算）[握手]",
+        "writer_answer": null,
+        "writer_reason": ""
+      }
+    ],
+    "audited": 0,
+    "false_drops": 0,
+    "rate": null,
+    "verdict": "未复核"
+  }
+}

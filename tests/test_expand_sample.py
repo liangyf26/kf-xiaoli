@@ -391,3 +391,169 @@ def test_stats_four_fake_cases(tmp_path):
                                                 "3": 0, "4": 0, "5": 0}
     assert s["needs_context_dist"] == {"true": 1, "false": 1, "null": 2}
     assert s["funnel"] == {"total_turns": 99, "pool": 4}   # 漏斗原样透出
+
+
+# ------------------------------------- --include-ids（任务书-060b A3 §7.2 / V3）
+
+import hashlib
+
+sys.path.insert(0, str(ROOT / "scripts"))
+import expand_sample as ex  # noqa: E402
+
+
+def _screen_doc(sessions_path, cap=10, verdict_map=None, extra_triples=(),
+                canon_sha=None, seed=60):
+    """按真实池构造 screen_060.json 形态文档。verdict_map: {session_key: verdict}。"""
+    sessions = json.loads(Path(sessions_path).read_text(encoding="utf-8"))["sessions"]
+    q059 = {ex.norm_text(c["question"]) for c in _labeled059()["cases"]}
+    canon_sha = canon_sha or ex.canonical_sha256(sessions)
+    pool, _ = ex.build_pool(sessions, seed, cap, q059)
+    by = {}
+    for c in pool:
+        by.setdefault((c["session"]["session_key"], c["session"]["start_time"]),
+                      []).append(c)
+    sarr = []
+    for (sk, ss), cands in sorted(by.items()):
+        v = (verdict_map or {}).get(sk, "customer")
+        if v == "skip":            # 该会话整个不出现在 screen（模拟 not_customer）
+            continue
+        sarr.append({
+            "session_key": sk, "session_start": ss, "verdict": v, "reason": "测试",
+            "method": "llm", "sent_turns": 1, "sent_chars": 10,
+            "candidates": [{"case_candidate_id": f"S{T:04d}_T{c['turn_idx']:03d}",
+                            "session_key": sk, "session_start": ss,
+                            "turn_idx": c["turn_idx"], "question": c["turn"]["text"]}
+                           for c, T in zip(cands, range(1, len(cands) + 1))],
+        })
+    doc = {"meta": {"canonical_sha256": canon_sha, "cap": cap,
+                    "model_config": {"provider": "stub", "model": "m",
+                                     "temperature": 0.0, "top_p": 1.0}},
+           "sessions": sarr, "skipped_sessions": []}
+    for sk, ss, ti in extra_triples:   # 池外三元组（模拟错位）
+        doc["sessions"].append({
+            "session_key": sk, "session_start": ss, "verdict": "customer",
+            "reason": "测试", "method": "llm", "sent_turns": 0, "sent_chars": 0,
+            "candidates": [{"case_candidate_id": "SX999_T999", "session_key": sk,
+                            "session_start": ss, "turn_idx": ti, "question": "池外"}]})
+    return doc
+
+
+def _write_screen(tmp_path, doc, name="screen_060.json"):
+    p = tmp_path / name
+    p.write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
+    return p
+
+
+def _ids_args(out, sessions, l059, screen, cap=3, count=100, extra=()):
+    return ["sample", "--seed", "60", "--include-ids", str(screen), "--cap", str(cap),
+            "--count", str(count), "--output", str(out),
+            "--sessions", str(sessions), "--labeled-059", str(l059), *extra]
+
+
+def test_include_ids_triple_match_warns_exit2(tmp_path):
+    sessions, l059 = _write_inputs(tmp_path)
+    doc = _screen_doc(sessions, extra_triples=[("P:A001", A_START, 999)])
+    screen = _write_screen(tmp_path, doc)
+    out = tmp_path / "s2.json"
+    r = _run(*_ids_args(out, sessions, l059, screen))
+    assert r.returncode == 2, (r.stdout, r.stderr)          # 未命中 → 退出码非 0（V3）
+    assert "匹配不到" in r.stderr and "P:A001|2026-08-01 09:00:00|T999" in r.stderr
+    d = json.loads(out.read_text(encoding="utf-8"))
+    a = d["include_audit"]
+    assert a["unmatched_triples"] == 1 and a["screen_triples"] > a["matched_triples"]
+    assert all("池外" != c["question"] for c in d["cases"])   # 池外条目不进卷
+    # matched 14 条（池内命中）经每会话≤3 截取后 picked=10（B 6→3、A 4→3、C 2、D 1、F 1）
+    assert a["matched_triples"] == 14 and len(d["cases"]) == a["picked"] == 10
+
+
+def test_include_ids_triple_not_turn_idx(tmp_path):
+    """匹配必须三元组：screen 只给 A 会话 turn_idx=2 的候选，B 会话同 turn_idx 不许串。"""
+    sessions, l059 = _write_inputs(tmp_path)
+    doc = _screen_doc(sessions)
+    doc["sessions"] = [s for s in doc["sessions"] if s["session_key"] == "P:A001"]
+    doc["sessions"][0]["candidates"] = [c for c in doc["sessions"][0]["candidates"]
+                                        if c["turn_idx"] == 2]
+    screen = _write_screen(tmp_path, doc)
+    out = tmp_path / "s2.json"
+    r = _run(*_ids_args(out, sessions, l059, screen))
+    assert r.returncode == 0, (r.stdout, r.stderr)
+    d = json.loads(out.read_text(encoding="utf-8"))
+    qs = [c["question"] for c in d["cases"]]
+    assert qs == ["帮忙推荐下"]                              # 只 A 的 T2，不是 B 的 T2
+    assert d["include_audit"]["unmatched_triples"] == 0 and r.returncode == 0
+
+
+def test_include_ids_per_session_cap_and_count(tmp_path):
+    sessions, l059 = _write_inputs(tmp_path)
+    doc = _screen_doc(sessions)
+    screen = _write_screen(tmp_path, doc)
+    # cap=3：B 会话 3 条候选只许取 3
+    out = tmp_path / "s2a.json"
+    r = _run(*_ids_args(out, sessions, l059, screen, cap=3, count=999))
+    assert r.returncode == 0, r.stderr
+    d = json.loads(out.read_text(encoding="utf-8"))
+    from collections import Counter
+    cnt = Counter((c["anchor"]["session_key"]) for c in d["cases"])
+    assert all(v <= 3 for v in cnt.values())
+    # count=1：只取 1 条
+    out2 = tmp_path / "s2b.json"
+    r2 = _run(*_ids_args(out2, sessions, l059, screen, cap=3, count=1))
+    d2 = json.loads(out2.read_text(encoding="utf-8"))
+    assert r2.returncode == 0 and len(d2["cases"]) == 1
+
+
+def test_include_ids_deterministic_sha(tmp_path):
+    """V3：同输入连跑两次 → 输出 sha 相同、exit 0（全命中时）。"""
+    sessions, l059 = _write_inputs(tmp_path)
+    doc = _screen_doc(sessions)
+    screen = _write_screen(tmp_path, doc)
+    a, b = tmp_path / "a.json", tmp_path / "b.json"
+    r1 = _run(*_ids_args(a, sessions, l059, screen))
+    r2 = _run(*_ids_args(b, sessions, l059, screen))
+    assert r1.returncode == 0 and r2.returncode == 0, (r1.stderr, r2.stderr)
+    assert a.read_bytes() == b.read_bytes()
+
+
+def test_include_ids_rejects_bad_seed(tmp_path):
+    sessions, l059 = _write_inputs(tmp_path)
+    doc = _screen_doc(sessions)
+    screen = _write_screen(tmp_path, doc)
+    out = tmp_path / "s2.json"
+    r2 = _run(*_ids_args(out, sessions, l059, screen, extra=["--seed", "55"]))
+    assert r2.returncode == 2 and "seed=60" in r2.stderr
+
+
+def test_include_ids_batch_tag_and_start_seq(tmp_path):
+    """Chief B2 分批：--batch B2 --start-seq 51 → case_id 060-0051 起、batch 全 B2；
+    不传 → 060-0001 起、batch=S2（现状一致）。"""
+    sessions, l059 = _write_inputs(tmp_path)
+    doc = _screen_doc(sessions)
+    screen = _write_screen(tmp_path, doc)
+    out = tmp_path / "b2.json"
+    r = _run(*_ids_args(out, sessions, l059, screen, cap=3, count=3,
+                        extra=["--batch", "B2", "--start-seq", "51"]))
+    assert r.returncode == 0, r.stderr
+    d = json.loads(out.read_text(encoding="utf-8"))
+    assert [c["case_id"] for c in d["cases"]] == ["060-0051", "060-0052", "060-0053"]
+    assert all(c["batch"] == "B2" for c in d["cases"])
+    assert d["include_audit"]["batch_tag"] == "B2" and d["include_audit"]["start_seq"] == 51
+    # 不传：060-0001 起、batch=S2
+    out2 = tmp_path / "default.json"
+    r2 = _run(*_ids_args(out2, sessions, l059, screen, cap=3, count=3))
+    assert r2.returncode == 0, r2.stderr
+    d2 = json.loads(out2.read_text(encoding="utf-8"))
+    assert [c["case_id"] for c in d2["cases"]] == ["060-0001", "060-0002", "060-0003"]
+    assert all(c["batch"] == "S2" for c in d2["cases"])
+    # 批模式仍要整数批号：--batch abc → 报错不炸
+    r3 = _run(*_sample_args("abc", tmp_path / "x.json", sessions, l059))
+    assert r3.returncode == 2 and "整数批号" in r3.stderr
+
+
+def test_include_ids_rejects_sha_mismatch(tmp_path):
+    sessions, l059 = _write_inputs(tmp_path)
+    doc = _screen_doc(sessions, canon_sha="deadbeef" * 8)
+    screen = _write_screen(tmp_path, doc)
+    out = tmp_path / "s2.json"
+    r = _run(*_ids_args(out, sessions, l059, screen))
+    assert r.returncode == 1 and "不一致" in r.stderr
+    assert not out.exists()                                  # 拒绝抽样不写文件
