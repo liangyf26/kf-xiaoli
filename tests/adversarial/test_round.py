@@ -403,3 +403,20 @@ def test_planned_pose_carries_cid(monkeypatch, tmp_path):
     pose_fn = rr._planned_pose(cfg, 1, tmp_path)
     pose = pose_fn(0, 0)
     assert pose.cid and isinstance(pose.judge_point, list)
+
+
+def test_planned_pose_resolves_expect_hit(monkeypatch, tmp_path):
+    """场景断言的 expect_hit 短语要解析成来源标签，红方 sources 才对得上。"""
+    import shutil
+
+    import tests.adversarial.run_round as rr
+    monkeypatch.setattr(rr, "_ask_blue",
+                        lambda blue, prompt, fallback: ("那个50拼车有多少流量", "追问F3"))
+    kb = tmp_path / "kb.md"
+    shutil.copy("data/sdwan-new.md", kb)
+    cfg = {"match": {"mode": "fixed", "questions": 1, "seed": 42},
+           "styles_dir": "tests/adversarial/scenarios/styles",
+           "blue": {"base": "http://blue", "model": "b"}}
+    pose = rr._planned_pose(cfg, 1, kb)(0, 0)
+    hits = [w for _, jp in pose.judge_point for w in jp.get("expect_hit") or []]
+    assert hits and all("问题" in w for w in hits)      # 短语已变来源标签

@@ -310,8 +310,34 @@ def run(config: dict, out_root: Path, questions: int | None = None,
     return round_dir, (0 if summary["balanced"] else 3)
 
 
+def _kb_object(kb: Path | None):
+    """kb 副本 → KnowledgeBase；路径无效返回 None（判据短语解析用，不阻塞对局）。"""
+    if kb is None or not Path(kb).exists():
+        return None
+    try:
+        from backend.knowledge import KnowledgeBase
+
+        return KnowledgeBase(kb)
+    except Exception:
+        return None
+
+
 def _planned_pose(config: dict, n: int, kb: Path | None):
     planned = _blue_questions(config, n, kb or Path("."))
+    kb_obj = _kb_object(kb)
+    if kb_obj is not None:
+        # 场景断言的 expect_hit 是内容短语（A/B 时代口径），对局判分前先解析成
+        # 来源标签（与生产 sources 同格式，#057 的 resolve_expect_hit 路径）；
+        # 解析不出就剥掉 expect_hit 保留 forbid/route，不让红方吃冤枉分。
+        from tests.adversarial.scenarios.style_sampler import resolve_expect_hit
+
+        def _resolve(jp: dict) -> dict:
+            got = resolve_expect_hit(jp, kb_obj.qa_pairs)
+            return got if got is not None else {k: v for k, v in jp.items()
+                                                if k != "expect_hit"}
+
+        for item in planned:
+            item["judge_points"] = [(s, _resolve(jp)) for s, jp in item["judge_points"]]
     cursor = {"i": 0}
 
     def pose(topic: int, followups: int) -> Pose | None:
