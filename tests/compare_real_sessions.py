@@ -545,7 +545,7 @@ def recompute_from_results(source: Path, args) -> None:
     }, ensure_ascii=False, indent=2), encoding="utf-8")
     import hashlib
     import subprocess
-    anchor = {"llm_base": "http://172.28.50.9:30030/v1", "llm_model": "Qwen3.8-27B"}
+    anchor = {"llm_base": "http://172.28.29.24:30032/v1", "llm_model": "qwen3.8-27b"}
     # 短哈希。报告文件自己也在这次提交里，所以取到的是父提交；
     # 入库前用最终 HEAD 回填报告里的「代码提交 `…`」一行，再 amend。
     git_sha = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True,
