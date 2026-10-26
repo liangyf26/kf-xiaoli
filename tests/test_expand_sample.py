@@ -1,0 +1,362 @@
+"""#060 C1 抽样工具单测（任务书 §8 V5/V6、§10 追加语义、stats 逐数核对）。
+
+运行：pytest tests/test_expand_sample.py -q
+假 sessions 覆盖：文件序≠规范序（time 乱序）、群聊排除、超长/短应答/≤3字/与059重复、
+序列内重话、每会话 cap、bot/human 挂载与空回复不入。
+"""
+import json
+import socket
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+SCRIPT = ROOT / "scripts" / "expand_sample.py"
+
+A_START = "2026-08-01 09:00:00"
+LONG_TEXT = "长" * 201
+DUP_059_TEXT = "已用过的原话"
+
+
+def _turn(text, when, bot="", human="", src="biz_wx_message.sql"):
+    return {"speaker": "customer", "text": text, "time": when,
+            "bot_reply": bot, "human_reply": human, "source_file": src}
+
+
+def _session(sid, key, start, end, turns, src="biz_wx_message.sql"):
+    return {"session_id": sid, "session_key": key, "source_file": src,
+            "start_time": start, "end_time": end, "customer_count": 1, "turns": turns}
+
+
+def _sessions():
+    """turns 列表按文件顺序乱排；规范序由 time 决定（S-A 内 8 轮全乱）。"""
+    return [
+        _session("S-E", "G:E001", "2026-08-01 12:00:00", "2026-08-01 12:10:00", [
+            _turn("群聊消息一", "2026-08-01 12:01:00", src="group.sql"),
+            _turn("群聊消息二", "2026-08-01 12:02:00", src="group.sql"),
+            _turn("群聊消息三", "2026-08-01 12:03:00", src="group.sql"),
+        ]),
+        _session("S-C", "P:C001", "2026-08-01 10:30:00", "2026-08-01 10:36:00", [
+            _turn("C重复题", "2026-08-01 10:35:00"),   # 规范序#2（与#0同原话 → dup_text）
+            _turn("C独有题", "2026-08-01 10:31:00"),   # 规范序#1
+            _turn("C重复题", "2026-08-01 10:30:00"),   # 规范序#0
+        ]),
+        _session("S-A", "P:A001", A_START, "2026-08-01 09:20:00", [
+            _turn("收到", "2026-08-01 09:14:00"),                          # 规范序#5 short_reply
+            _turn("怎么弄套餐", "2026-08-01 09:01:00", bot="请看套餐说明"),   # 规范序#0 候选
+            _turn(LONG_TEXT, "2026-08-01 09:08:00"),                        # 规范序#3 too_long
+            _turn(DUP_059_TEXT, "2026-08-01 09:12:00"),                     # 规范序#4 dup_vs_059
+            _turn("帮忙推荐下", "2026-08-01 09:05:00", human="好的稍等"),      # 规范序#2 候选
+            _turn("嗯嗯嗯", "2026-08-01 09:15:00"),                          # 规范序#6 too_short
+            _turn("价格怎么样", "2026-08-01 09:03:00", bot="120每月"),        # 规范序#1 候选
+            _turn("再问一次价格", "2026-08-01 09:18:00"),                    # 规范序#7 候选
+        ]),
+        _session("S-F", "P:F001", "2026-08-01 13:00:00", "2026-08-01 13:01:00", [
+            _turn("F独有题", "2026-08-01 13:00:30"),
+        ]),
+        _session("S-D", "P:D001", "2026-08-01 11:00:00", "2026-08-01 11:02:00", [
+            _turn("D独有题", "2026-08-01 11:01:00"),      # 规范序#1
+            _turn(DUP_059_TEXT, "2026-08-01 11:00:00"),  # 规范序#0 dup_vs_059
+        ]),
+        _session("S-B", "P:B001", "2026-08-01 10:00:00", "2026-08-01 10:06:00", [
+            _turn(f"B问题{i}", f"2026-08-01 10:0{i}:00") for i in range(1, 7)  # 6 候选，cap 到 3
+        ]),
+    ]
+
+
+def _labeled059():
+    return {"description": "059 假卷", "cases": [{
+        "question": DUP_059_TEXT, "source": "biz_wx_message.sql 2026-08-01 09:12:00",
+        "session_id": "S009", "reviewed": True, "should_answer": False,
+        "expected_action": "answer", "expected_keywords": [], "expected_sources": [],
+    }]}
+
+
+def _write_inputs(tmp_path):
+    sessions = tmp_path / "sessions.json"
+    sessions.write_text(json.dumps({"description": "测试会话", "sessions": _sessions()},
+                                   ensure_ascii=False), encoding="utf-8")
+    l059 = tmp_path / "labeled_059.json"
+    l059.write_text(json.dumps(_labeled059(), ensure_ascii=False), encoding="utf-8")
+    return sessions, l059
+
+
+def _run(*args):
+    return subprocess.run([sys.executable, str(SCRIPT), *args],
+                          capture_output=True, text=True)
+
+
+def _sample_args(batch, out, sessions, l059):
+    return ["sample", "--seed", "60", "--context-turns", "5", "--per-session", "3",
+            "--batch-size", "5", "--batch", str(batch), "--out", str(out),
+            "--sessions", str(sessions), "--labeled-059", str(l059)]
+
+
+EXPECTED_FUNNEL = {"total_turns": 23, "group_excluded": 3, "private_turns": 20,
+                   "too_long": 1, "short_reply": 1, "too_short": 1, "dup_vs_059": 2,
+                   "dup_text": 1, "per_session_capped": 4, "pool": 10}
+# capped=4 = S-B 六候选挤 3 + S-A 四候选挤 1（挤哪条由 seed 决定）；pool=15候选-1重话-4cap
+
+
+# ------------------------------------------------ V5 可复现
+
+def test_v5_same_seed_same_sha(tmp_path):
+    sessions, l059 = _write_inputs(tmp_path)
+    a, b = tmp_path / "a.json", tmp_path / "b.json"
+    r1 = _run(*_sample_args(1, a, sessions, l059))
+    r2 = _run(*_sample_args(1, b, sessions, l059))
+    assert r1.returncode == 0 and r2.returncode == 0, (r1.stderr, r2.stderr)
+    import hashlib
+    ha = hashlib.sha256(a.read_bytes()).hexdigest()
+    hb = hashlib.sha256(b.read_bytes()).hexdigest()
+    assert ha == hb
+
+
+def test_v5_shuffled_sessions_same_sha(tmp_path):
+    """V5②：打乱会话与轮次顺序后重跑，产物 sha256 不变（canonical 序不变）。"""
+    import hashlib
+    import random
+    sessions, l059 = _write_inputs(tmp_path)
+    a = tmp_path / "a.json"
+    assert _run(*_sample_args(1, a, sessions, l059)).returncode == 0
+
+    d = json.loads(sessions.read_text(encoding="utf-8"))
+    r = random.Random(1)
+    r.shuffle(d["sessions"])
+    for s in d["sessions"]:
+        r.shuffle(s["turns"])
+    shuf = tmp_path / "shuffled.json"
+    shuf.write_text(json.dumps(d, ensure_ascii=False), encoding="utf-8")
+
+    c = tmp_path / "c.json"
+    r2 = _run(*_sample_args(1, c, shuf, l059))
+    assert r2.returncode == 0, r2.stderr
+    assert hashlib.sha256(a.read_bytes()).hexdigest() == \
+        hashlib.sha256(c.read_bytes()).hexdigest()
+
+
+# ------------------------------------------------ 追加语义（§10）
+
+def test_batch_new_then_append(tmp_path):
+    """新批 → 追加 exit 0；B2 分次跑 = 一次连跑两批，case_id 全局连续。"""
+    sessions, l059 = _write_inputs(tmp_path)
+    out = tmp_path / "out.json"
+    r1 = _run(*_sample_args(1, out, sessions, l059))
+    assert r1.returncode == 0, r1.stderr
+    d = json.loads(out.read_text(encoding="utf-8"))
+    assert [c["case_id"] for c in d["cases"]] == [f"060-{i:04d}" for i in range(1, 6)]
+    assert all(c["batch"] == "B1" for c in d["cases"])
+    assert d["funnel"] == EXPECTED_FUNNEL
+
+    r2 = _run(*_sample_args(2, out, sessions, l059))
+    assert r2.returncode == 0, r2.stderr
+    d = json.loads(out.read_text(encoding="utf-8"))
+    assert [c["case_id"] for c in d["cases"]] == [f"060-{i:04d}" for i in range(1, 11)]
+    assert {c["batch"] for c in d["cases"]} == {"B1", "B2"}
+    # 样本序列 10 条已取尽：第 3 批起点越界 → 报错退出非 0
+    r3 = _run(*_sample_args(3, out, sessions, l059))
+    assert r3.returncode != 0
+    assert "样本序列只有 10 条" in r3.stderr
+
+
+def test_batch_noop_identical_keeps_bytes(tmp_path):
+    """已有且逐字段相同 → no-op，退出 0，文件字节不变。"""
+    import hashlib
+    sessions, l059 = _write_inputs(tmp_path)
+    out = tmp_path / "out.json"
+    assert _run(*_sample_args(1, out, sessions, l059)).returncode == 0
+    before = hashlib.sha256(out.read_bytes()).hexdigest()
+    r = _run(*_sample_args(1, out, sessions, l059))
+    assert r.returncode == 0
+    assert "no-op" in r.stdout
+    assert hashlib.sha256(out.read_bytes()).hexdigest() == before
+
+
+def test_batch_conflict_nonzero_and_file_untouched(tmp_path):
+    """已有但不同 → 不写文件、stderr 报差异 case_id、退出码非 0。"""
+    import hashlib
+    sessions, l059 = _write_inputs(tmp_path)
+    out = tmp_path / "out.json"
+    assert _run(*_sample_args(1, out, sessions, l059)).returncode == 0
+    before = hashlib.sha256(out.read_bytes()).hexdigest()
+
+    d = json.loads(out.read_text(encoding="utf-8"))
+    d["cases"][0]["question"] = "被人手改过的题"
+    out.write_text(json.dumps(d, ensure_ascii=False, indent=2), encoding="utf-8")
+    tampered = hashlib.sha256(out.read_bytes()).hexdigest()
+
+    r = _run(*_sample_args(1, out, sessions, l059))
+    assert r.returncode != 0
+    assert "060-0001" in r.stderr
+    assert hashlib.sha256(out.read_bytes()).hexdigest() == tampered   # 工具未写文件
+
+
+# ------------------------------------------------ trace（V6）
+
+def test_trace_all_pass_exit0(tmp_path):
+    sessions, l059 = _write_inputs(tmp_path)
+    out = tmp_path / "out.json"
+    assert _run(*_sample_args(1, out, sessions, l059)).returncode == 0
+    r = _run("trace", "--all", "--labeled", str(out), "--sessions", str(sessions))
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "trace 通过 5/5 条" in r.stdout
+    # 原文件字节 sha 只打印、不落产物
+    assert "原文件字节 sha256" in r.stdout
+    assert "sessions_sha256" not in out.read_text(encoding="utf-8")
+
+
+def test_trace_broken_anchor_fails_and_reports_case_id(tmp_path):
+    """改坏 1 条锚点（turn_idx 越界）→ 非 0 退出并点名 case_id。"""
+    sessions, l059 = _write_inputs(tmp_path)
+    out = tmp_path / "out.json"
+    assert _run(*_sample_args(1, out, sessions, l059)).returncode == 0
+    d = json.loads(out.read_text(encoding="utf-8"))
+    victim = d["cases"][2]["case_id"]
+    d["cases"][2]["anchor"]["turn_idx"] = 999
+    out.write_text(json.dumps(d, ensure_ascii=False, indent=2), encoding="utf-8")
+    r = _run("trace", "--all", "--labeled", str(out), "--sessions", str(sessions))
+    assert r.returncode != 0
+    assert victim in r.stdout
+    assert "越界" in r.stdout
+
+
+def test_trace_single_case_prints_window(tmp_path):
+    sessions, l059 = _write_inputs(tmp_path)
+    out = tmp_path / "out.json"
+    assert _run(*_sample_args(1, out, sessions, l059)).returncode == 0
+    r = _run("trace", "060-0001", "--labeled", str(out), "--sessions", str(sessions))
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "会话窗口" in r.stdout and "PASS" in r.stdout
+
+
+# ------------------------------------------------ 规范序 / 窗口 / 产物卫生
+
+def _sample_all(tmp_path, name="out.json"):
+    """batch-size 50 一次取全（pool=10），避免断言依赖洗牌后的批次切分。"""
+    sessions, l059 = _write_inputs(tmp_path)
+    out = tmp_path / name
+    r = _run("sample", "--seed", "60", "--context-turns", "5", "--per-session", "3",
+             "--batch-size", "50", "--batch", "1", "--out", str(out),
+             "--sessions", str(sessions), "--labeled-059", str(l059))
+    assert r.returncode == 0, r.stderr
+    return sessions, out
+
+
+def test_canonical_order_turn_idx(tmp_path):
+    """turn_idx 是规范序下标，不是文件下标（S-A 文件序被乱排）。"""
+    sessions, out = _sample_all(tmp_path)
+    d = json.loads(out.read_text(encoding="utf-8"))
+    a_cases = [c for c in d["cases"] if c["anchor"]["session_key"] == "P:A001"]
+    assert len(a_cases) == 3 and len({c["anchor"]["turn_idx"] for c in a_cases}) == 3
+    by_q = {c["question"]: c for c in a_cases}
+    if "怎么弄套餐" in by_q:      # 会话第一轮：context 必空
+        assert by_q["怎么弄套餐"]["anchor"]["turn_idx"] == 0
+        assert by_q["怎么弄套餐"]["context"] == []
+    if "价格怎么样" in by_q:
+        assert by_q["价格怎么样"]["anchor"]["turn_idx"] == 1
+    if "再问一次价格" in by_q:
+        assert by_q["再问一次价格"]["anchor"]["turn_idx"] == 7
+    assert all(c["anchor"]["session_start"] == A_START for c in a_cases)
+
+
+def test_window_mounting_rules(tmp_path):
+    """§3 挂载：customer→bot→human；回复 turn_idx/time 取客户轮；空回复不入；
+    目标轮自己的回复不进窗口；被过滤的轮仍作上文照带；每会话 cap；漏斗逐类计数。"""
+    sessions, out = _sample_all(tmp_path)
+    d = json.loads(out.read_text(encoding="utf-8"))
+    assert d["funnel"] == EXPECTED_FUNNEL
+    by_q = {c["question"]: c for c in d["cases"]}
+    # 目标轮「价格怎么样」=S-A 规范序#1，前文=#0（bot 非空入、human 空不入）
+    ctx = by_q["价格怎么样"]["context"]
+    assert [(e["role"], e["turn_idx"], e["text"]) for e in ctx] == [
+        ("customer", 0, "怎么弄套餐"),
+        ("bot", 0, "请看套餐说明"),
+    ]
+    assert all(e["time"] == "2026-08-01 09:01:00" for e in ctx)   # time 取客户轮
+    # 目标轮「再问一次价格」=规范序#7：窗口=前 5 个客户轮 #2..#6（时间正序）
+    # 被过滤的长文/已用过/收到/嗯嗯嗯照带上窗；#2 的 human「好的稍等」入窗
+    keys = lambda c: [(e["role"], e["turn_idx"], e["text"]) for e in c["context"]]
+    k7 = keys(by_q["再问一次价格"])
+    assert [e["turn_idx"] for e in by_q["再问一次价格"]["context"]
+            if e["role"] == "customer"] == [2, 3, 4, 5, 6]
+    assert ("customer", 2, "帮忙推荐下") in k7
+    assert ("human", 2, "好的稍等") in k7
+    assert ("customer", 3, LONG_TEXT) in k7
+    # 每会话 cap：S-B 六条候选只收 3 条
+    assert len([c for c in d["cases"] if c["anchor"]["session_key"] == "P:B001"]) == 3
+    # 被排除条目不进卷
+    qs = {c["question"] for c in d["cases"]}
+    assert "收到" not in qs and "嗯嗯嗯" not in qs and DUP_059_TEXT not in qs
+    assert "群聊消息一" not in qs
+    assert len([c for c in d["cases"] if c["question"] == LONG_TEXT]) == 0
+
+
+def test_product_hygiene(tmp_path):
+    """产物不许有：/home、主机名、当天日期、sessions_sha256（0 次）。"""
+    sessions, l059 = _write_inputs(tmp_path)
+    out = tmp_path / "out.json"
+    assert _run(*_sample_args(1, out, sessions, l059)).returncode == 0
+    text = out.read_text(encoding="utf-8")
+    assert "/home" not in text
+    assert socket.gethostname() not in text
+    assert time.strftime("%Y-%m-%d") not in text
+    assert text.count("sessions_sha256") == 0
+
+
+def test_shuffle_actually_randomizes(tmp_path):
+    """反向验证守护：批次序列 ≠ 规范序（删 shuffle 后此测试必红）。"""
+    sessions, l059 = _write_inputs(tmp_path)
+    out = tmp_path / "out.json"
+    assert _run(*_sample_args(1, out, sessions, l059)).returncode == 0
+    d = json.loads(out.read_text(encoding="utf-8"))
+    keys = [(c["anchor"]["session_start"], c["anchor"]["session_key"],
+             c["anchor"]["turn_idx"]) for c in d["cases"]]
+    assert keys != sorted(keys), "批次仍为规范序——shuffle 未生效或被删除"
+
+
+# ------------------------------------------------ stats 逐数核对（4 条假数据）
+
+def test_stats_four_fake_cases(tmp_path):
+    labeled = tmp_path / "fake060.json"
+    labeled.write_text(json.dumps({
+        "description": "stats 假卷",
+        "funnel": {"total_turns": 99, "pool": 4},
+        "cases": [
+            {"case_id": "060-0001", "batch": "B1", "reviewed": True,
+             "expected_action": "answer", "expected_sources": ["x / 问题1"],
+             "context": [{"turn_idx": 0, "role": "customer", "text": "a", "time": "t"},
+                         {"turn_idx": 0, "role": "bot", "text": "b", "time": "t"},
+                         {"turn_idx": 1, "role": "customer", "text": "c", "time": "t"}],
+             "needs_context": True, "skip_reason": "", "security_flag": False},
+            {"case_id": "060-0002", "batch": "B1", "reviewed": True,
+             "expected_action": "handoff", "expected_sources": [],
+             "context": [], "needs_context": False, "skip_reason": "", "security_flag": False},
+            {"case_id": "060-0003", "batch": "B1", "reviewed": True,
+             "expected_action": "", "expected_sources": [],
+             "context": [{"turn_idx": 2, "role": "customer", "text": "d", "time": "t"}],
+             "needs_context": None, "skip_reason": "context_dependent", "security_flag": False},
+            {"case_id": "060-0004", "batch": "B1", "reviewed": True,
+             "expected_action": "", "expected_sources": [],
+             "context": [], "needs_context": None, "skip_reason": "not_customer",
+             "security_flag": False},
+        ],
+    }, ensure_ascii=False), encoding="utf-8")
+    r = _run("stats", "--labeled", str(labeled), "--json")
+    assert r.returncode == 0, r.stderr
+    s = json.loads(r.stdout)
+    assert s["total_cases"] == 4                    # V7
+    assert s["reviewed"] == 4 and s["reviewed_rate"] == 1.0   # V9
+    assert s["p_cases"] == 1 and s["handoff_cases"] == 1
+    assert s["main_denominator"] == 2               # V1 = P + handoff
+    assert s["refuse_cases"] == 0
+    assert s["source_nonempty_rate"] == 1.0         # V2（P 只有 1 条且来源非空）
+    assert s["s_cases"] == 2 and s["k_cases"] == 0
+    assert s["context_dependent_cases"] == 1
+    assert s["v4_main_of_s"] == 0.5                 # V4 主口径 = 1/2（占 S）
+    assert s["v4_aux_of_total"] == 0.25             # V4 辅助 = 1/4（占原始样本）
+    assert s["skip_types"] == {"context_dependent": 1, "not_customer": 1}
+    assert s["context_customer_turns_dist"] == {"0": 2, "1": 1, "2": 1,
+                                                "3": 0, "4": 0, "5": 0}
+    assert s["needs_context_dist"] == {"true": 1, "false": 1, "null": 2}
+    assert s["funnel"] == {"total_turns": 99, "pool": 4}   # 漏斗原样透出
