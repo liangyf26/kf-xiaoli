@@ -22,7 +22,9 @@
       "sent_turns": 7,
       "sent_chars": 86,
       "window_text": "[客户] 可以的。下周走如何\n[客户] 这两周都在忙巡视材料\n[客户] 好的。\n[客户] 下周一开发票和请款函\n[客户] [捂脸]不懂在哪里搞\n[客户] 不懂在哪里认证\n[客户] 晕死",
-      "writer_answer": null
+      "writer_answer": "是",
+      "writer_answer_original": "否",
+      "adjudication": "用户10-26裁定：老客户谈合同/报价/开票/付款/寄合同/跟进报障算customer；Chief与Reviewer独立复判一致"
     },
     {
       "sample_id": "V2-002",
@@ -33,7 +35,9 @@
       "sent_turns": 20,
       "sent_chars": 233,
       "window_text": "[客户] 表头可以换成之前报价的表头\n[客户] 你把到这里的都替换成\n[客户] 可以增加列\n[客户] 跟你之前报价一样的\n[客户] 只是多了不含税\n[客户] 对\n[客户] 你也含进去\n[客户] 把价格加进去\n[客户] 一个模块一个报价\n[客户] 嗯\n[客户] 这些功能描述也要放进去哦\n[客户] 全部放\n[客户] 最后签合同就是按这个清单来着\n[客户] OK\n[客户] 之前部门不包含这块吗？\n[客户] 哦，加进去\n[客户] 可能6万多\n[客户] 你可以留空\n[客户] 明天要盖章给过来哦\n[客户] OK",
-      "writer_answer": null
+      "writer_answer": "是",
+      "writer_answer_original": "否",
+      "adjudication": "用户10-26裁定：老客户谈合同/报价/开票/付款/寄合同/跟进报障算customer；Chief与Reviewer独立复判一致"
     },
     {
       "sample_id": "V2-003",
@@ -44,7 +48,9 @@
       "sent_turns": 4,
       "sent_chars": 79,
       "window_text": "[客户] 已反馈给北极牛\n[客户] 没有了。就这三张，还是之前已经开好的。\n[客户] 指李秀千，还是所有收到发票\n[客户] 开进来5266.2元，税额605.84元",
-      "writer_answer": null
+      "writer_answer": "是",
+      "writer_answer_original": "否",
+      "adjudication": "用户10-26裁定：老客户谈合同/报价/开票/付款/寄合同/跟进报障算customer；Chief与Reviewer独立复判一致"
     },
     {
       "sample_id": "V2-004",
@@ -55,7 +61,9 @@
       "sent_turns": 5,
       "sent_chars": 91,
       "window_text": "[客户] 给个地址 把合同寄过去给你们签字盖章\n[客户] 好的\n[客户] 好的 今天寄出去\n[客户] 嗯嗯\n[客户] 收件地址 ***地址***\n收件联系：黎源\n收件电话：***手机号***",
-      "writer_answer": null
+      "writer_answer": "是",
+      "writer_answer_original": "否",
+      "adjudication": "用户10-26裁定：老客户谈合同/报价/开票/付款/寄合同/跟进报障算customer；Chief与Reviewer独立复判一致"
     },
     {
       "sample_id": "V2-005",
@@ -66,7 +74,7 @@
       "sent_turns": 3,
       "sent_chars": 55,
       "window_text": "[客户] ***手机号***，收个验证码，广西超森软著账号，换绑手机\n[客户] 收到\n[客户] 副厅，飘窗旁边墙角",
-      "writer_answer": null
+      "writer_answer": "否"
     },
     {
       "sample_id": "V2-006",
@@ -77,7 +85,7 @@
       "sent_turns": 1,
       "sent_chars": 17,
       "window_text": "[客户] 除了公网IP其他都没问题",
-      "writer_answer": null
+      "writer_answer": "是"
     },
     {
       "sample_id": "V2-007",
@@ -88,7 +96,7 @@
       "sent_turns": 2,
       "sent_chars": 44,
       "window_text": "[客户] 我是韦山 Billy\n[客户] 你好！有竹溪立交体育公园监控的1号机位直播链接吗",
-      "writer_answer": null
+      "writer_answer": "是"
     },
     {
       "sample_id": "V2-008",
@@ -99,7 +107,9 @@
       "sent_turns": 3,
       "sent_chars": 129,
       "window_text": "[客户] ***姓名***，合同还有几点需沟通：1.关于支付费用，财务最新提出了分三次转——签合同后给40%、验收后给55%、验收一年后给5%。2.合同期如果是2年，免费维保后我们先给一年的维保费，后续的再另外签。\n[客户] 你看这样是否合适\n[客户] [抱拳]",
-      "writer_answer": null
+      "writer_answer": "是",
+      "writer_answer_original": "否",
+      "adjudication": "用户10-26裁定：老客户谈合同/报价/开票/付款/寄合同/跟进报障算customer；Chief与Reviewer独立复判一致"
     },
     {
       "sample_id": "V2-009",
@@ -110,7 +120,9 @@
       "sent_turns": 5,
       "sent_chars": 145,
       "window_text": "[客户] 不正常。\n上午电话沟通过，他们说看看后台数据先，说可能跟上传量有关，现场看也没用的，就是看后台数据。一会再追问一下\n[客户] 我们开内部会就行了\n[客户] 他们不会来的\n[客户] 4点\n[客户] 庞总安排客户经理U089\nU089电话沟通了，然后继续让我找装维\n装维电话***手机号***",
-      "writer_answer": null
+      "writer_answer": "是",
+      "writer_answer_original": "否",
+      "adjudication": "用户10-26裁定：老客户谈合同/报价/开票/付款/寄合同/跟进报障算customer；Chief与Reviewer独立复判一致"
     },
     {
       "sample_id": "V2-010",
@@ -121,7 +133,7 @@
       "sent_turns": 15,
       "sent_chars": 222,
       "window_text": "[客户] 那个小程序现在的域名是工会自己的吗？\n[客户] 申请域名一般多少钱？\n[客户] 归属工号的\n[客户] 独立域名\n[客户] 归属工会的\n[客户] 帮他们弄完一起多少？\n[客户] 后续想长期使用，然后通过域名做安全防护\n[客户] 有什么防护？\n[客户] 他这个小程序属于单域名吗？\n[客户] 我意思是用到的域名算单域名吧\n[客户] 只有一个吧\n[客户] 明白\n[客户] 那目前这个小程序算使用了几个域名？\n[客户] 一个二级域名？\n[客户] 还是每个页面算一个域名？",
-      "writer_answer": null
+      "writer_answer": "是"
     },
     {
       "sample_id": "V2-011",
@@ -132,7 +144,7 @@
       "sent_turns": 15,
       "sent_chars": 747,
       "window_text": "[客户] wq v\n[客户] 你在哪\n[客户] 你好\n[客户] 我怎么跟你测试？\n[客户] SDWAN是什么？\n[客服] SD-WAN 是我们使用的正规企业架设的网络方案。简单来说，您不用专门拉新网线，只要用普通网线把设备接在您现有的路由器或交换机上，它就能自动打通加密隧道，直连到我们的海外边缘节点，借用您现有的宽带网络就能跑专线效果。相比传统翻墙，我们是联通核心代理，使用联通跨境专线，千元以上可以签合同开发票，长期稳定使用建议搭配300元的路由器硬件，支持淘宝购买。\n[客户] SDWAN是什么？\n[客服] SD-WAN 是我们使用的正规企业架设的网络方案。简单来说，您不用专门拉新网线，只要用普通网线把设备接在您现有的路由器或交换机上，它就能自动打通加密隧道，直连到我们的海外边缘节点，借用您现有的宽带网络就能跑专线效果。相比传统翻墙，我们是联通核心代理，使用联通跨境专线，千元以上可以签合同开发票，长期稳定使用建议搭配300元的路由器硬件，支持淘宝购买。\n[客户] 你在哪\n[客户] 苹果帐号要怎么弄？\n[客户] 苹果帐号要怎么弄？\n[客服] 美区Apple ID可以用国内号码注册哦。您可以参考这个教程：***链接***另外，注册时建议准备好美区账号，苹果手机记得切换地区为美国、语言设为英语，并且不要插卡哦。\n[客户] 你家在哪\n[客户] 我想SDWAN我可以用，你介绍 一下\n[客服] 亲，我们是在联通核心代理，没有具体的物理地址哦。不过您放心，我们用的是正规联通跨境专线，千元以上可以签合同开发票，长期稳定使用建议搭配300元的路由器硬件，支持淘宝购买。想试试吗？\n[客户] 苹果怎么用，苹果appid 怎么申请\n[客户] 美区appid可以搞吗\n[客户] 你人在不在啊\n[客户] 美区appid可以搞吗",
-      "writer_answer": null
+      "writer_answer": "是"
     },
     {
       "sample_id": "V2-012",
@@ -143,7 +155,7 @@
       "sent_turns": 5,
       "sent_chars": 262,
       "window_text": "[客户] 你好\n[客服] 你好呀！我是客服，专门负责 SDWAN 跨境网络业务。是想了解跨境专线、云电脑，还是想先免费试用线路呢？😊\n[客户] 多少钱\n[客服] 基础线路120元/月，主推的独享IP线路180元/月，直播优化260元/月，还有50元/月的拼车方案哦~\n[客户] 你们这货，速度 能达到多少？\n[客服] 带宽方面，120元和180元套餐是5-10兆，260元直播专线是大于等于10兆，上下行对等哦~\n[客户] 有设备吗\n[客户] 要用路由吗\n[客服] 有的，SDWAN路由器300元/个，支持淘宝闲鱼交易，长期用更稳~",
-      "writer_answer": null
+      "writer_answer": "是"
     },
     {
       "sample_id": "V2-013",
@@ -154,7 +166,7 @@
       "sent_turns": 3,
       "sent_chars": 88,
       "window_text": "[客户] 网断了啊\n[客户] 怎么办\n[客服] 不好意思老板，我们公司全是搞技术的，不太会做客服哈，抱歉抱歉，我们改正，正常12小时我们一定给你一个满意的回复。\n[客户] 连不上了",
-      "writer_answer": null
+      "writer_answer": "是"
     },
     {
       "sample_id": "V2-014",
@@ -165,7 +177,7 @@
       "sent_turns": 7,
       "sent_chars": 925,
       "window_text": "[客户] 没断网，很慢，怎么办？\n[客服] 网速有点慢啊？看视频有点卡？感觉很慢啊。打开 ***链接*** 测速正常会有10兆上下行，有疑问可把截图发到我们售后群。每条线路带宽有限，建议只有一台手机或电脑同时使用。如果是软件客户端中节点有 2 个，分别是 ss 和 vl 结尾的，可以切换试一下。\n[客户] 没理由啊，怎么时断时得\n[客户] 是不是网不对\n[客户] 有什么情况 现在/，帮我看看\n[客服] 您好，关于您提到的‘没理由啊，怎么时断时得’（网络时断时续）的情况，根据知识库中的常见原因排查建议，您可以尝试以下步骤：\n\n1. **检查系统时间**：如果是同一条线路同一个账号下个别设备不能用，请检查设备系统时间是否对齐世界时间，误差需在 30 秒以内。\n2. **测速验证**：请打开 ***链接*** 进行测速，正常应有 10 兆上下行。如果感觉慢，建议只有一台手机或电脑同时使用，避免多条设备挤占带宽。\n3. **切换节点**：如果是软件客户端中节点有 2 个（分别是 ss 和 vl 结尾的），可以尝试切换试一下。\n4. **重启设备**：可以尝试重启一下您的手机、电脑以及 SDWAN 路由器。\n5. **检查连接方式**：非常不建议使用‘无线转无线’（如接收手机热点再发 WiFi）或无线网桥，损耗极大，容易掉线和卡顿。如有户外移动需求，建议买大品牌（华为、中兴）5G/4G 插卡路由器 CPE，用 CPE 收信号，再用一根网线接入 SDWAN 设备。\n6. **网口匹配**：如果是路由网口接上后断断续续，可能是上级路由器和 SDWAN 之间网口匹配问题，请尝试换网口，或者手动设置千兆全双工。\n\n如果以上操作后仍无法解决，您可以把测速截图或设备情况发给我们，我们会安排技术人员协助您排查。\n[客户] 没理由啊，怎么时断时得\n[客户] 是不是网不对\n[客户] 你的网不太好啊，好慢，怎么办\n[客服] 网速有点慢啊？看视频有点卡？打开 ***链接*** 测速正常会有10兆上下行，有疑问可把截图发到我们售后群。每条线路带宽有限，建议只有一台手机或电脑同时使用。如果是软件客户端中节点有 2 个，分别是 ss 和 vl 结尾的，可以切换试一下。",
-      "writer_answer": null
+      "writer_answer": "是"
     },
     {
       "sample_id": "V2-015",
@@ -176,7 +188,7 @@
       "sent_turns": 10,
       "sent_chars": 139,
       "window_text": "[客户] 清一下群内容\n[客户] 已退群\n[客户] 价格太死\n[客户] 没办法合作\n[客户] 我准备举报一下你们 微信上\n[客户] 乱报价\n[客户] 本来就一个自建的线路\n[客户] 非要坑别人\n[客户] 冒充sdwan\n[客服] (图片) sdwan-1.jpg\n[客户] 可以\n[客服] 可以。",
-      "writer_answer": null
+      "writer_answer": "是"
     },
     {
       "sample_id": "V2-016",
@@ -186,7 +198,7 @@
       "turn_idx": 0,
       "question": "QQ群，接信息，打字聊天，客服系统，工单系统，派工单 。Qq群客户运营，打字回答参加政府组织的大赛的问题，上系统填写工单，跟进回复参赛者信息。无外勤，政府单位空调房，有人要对接好沟通好，不是G016，只对接QQ群和客服系统的参赛者问题。",
       "layer": "not_customer",
-      "writer_answer": null
+      "writer_answer": "否"
     },
     {
       "sample_id": "V2-017",
@@ -196,7 +208,7 @@
       "turn_idx": 2,
       "question": "好，下午5点之前可以交流，5点之后我回老家一趟",
       "layer": "not_customer",
-      "writer_answer": null
+      "writer_answer": "否"
     },
     {
       "sample_id": "V2-018",
@@ -206,7 +218,7 @@
       "turn_idx": 8,
       "question": "我对着来检查",
       "layer": "not_customer",
-      "writer_answer": null
+      "writer_answer": "否"
     },
     {
       "sample_id": "V2-019",
@@ -216,7 +228,7 @@
       "turn_idx": 0,
       "question": "面试通知:\n\n周四早上10:35，青秀区金湖广场民族大道100号西江大厦A座1802\n\n自备纸质简历，提前找大楼A座入口，请准时。\n\n很多问题来了讲清楚，欢迎沟通，祝您成功。能来请回1",
       "layer": "not_customer",
-      "writer_answer": null
+      "writer_answer": "否"
     },
     {
       "sample_id": "V2-020",
@@ -226,7 +238,7 @@
       "turn_idx": 5,
       "question": "更新了下，没什么先按这个，我们提请示先",
       "layer": "not_customer",
-      "writer_answer": null
+      "writer_answer": "否"
     },
     {
       "sample_id": "V2-021",
@@ -236,7 +248,7 @@
       "turn_idx": 13,
       "question": "这也是一个非常好的方案。",
       "layer": "not_customer",
-      "writer_answer": null
+      "writer_answer": "否"
     },
     {
       "sample_id": "V2-022",
@@ -246,7 +258,7 @@
       "turn_idx": 4,
       "question": "项目机才有利润，加30%以上报给业主，价格不透明",
       "layer": "not_customer",
-      "writer_answer": null
+      "writer_answer": "否"
     },
     {
       "sample_id": "V2-023",
@@ -256,7 +268,7 @@
       "turn_idx": 7,
       "question": "那出价格跟你说、",
       "layer": "not_customer",
-      "writer_answer": null
+      "writer_answer": "否"
     },
     {
       "sample_id": "V2-024",
@@ -266,7 +278,7 @@
       "turn_idx": 0,
       "question": "专业代办 ISO 三体系、3A 认证\n正规可查・速度快・价格低\n全程服务，包通过\n投标加分利器，提升企业竞争力\n欢迎咨询办理☎️***手机号***",
       "layer": "not_customer",
-      "writer_answer": null
+      "writer_answer": "否"
     },
     {
       "sample_id": "V2-025",
@@ -276,7 +288,7 @@
       "turn_idx": 0,
       "question": "收到！这看起来是微信的群聊或好友信息卡片（昵称“客服”）。\n\n你是想让我模拟这个“客服”和你聊天，还是想分析这段 XML 数据呢？😄 直接告诉我你的想法吧！",
       "layer": "not_customer",
-      "writer_answer": null
+      "writer_answer": "否"
     },
     {
       "sample_id": "V2-026",
@@ -286,7 +298,7 @@
       "turn_idx": 9,
       "question": "不是不是，最好你回来看着我",
       "layer": "not_customer",
-      "writer_answer": null
+      "writer_answer": "否"
     },
     {
       "sample_id": "V2-027",
@@ -296,7 +308,7 @@
       "turn_idx": 5,
       "question": "您发给我看看呢 小姐姐",
       "layer": "not_customer",
-      "writer_answer": null
+      "writer_answer": "否"
     },
     {
       "sample_id": "V2-028",
@@ -306,7 +318,7 @@
       "turn_idx": 6,
       "question": "卡斯特的收款，回款已经完成。",
       "layer": "not_customer",
-      "writer_answer": null
+      "writer_answer": "否"
     },
     {
       "sample_id": "V2-029",
@@ -316,7 +328,7 @@
       "turn_idx": 8,
       "question": "第二个验证码",
       "layer": "not_customer",
-      "writer_answer": null
+      "writer_answer": "否"
     },
     {
       "sample_id": "V2-030",
@@ -326,7 +338,7 @@
       "turn_idx": 4,
       "question": "[握手]互相帮助",
       "layer": "not_customer",
-      "writer_answer": null
+      "writer_answer": "否"
     }
   ],
   "session_audit_spec": {
@@ -345,7 +357,7 @@
         "sent_turns": 5,
         "sent_chars": 310,
         "window_text": "[客户] 领导，我这边主要做咱们科技行业完善企业资质服务的，我们和中移/电信都是长期的合作伙伴\n[客户] 您后期企业需要的各类资质 荣誉 这块都是可以完善的\n[客户] 领导，***企业名***，咱们平时也都有在拿项目，然后跟我们同一时间段竞争的对手呀，家里面三体系这块完善的都是比较全面的，看咱们家这块也比较空白，只有一个CMMI软件能力成熟度模型证书\n[客户] 领导，***企业名***，咱们平时也都有在拿项目，然后跟我们同一时间段竞争的对手呀，家里面三体系这块完善的都是比较全面的，看咱们家这块也比较空白，只有一个CMMI软件能力成熟度模型证书\n[客户] 咱们这一块也可以把家里面三体系给它完善一下，这是招投标必须的基本门槛",
-        "writer_answer": null,
+        "writer_answer": "否",
         "writer_reason": ""
       },
       {
@@ -354,7 +366,7 @@
         "sent_turns": 3,
         "sent_chars": 80,
         "window_text": "[客户] 正在一项项对，哪些是合同内的，哪些是合同外的，是否是做好了后面又变需求的\n[客户] 在我这边，下班前好\n[客户] 玉林移动修bug补漏洞合同，款刚刚收完了",
-        "writer_answer": null,
+        "writer_answer": "否",
         "writer_reason": ""
       },
       {
@@ -363,7 +375,7 @@
         "sent_turns": 1,
         "sent_chars": 93,
         "window_text": "[客户] 您好，最近项目上有考虑用外包人员么[憨笑]，我们可以提供前后端，java，PHP， 测试，大数据，C++，安卓， iOS，python，.net等软件技术人员，全国业务都可交付",
-        "writer_answer": null,
+        "writer_answer": "否",
         "writer_reason": ""
       },
       {
@@ -372,7 +384,7 @@
         "sent_turns": 1,
         "sent_chars": 178,
         "window_text": "[客户] 老总，好久没跟您问候啦，最近忙吗？特意给信息跟您联络下感情[抱拳][呲牙]，顺便问问您近期手上有没有会议室报告厅，KTV、展厅这类音视频、LED屏、家庭影院相关新建/改造升级项目？\n惠威音响、LED显示屏、整套系统集成供货、设计安装调试我们都可以一站式落地，价格、售后、技术支持我们这边全力配合您，有相关计划随时招呼我哦。[握手][握手][握手]",
-        "writer_answer": null,
+        "writer_answer": "否",
         "writer_reason": ""
       },
       {
@@ -381,7 +393,7 @@
         "sent_turns": 9,
         "sent_chars": 432,
         "window_text": "[客户] 整机配置询价：Intel Ultra9 285K处理器，Z890带WiFi主板，96G DDR5 6400双通道内存，RTX5090D显卡，2T+4T高速固态，16TB企业级机械硬盘，1250W金牌全模组ATX3.0电源，360数显水冷，ATX机箱，27寸4K IPS升降显示器，无光机箱风扇，全新正品\n[客户] 西部数据 24TB WUH722624ALE604\n[客户] 整机配置询价：Intel Ultra9 285K处理器，Z890带WiFi主板，96G DDR5 6400双通道内存，RTX5090D显卡，2T+4T高速固态，16TB企业级机械硬盘，1250W金牌全模组ATX3.0电源，360数显水冷，ATX机箱，27寸4K IPS升降显示器，无光机箱风扇，全新正品  3台\n[客户] 西部数据 24TB WUH722624ALE604 2块\n[客户] 先买硬盘\n[客户] 对，\n[客户] 硬盘你那边能出吧\n[客户] 硬盘这种，你找就可以了\n[客户] 先询价",
-        "writer_answer": null,
+        "writer_answer": "否",
         "writer_reason": ""
       },
       {
@@ -390,7 +402,7 @@
         "sent_turns": 1,
         "sent_chars": 90,
         "window_text": "[客户] ***企业名***\n主营   工作站  服务器  AI八卡机  24小时在线报价随时发货，有需要报价的可以随时发我  质量售后绝对嘎嘎板正[抱拳][抱拳][抱拳][抱拳]",
-        "writer_answer": null,
+        "writer_answer": "否",
         "writer_reason": ""
       },
       {
@@ -399,7 +411,7 @@
         "sent_turns": 1,
         "sent_chars": 60,
         "window_text": "[客户] 开学倒计时3天\n\n还没给孩子购买学生意外险的朋友可以联系我，别等开学再买，到时恢复原价，断保又有30天等待期。",
-        "writer_answer": null,
+        "writer_answer": "否",
         "writer_reason": ""
       },
       {
@@ -408,7 +420,7 @@
         "sent_turns": 2,
         "sent_chars": 110,
         "window_text": "[客户] ***姓名***，下午好，这个技术合同登记您那边（卖方）有进行技术合同登记了没，如果没有的话，我这边（买方）进行登记，需要您那边帮签字盖章一份这个文件，用于买方进行技术合同登记的证明材料\n[客户] 好的，[抱拳]",
-        "writer_answer": null,
+        "writer_answer": "否",
         "writer_reason": ""
       },
       {
@@ -417,7 +429,7 @@
         "sent_turns": 3,
         "sent_chars": 38,
         "window_text": "[客户] 你好，这边广西的高企多少钱呢\n[客户] 哪一年的\n[客户] 发我看看哇",
-        "writer_answer": null,
+        "writer_answer": "否",
         "writer_reason": ""
       },
       {
@@ -426,14 +438,30 @@
         "sent_turns": 7,
         "sent_chars": 121,
         "window_text": "[客户] 稍等\n[客户] 13000\n[客服] [衰]多给个50\n[客户] 搞不了啊\n[客服] 那下次，过几天我这里估计还有货\n[客户] 好\n[客户] 苹果有货就赶紧出\n[客户] 都在掉价了\n[客服] [憨笑][憨笑]没事，到时看价格再说\n[客户] 嗯嗯",
-        "writer_answer": null,
+        "writer_answer": "否",
         "writer_reason": ""
       }
     ],
-    "audited": 0,
+    "audited": 10,
     "false_drops": 0,
-    "rate": null,
-    "verdict": "未复核"
+    "rate": 0.0,
+    "verdict": "PASS"
   },
-  "layer_note": {}
+  "layer_note": {},
+  "check_result": {
+    "audited": 30,
+    "correct": 29,
+    "rate": 0.9667,
+    "verdict": "PASS",
+    "per_layer": {
+      "customer": {
+        "correct": 14,
+        "n": 15
+      },
+      "not_customer": {
+        "correct": 15,
+        "n": 15
+      }
+    }
+  }
 }
