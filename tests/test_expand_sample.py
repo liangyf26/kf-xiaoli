@@ -621,3 +621,85 @@ def test_exclude_labeled_removes_pool_triples(tmp_path):
     from collections import Counter
     sess_cnt = Counter((k[0], k[1]) for k in keys_new)
     assert all(v <= 3 for v in sess_cnt.values())
+
+
+# ------------------------------------- --exclude-labeled 预占名额（#060b-B2）
+
+def test_exclude_labeled_preoccupies_cap(tmp_path):
+    """传 --exclude-labeled：已入卷某会话占 2 条，cap=3，新抽这个会话只能再进 1 条。"""
+    sessions, l059 = _write_inputs(tmp_path)
+    screen = _write_screen(tmp_path, _screen_doc(sessions, cap=10))
+    
+    # 已入卷：P:B001 已占 2 条（turn_idx 0 和 1）
+    excl = tmp_path / "labeled_060.json"
+    excl_triples = [("P:B001", "2026-08-01 10:00:00", 0),
+                    ("P:B001", "2026-08-01 10:00:00", 1)]
+    excl.write_text(json.dumps(_labeled060_doc(excl_triples, start_seq=1, batch="B1"),
+                               ensure_ascii=False), encoding="utf-8")
+    
+    out = tmp_path / "out.json"
+    r = _run(*_ids_args(out, sessions, l059, screen, cap=3, count=999,
+                        extra=["--batch", "B2", "--start-seq", "101",
+                               "--exclude-labeled", str(excl)]))
+    assert r.returncode == 0, r.stderr
+    
+    d = json.loads(out.read_text(encoding="utf-8"))
+    # P:B001 已占 2 条，cap=3，新抽最多 1 条
+    b001_cases = [c for c in d["cases"] 
+                  if c["anchor"]["session_key"] == "P:B001"]
+    assert len(b001_cases) == 1, f"Expected 1 new case for P:B001, got {len(b001_cases)}"
+    assert "preoccupied_sessions" in d["include_audit"]
+
+
+def test_exclude_case_ids_frees_quota(tmp_path):
+    """传 --exclude-case-ids：被排除的 case_id 不占名额，但三元组仍被剔除。"""
+    sessions, l059 = _write_inputs(tmp_path)
+    screen = _write_screen(tmp_path, _screen_doc(sessions, cap=10))
+    
+    # 已入卷：P:B001 占 2 条，但通过 exclude-case-ids 释放名额
+    excl = tmp_path / "labeled_060.json"
+    excl_triples = [("P:B001", "2026-08-01 10:00:00", 0),
+                    ("P:B001", "2026-08-01 10:00:00", 1)]
+    excl.write_text(json.dumps(_labeled060_doc(excl_triples, start_seq=1, batch="B1"),
+                               ensure_ascii=False), encoding="utf-8")
+    
+    out = tmp_path / "out.json"
+    r = _run(*_ids_args(out, sessions, l059, screen, cap=3, count=999,
+                        extra=["--batch", "B2", "--start-seq", "101",
+                               "--exclude-labeled", str(excl),
+                               "--exclude-case-ids", "060-0001,060-0002"]))
+    assert r.returncode == 0, r.stderr
+    
+    d = json.loads(out.read_text(encoding="utf-8"))
+    # P:B001 被释放名额，cap=3，应该能抽 3 条
+    b001_cases = [c for c in d["cases"] 
+                  if c["anchor"]["session_key"] == "P:B001"]
+    assert len(b001_cases) == 3, f"Expected 3 cases for P:B001 after quota freed, got {len(b001_cases)}"
+    # 三元组 (P:B001, ..., 0) 和 (P:B001, ..., 1) 仍被剔除
+    turn_idxs = [c["anchor"]["turn_idx"] for c in b001_cases]
+    assert 0 not in turn_idxs and 1 not in turn_idxs
+
+
+def test_exclude_case_ids_range_syntax(tmp_path):
+    """--exclude-case-ids 支持区间语法 060-0001..060-0003。"""
+    sessions, l059 = _write_inputs(tmp_path)
+    screen = _write_screen(tmp_path, _screen_doc(sessions, cap=10))
+    
+    excl = tmp_path / "labeled_060.json"
+    excl_triples = [("P:B001", "2026-08-01 10:00:00", i) for i in range(3)]
+    excl.write_text(json.dumps(_labeled060_doc(excl_triples, start_seq=1, batch="B1"),
+                               ensure_ascii=False), encoding="utf-8")
+    
+    out = tmp_path / "out.json"
+    r = _run(*_ids_args(out, sessions, l059, screen, cap=3, count=999,
+                        extra=["--batch", "B2", "--start-seq", "101",
+                               "--exclude-labeled", str(excl),
+                               "--exclude-case-ids", "060-0001..060-0003"]))
+    assert r.returncode == 0, r.stderr
+    
+    d = json.loads(out.read_text(encoding="utf-8"))
+    b001_cases = [c for c in d["cases"] 
+                  if c["anchor"]["session_key"] == "P:B001"]
+    assert len(b001_cases) == 3
+    turn_idxs = [c["anchor"]["turn_idx"] for c in b001_cases]
+    assert all(idx not in [0, 1, 2] for idx in turn_idxs)

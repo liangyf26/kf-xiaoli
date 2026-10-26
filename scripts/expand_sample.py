@@ -209,6 +209,29 @@ def funnel_line(funnel: dict) -> str:
             "→ 序列内重话 {dup_text} / 会话满 {per_session_capped} → 样本序列 {pool}").format(**funnel)
 
 
+def _parse_case_ids(spec: str) -> set:
+    """解析 case_id 列表：逗号分隔或区间（060-0051..060-0063）。"""
+    ids = set()
+    for part in spec.split(','):
+        part = part.strip()
+        if '..' in part:
+            # 区间：060-0051..060-0063
+            start_str, end_str = part.split('..')
+            start_str, end_str = start_str.strip(), end_str.strip()
+            # 提取数字部分
+            start_match = re.match(r'(\d+)-(\d+)', start_str)
+            end_match = re.match(r'(\d+)-(\d+)', end_str)
+            if start_match and end_match:
+                prefix = start_match.group(1)
+                start_num = int(start_match.group(2))
+                end_num = int(end_match.group(2))
+                for i in range(start_num, end_num + 1):
+                    ids.add(f"{prefix}-{i:04d}")
+        else:
+            ids.add(part)
+    return ids
+
+
 def _sample_include_ids(args, sessions, q059, canon_sha) -> int:
     """--include-ids 模式（任务书-060b A3 §7.2/V3）。
 
@@ -257,6 +280,10 @@ def _sample_include_ids(args, sessions, q059, canon_sha) -> int:
     # --exclude-labeled：已有卷条目的三元组从候选剔除（在每会话上限截取前），
     # 防 B2 与 B1 抽重（同一 cap=10 池 + 同 seed 会取到同一批，Chief 2026-10-26）
     excluded_by_labeled: list = []
+    exclude_case_id_set: set = set()
+    if args.exclude_case_ids:
+        exclude_case_id_set = _parse_case_ids(args.exclude_case_ids)
+    
     if args.exclude_labeled:
         try:
             exd = json.loads(resolve(args.exclude_labeled).read_text(encoding="utf-8"))
@@ -271,17 +298,30 @@ def _sample_include_ids(args, sessions, q059, canon_sha) -> int:
                 print(f"⚠️ exclude 卷 case {c.get('case_id')} 的 canonical_sha256 与当前库不一致"
                       f"（锚点失效，剔除清单可能不准）", file=sys.stderr)
             excluded_by_labeled.append((a.get("session_key"), a.get("session_start"),
-                                        a.get("turn_idx")))
-        excluded_set = set(excluded_by_labeled)
+                                        a.get("turn_idx"), c.get("case_id")))
+        excluded_set = {(sk, ss, ti) for sk, ss, ti, _ in excluded_by_labeled}
         before = len(matched)
         matched = [c for c in matched if tkey(c) not in excluded_set]
         print(f"--exclude-labeled {args.exclude_labeled}: 剔除已入卷三元组 "
               f"{len(excluded_by_labeled)} 个（命中池内 {before - len(matched)} 个）")
+    
+    # 预先统计已入卷的每会话名额（#060b-B2）：exclude-case-ids 中的不占名额
+    preoccupied: Counter = Counter()
+    preoccupied_sessions = 0
+    if excluded_by_labeled:
+        for sk, ss, ti, case_id in excluded_by_labeled:
+            if case_id not in exclude_case_id_set:
+                k = (sk, ss)
+                if preoccupied[k] == 0:
+                    preoccupied_sessions += 1
+                preoccupied[k] += 1
 
     picked, cnt = [], Counter()
     for c in matched:                                   # pool 序（shuffle 后），逐条过上限
         k = (c["session"]["session_key"], c["session"]["start_time"])
-        if cnt[k] >= args.per_session:
+        # 每会话上限 = per_session - 已占名额
+        effective_cap = args.per_session - preoccupied[k]
+        if cnt[k] >= effective_cap:
             continue
         cnt[k] += 1
         picked.append(c)
@@ -301,6 +341,8 @@ def _sample_include_ids(args, sessions, q059, canon_sha) -> int:
         "unmatched_list": [f"{sk}|{ss}|T{ti}" for sk, ss, ti in unmatched],
         "exclude_labeled": args.exclude_labeled,
         "excluded_by_labeled": len(excluded_by_labeled),
+        "exclude_case_ids": args.exclude_case_ids,
+        "preoccupied_sessions": preoccupied_sessions,
         "per_session_cap": args.per_session,
         "picked": len(picked),
         "batch_tag": batch_tag,
@@ -600,6 +642,9 @@ def main(argv=None) -> int:
     sp.add_argument("--exclude-labeled", default=None,
                     help="--include-ids 模式：已有卷（如 labeled_060.json）——其中条目的"
                          "(session_key,session_start,turn_idx) 三元组从候选剔除，防批次撞号")
+    sp.add_argument("--exclude-case-ids", default=None,
+                    help="--include-ids 模式：逗号分隔的 case_id（如 060-0051,060-0052）或区间"
+                         "（如 060-0051..060-0063）——这些 case_id 的三元组被剔除但不占每会话名额")
     sp.add_argument("--out", "--output", dest="out", default=DEFAULT_OUT)
     sp.add_argument("--sessions", default=DEFAULT_SESSIONS)
     sp.add_argument("--labeled-059", default=DEFAULT_LABELED_059)
