@@ -1,5 +1,4 @@
 {
-  "description": "059+060 合并总卷（scripts/merge_labeled.py 生成；来源卷与 sha256 见 merge_info.sources，评测口径同 accuracy_evaluation）",
   "cases": [
     {
       "anchor": {
@@ -4537,30 +4536,2243 @@
       "should_answer": false,
       "skip_reason": "duplicate_of:060-0035",
       "source": "biz_wx_message2.sql 2026-09-05 18:44:38"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U026",
+        "session_start": "2026-08-13 16:23:15",
+        "turn_idx": 18
+      },
+      "batch": "B3",
+      "case_id": "060-0114",
+      "context": [
+        {
+          "role": "customer",
+          "text": "这个给他们自己考虑",
+          "time": "2026-08-13 16:38:48",
+          "turn_idx": 13
+        },
+        {
+          "role": "customer",
+          "text": "万一他们一定要用信创的",
+          "time": "2026-08-13 16:38:57",
+          "turn_idx": 14
+        },
+        {
+          "role": "customer",
+          "text": "丢给他们",
+          "time": "2026-08-13 16:39:08",
+          "turn_idx": 15
+        },
+        {
+          "role": "customer",
+          "text": "要我们采再说",
+          "time": "2026-08-13 16:39:14",
+          "turn_idx": 16
+        },
+        {
+          "role": "customer",
+          "text": "你现在报的没含你的利润？",
+          "time": "2026-08-13 16:42:38",
+          "turn_idx": 17
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "这样我怎么加呢",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S031",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-08-13 16:23:15"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U123",
+        "session_start": "2026-08-05 08:55:35",
+        "turn_idx": 0
+      },
+      "batch": "B3",
+      "case_id": "060-0115",
+      "context": [],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "备案申请书删掉了，没有WORD，是平台上面填那些资料生成后下载的PDF",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S290",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-08-05 08:55:35"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U123",
+        "session_start": "2026-09-04 09:01:58",
+        "turn_idx": 0
+      },
+      "batch": "B3",
+      "case_id": "060-0116",
+      "context": [],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "我撤错了。这个钉钉昨晚网络卡上了两条出来。",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S308",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-09-04 09:01:58"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U041",
+        "session_start": "2026-08-03 10:48:43",
+        "turn_idx": 2
+      },
+      "batch": "B3",
+      "case_id": "060-0117",
+      "context": [
+        {
+          "role": "customer",
+          "text": "你那个没有v6就会有问题的",
+          "time": "2026-08-03 10:48:43",
+          "turn_idx": 0
+        },
+        {
+          "role": "customer",
+          "text": "这个v6地址不是公网的，就像是 169.254.x.x 这种",
+          "time": "2026-08-03 10:50:30",
+          "turn_idx": 1
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "是这个接口没有v6，你连我这边服务器就不顺畅了",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S101",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-08-03 10:48:43"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U041",
+        "session_start": "2026-08-03 07:49:19",
+        "turn_idx": 4
+      },
+      "batch": "B3",
+      "case_id": "060-0118",
+      "context": [
+        {
+          "role": "customer",
+          "text": "嗯，能看到是哪一段的问题吗？",
+          "time": "2026-08-03 07:49:19",
+          "turn_idx": 0
+        },
+        {
+          "role": "customer",
+          "text": "流量没有断过，整体是平稳的，我判断最大的可能还是移动到我这边的互联互通堵了",
+          "time": "2026-08-03 08:01:38",
+          "turn_idx": 1
+        },
+        {
+          "role": "customer",
+          "text": "嗯呢，目前没有办法绕开互联互通",
+          "time": "2026-08-03 08:07:18",
+          "turn_idx": 2
+        },
+        {
+          "role": "customer",
+          "text": "是国内这段，教育网目前跟移动的互联互通带宽似乎不太够，抛开这段我这边直接跑是没有问题的",
+          "time": "2026-08-03 08:28:58",
+          "turn_idx": 3
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "我快被辞了，在考虑怎么弄这个",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S100",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-08-03 07:49:19"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U004",
+        "session_start": "2026-09-07 09:01:13",
+        "turn_idx": 0
+      },
+      "batch": "B3",
+      "case_id": "060-0119",
+      "context": [],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "1. 沟通水质传感器的对接\n2. 把初版程序的部署方案和程序给甲方\n3. 网关部分程序改用 go 和 rust",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S073",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-09-07 09:01:13"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U041",
+        "session_start": "2026-08-03 10:48:43",
+        "turn_idx": 0
+      },
+      "batch": "B3",
+      "case_id": "060-0120",
+      "context": [],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "你那个没有v6就会有问题的",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S101",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-08-03 10:48:43"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U031",
+        "session_start": "2026-08-21 16:20:57",
+        "turn_idx": 5
+      },
+      "batch": "B3",
+      "case_id": "060-0121",
+      "context": [
+        {
+          "role": "customer",
+          "text": "我问问，卡在姚姚那里",
+          "time": "2026-08-21 16:20:57",
+          "turn_idx": 0
+        },
+        {
+          "role": "customer",
+          "text": "我这两天要赶几份材料、本来昨天要交的",
+          "time": "2026-08-21 16:22:09",
+          "turn_idx": 1
+        },
+        {
+          "role": "customer",
+          "text": "我留言给她，等她回复我",
+          "time": "2026-08-21 16:22:20",
+          "turn_idx": 2
+        },
+        {
+          "role": "customer",
+          "text": "哦",
+          "time": "2026-08-21 16:44:02",
+          "turn_idx": 3
+        },
+        {
+          "role": "customer",
+          "text": "我姐周末来，可能要用一下，如果不用我再告诉你",
+          "time": "2026-08-21 17:06:44",
+          "turn_idx": 4
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "姚回我的",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S079",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-08-21 16:20:57"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U026",
+        "session_start": "2026-08-13 16:23:15",
+        "turn_idx": 16
+      },
+      "batch": "B3",
+      "case_id": "060-0122",
+      "context": [
+        {
+          "role": "customer",
+          "text": "这个一定要用信创的可以用吗",
+          "time": "2026-08-13 16:37:36",
+          "turn_idx": 11
+        },
+        {
+          "role": "customer",
+          "text": "假如",
+          "time": "2026-08-13 16:37:39",
+          "turn_idx": 12
+        },
+        {
+          "role": "customer",
+          "text": "这个给他们自己考虑",
+          "time": "2026-08-13 16:38:48",
+          "turn_idx": 13
+        },
+        {
+          "role": "customer",
+          "text": "万一他们一定要用信创的",
+          "time": "2026-08-13 16:38:57",
+          "turn_idx": 14
+        },
+        {
+          "role": "customer",
+          "text": "丢给他们",
+          "time": "2026-08-13 16:39:08",
+          "turn_idx": 15
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "要我们采再说",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S031",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-08-13 16:23:15"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U010",
+        "session_start": "2026-09-29 16:07:12",
+        "turn_idx": 9
+      },
+      "batch": "B3",
+      "case_id": "060-0123",
+      "context": [
+        {
+          "role": "customer",
+          "text": "代理肯定要有利润空间的",
+          "time": "2026-09-29 16:09:41",
+          "turn_idx": 4
+        },
+        {
+          "role": "human",
+          "text": "没事，您考虑，我们都是这样卖的",
+          "time": "2026-09-29 16:09:41",
+          "turn_idx": 4
+        },
+        {
+          "role": "customer",
+          "text": "什么",
+          "time": "2026-09-29 16:10:09",
+          "turn_idx": 5
+        },
+        {
+          "role": "human",
+          "text": "客户你报你的价，卖多少我们不管",
+          "time": "2026-09-29 16:10:09",
+          "turn_idx": 5
+        },
+        {
+          "role": "customer",
+          "text": "那也不是招代理",
+          "time": "2026-09-29 16:10:23",
+          "turn_idx": 6
+        },
+        {
+          "role": "human",
+          "text": "价格定好了，加吧",
+          "time": "2026-09-29 16:10:23",
+          "turn_idx": 6
+        },
+        {
+          "role": "customer",
+          "text": "[撇嘴]",
+          "time": "2026-09-29 16:10:30",
+          "turn_idx": 7
+        },
+        {
+          "role": "customer",
+          "text": "速度怎么样",
+          "time": "2026-09-29 16:11:14",
+          "turn_idx": 8
+        },
+        {
+          "role": "human",
+          "text": "我们的几家代理都是这样卖的，加倍卖，我们代收费",
+          "time": "2026-09-29 16:11:14",
+          "turn_idx": 8
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "哪种卖的好",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S174",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message.sql 2026-09-29 16:07:12"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U126",
+        "session_start": "2026-08-03 08:40:56",
+        "turn_idx": 0
+      },
+      "batch": "B3",
+      "case_id": "060-0124",
+      "context": [],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "拉SDWAN",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S313",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-08-03 08:40:56"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U026",
+        "session_start": "2026-08-13 16:23:15",
+        "turn_idx": 5
+      },
+      "batch": "B3",
+      "case_id": "060-0125",
+      "context": [
+        {
+          "role": "customer",
+          "text": "这块我们不出吧",
+          "time": "2026-08-13 16:23:15",
+          "turn_idx": 0
+        },
+        {
+          "role": "customer",
+          "text": "这个我提供需求",
+          "time": "2026-08-13 16:24:14",
+          "turn_idx": 1
+        },
+        {
+          "role": "customer",
+          "text": "不要加在我们这里",
+          "time": "2026-08-13 16:24:20",
+          "turn_idx": 2
+        },
+        {
+          "role": "customer",
+          "text": "这样价格看上去不高",
+          "time": "2026-08-13 16:24:26",
+          "turn_idx": 3
+        },
+        {
+          "role": "customer",
+          "text": "加上差旅就162000",
+          "time": "2026-08-13 16:25:43",
+          "turn_idx": 4
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "你这个是成本？",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S031",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-08-13 16:23:15"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U126",
+        "session_start": "2026-08-03 08:40:56",
+        "turn_idx": 1
+      },
+      "batch": "B3",
+      "case_id": "060-0126",
+      "context": [
+        {
+          "role": "customer",
+          "text": "拉SDWAN",
+          "time": "2026-08-03 08:40:56",
+          "turn_idx": 0
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "你好啊，我周六在闲鱼上问你的",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S313",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-08-03 08:40:56"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U122",
+        "session_start": "2026-08-20 15:20:10",
+        "turn_idx": 0
+      },
+      "batch": "B3",
+      "case_id": "060-0127",
+      "context": [],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "我通过了你的朋友验证请求，现在我们可以开始聊天了",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S284",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-08-20 15:20:10"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U007",
+        "session_start": "2026-09-22 17:35:54",
+        "turn_idx": 0
+      },
+      "batch": "B3",
+      "case_id": "060-0128",
+      "context": [],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "我是***姓名***",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S205",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message.sql 2026-09-22 17:35:54"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U004",
+        "session_start": "2026-09-04 16:31:06",
+        "turn_idx": 7
+      },
+      "batch": "B3",
+      "case_id": "060-0129",
+      "context": [
+        {
+          "role": "customer",
+          "text": "硬件对接跟液位传感器厂家已经开了个会沟通。他们只有mqtt和tcp两种方式对接，但是合同要的mqtt和http。现在威尔森这边，还想再看看水质传感器那边支持什么协议，再确认用什么协议接。所以硬件我们暂时就不接，等他们定协议",
+          "time": "2026-09-04 16:38:44",
+          "turn_idx": 2
+        },
+        {
+          "role": "customer",
+          "text": "好的",
+          "time": "2026-09-04 16:43:31",
+          "turn_idx": 3
+        },
+        {
+          "role": "customer",
+          "text": "1. 水电费缴纳，是要做支付吗？给园区用户支付？或者只是有个后台录入数据做统计分析而已？",
+          "time": "2026-09-04 16:45:25",
+          "turn_idx": 4
+        },
+        {
+          "role": "customer",
+          "text": "我们是丙方？",
+          "time": "2026-09-04 16:59:02",
+          "turn_idx": 5
+        },
+        {
+          "role": "customer",
+          "text": "超出原需求 15% 工作量的功能\n这个是按照我们评估的工作量来算，是吗",
+          "time": "2026-09-04 17:03:12",
+          "turn_idx": 6
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "其他没有什么了",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S070",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-09-04 16:31:06"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U010",
+        "session_start": "2026-09-29 16:07:12",
+        "turn_idx": 11
+      },
+      "batch": "B3",
+      "case_id": "060-0130",
+      "context": [
+        {
+          "role": "customer",
+          "text": "那也不是招代理",
+          "time": "2026-09-29 16:10:23",
+          "turn_idx": 6
+        },
+        {
+          "role": "human",
+          "text": "价格定好了，加吧",
+          "time": "2026-09-29 16:10:23",
+          "turn_idx": 6
+        },
+        {
+          "role": "customer",
+          "text": "[撇嘴]",
+          "time": "2026-09-29 16:10:30",
+          "turn_idx": 7
+        },
+        {
+          "role": "customer",
+          "text": "速度怎么样",
+          "time": "2026-09-29 16:11:14",
+          "turn_idx": 8
+        },
+        {
+          "role": "human",
+          "text": "我们的几家代理都是这样卖的，加倍卖，我们代收费",
+          "time": "2026-09-29 16:11:14",
+          "turn_idx": 8
+        },
+        {
+          "role": "customer",
+          "text": "哪种卖的好",
+          "time": "2026-09-29 16:12:10",
+          "turn_idx": 9
+        },
+        {
+          "role": "human",
+          "text": "180和260",
+          "time": "2026-09-29 16:12:10",
+          "turn_idx": 9
+        },
+        {
+          "role": "customer",
+          "text": "180的我测下",
+          "time": "2026-09-29 16:13:43",
+          "turn_idx": 10
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "我这边有很多做跨境的",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S174",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message.sql 2026-09-29 16:07:12"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U004",
+        "session_start": "2026-09-04 16:31:06",
+        "turn_idx": 11
+      },
+      "batch": "B3",
+      "case_id": "060-0131",
+      "context": [
+        {
+          "role": "customer",
+          "text": "超出原需求 15% 工作量的功能\n这个是按照我们评估的工作量来算，是吗",
+          "time": "2026-09-04 17:03:12",
+          "turn_idx": 6
+        },
+        {
+          "role": "customer",
+          "text": "其他没有什么了",
+          "time": "2026-09-04 17:04:56",
+          "turn_idx": 7
+        },
+        {
+          "role": "customer",
+          "text": "这里的第三方登录，是指微信吗",
+          "time": "2026-09-04 17:16:07",
+          "turn_idx": 8
+        },
+        {
+          "role": "customer",
+          "text": "直接按照300含税报给他们？",
+          "time": "2026-09-04 17:17:32",
+          "turn_idx": 9
+        },
+        {
+          "role": "customer",
+          "text": "打通企业账单数据\n这是要接他们原来什么物业系统？",
+          "time": "2026-09-04 17:23:11",
+          "turn_idx": 10
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "还有合同里说的响应时间3秒、9秒，如果可以就加上在服务器硬件资源充足的情况下。万一是他们传输大文件，导致带宽不够之类的问题免责",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S070",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-09-04 16:31:06"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U037",
+        "session_start": "2026-08-19 17:28:52",
+        "turn_idx": 1
+      },
+      "batch": "B3",
+      "case_id": "060-0132",
+      "context": [
+        {
+          "role": "customer",
+          "text": "我公司跟你公司签订一个服务合同，对公2000元，开专票给我，是这样吧[破涕为笑]",
+          "time": "2026-08-19 17:28:52",
+          "turn_idx": 0
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "[破涕为笑]好的，我是6%",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S092",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-08-19 17:28:52"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U081",
+        "session_start": "2026-08-17 11:08:35",
+        "turn_idx": 4
+      },
+      "batch": "B3",
+      "case_id": "060-0133",
+      "context": [
+        {
+          "role": "customer",
+          "text": "开票的是，先开票，学校对公打款到开票公司",
+          "time": "2026-08-17 11:08:35",
+          "turn_idx": 0
+        },
+        {
+          "role": "customer",
+          "text": "是的",
+          "time": "2026-08-17 11:10:39",
+          "turn_idx": 1
+        },
+        {
+          "role": "customer",
+          "text": "他们超过500的报销都要走对公",
+          "time": "2026-08-17 11:10:58",
+          "turn_idx": 2
+        },
+        {
+          "role": "customer",
+          "text": "费用怎么收",
+          "time": "2026-08-17 11:12:05",
+          "turn_idx": 3
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "是全部收12%?",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S166",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-08-17 11:08:35"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U126",
+        "session_start": "2026-08-03 08:40:56",
+        "turn_idx": 3
+      },
+      "batch": "B3",
+      "case_id": "060-0134",
+      "context": [
+        {
+          "role": "customer",
+          "text": "拉SDWAN",
+          "time": "2026-08-03 08:40:56",
+          "turn_idx": 0
+        },
+        {
+          "role": "customer",
+          "text": "你好啊，我周六在闲鱼上问你的",
+          "time": "2026-08-03 08:50:10",
+          "turn_idx": 1
+        },
+        {
+          "role": "customer",
+          "text": "好的",
+          "time": "2026-08-03 08:50:45",
+          "turn_idx": 2
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "行[OK]",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S313",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-08-03 08:40:56"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U035",
+        "session_start": "2026-08-21 17:33:07",
+        "turn_idx": 2
+      },
+      "batch": "B3",
+      "case_id": "060-0135",
+      "context": [
+        {
+          "role": "customer",
+          "text": "超哥，打扰一下，您之前送我的那个电话卡，我按照帖子的教程操作，一直没有信号诶，这几天我一直在网上查资料，弄了好久还是没有信号，是不是那里我操作的有错误呀",
+          "time": "2026-08-21 17:33:07",
+          "turn_idx": 0
+        },
+        {
+          "role": "customer",
+          "text": "实在是查不到资料了，才来麻烦您[破涕为笑]",
+          "time": "2026-08-21 17:33:24",
+          "turn_idx": 1
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "好嘞，感***姓名***哥",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S090",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-08-21 17:33:07"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U004",
+        "session_start": "2026-09-06 22:16:50",
+        "turn_idx": 1
+      },
+      "batch": "B3",
+      "case_id": "060-0136",
+      "context": [
+        {
+          "role": "customer",
+          "text": "带宽没有满，很低",
+          "time": "2026-09-06 22:16:50",
+          "turn_idx": 0
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "你ros能重启吗",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S072",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-09-06 22:16:50"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U004",
+        "session_start": "2026-09-03 09:41:00",
+        "turn_idx": 0
+      },
+      "batch": "B3",
+      "case_id": "060-0137",
+      "context": [],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "是的，整栋楼停",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S065",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-09-03 09:41:00"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U001",
+        "session_start": "2026-09-13 07:38:23",
+        "turn_idx": 6
+      },
+      "batch": "B3",
+      "case_id": "060-0138",
+      "context": [
+        {
+          "role": "customer",
+          "text": "sdwan多少钱",
+          "time": "2026-09-13 07:38:35",
+          "turn_idx": 1
+        },
+        {
+          "role": "bot",
+          "text": "你好！SD-WAN 线路价格如下：120 元/月一条 IDC 线路（独享，适合社媒）；180 元/月一条 ISP 家庭 IP 线路（独享，主推，对 IP 有要求选这个）；260 元/月一条 ISP 家庭 IP 直播优化线路（独享，专门针对 TK 直播优化）。另外，5 人拼车共享 IP 单人 50 元/月，适合看店、购物等。长期使用建议搭配 300 元/个的 SD-WAN 路由器硬件。",
+          "time": "2026-09-13 07:38:35",
+          "turn_idx": 1
+        },
+        {
+          "role": "customer",
+          "text": "苹果ID好搞吗",
+          "time": "2026-09-13 07:39:42",
+          "turn_idx": 2
+        },
+        {
+          "role": "bot",
+          "text": "美区 Apple ID 账号好搞的，国内号码就能注册，不用外国手机。教程链接发你：***链接***照着操作就行。",
+          "time": "2026-09-13 07:39:42",
+          "turn_idx": 2
+        },
+        {
+          "role": "customer",
+          "text": "你的SDWAN是联通的？支持移动电信吗",
+          "time": "2026-09-13 07:41:11",
+          "turn_idx": 3
+        },
+        {
+          "role": "bot",
+          "text": "是的，我们是联通的核心代理商，线路底层就是联通的。不过办公室宽带只要常见的电信、联通宽带都可以接入使用哦。",
+          "time": "2026-09-13 07:41:11",
+          "turn_idx": 3
+        },
+        {
+          "role": "customer",
+          "text": "可以",
+          "time": "2026-09-13 07:47:24",
+          "turn_idx": 4
+        },
+        {
+          "role": "customer",
+          "text": "你们sdwan有独立IP吗",
+          "time": "2026-09-13 07:47:31",
+          "turn_idx": 5
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "你有独立 IP吗",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S328",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-09-13 07:38:23"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U004",
+        "session_start": "2026-09-07 14:54:43",
+        "turn_idx": 1
+      },
+      "batch": "B3",
+      "case_id": "060-0139",
+      "context": [
+        {
+          "role": "customer",
+          "text": "不正常。\n上午电话沟通过，他们说看看后台数据先，说可能跟上传量有关，现场看也没用的，就是看后台数据。一会再追问一下",
+          "time": "2026-09-07 14:54:43",
+          "turn_idx": 0
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "我们开内部会就行了",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S075",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-09-07 14:54:43"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U010",
+        "session_start": "2026-09-29 18:27:59",
+        "turn_idx": 1
+      },
+      "batch": "B3",
+      "case_id": "060-0140",
+      "context": [
+        {
+          "role": "customer",
+          "text": "客户问",
+          "time": "2026-09-29 18:27:59",
+          "turn_idx": 0
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "能不能按流量买断计费",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S175",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message.sql 2026-09-29 18:27:59"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U123",
+        "session_start": "2026-08-24 10:46:07",
+        "turn_idx": 2
+      },
+      "batch": "B3",
+      "case_id": "060-0141",
+      "context": [
+        {
+          "role": "customer",
+          "text": "***手机号***，收个验证码，广西超森软著账号，换绑手机",
+          "time": "2026-08-24 10:46:07",
+          "turn_idx": 0
+        },
+        {
+          "role": "customer",
+          "text": "收到",
+          "time": "2026-08-24 10:46:35",
+          "turn_idx": 1
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "副厅，飘窗旁边墙角",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S304",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-08-24 10:46:07"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U037",
+        "session_start": "2026-08-19 17:28:52",
+        "turn_idx": 9
+      },
+      "batch": "B3",
+      "case_id": "060-0142",
+      "context": [
+        {
+          "role": "customer",
+          "text": "明白了",
+          "time": "2026-08-19 17:31:34",
+          "turn_idx": 4
+        },
+        {
+          "role": "customer",
+          "text": "我的几个马甲都是一般纳税人，没有小规模了",
+          "time": "2026-08-19 17:31:49",
+          "turn_idx": 5
+        },
+        {
+          "role": "customer",
+          "text": "原来跟人合伙有1个马甲，他今天说下半年不打算做了，估计要去注销或者挂空了，他是法人。",
+          "time": "2026-08-19 17:32:54",
+          "turn_idx": 6
+        },
+        {
+          "role": "customer",
+          "text": "这行不好做，他说不做了，随他决定呗",
+          "time": "2026-08-19 17:33:43",
+          "turn_idx": 7
+        },
+        {
+          "role": "customer",
+          "text": "我做得少，就是项目上用到，就买来给客户，平时不怎么搞电脑这块",
+          "time": "2026-08-19 17:36:02",
+          "turn_idx": 8
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "搭配监控用的，大屏用的，就1－2台电脑，这种不多",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S092",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-08-19 17:28:52"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U004",
+        "session_start": "2026-09-07 09:01:13",
+        "turn_idx": 5
+      },
+      "batch": "B3",
+      "case_id": "060-0143",
+      "context": [
+        {
+          "role": "customer",
+          "text": "1. 沟通水质传感器的对接\n2. 把初版程序的部署方案和程序给甲方\n3. 网关部分程序改用 go 和 rust",
+          "time": "2026-09-07 09:01:13",
+          "turn_idx": 0
+        },
+        {
+          "role": "customer",
+          "text": "联通宽带，依旧是网关ping波动",
+          "time": "2026-09-07 09:19:14",
+          "turn_idx": 1
+        },
+        {
+          "role": "customer",
+          "text": "上传不够100M，只有10-15M之间",
+          "time": "2026-09-07 09:19:58",
+          "turn_idx": 2
+        },
+        {
+          "role": "customer",
+          "text": "【腾讯文档】李君-工作\n***链接***",
+          "time": "2026-09-07 09:31:45",
+          "turn_idx": 3
+        },
+        {
+          "role": "customer",
+          "text": "21111，麻烦。要改阿里云防火墙、系统防火墙、内网穿透全部一起。简单的方案是60017映射到21111，如果你兼容的话",
+          "time": "2026-09-07 09:35:46",
+          "turn_idx": 4
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "nps.chaosen.ltd:60017=》呼了么业务端21111端口，映射了",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S073",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-09-07 09:01:13"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U005",
+        "session_start": "2026-09-08 15:45:56",
+        "turn_idx": 7
+      },
+      "batch": "B3",
+      "case_id": "060-0144",
+      "context": [
+        {
+          "role": "customer",
+          "text": "好的",
+          "time": "2026-09-08 15:47:56",
+          "turn_idx": 2
+        },
+        {
+          "role": "customer",
+          "text": "授予所有访问权限后存储显示✔了，就是地方难找",
+          "time": "2026-09-08 16:04:59",
+          "turn_idx": 3
+        },
+        {
+          "role": "customer",
+          "text": "好的",
+          "time": "2026-09-08 16:08:10",
+          "turn_idx": 4
+        },
+        {
+          "role": "customer",
+          "text": "没有录音上传",
+          "time": "2026-09-08 16:13:38",
+          "turn_idx": 5
+        },
+        {
+          "role": "customer",
+          "text": "ok",
+          "time": "2026-09-08 16:34:06",
+          "turn_idx": 6
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "我看到内容是这样的",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S216",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-09-08 15:45:56"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U081",
+        "session_start": "2026-08-28 16:11:57",
+        "turn_idx": 16
+      },
+      "batch": "B3",
+      "case_id": "060-0145",
+      "context": [
+        {
+          "role": "customer",
+          "text": "他们报，现在都怕流程又不下去了，没开学，问不到怎么采购",
+          "time": "2026-08-28 17:05:47",
+          "turn_idx": 11
+        },
+        {
+          "role": "customer",
+          "text": "走政采云的话，说现在不能走网上超市了，",
+          "time": "2026-08-28 17:06:34",
+          "turn_idx": 12
+        },
+        {
+          "role": "customer",
+          "text": "他们都没走过",
+          "time": "2026-08-28 17:09:24",
+          "turn_idx": 13
+        },
+        {
+          "role": "customer",
+          "text": "没人懂",
+          "time": "2026-08-28 17:09:29",
+          "turn_idx": 14
+        },
+        {
+          "role": "customer",
+          "text": "这家分两次开",
+          "time": "2026-08-28 17:13:39",
+          "turn_idx": 15
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "我也是还在外面，今天先不管他了，她也没搞清楚",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S168",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-08-28 16:11:57"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U050",
+        "session_start": "2026-08-31 17:18:49",
+        "turn_idx": 0
+      },
+      "batch": "B3",
+      "case_id": "060-0146",
+      "context": [],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "我是U051",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S114",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-08-31 17:18:49"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U054",
+        "session_start": "2026-09-07 17:08:12",
+        "turn_idx": 1
+      },
+      "batch": "B3",
+      "case_id": "060-0147",
+      "context": [
+        {
+          "role": "customer",
+          "text": "日区直播线多少钱一个月",
+          "time": "2026-09-07 17:08:12",
+          "turn_idx": 0
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "我看到闲鱼有按天租 可以租几天使用吗",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S121",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-09-07 17:08:12"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U118",
+        "session_start": "2026-09-09 07:26:34",
+        "turn_idx": 3
+      },
+      "batch": "B3",
+      "case_id": "060-0148",
+      "context": [
+        {
+          "role": "customer",
+          "text": "你们sdwan怎么收费？",
+          "time": "2026-09-09 07:26:34",
+          "turn_idx": 0
+        },
+        {
+          "role": "bot",
+          "text": "SD-WAN组网3天开通。",
+          "time": "2026-09-09 07:26:34",
+          "turn_idx": 0
+        },
+        {
+          "role": "customer",
+          "text": "跨境加速怎么做？",
+          "time": "2026-09-09 07:26:37",
+          "turn_idx": 1
+        },
+        {
+          "role": "customer",
+          "text": "能替换专线吗？",
+          "time": "2026-09-09 07:26:40",
+          "turn_idx": 2
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "还在吗？",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S278",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-09-09 07:26:34"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U050",
+        "session_start": "2026-08-31 17:18:49",
+        "turn_idx": 5
+      },
+      "batch": "B3",
+      "case_id": "060-0149",
+      "context": [
+        {
+          "role": "customer",
+          "text": "我是U051",
+          "time": "2026-08-31 17:18:49",
+          "turn_idx": 0
+        },
+        {
+          "role": "customer",
+          "text": "组网怎么理解",
+          "time": "2026-08-31 17:18:56",
+          "turn_idx": 1
+        },
+        {
+          "role": "customer",
+          "text": "可以",
+          "time": "2026-08-31 17:48:14",
+          "turn_idx": 2
+        },
+        {
+          "role": "customer",
+          "text": "sdwan",
+          "time": "2026-08-31 17:53:42",
+          "turn_idx": 3
+        },
+        {
+          "role": "customer",
+          "text": "我看你发了个联通",
+          "time": "2026-08-31 17:53:42",
+          "turn_idx": 4
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "那个是什么价格",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S114",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-08-31 17:18:49"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U004",
+        "session_start": "2026-09-06 22:16:50",
+        "turn_idx": 4
+      },
+      "batch": "B3",
+      "case_id": "060-0150",
+      "context": [
+        {
+          "role": "customer",
+          "text": "带宽没有满，很低",
+          "time": "2026-09-06 22:16:50",
+          "turn_idx": 0
+        },
+        {
+          "role": "customer",
+          "text": "你ros能重启吗",
+          "time": "2026-09-06 22:16:56",
+          "turn_idx": 1
+        },
+        {
+          "role": "customer",
+          "text": "办公室一边的问题",
+          "time": "2026-09-06 22:20:15",
+          "turn_idx": 2
+        },
+        {
+          "role": "customer",
+          "text": "刚就重启ros",
+          "time": "2026-09-06 22:25:58",
+          "turn_idx": 3
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "29.40",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S072",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-09-06 22:16:50"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U001",
+        "session_start": "2026-09-21 20:42:41",
+        "turn_idx": 4
+      },
+      "batch": "B3",
+      "case_id": "060-0151",
+      "context": [
+        {
+          "role": "customer",
+          "text": "没断网，很慢，怎么办？",
+          "time": "2026-09-21 20:42:41",
+          "turn_idx": 0
+        },
+        {
+          "role": "bot",
+          "text": "网速有点慢啊？看视频有点卡？感觉很慢啊。打开 ***链接*** 测速正常会有10兆上下行，有疑问可把截图发到我们售后群。每条线路带宽有限，建议只有一台手机或电脑同时使用。如果是软件客户端中节点有 2 个，分别是 ss 和 vl 结尾的，可以切换试一下。",
+          "time": "2026-09-21 20:42:41",
+          "turn_idx": 0
+        },
+        {
+          "role": "customer",
+          "text": "没理由啊，怎么时断时得",
+          "time": "2026-09-21 20:44:05",
+          "turn_idx": 1
+        },
+        {
+          "role": "customer",
+          "text": "是不是网不对",
+          "time": "2026-09-21 20:44:12",
+          "turn_idx": 2
+        },
+        {
+          "role": "customer",
+          "text": "有什么情况 现在/，帮我看看",
+          "time": "2026-09-21 20:44:21",
+          "turn_idx": 3
+        },
+        {
+          "role": "bot",
+          "text": "您好，关于您提到的‘没理由啊，怎么时断时得’（网络时断时续）的情况，根据知识库中的常见原因排查建议，您可以尝试以下步骤：\n\n1. **检查系统时间**：如果是同一条线路同一个账号下个别设备不能用，请检查设备系统时间是否对齐世界时间，误差需在 30 秒以内。\n2. **测速验证**：请打开 ***链接*** 进行测速，正常应有 10 兆上下行。如果感觉慢，建议只有一台手机或电脑同时使用，避免多条设备挤占带宽。\n3. **切换节点**：如果是软件客户端中节点有 2 个（分别是 ss 和 vl 结尾的），可以尝试切换试一下。\n4. **重启设备**：可以尝试重启一下您的手机、电脑以及 SDWAN 路由器。\n5. **检查连接方式**：非常不建议使用‘无线转无线’（如接收手机热点再发 WiFi）或无线网桥，损耗极大，容易掉线和卡顿。如有户外移动需求，建议买大品牌（华为、中兴）5G/4G 插卡路由器 CPE，用 CPE 收信号，再用一根网线接入 SDWAN 设备。\n6. **网口匹配**：如果是路由网口接上后断断续续，可能是上级路由器和 SDWAN 之间网口匹配问题，请尝试换网口，或者手动设置千兆全双工。\n\n如果以上操作后仍无法解决，您可以把测速截图或设备情况发给我们，我们会安排技术人员协助您排查。",
+          "time": "2026-09-21 20:44:21",
+          "turn_idx": 3
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "没理由啊，怎么时断时得",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S335",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message.sql 2026-09-21 20:42:41"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U005",
+        "session_start": "2026-09-08 15:45:56",
+        "turn_idx": 0
+      },
+      "batch": "B3",
+      "case_id": "060-0152",
+      "context": [],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "测试过了，我自己这台机，存储权限授权了但是显示x，本地有录音但是后台没有，另外两台机子存贮权限显示可以，但是也没上传成功",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S216",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-09-08 15:45:56"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U123",
+        "session_start": "2026-09-01 18:07:26",
+        "turn_idx": 0
+      },
+      "batch": "B3",
+      "case_id": "060-0153",
+      "context": [],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "元境，象极那个合同，合同总额148800元的。\n现在需要支付第一笔款59520元",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S307",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-09-01 18:07:26"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U032",
+        "session_start": "2026-08-05 14:36:16",
+        "turn_idx": 3
+      },
+      "batch": "B3",
+      "case_id": "060-0154",
+      "context": [
+        {
+          "role": "customer",
+          "text": "OK",
+          "time": "2026-08-05 14:36:16",
+          "turn_idx": 0
+        },
+        {
+          "role": "customer",
+          "text": "玛德，那个鬼系统，我用国鹏的账号登录不进去，",
+          "time": "2026-08-05 14:36:30",
+          "turn_idx": 1
+        },
+        {
+          "role": "customer",
+          "text": "合同 的标题我改一下",
+          "time": "2026-08-05 14:53:12",
+          "turn_idx": 2
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "没事，你晚上看都OK",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S082",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-08-05 14:36:16"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U132",
+        "session_start": "2026-08-21 11:29:27",
+        "turn_idx": 2
+      },
+      "batch": "B3",
+      "case_id": "060-0155",
+      "context": [
+        {
+          "role": "customer",
+          "text": "闲鱼",
+          "time": "2026-08-21 11:29:27",
+          "turn_idx": 0
+        },
+        {
+          "role": "customer",
+          "text": "260包月能给到多大带宽？限流量吗？出口ip是哪里的？",
+          "time": "2026-08-21 11:39:30",
+          "turn_idx": 1
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "[偷笑]",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S318",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-08-21 11:29:27"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U062",
+        "session_start": "2026-08-24 16:50:51",
+        "turn_idx": 0
+      },
+      "batch": "B3",
+      "case_id": "060-0156",
+      "context": [],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "***姓名***，下午好啊[太阳]",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S136",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-08-24 16:50:51"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U004",
+        "session_start": "2026-08-12 23:23:13",
+        "turn_idx": 4
+      },
+      "batch": "B3",
+      "case_id": "060-0157",
+      "context": [
+        {
+          "role": "customer",
+          "text": "这里也是，第三方的硬件、网络之类的问题，就会影响。这个能憋清责任就行",
+          "time": "2026-08-12 23:23:13",
+          "turn_idx": 0
+        },
+        {
+          "role": "customer",
+          "text": "这条应该定义我们自研部分的源码，第三方的那些中间件、模块或者系统，我们管不着",
+          "time": "2026-08-12 23:25:46",
+          "turn_idx": 1
+        },
+        {
+          "role": "customer",
+          "text": "还有就是数据库能不能换pgsql？云服务器还有没有更多资源",
+          "time": "2026-08-12 23:35:50",
+          "turn_idx": 2
+        },
+        {
+          "role": "customer",
+          "text": "视频兼容转码的事情，需要考虑吗",
+          "time": "2026-08-12 23:42:50",
+          "turn_idx": 3
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "这里有笔误",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S050",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-08-12 23:23:13"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U030",
+        "session_start": "2026-09-03 16:31:14",
+        "turn_idx": 2
+      },
+      "batch": "B3",
+      "case_id": "060-0158",
+      "context": [
+        {
+          "role": "customer",
+          "text": "***姓名***，征求一下您意见：协议里面 能否不写后续维保费的条款？     或者改为“免费维护保修期满后，甲方需按年向丙方支付年度维护保修费，具体费用及支付方式双方另行签署维保协议。 同时合约期限改为截至  2027年12月，到时连同需要续期的域名、服务费的费用一起以维保服务费的形式另签协议支付。",
+          "time": "2026-09-03 16:31:14",
+          "turn_idx": 0
+        },
+        {
+          "role": "customer",
+          "text": "对的   \n需要续费的项目+维保费  一起另签服务协议，这个合作协议就只体现升级改造部分",
+          "time": "2026-09-03 16:38:12",
+          "turn_idx": 1
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "你看如何",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S038",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-09-03 16:31:14"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U004",
+        "session_start": "2026-08-12 23:23:13",
+        "turn_idx": 0
+      },
+      "batch": "B3",
+      "case_id": "060-0159",
+      "context": [],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "这里也是，第三方的硬件、网络之类的问题，就会影响。这个能憋清责任就行",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S050",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-08-12 23:23:13"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U099",
+        "session_start": "2026-08-31 09:44:31",
+        "turn_idx": 1
+      },
+      "batch": "B3",
+      "case_id": "060-0160",
+      "context": [
+        {
+          "role": "customer",
+          "text": "我是韦山 Billy",
+          "time": "2026-08-31 09:44:31",
+          "turn_idx": 0
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "你好！有竹溪立交体育公园监控的1号机位直播链接吗",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S212",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-08-31 09:44:31"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U032",
+        "session_start": "2026-08-04 08:05:18",
+        "turn_idx": 5
+      },
+      "batch": "B3",
+      "case_id": "060-0161",
+      "context": [
+        {
+          "role": "customer",
+          "text": "可以的。下周走如何",
+          "time": "2026-08-04 08:05:18",
+          "turn_idx": 0
+        },
+        {
+          "role": "customer",
+          "text": "这两周都在忙巡视材料",
+          "time": "2026-08-04 08:05:53",
+          "turn_idx": 1
+        },
+        {
+          "role": "customer",
+          "text": "好的。",
+          "time": "2026-08-04 08:08:08",
+          "turn_idx": 2
+        },
+        {
+          "role": "customer",
+          "text": "下周一开发票和请款函",
+          "time": "2026-08-04 08:08:15",
+          "turn_idx": 3
+        },
+        {
+          "role": "customer",
+          "text": "[捂脸]不懂在哪里搞",
+          "time": "2026-08-04 08:21:44",
+          "turn_idx": 4
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "不懂在哪里认证",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S080",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-08-04 08:05:18"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U001",
+        "session_start": "2026-09-20 10:39:15",
+        "turn_idx": 3
+      },
+      "batch": "B3",
+      "case_id": "060-0162",
+      "context": [
+        {
+          "role": "customer",
+          "text": "你好",
+          "time": "2026-09-20 10:39:15",
+          "turn_idx": 0
+        },
+        {
+          "role": "bot",
+          "text": "你好呀！我是客服，专门负责 SDWAN 跨境网络业务。是想了解跨境专线、云电脑，还是想先免费试用线路呢？😊",
+          "time": "2026-09-20 10:39:15",
+          "turn_idx": 0
+        },
+        {
+          "role": "customer",
+          "text": "多少钱",
+          "time": "2026-09-20 10:43:59",
+          "turn_idx": 1
+        },
+        {
+          "role": "bot",
+          "text": "基础线路120元/月，主推的独享IP线路180元/月，直播优化260元/月，还有50元/月的拼车方案哦~",
+          "time": "2026-09-20 10:43:59",
+          "turn_idx": 1
+        },
+        {
+          "role": "customer",
+          "text": "你们这货，速度 能达到多少？",
+          "time": "2026-09-20 10:44:20",
+          "turn_idx": 2
+        },
+        {
+          "role": "bot",
+          "text": "带宽方面，120元和180元套餐是5-10兆，260元直播专线是大于等于10兆，上下行对等哦~",
+          "time": "2026-09-20 10:44:20",
+          "turn_idx": 2
+        }
+      ],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "有设备吗",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S330",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message.sql 2026-09-20 10:39:15"
+    },
+    {
+      "anchor": {
+        "canonical_sha256": "c527b111ef6cd58d57bc1aeed1091edf14874f4cc098a0572351cbadcbf3212b",
+        "session_key": "P:U004",
+        "session_start": "2026-08-06 10:22:08",
+        "turn_idx": 0
+      },
+      "batch": "B3",
+      "case_id": "060-0163",
+      "context": [],
+      "expected_action": "",
+      "expected_emotion": "",
+      "expected_intent": "",
+      "expected_keywords": [],
+      "expected_sources": [],
+      "label_note": "",
+      "needs_context": null,
+      "question": "上面这些都加完了，倒数第二页，这些AI大赛和sdwan的内容继续加上？",
+      "reviewed": false,
+      "reviewer": "",
+      "security_flag": false,
+      "session_id": "S043",
+      "should_answer": false,
+      "skip_reason": "",
+      "source": "biz_wx_message2.sql 2026-08-06 10:22:08"
     }
   ],
+  "description": "059+060 合并总卷（scripts/merge_labeled.py 生成；来源卷与 sha256 见 merge_info.sources，评测口径同 accuracy_evaluation）",
+  "funnel": {
+    "dup_text": 21,
+    "dup_vs_059": 23,
+    "group_excluded": 169,
+    "per_session_capped": 203,
+    "pool": 965,
+    "private_turns": 1478,
+    "short_reply": 89,
+    "too_long": 37,
+    "too_short": 140,
+    "total_turns": 1647
+  },
+  "include_audit": {
+    "batch_tag": "B3",
+    "exclude_case_ids": null,
+    "exclude_labeled": "data/wx_real/labeled_060.json",
+    "excluded_by_labeled": 100,
+    "include_source": "data/wx_real/screen_060.json",
+    "matched_triples": 248,
+    "per_session_cap": 3,
+    "picked": 50,
+    "pool_built_with_cap": 10,
+    "preoccupied_sessions": 68,
+    "screen_triples": 306,
+    "start_seq": 114,
+    "unmatched_list": [],
+    "unmatched_triples": 0
+  },
   "merge_info": {
-    "generated_at": "2026-10-26T14:39:36",
-    "total_input": 100,
-    "total_output": 100,
+    "dedup_rule": "按卷型分键：带 case_id 只按 case_id（同文不同 id 都保留）；无 case_id（059）按规范化原话；跨卷不做原话交叉去重；剔后入者",
+    "dropped_detail": [],
     "duplicates_dropped": 0,
+    "generated_at": "2026-10-26T14:39:36",
     "sources": [
       {
-        "file": "/tmp/chief_b2v/keep87.json",
-        "sha256": "a8331a4edf34997a24a0f5f0077a6e20163bd4311eaac9938e4ac6a61e4ed023",
         "cases": 87,
+        "dropped": 0,
+        "file": "/tmp/chief_b2v/keep87.json",
         "kept": 87,
-        "dropped": 0
+        "sha256": "a8331a4edf34997a24a0f5f0077a6e20163bd4311eaac9938e4ac6a61e4ed023"
       },
       {
-        "file": "/tmp/chief_b2v/r.json",
-        "sha256": "fa038884698f12c868ffd987db0e604065e2740c2a3a0d18786d88214cd182de",
         "cases": 13,
+        "dropped": 0,
+        "file": "/tmp/chief_b2v/r.json",
         "kept": 13,
-        "dropped": 0
+        "sha256": "fa038884698f12c868ffd987db0e604065e2740c2a3a0d18786d88214cd182de"
       }
     ],
-    "dropped_detail": [],
-    "dedup_rule": "按卷型分键：带 case_id 只按 case_id（同文不同 id 都保留）；无 case_id（059）按规范化原话；跨卷不做原话交叉去重；剔后入者"
+    "total_input": 100,
+    "total_output": 100
+  },
+  "sampling": {
+    "context_turns": 5,
+    "count": 50,
+    "mode": "include-ids",
+    "per_session": 3,
+    "screen_cap": 10,
+    "seed": 60
   }
 }
