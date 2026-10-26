@@ -538,3 +538,49 @@ def test_blue_prompts_append_across_batches(monkeypatch, tmp_path):
     assert pose_fn(0, 0) and pose_fn(1, 0)
     lines = (tmp_path / "blue_prompts.jsonl").read_text(encoding="utf-8").splitlines()
     assert len(lines) == 2                              # 分批追加不覆盖前批
+
+
+def test_run_heldout_appends_report(tmp_path, monkeypatch):
+    """heldout.enabled 时局末自动复测并把段落写进 round_report.md。"""
+    from tests.adversarial import heldout as ho
+    from tests.adversarial.run_round import _run_heldout
+
+    monkeypatch.setattr(ho, "HELDOUT_ROOT", tmp_path / "root")
+
+    def fake_generate(cfg):
+        d = tmp_path / "heldout-run"
+        d.mkdir()
+        return {"dir": str(d), "n": 2, "seed": "s"}
+
+    def fake_run(d, answer_fn, search_fn, scope_terms, **kw):
+        return {"n": 2, "scoreable": 2, "red_scored": 1, "red_rate": 0.5, "dir": d}
+
+    monkeypatch.setattr(ho, "generate", fake_generate)
+    monkeypatch.setattr(ho, "run", fake_run)
+
+    gdir = tmp_path / "game_1"
+    gdir.mkdir()
+    rows = []
+    for i, (ins, sc, vd) in enumerate([(True, True, "red_scored"), (True, True, "blue_scored")]):
+        rows.append(json.dumps({"seq": i, "classification": {
+            "in_scope": ins, "scored": sc, "verdict": vd}}, ensure_ascii=False))
+    (gdir / "turns.jsonl").write_text("\n".join(rows) + "\n", encoding="utf-8")
+
+    kb = tmp_path / "kb.md"
+    kb.write_text("占位库", encoding="utf-8")
+    cfg = _config(heldout={"enabled": True, "questions": 2})
+    out = _run_heldout(cfg, tmp_path, kb, None, lambda q: [],
+                       lambda q: {"answer": "a", "sources": [], "path": "p"}, None)
+    assert out["heldout"]["train_rate"] == 0.5      # 训练局 1 红 1 蓝
+    assert out["heldout"]["diff_pp"] == 0.0         # 封存题 0.5 − 训练局 0.5
+    text = (tmp_path / "round_report.md").read_text(encoding="utf-8")
+    assert "held-out" in text and "50.0%" in text
+
+
+def test_run_heldout_skipped_by_default(tmp_path):
+    """heldout.enabled 缺省 false → 不跑、不写报告段。"""
+    from tests.adversarial.run_round import _run_heldout
+    out = _run_heldout(_config(), tmp_path, tmp_path / "kb.md", None,
+                       lambda q: [], lambda q: None, None)
+    assert out is None
+    assert not (tmp_path / "round_report.md").exists()
