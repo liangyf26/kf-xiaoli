@@ -54,6 +54,20 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
+def _guard_kb_dir(kb_dir) -> None:
+    """生产库守护：kb-dir 不得是仓库根、不得位于 data/ 下（只改对抗副本）。
+
+    Architect 复核 #061-阶段4 必修1（2026-10-27）：此前不校验指向，
+    `reset --kb-dir data` 会把生产 data/ 整体搬进备份、apply 会往 data/ 写文件。
+    在任何写操作之前调用，触发即拒绝（main 转 JSON 返回码 2）。"""
+    resolved = Path(kb_dir).resolve()
+    data_dir = (PROJECT_ROOT / "data").resolve()
+    if resolved == PROJECT_ROOT.resolve():
+        raise PermissionError(f"kb-dir 不允许指向仓库根: {resolved}")
+    if resolved == data_dir or resolved.is_relative_to(data_dir):
+        raise PermissionError(f"kb-dir 不允许位于生产库 data/ 下: {resolved}")
+
+
 # ---------------------------------------------------------------- 建议登记
 def add_proposal(kb_dir: Path, *, kind: str, content: str, question_id: str,
                  reason: str, target: str | None = None, bot: str = "red-team") -> dict:
@@ -64,6 +78,9 @@ def add_proposal(kb_dir: Path, *, kind: str, content: str, question_id: str,
         raise ValueError(f"{kind} 类建议必须给 --target，如 '售前问题 · 价格/问3'")
     if kind in ("新增", "修改") and "答：" not in content:
         raise ValueError("content 须含题面行与「答：」正文，例如 '题面\n答：正文'")
+    if any(_SECTION_RE.match(l) for l in content.splitlines()):
+        raise ValueError("content 不允许携带章节标题行（**【…】**），章节由 --target 指定"
+                         "（否则无编号行会被解析丢弃）")
     kb_dir = Path(kb_dir)
     kb_dir.mkdir(parents=True, exist_ok=True)
     existing = load_proposals(kb_dir)
@@ -138,7 +155,7 @@ def _find_target(entries: list[dict], target: str) -> dict | None:
 def _apply_proposals(text: str, proposals: list[dict]) -> tuple[str, list[str], frozenset]:
     """把建议应用到库文本，返回 (新文本, 定位/格式错误, 本次新增/修改的条目键)。"""
     errors: list[str] = []
-    touched: set[tuple[str, int]] = set()
+    touched: dict[str, tuple[str, int]] = {}   # 建议 id → 落点 (section, 编号)
     for p in proposals:
         kind = p["kind"]
         if kind == "删除":
@@ -155,13 +172,23 @@ def _apply_proposals(text: str, proposals: list[dict]) -> tuple[str, list[str], 
             if not tgt:
                 errors.append(f"{p['id']}: 修改目标不存在 {p['target']}")
                 continue
+            body = p["content"].splitlines()
+            if _SECTION_RE.match(body[0].strip()):
+                # Architect 必修2：夹带章节头的 content 会把「4、**【…】**」变
+                # 成合法条目头，题面落点核对也抓不住（title 恰好相等）——源头拒。
+                errors.append(f"{p['id']}: content 首行是章节标题行（**【…】**），"
+                              "章节由 target 指定，不允许夹带")
+                continue
             lines = text.splitlines()
-            new_block = [f"{tgt['number']}、{p['content'].splitlines()[0].strip()}"] \
-                + p["content"].splitlines()[1:]
+            new_block = [f"{tgt['number']}、{body[0].strip()}"] + body[1:]
             text = "\n".join(lines[:tgt["start"]] + new_block + lines[tgt["end"]:])
-            touched.add((tgt["section"], tgt["number"]))
+            touched[p["id"]] = (tgt["section"], tgt["number"])
         else:  # 新增
             body = p["content"].splitlines()
+            if _SECTION_RE.match(body[0].strip()):
+                errors.append(f"{p['id']}: content 首行是章节标题行（**【…】**），"
+                              "章节由 target 指定，不允许夹带")
+                continue
             m_sec = re.fullmatch(r"(.+?)/问(\d+)", p["target"] or " ")
             want_section = m_sec.group(1).strip() if m_sec else (p.get("target") or "").strip()
             lines = text.splitlines()
@@ -173,7 +200,7 @@ def _apply_proposals(text: str, proposals: list[dict]) -> tuple[str, list[str], 
                     continue
                 block = [f"**【{want_section}】**", f"1、{body[0].strip()}"] + body[1:]
                 text = "\n".join(lines + block) + "\n"
-                touched.add((want_section, 1))
+                touched[p["id"]] = (want_section, 1)
                 continue
             entries = _split_entries(text)
             nums = [e["number"] for e in entries if e["section"] == want_section]
@@ -184,8 +211,8 @@ def _apply_proposals(text: str, proposals: list[dict]) -> tuple[str, list[str], 
             insert_at = last_in_sec["end"] if last_in_sec else sec_idx + 1
             block = [f"{next_n}、{body[0].strip()}"] + body[1:]
             text = "\n".join(lines[:insert_at] + block + lines[insert_at:])
-            touched.add((want_section, next_n))
-    return text, errors, frozenset(touched)
+            touched[p["id"]] = (want_section, next_n)
+    return text, errors, dict(touched)
 
 
 # ---------------------------------------------------------------- 门禁
@@ -287,14 +314,36 @@ def apply(kb_dir: Path, seed_path: Path, *, review_bot: bool = False,
         base = kb_dir / versions[-1]["file"]
         if base.exists():
             base_text = base.read_text(encoding="utf-8")
-    new_text, errors, touched = _apply_proposals(base_text, pending)
+    new_text, errors, landed = _apply_proposals(base_text, pending)
+    # 条目数对账（Architect 必修2）：解析丢内容（夹带章节头/无编号行）会在
+    # 重建时被静默跳过，库留下永远查不到的文字——期望条目数对不上就整批拒。
+    delta = sum(1 if p["kind"] == "新增" else (-1 if p["kind"] == "删除" else 0)
+                for p in pending)
+    expected_n = len(_split_entries(base_text)) + delta
+    actual_n = len(_split_entries(new_text))
+    if actual_n != expected_n:
+        errors.append(f"条目数对账失败: 期望 {expected_n} 实际 {actual_n}"
+                      "（解析丢内容，检查建议是否夹带章节头/无编号行）")
+    # 题面落点核对（必修2 强化）：夹带章节头被编号前缀吃掉时条目数恰好平衡，
+    # 再核每个新增/修改建议的题面是否原样落成条目标题，变形即拒。
+    entries_by_key = {(e["section"], e["number"]): e for e in _split_entries(new_text)}
+    for p in pending:
+        if p["kind"] == "删除":
+            continue
+        key = landed.get(p["id"])
+        want = p["content"].splitlines()[0].strip()
+        got = entries_by_key.get(key) if key else None
+        if got is None or got["title"] != want:
+            spot = f"{key[0]}/问{key[1]}" if key else "未落点"
+            errors.append(f"{p['id']}: 落点 {spot} 题面不符"
+                          f"（期望 {want!r}，content 含章节头/无编号行会被解析丢弃或变形）")
     if errors:
         _mark(kb_dir, [p["id"] for p in pending], "rejected",
               "应用失败整批拒收: " + "; ".join(errors))
         return {"applied": False, "why": "应用建议失败（整批拒收）", "errors": errors}
     candidate = kb_dir / "candidate.md"
     candidate.write_text(new_text, encoding="utf-8")
-    gate_result = gate(candidate, touched=touched,
+    gate_result = gate(candidate, touched=frozenset(landed.values()),
                        review_bot=review_bot, review_fn=review_fn)
     ids = [p["id"] for p in pending]
     if not gate_result["ok"]:
@@ -302,7 +351,19 @@ def apply(kb_dir: Path, seed_path: Path, *, review_bot: bool = False,
         candidate.unlink(missing_ok=True)
         return {"applied": False, "why": "门禁未过（整批拒收）",
                 "reasons": gate_result["reasons"], "stage_detail": gate_result["stage_detail"]}
-    version = (versions[-1]["version"] + 1) if versions else 0
+    version = versions[-1]["version"] + 1 if versions else 1
+    if not versions:
+        # 首次 apply（Architect 必修3）：先落种子基线 v0（与 reset 的 v0 同语义），
+        # 本次修库写 v1、parent 0——v0 永远表示种子原样，复盘不再歧义。
+        v0 = kb_dir / "v0.md"
+        v0.write_text(seed_text, encoding="utf-8")
+        baseline = {"version": 0, "file": "v0.md", "parent": None,
+                    "sha256": _sha256(v0), "proposal_ids": [],
+                    "gate": {"ok": True, "detail": "种子基线（首次 apply 自动落）"},
+                    "created_at": time.strftime("%Y-%m-%dT%H:%M:%S")}
+        with (kb_dir / VERSIONS_FILE).open("w", encoding="utf-8") as fh:
+            fh.write(json.dumps(baseline, ensure_ascii=False) + "\n")
+        versions = versions + [baseline]     # 基线纳入链，v1 的 parent 才是 0
     fname = f"v{version}.md"
     candidate.rename(kb_dir / fname)
     rec = {"version": version, "file": fname,
@@ -328,7 +389,8 @@ def _load_versions(kb_dir: Path) -> list[dict]:
 def reset(kb_dir: Path, backup_root: Path, seed_path: Path) -> dict:
     """kb_dir 整体移入备份，再从种子拷 v0。不删除任何文件。"""
     kb_dir, backup_root, seed_path = Path(kb_dir), Path(backup_root), Path(seed_path)
-    backup = backup_root / time.strftime("%Y%m%d-%H%M%S")
+    backup = backup_root / f"{time.strftime('%Y%m%d-%H%M%S')}-{os.urandom(2).hex()}"
+    # 随机后缀（Architect 小问题②）：同秒两次 reset 不再嵌套同名目录
     backup.mkdir(parents=True, exist_ok=True)
     if kb_dir.exists():
         shutil.move(str(kb_dir), str(backup / kb_dir.name))
@@ -372,23 +434,30 @@ def main(argv=None) -> int:
     p_rst.add_argument("--kb-dir", default="runs/adversarial/kb")
     p_rst.add_argument("--seed", default="data/sdwan-new.md")
     args = ap.parse_args(argv)
-    if args.cmd == "add-proposal":
-        content = Path(args.file).read_text(encoding="utf-8") if args.file else ""
-        prop = add_proposal(args.kb_dir, kind=args.kind, content=content,
-                            question_id=args.question_id, reason=args.reason,
-                            target=args.target, bot=args.bot)
-        print(json.dumps({"ok": True, "id": prop["id"]}, ensure_ascii=False))
+    try:
+        _guard_kb_dir(args.kb_dir)                     # 三个子命令统一过生产库守护
+        if args.cmd == "add-proposal":
+            content = Path(args.file).read_text(encoding="utf-8") if args.file else ""
+            prop = add_proposal(args.kb_dir, kind=args.kind, content=content,
+                                question_id=args.question_id, reason=args.reason,
+                                target=args.target, bot=args.bot)
+            print(json.dumps({"ok": True, "id": prop["id"]}, ensure_ascii=False))
+            return 0
+        if args.cmd == "apply":
+            out = apply(args.kb_dir, args.seed, review_bot=args.review_bot)
+            print(json.dumps(out, ensure_ascii=False, default=str))
+            return 0 if out.get("applied") else 1
+        # 备份目录跟随 --kb-dir（kb_dir.parent/_backup），默认 kb-dir=runs/adversarial/kb
+        # 时仍落 runs/adversarial/_backup；沙盒 --kb-dir 不会往项目目录塞备份
+        #（Chief 复核 2026-10-27：写死项目路径会让多次测试串味）。
+        out = reset(args.kb_dir, Path(args.kb_dir).parent / "_backup", args.seed)
+        print(json.dumps(out, ensure_ascii=False))
         return 0
-    if args.cmd == "apply":
-        out = apply(args.kb_dir, args.seed, review_bot=args.review_bot)
-        print(json.dumps(out, ensure_ascii=False, default=str))
-        return 0 if out.get("applied") else 1
-    # 备份目录跟随 --kb-dir（kb_dir.parent/_backup），默认 kb-dir=runs/adversarial/kb
-    # 时仍落 runs/adversarial/_backup；沙盒 --kb-dir 不会往项目目录塞备份
-    #（Chief 复核 2026-10-27：写死项目路径会让多次测试串味）。
-    out = reset(args.kb_dir, Path(args.kb_dir).parent / "_backup", args.seed)
-    print(json.dumps(out, ensure_ascii=False))
-    return 0
+    except (ValueError, PermissionError) as exc:
+        # 小问题①：内容非法/守护拒绝返回 JSON 错误而非 traceback
+        print(json.dumps({"ok": False,
+                          "error": f"{type(exc).__name__}: {exc}"}, ensure_ascii=False))
+        return 2
 
 
 if __name__ == "__main__":

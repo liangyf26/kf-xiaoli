@@ -103,7 +103,7 @@ def test_gate_regression_rejects_violating_proposal(tmp_path, production_kb_snap
 
 
 def test_apply_accepts_good_proposal(tmp_path, production_kb_snapshot):
-    """全新题面新增条目 → 写 v0.md + versions.jsonl，建议标 applied。"""
+    """全新题面新增条目 → 首次自动落种子基线 v0，本次修库写 v1（parent 0）。"""
     seed = _production_new_kb()
     _propose(tmp_path,
              content="量子加密专线年费多少钱？\n答：年费 3600 元，含量子密钥分发服务。",
@@ -111,17 +111,22 @@ def test_apply_accepts_good_proposal(tmp_path, production_kb_snapshot):
     out = kp.apply(tmp_path, seed)
     assert out["applied"] is True, out
     v0 = tmp_path / "v0.md"
-    assert v0.exists()
+    v1 = tmp_path / "v1.md"
+    assert v0.exists() and v1.exists()
+    assert v0.read_text(encoding="utf-8") == seed.read_text(encoding="utf-8")  # v0=种子原样
     versions = kp._load_versions(tmp_path)
-    assert len(versions) == 1
-    rec = versions[0]
-    assert rec["version"] == 0 and rec["parent"] is None
-    assert rec["sha256"] == _sha(v0)
+    assert len(versions) == 2
+    base, rec = versions
+    assert base["version"] == 0 and base["parent"] is None
+    assert base["sha256"] == _sha(seed)                        # 基线 sha == 种子库
+    assert rec["version"] == 1 and rec["parent"] == 0
+    assert rec["sha256"] == _sha(v1)
     assert rec["proposal_ids"] == ["P-001"]
     assert [p["status"] for p in kp.load_proposals(tmp_path)] == ["applied"]
-    text = v0.read_text(encoding="utf-8")
+    text = v1.read_text(encoding="utf-8")
     assert "4、量子加密专线年费多少钱？" in text          # 基本介绍原有 3 条 → 编号 4
     assert "答：年费 3600 元" in text
+    assert "量子加密" not in v0.read_text(encoding="utf-8")  # 基线不含新条目
 
 
 def test_review_bot_gate(tmp_path, production_kb_snapshot):
@@ -179,6 +184,66 @@ def test_reset_backup_follows_kb_dir(tmp_path):
     assert (kb / "v0.md").read_text(encoding="utf-8") == "SEED-CONTENT\n"
     after = sorted(p.name for p in proj_backup.iterdir()) if proj_backup.exists() else None
     assert after == before                       # 项目 _backup 未被塞入备份
+
+
+def test_guard_rejects_production_kb_dirs(tmp_path, production_kb_snapshot):
+    """必修1：--kb-dir 指仓库根或 data/ 下 → 三子命令全拒（exit 2），生产库未动。"""
+    data = _production_new_kb().parent
+    before = {p: _stat(p) for p in sorted(data.glob("sdwan*.md"))}
+    seed = str(_production_new_kb())
+    for kb_dir in ("data", "data/wx_real", "."):
+        rc = kp.main(["add-proposal", "--kb-dir", kb_dir, "--kind", "新增",
+                      "--question-id", "G", "--reason", "r"])
+        assert rc == 2, ("add-proposal", kb_dir)
+        rc = kp.main(["apply", "--kb-dir", kb_dir, "--seed", seed])
+        assert rc == 2, ("apply", kb_dir)
+        rc = kp.main(["reset", "--kb-dir", kb_dir, "--seed", seed])
+        assert rc == 2, ("reset", kb_dir)
+    after = {p: _stat(p) for p in sorted(data.glob("sdwan*.md"))}
+    assert after == before
+
+
+def test_add_proposal_rejects_section_header(tmp_path):
+    """必修2 前置：content 夹带章节标题行 → add-proposal 直接拒。"""
+    with pytest.raises(ValueError, match="章节标题行"):
+        _propose(tmp_path,
+                 content="**【新章节】**\n无编号题目\n答：混进来的",
+                 question_id="D-3", target="基本介绍")
+
+
+def test_gate_rejects_entry_count_mismatch(tmp_path, production_kb_snapshot):
+    """必修2 兜底：绕过 add-proposal 构造夹带建议 → apply 条目数对账拒收、零写入。"""
+    seed = _production_new_kb()
+    base_n = len(kp._split_entries(seed.read_text(encoding="utf-8")))
+    smuggled = {"id": "P-901", "kind": "新增", "target": "基本介绍",
+                "content": "**【新章节】**\n无编号题目\n答：混进来的",
+                "question_id": "D-4", "reason": "绕过校验的夹带",
+                "bot": "red-team", "status": "pending",
+                "created_at": "2026-10-27T06:00:00"}
+    (tmp_path / kp.PROPOSALS_FILE).write_text(
+        json.dumps(smuggled, ensure_ascii=False) + "\n", encoding="utf-8")
+    out = kp.apply(tmp_path, seed)
+    assert out["applied"] is False
+    assert any("章节标题行" in r or "题面不符" in r for r in out["errors"]), out["errors"]
+    assert not (tmp_path / "v0.md").exists() and not (tmp_path / "v1.md").exists()
+    assert len(kp._split_entries(seed.read_text(encoding="utf-8"))) == base_n
+
+
+def test_reset_unique_backup_dirs(tmp_path):
+    """小问题②：同秒两次 reset → 两个不嵌套的备份目录。"""
+    kb = tmp_path / "kb"
+    kb.mkdir()
+    (kb / "old.md").write_text("旧", encoding="utf-8")
+    seed = tmp_path / "seed.md"
+    seed.write_text("SEED\n", encoding="utf-8")
+    rc1 = kp.main(["reset", "--kb-dir", str(kb), "--seed", str(seed)])
+    (kb / "again.md").write_text("二", encoding="utf-8")
+    rc2 = kp.main(["reset", "--kb-dir", str(kb), "--seed", str(seed)])
+    assert rc1 == 0 and rc2 == 0
+    backups = sorted((tmp_path / "_backup").iterdir())
+    assert len(backups) == 2 and len({b.name for b in backups}) == 2   # 目录名互不相同
+    assert all((b / "kb").exists() for b in backups)                   # 各自完整
+    assert (kb / "v0.md").exists()                                     # 仍是种子 v0
 
 
 def test_kb_seed_prefers_latest_version(tmp_path):
