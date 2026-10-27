@@ -212,13 +212,13 @@ async def handle_llm_generation(
                            if anchor != -1 else prompt + "\n\n" + suffix)
             result = await llm_client.generate(
                 [{"role": "user", "content": content}],
-                # #062 §9.2（Chief 批）：重试是短输出（话术或带条目短答），15s 短超时
-                # 且不再内部重试——最坏 24+15≈39s，替代原 54s；seed7 实测重试撞 30s
-                # 上限四题全落兜底
-                # #062 §10（Chief 批）：重试再关思考——seed11 实测 12/68 次调用
-                # completion_tokens 打满 1024（思考吃 token 致 JSON 截断=③的根因）
+                # #062 §9.2/§10（Chief 批）：重试（attempt1，无论成因=话术缺陷还是
+                # JSON 截断/空回复）一律 15s 短超时、不内部重试、关思考。
+                # 收口局实测：关 thinking 只挂 defect_retry 分支时，attempt0 走
+                # 「JSON残缺→普通重试」的题（seq27）attempt1 仍思考烧光 1024 token
+                # （finish_reason=length resp_chars=87）二次截断落兜底——③ 未清零的根因。
                 **({"timeout_s": 15.0, "retries": 0, "enable_thinking": False}
-                   if defect_retry else {}),
+                   if attempt == 1 else {}),
             )
             parsed = parse_json_response(result["response"])
             # #062 修库附加代码项：出口剥 {{{...}}} 内部占位符（含库原文带出与

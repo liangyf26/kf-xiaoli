@@ -179,10 +179,14 @@ class _BrokenThenGoodLLM:
     def __init__(self):
         self.calls = 0
 
-    async def generate(self, messages):
+    async def generate(self, messages, **kwargs):
+        # #062 §10：attempt1 统一带 timeout_s/retries/enable_thinking（重试关思考），
+        # 桩须吃住 kwargs；顺带断言重试调用确实带上了关思考参数
         self.calls += 1
         if self.calls == 1:
+            assert kwargs == {}
             return {"response": '{"answer": "基本流程', "usage": {}, "latency_ms": 10}
+        assert kwargs == {"timeout_s": 15.0, "retries": 0, "enable_thinking": False}
         return {"response": json.dumps({"answer": "手机上可以装客户端", "sources": ["问题3"]}, ensure_ascii=False),
                 "usage": {}, "latency_ms": 20}
 

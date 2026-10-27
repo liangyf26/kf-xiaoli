@@ -113,6 +113,21 @@ def test_defect_retry_recovers_answer(tmp_path):
     assert p1.startswith("【强制作答约束·最优先】")
 
 
+def test_broken_json_attempt0_retry_disables_thinking(tmp_path):
+    """收口局实测（seq27）：attempt0 JSON 截断（非话术）走普通重试，attempt1
+    也必须关 thinking——否则思考二次烧光 1024 token 落兜底（③未清零根因）。"""
+    import json
+    ans = "可以，对公开技术服务发票，1%增值税普通专用发票，累计付款满1000元可开。"
+    truncated = '{"answer": "可以，对公开技术服务发票，1%增值'   # 截断 JSON 残片
+    good = json.dumps({"answer": ans, "sources": []}, ensure_ascii=False)
+    res, cap = _run(tmp_path, "", payloads=[truncated, good])
+    assert res["answer"] == ans
+    assert cap["calls"] == 2
+    assert cap["kwargs"][0] == {}
+    assert cap["kwargs"][1] == {"timeout_s": 15.0, "retries": 0,
+                                "enable_thinking": False}
+
+
 def test_model_written_reason_skips_retry(tmp_path):
     """模型自写理由=合法转人工：不重试，1 次调用直接采纳。"""
     raw = ('{"answer": "这个问题需要同事确认，已为您转接人工客服。", "sources": [], '
