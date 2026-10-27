@@ -2,6 +2,7 @@
 import hashlib
 import json
 import threading
+import time
 from pathlib import Path
 
 import pytest
@@ -671,7 +672,8 @@ def _fake_ask_factory(calls, fail_first=0):
 
 
 def test_prefetch_same_questions_byte_identical(tmp_path, monkeypatch):
-    """I① 同 seed：预取版与串行版的 blue_prompts.jsonl 与题面序列逐字节一致。"""
+    """I① 同 seed：预取版与串行版的 blue_prompts.jsonl 与题面序列逐字节一致；
+    且整局 spec 不因分批重复（探针复核修②的多样性回归）。"""
     import tests.adversarial.run_round as rr
     outs = []
     for pf in (False, True):
@@ -681,15 +683,19 @@ def test_prefetch_same_questions_byte_identical(tmp_path, monkeypatch):
         pdir = tmp_path / ("serial" if not pf else "prefetch")
         pdir.mkdir()
         cfg = _race_cfg()
-        state_obj = {}
         monkey = rr._planned_pose(cfg, 30, tmp_path / "kb.md", prompts_dir=pdir,
                                   prefetch=pf)
-        # 串行消费 20 题（race 节奏：答一题出一题的补货时机不同，但批序/参数一致）
-        for _ in range(20):
+        for _ in range(30):                               # 消费全部 30 题
             outs.append((monkey(0, 0).question, pf))
-        (pdir / "blue_prompts.jsonl")
+        if pf:                                            # 等 worker 收尾再比文件
+            st = monkey._planned_state
+            deadline = time.time() + 5
+            while time.time() < deadline and st["seen"] < 30:
+                time.sleep(0.05)
+            assert st["seen"] == 30
     serial, prefetch = [o for o in outs if o[1] is False], [o for o in outs if o[1] is True]
     assert [q for q, _ in serial] == [q for q, _ in prefetch], "同 seed 题面序列必须一致"
+    assert len({q for q, _ in serial}) == 30, "30 题 spec 不得因分批重复（多样性塌缩）"
     a = (tmp_path / "serial" / "blue_prompts.jsonl").read_bytes()
     b = (tmp_path / "prefetch" / "blue_prompts.jsonl").read_bytes()
     assert a == b, "blue_prompts.jsonl 必须逐字节相同"
@@ -744,6 +750,11 @@ def test_prefetch_timeline_written(tmp_path, monkeypatch):
                               prefetch=True)
     for _ in range(12):                                   # 消费 12 题
         monkey(0, 0)
+    st = monkey._planned_state
+    deadline = time.time() + 5                            # 等 worker 收尾（水位满会短暂等待）
+    while time.time() < deadline and not any(
+            r["event"] == "worker_exit" for r in st["timeline"]):
+        time.sleep(0.05)
     rows = [json.loads(l) for l in
             (pdir / "prefetch_timeline.jsonl").read_text(encoding="utf-8").splitlines()]
     events = [r["event"] for r in rows]
@@ -757,3 +768,37 @@ def test_prefetch_timeline_written(tmp_path, monkeypatch):
     assert ts == sorted(ts), "时间线必须单调不减"          # 同文件追加，天然有序
     st = monkey._planned_state
     assert len(st["timeline"]) == len(rows)               # 内存与落盘一致
+
+
+def test_prefetch_worker_survives_watermark(tmp_path, monkeypatch):
+    """I 探针复核回归：水位满 worker 等消费不退出，批3 仍由 worker 补齐。"""
+    import tests.adversarial.run_round as rr
+    calls = []
+    ask = _fake_ask_factory(calls)
+    monkeypatch.setattr(rr, "_ask_blue", ask)
+    pdir = tmp_path / "pdir"
+    pdir.mkdir()
+    cfg = _race_cfg()                                     # n=30, batch=10, 水位=20
+    monkey = rr._planned_pose(cfg, 30, tmp_path / "kb.md", prompts_dir=pdir,
+                              prefetch=True)
+    for _ in range(20):                                   # 消费 20 → 池空
+        monkey(0, 0)
+    st = monkey._planned_state
+    deadline = time.time() + 5
+    while time.time() < deadline and st["seen"] < 30:     # 批3 必须由 worker 补
+        time.sleep(0.05)
+    assert st["seen"] == 30, "水位满后 worker 不得退出，批3 应由预取补齐"
+    for _ in range(5):
+        monkey(0, 0)
+    deadline = time.time() + 6                            # worker 退避链最长 ~3s，等它退出
+    while time.time() < deadline and not any(
+            r["event"] == "worker_exit" for r in st["timeline"]):
+        time.sleep(0.05)
+    rows = [json.loads(l) for l in
+            (pdir / "prefetch_timeline.jsonl").read_text(encoding="utf-8").splitlines()]
+    wexit = [r["why"] for r in rows if r["event"] == "worker_exit"]
+    assert wexit == ["all_planned"], f"worker 退出原因异常: {wexit}"
+    # 批2/批3 由 worker 与主循环回退竞速补齐，谁抢到锁都合法，批数不作断言；
+    # 回归判据是退出原因：探针 bug 版在水位处 fails2 让位，修复版必须 all_planned。
+    wfills = [r for r in rows if r["event"] == "fill_start" and r["src"] == "worker"]
+    assert len(wfills) >= 1, "worker 未参与任何出题"

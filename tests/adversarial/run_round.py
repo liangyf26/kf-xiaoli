@@ -133,6 +133,9 @@ def _blue_questions(config: dict, n: int, kb: Path, ask_blue=None,
                     prompts_dir: Path | None = None) -> list[dict]:
     """风格池定题干，蓝方模型只负责改写成题面，并说明为什么选这张卡。
 
+    一次性出 n 题（heldout 等调用方）。分批跑局请走 _planned_pose（20261027
+    探针复核修②：分批各自 sample(seed, take) 会重复同一批 spec，多样性塌缩）。
+
     prompts_dir（G+C 修复）：蓝方题面落盘目录，由 run() 传轮目录（与 outbox 同级）。
     旧实现写 kb.parent——kb 指生产 data/ 时测试数据直接落进生产目录（20261027
     Architect 抓到 59 行测试数据）。None=不落盘（单测/工具调用默认不写任何文件）。"""
@@ -437,11 +440,22 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
     - 同 seed 题面逐字节一致——补货批序/参数与串行版完全相同，只挪时间点；
     - 预取失败只记 blue_fill_errors.jsonl，主循环池空时同步回退补货，不搞崩整轮；
     - fixed（n<=batch）不启用预取，首批评为原同步路径。"""
-    from tests.adversarial.scenarios.style_sampler import resolve_expect_hit
+    from tests.adversarial.scenarios.style_sampler import (
+        blue_prompt, load_styles, resolve_expect_hit, sample)
 
     batch = int((config.get("match") or {}).get("pose_batch", 10))
     kb_obj = _kb_object(kb)
     watermark = 2 * batch          # 预取水位：已计划-已消费保持 <= 2 批
+    # 探针复核修②（20261027）：原每批调 sample(seed, take)——sample 是纯函数，
+    # 同参同果 → 每批 10 个 spec 完全相同，整局多样性塌缩成 10 道场景换皮
+    # （探针2 实测 20 题只有 10 个不同 spec）。改为开局一次性 sample(seed, n)，
+    # 补批按 specs[seen:seen+take] 切片：批序与一次性串行版逐题一致。
+    _styles = load_styles(Path(config.get("styles_dir",
+                                           "tests/adversarial/scenarios/styles")))
+    _specs_all = sample(config["match"]["seed"], n, _styles)
+    _by_style = {c["style_id"]: c for c in _styles}
+    _blue = config["blue"]
+    _seed = config["match"]["seed"]
 
     def _resolve(jp: dict) -> dict:
         got = resolve_expect_hit(jp, kb_obj.qa_pairs)
@@ -473,11 +487,33 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
         # 整批互斥（I）：worker 与主循环回退共用一把锁，锁内重查水位，
         # 杜绝同批双补（竞态会把 blue_prompts.jsonl 写成重复行）。
         with state["lock"]:
-            if state["seen"] >= n or state["next"] < len(state["planned"]):
+            if state["seen"] >= n:
                 return
+            if src == "worker":
+                # 探针复核修（20261027）：原「池非空即拒」让 worker 在库存整批时
+                # 无事可做，连续两次被计为失败即 fails2 让位，批2 之后全落主循环
+                # 串行回退（探针实测 42s/题 零收益）。预取看水位：库存<水位就补。
+                if state["seen"] - state["next"] >= watermark:
+                    return
+            elif state["next"] < len(state["planned"]):
+                return                  # 回退仍看池空，语义与串行版一致
             take = min(batch, n - state["seen"])
             _tl("fill_start", src=src, seen=state["seen"], take=take)
-            items = _blue_questions(config, take, kb or Path("."), prompts_dir=prompts_dir)
+            items = []
+            for spec in _specs_all[state["seen"]:state["seen"] + take]:
+                card = _by_style[spec["style_id"]]
+                prompt = blue_prompt(spec, card, _seed)
+                text, reason = _ask_blue(_blue, prompt, spec["template"])
+                items.append({"text": text, "reason": reason,
+                              "style_id": spec["style_id"], "prompt": prompt,
+                              "intent": spec["intent"],
+                              "judge_points": spec["judge_points"]})
+            if prompts_dir is not None:
+                ppath = Path(prompts_dir) / "blue_prompts.jsonl"
+                with ppath.open("a" if ppath.exists() else "w",
+                                encoding="utf-8") as fh:
+                    for q in items:              # race 分批出题时追加，不覆盖前批
+                        fh.write(json.dumps(q, ensure_ascii=False) + "\n")
             _tl("fill_end", src=src, seen=state["seen"] + take)
             if kb_obj is not None:
                 # 场景断言的 expect_hit 是内容短语（A/B 时代口径），判分前解析成来源
@@ -495,20 +531,29 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
             _log_fill_error("fill", exc)
 
     def _prefetch_worker() -> None:
-        # 答题期间后台补货；失败只记日志退出，主循环会同步回退，整轮不受影响。
-        # 连续 2 批无进度即让位（防蓝方端点持续故障时空转刷错误日志）。
+        # 答题期间后台补货；真失败（池空还补不到货）连续 2 次才让位。
+        # 水位满只是等消费腾位，不退出（探针复核修：原版到水位即退出，
+        # 批2 之后全部落到主循环同步回退，预取名存实亡）。
         _tl("worker_start", watermark=watermark, n=n)
         fails = 0
         while True:
             with state["lock"]:
                 backlog = state["seen"] - state["next"]
-            if backlog >= watermark or state["seen"] >= n:
-                _tl("worker_exit", why="watermark_or_done", backlog=backlog,
-                    seen=state["seen"])
+            if state["seen"] >= n:
+                _tl("worker_exit", why="all_planned", seen=state["seen"])
                 return
+            if backlog >= watermark:
+                time.sleep(1.0)             # 水位满：等消费腾位，不退出
+                continue
             before = state["seen"]
             _fill_guarded(src="worker")
-            fails = fails + 1 if state["seen"] == before else 0
+            if state["seen"] == before:
+                time.sleep(2.0)             # 无进展退避，防端点故障热旋
+                with state["lock"]:
+                    stocked = state["next"] < len(state["planned"])
+                fails = fails + 1 if not stocked else 0
+            else:
+                fails = 0
             if fails >= 2:
                 _tl("worker_exit", why="fails2", seen=state["seen"])
                 return
