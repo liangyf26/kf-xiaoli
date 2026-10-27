@@ -437,7 +437,10 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
 
     I（20261027 复审必修I）：答题期间后台预取下一批（水位 = 2×batch），出题
     串行等待不再压在答题墙钟上。约束：
-    - 同 seed 题面逐字节一致——补货批序/参数与串行版完全相同，只挪时间点；
+    - 锁只护状态与占位，出题在锁外——整批持锁会连消费端 pop 一起挡住
+      （探针3 实测：批2 生成的 160s 里一道题都弹不出来）；busy 标志保证
+      同时最多一批在飞，planned 追加严格按切片序；
+    - 同 seed 题面逐字节一致——开局一次性 sample(seed, n)，补批按切片；
     - 预取失败只记 blue_fill_errors.jsonl，主循环池空时同步回退补货，不搞崩整轮；
     - fixed（n<=batch）不启用预取，首批评为原同步路径。"""
     from tests.adversarial.scenarios.style_sampler import (
@@ -462,8 +465,8 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
         return got if got is not None else {k: v for k, v in jp.items()
                                             if k != "expect_hit"}
 
-    state = {"planned": [], "next": 0, "seen": 0, "lock": threading.Lock(),
-             "errors": [], "timeline": []}
+    state = {"planned": [], "next": 0, "seen": 0, "busy": False,
+             "lock": threading.Lock(), "errors": [], "timeline": []}
     tpath = (Path(prompts_dir) / "prefetch_timeline.jsonl") if prompts_dir is not None else None
 
     def _tl(event: str, **kw) -> None:
@@ -483,80 +486,101 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
             with (Path(prompts_dir) / "blue_fill_errors.jsonl").open("a", encoding="utf-8") as fh:
                 fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
 
-    def _fill_once(src: str = "main") -> None:
-        # 整批互斥（I）：worker 与主循环回退共用一把锁，锁内重查水位，
-        # 杜绝同批双补（竞态会把 blue_prompts.jsonl 写成重复行）。
-        with state["lock"]:
-            if state["seen"] >= n:
-                return
-            if src == "worker":
-                # 探针复核修（20261027）：原「池非空即拒」让 worker 在库存整批时
-                # 无事可做，连续两次被计为失败即 fails2 让位，批2 之后全落主循环
-                # 串行回退（探针实测 42s/题 零收益）。预取看水位：库存<水位就补。
-                if state["seen"] - state["next"] >= watermark:
-                    return
-            elif state["next"] < len(state["planned"]):
-                return                  # 回退仍看池空，语义与串行版一致
-            take = min(batch, n - state["seen"])
-            _tl("fill_start", src=src, seen=state["seen"], take=take)
-            items = []
-            for spec in _specs_all[state["seen"]:state["seen"] + take]:
-                card = _by_style[spec["style_id"]]
-                prompt = blue_prompt(spec, card, _seed)
-                text, reason = _ask_blue(_blue, prompt, spec["template"])
-                items.append({"text": text, "reason": reason,
-                              "style_id": spec["style_id"], "prompt": prompt,
-                              "intent": spec["intent"],
-                              "judge_points": spec["judge_points"]})
-            if prompts_dir is not None:
-                ppath = Path(prompts_dir) / "blue_prompts.jsonl"
-                with ppath.open("a" if ppath.exists() else "w",
-                                encoding="utf-8") as fh:
-                    for q in items:              # race 分批出题时追加，不覆盖前批
-                        fh.write(json.dumps(q, ensure_ascii=False) + "\n")
-            _tl("fill_end", src=src, seen=state["seen"] + take)
-            if kb_obj is not None:
-                # 场景断言的 expect_hit 是内容短语（A/B 时代口径），判分前解析成来源
-                # 标签（与生产 sources 同格式，#057 路径）；解析不出剥 expect_hit
-                # 保 forbid/route，不让红方吃冤枉分。
-                for item in items:
-                    item["judge_points"] = [(s, _resolve(jp)) for s, jp in item["judge_points"]]
-            state["planned"].extend(items)
-            state["seen"] += take
+    def _gen_slice(start: int, take: int) -> list[dict]:
+        # 出题在锁外（探针3 实测：整批持锁连消费端 pop 一起挡住，批2 生成的
+        # 160s 里一道题都弹不出来，预取收益被锁吃掉）。锁只护状态与占位。
+        items = []
+        for spec in _specs_all[start:start + take]:
+            card = _by_style[spec["style_id"]]
+            prompt = blue_prompt(spec, card, _seed)
+            text, reason = _ask_blue(_blue, prompt, spec["template"])
+            items.append({"text": text, "reason": reason,
+                          "style_id": spec["style_id"], "prompt": prompt,
+                          "intent": spec["intent"],
+                          "judge_points": spec["judge_points"]})
+        if prompts_dir is not None:
+            ppath = Path(prompts_dir) / "blue_prompts.jsonl"
+            with ppath.open("a" if ppath.exists() else "w", encoding="utf-8") as fh:
+                for q in items:                  # race 分批出题时追加，不覆盖前批
+                    fh.write(json.dumps(q, ensure_ascii=False) + "\n")
+        if kb_obj is not None:
+            # 场景断言的 expect_hit 是内容短语（A/B 时代口径），判分前解析成来源
+            # 标签（与生产 sources 同格式，#057 路径）；解析不出剥 expect_hit
+            # 保 forbid/route，不让红方吃冤枉分。
+            for item in items:
+                item["judge_points"] = [(s, _resolve(jp)) for s, jp in item["judge_points"]]
+        return items
 
-    def _fill_guarded(src: str = "main") -> None:
+    def _try_reserve(src: str):
+        # 锁内占位（seen 先行推进）+ busy 防两批在飞：杜绝双补、保证 append
+        # 严格按切片序（planned 顺序=spec 序）；失败回退占位，重试同段重切。
+        with state["lock"]:
+            if state["busy"] or state["seen"] >= n:
+                return None
+            if src == "worker":
+                if state["seen"] - state["next"] >= watermark:
+                    return None                  # 水位满：等消费腾位
+            elif state["next"] < len(state["planned"]):
+                return None                      # 回退只看池空，语义与串行版一致
+            take = min(batch, n - state["seen"])
+            start = state["seen"]
+            state["seen"] += take
+            state["busy"] = True
+            return start, take
+
+    def _fill_once(src: str = "main") -> bool:
+        """占位→锁外出题→短锁追加。返回是否真出了题。"""
+        res = _try_reserve(src)
+        if res is None:
+            return False
+        start, take = res
+        _tl("fill_start", src=src, seen=start, take=take)
         try:
-            _fill_once(src)
+            items = _gen_slice(start, take)
+        except Exception:
+            with state["lock"]:                  # 失败退占位，下轮同段重切
+                state["seen"] = start
+                state["busy"] = False
+            raise
+        with state["lock"]:
+            state["planned"].extend(items)
+            state["busy"] = False
+        _tl("fill_end", src=src, seen=start + take)
+        return True
+
+    def _fill_guarded(src: str = "main") -> bool:
+        try:
+            return _fill_once(src)
         except Exception as exc:                    # noqa: BLE001
             _log_fill_error("fill", exc)
+            return False
 
     def _prefetch_worker() -> None:
-        # 答题期间后台补货；真失败（池空还补不到货）连续 2 次才让位。
-        # 水位满只是等消费腾位，不退出（探针复核修：原版到水位即退出，
-        # 批2 之后全部落到主循环同步回退，预取名存实亡）。
+        # 预取：backlog<水位就补；水位满/在途是健康等待，不退出（探针1/2 根因
+        # 之一即到水位即退）。仅「池空还连续 2 次补不到货」才让位（防端点故障
+        # 热旋刷日志），让位后主循环池空会同步自补，整轮不受影响。
         _tl("worker_start", watermark=watermark, n=n)
         fails = 0
         while True:
             with state["lock"]:
-                backlog = state["seen"] - state["next"]
-            if state["seen"] >= n:
+                done = state["seen"] >= n
+            if done:
                 _tl("worker_exit", why="all_planned", seen=state["seen"])
                 return
-            if backlog >= watermark:
-                time.sleep(1.0)             # 水位满：等消费腾位，不退出
-                continue
-            before = state["seen"]
-            _fill_guarded(src="worker")
-            if state["seen"] == before:
-                time.sleep(2.0)             # 无进展退避，防端点故障热旋
-                with state["lock"]:
-                    stocked = state["next"] < len(state["planned"])
-                fails = fails + 1 if not stocked else 0
-            else:
+            progressed = _fill_guarded(src="worker")
+            if progressed:
                 fails = 0
-            if fails >= 2:
-                _tl("worker_exit", why="fails2", seen=state["seen"])
-                return
+                continue
+            with state["lock"]:
+                stocked = state["next"] < len(state["planned"]) or state["busy"]
+            if stocked:
+                time.sleep(1.0)          # 水位满/在途/已补上：健康等待
+            else:
+                fails += 1
+                if fails >= 2:
+                    _tl("worker_exit", why="fails2", seen=state["seen"])
+                    return
+                time.sleep(2.0)          # 池空无进展：退避再试
 
     if prefetch and n > batch:
         threading.Thread(target=_prefetch_worker, name="blue-prefetch",
@@ -564,20 +588,29 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
 
     def pose(topic: int, followups: int) -> Pose | None:
         # 阶段 2 每题独立，不沿用上一题做追问；追问编排是阶段 3 的事
-        if state["next"] >= len(state["planned"]) and state["seen"] < n:
-            _waited = time.time()
-            _fill_guarded()                          # 同步回退（预取未赶上/已失败）
-            _fill_guarded()                          # 池空最多再给一次机会
-            _tl("pose_fallback", waited_s=round(time.time() - _waited, 3),
-                next=state["next"])
-        with state["lock"]:
-            if state["next"] >= len(state["planned"]):
-                return None
-            item = state["planned"][state["next"]]
-            state["next"] += 1
-            _tl("pose_pop", next=state["next"])
-            return Pose(question=item["text"], reason=item["reason"],
-                        cid=item["intent"], judge_point=item["judge_points"])
+        waited = time.time()
+        stalled = False
+        while True:
+            with state["lock"]:
+                if state["next"] < len(state["planned"]):
+                    item = state["planned"][state["next"]]
+                    state["next"] += 1
+                    if stalled:                  # 等过在途/自补：记等待时长
+                        _tl("pose_fallback", waited_s=round(time.time() - waited, 3),
+                            next=state["next"])
+                    else:
+                        _tl("pose_pop", next=state["next"])
+                    return Pose(question=item["text"], reason=item["reason"],
+                                cid=item["intent"], judge_point=item["judge_points"])
+                if state["seen"] >= n:           # 已全部计划且弹尽：无题可出
+                    return None
+                can_fill = not state["busy"]
+            if can_fill:
+                _fill_guarded()                  # 池空且无人出题：同步自补
+                stalled = True
+            else:
+                stalled = True                   # 在途商品：等 worker 交货
+                time.sleep(0.2)
 
     pose._planned_state = state          # 测试观测点（水位/回退行为断言用）
     return pose
