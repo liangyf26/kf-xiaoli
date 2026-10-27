@@ -700,10 +700,14 @@ def test_prefetch_same_questions_byte_identical(tmp_path, monkeypatch):
 
 
 def test_prefetch_failure_falls_back_serial(tmp_path, monkeypatch):
-    """I② 预取失败只记日志，主循环池空同步回退，题目一个不少。"""
+    """I② 预取失败只记日志，主循环池空同步回退，题目一个不少。
+
+    B1①（20261027 复审）后单题失败在切片内重试（_ASK_ATTEMPTS=3），
+    瞬时抖动被吸收、不再落 fill 错误；要触发 fill 级失败需同一题连挂
+    _ASK_ATTEMPTS 次，故注入次数对齐 _ASK_ATTEMPTS。"""
     import tests.adversarial.run_round as rr
     calls = []
-    ask = _fake_ask_factory(calls, fail_first=2)          # 前两次调用失败=预取挂
+    ask = _fake_ask_factory(calls, fail_first=rr._ASK_ATTEMPTS)   # 首题连挂=预取挂
     monkeypatch.setattr(rr, "_ask_blue", ask)
     pdir = tmp_path / "pdir"; pdir.mkdir()
     cfg = _race_cfg()
@@ -714,9 +718,12 @@ def test_prefetch_failure_falls_back_serial(tmp_path, monkeypatch):
     errs = json.loads((pdir / "blue_fill_errors.jsonl").read_text(encoding="utf-8").splitlines()[0])
     assert "ConnectionError" in errs["error"]             # 失败落盘留证
     st = monkey._planned_state
-    # N4 事件驱动后 worker 被 pop notify 立即唤醒补货，seen 只会 ≥ 已消费数；
-    # 回归判据改为「交货不缺不少」（旧 seen==20 是 sleep 时序快照，已过时）。
-    assert st["seen"] >= 20 and len(st["planned"]) == st["seen"]
+    # B1① 逐题交付后：seen 在占位时先行、planned 随交付逐题跟上，断言采样
+    # 可能撞上「worker 正在补最后一批」的在途窗口。先事件等待补齐收尾再对账
+    # ——判据不变：交货不缺不少（本场景无回退，最终 planned==seen==n）。
+    assert monkey._planned_wait(
+        lambda: st["seen"] == 30 and not st["busy"], 5), "worker 未补齐 30 题"
+    assert len(st["planned"]) == st["seen"] == 30
 
 
 def test_prefetch_fills_during_answering(tmp_path, monkeypatch):
@@ -816,7 +823,8 @@ def test_n3_blue_always_fails_bounded_then_raises(tmp_path, monkeypatch):
     """N3（连审必修）：蓝方持续失败 → 退避 + 次数上限 + 明确抛错，不热循环。
 
     修前 3 秒 ask 31.5 万次且 pose 永不返回；修后调用有界、超限抛
-    BlueExhaustedError。"""
+    BlueExhaustedError。B1②（20261027 复审）后判据=连续零交付切片，
+    全挂端点每片首题连挂 3 次（_ASK_ATTEMPTS）即零交付，5 片后抛错。"""
     import tests.adversarial.run_round as rr
     calls = []
 
@@ -830,9 +838,143 @@ def test_n3_blue_always_fails_bounded_then_raises(tmp_path, monkeypatch):
     pose = rr._planned_pose(cfg, 10, tmp_path / "kb.md", prompts_dir=None,
                             prefetch=False)               # 走主循环自补路径
     t0 = time.time()
-    with pytest.raises(rr.BlueExhaustedError, match="连续失败"):
+    with pytest.raises(rr.BlueExhaustedError, match="零交付"):
         for _ in range(10):
             pose(0, 0)
     elapsed = time.time() - t0
-    assert len(calls) <= 10, f"ask 调用次数无界: {len(calls)}"
+    # 每片零交付消耗 _ASK_ATTEMPTS 次 ask，K=5 片 → 有界（worker 未启用）
+    assert len(calls) <= _ASK_ATTEMPTS_BOUND * rr._FILL_MAX_FAILS + rr._ASK_ATTEMPTS, \
+        f"ask 调用次数无界: {len(calls)}"
     assert elapsed < 10, f"退避未生效或上限未触发: {elapsed:.1f}s"
+
+
+_ASK_ATTEMPTS_BOUND = 3   # 每片零交付的 ask 上界（=_ASK_ATTEMPTS，符号常量便于读）
+
+
+def test_b1_halfdead_second_question_bounded_raise(tmp_path, monkeypatch):
+    """B1（复审必修）：每片第 2 题固定失败（半死端点）→ 必须有限时间抛错。
+
+    修前：判据只计「首问即挂」，切片内有成功 ask 就清零 → pose 静默卡住
+    （实测 15s 0 题、4.4 req/s 持续打蓝方）。修后：首题交付 1 题后，失败题
+    每片零交付、计数爬到 K 抛 BlueExhaustedError，asks 有界且可观测
+    （fill_fail 事件 + blue_fill_errors.jsonl 留痕）。"""
+    import tests.adversarial.run_round as rr
+    from tests.adversarial.scenarios.style_sampler import blue_prompt, load_styles, sample
+    calls = []
+    n, batch = 30, 10
+    styles = load_styles(Path("tests/adversarial/scenarios/styles"))
+    specs = sample(9, n, styles)
+    bys = {c["style_id"]: c for c in styles}
+    bad = {blue_prompt(s, bys[s["style_id"]], 9)
+           for i, s in enumerate(specs) if i % 10 == 1}   # 每片第 2 个 spec
+
+    def ask(blue, prompt, fallback):
+        calls.append(prompt)
+        if prompt in bad:
+            raise ValueError("半死注入：该片第2题固定失败")
+        tag = hashlib.sha256(prompt.encode("utf-8")).hexdigest()[:8]
+        return f"题面-{tag}", f"理由-{tag}"
+
+    monkeypatch.setattr(rr, "_ask_blue", ask)
+    monkeypatch.setattr(rr, "_FILL_BACKOFF_BASE", 0.01)   # 测试加速退避链
+    cfg = _race_cfg(n, batch)
+    pdir = tmp_path / "pdir"; pdir.mkdir()
+    pose = rr._planned_pose(cfg, n, tmp_path / "kb.md", prompts_dir=pdir,
+                            prefetch=True)
+    got = []
+    t0 = time.time()
+    with pytest.raises(rr.BlueExhaustedError, match="零交付"):
+        while True:
+            p = pose(0, 0)
+            if p is None:
+                break
+            got.append(p.question)
+    elapsed = time.time() - t0
+    assert got, "首个可交付题必须先正常弹出（部分交付保留）"
+    assert len(got) == 1, f"半死注入下应只有首题能交付: {len(got)}"
+    # ask 有界：首片 1 次成功 + K 片 × _ASK_ATTEMPTS 次失败（worker/主循环合计）
+    assert len(calls) <= 1 + _ASK_ATTEMPTS_BOUND * (rr._FILL_MAX_FAILS + 2), \
+        f"半死注入 ask 次数无界: {len(calls)}"
+    assert elapsed < 15, f"未在有限时间抛错: {elapsed:.1f}s"
+    st = pose._planned_state
+    assert any(r["event"] == "fill_fail" for r in st["timeline"]), "零交付切片必须有 fill_fail 观测点"
+    errs_file = pdir / "blue_fill_errors.jsonl"
+    assert errs_file.exists() and "ValueError" in errs_file.read_text(encoding="utf-8"), \
+        "fill 错误必须落盘留痕（可观测）"
+
+
+def test_b1_partial_delivery_no_whole_slice_redo(tmp_path, monkeypatch):
+    """B1①（复审必修）：15%/题 注入 n=45 —— 单题重试 + 部分交付，
+    不再整片重来（修前 asks=143 / fill_start=20，修后 asks≈55 / fill_start=6）。
+
+    注入是确定性的（按题面哈希挑 15% 首挂一次 + 指定题连挂 3 次），线程
+    交错不影响计数。断言：45 题全交付且与无失败版题序逐条一致（部分交付
+    不重排、不重复、不丢题），且时间线有 fill_partial（部分交付观测点）。"""
+    import tests.adversarial.run_round as rr
+    from tests.adversarial.scenarios.style_sampler import blue_prompt, load_styles, sample
+    calls, tries = [], {}
+
+    def ask(blue, prompt, fallback):
+        calls.append(prompt)
+        k = tries.get(prompt, 0)
+        tries[prompt] = k + 1
+        tag = hashlib.sha256(prompt.encode("utf-8")).hexdigest()[:8]
+        if int(tag[:6], 16) % 100 < 15 and k == 0:     # 15% 的题首挂一次（单题重试吸收）
+            raise ValueError("15%/题 注入失败")
+        if prompt == hard_prompt and k < 3:            # 指定题连挂 3 次：切片失败+部分交付
+            raise ValueError("硬失败注入：验证部分交付")
+        return f"题面-{tag}", f"理由-{tag}"
+
+    n = 45
+    styles = load_styles(Path("tests/adversarial/scenarios/styles"))
+    specs = sample(9, n, styles)
+    bys = {c["style_id"]: c for c in styles}
+    hard_prompt = blue_prompt(specs[2], bys[specs[2]["style_id"]], 9)   # 片1 第3题
+    monkeypatch.setattr(rr, "_ask_blue", ask)
+    cfg = _race_cfg(n, 10)
+    pose = rr._planned_pose(cfg, n, tmp_path / "kb.md", prompts_dir=None,
+                            prefetch=True)
+    got = [pose(0, 0).question for _ in range(n)]
+    st = pose._planned_state
+    fills = [r for r in st["timeline"] if r["event"] == "fill_start"]
+    partials = [r for r in st["timeline"] if r["event"] == "fill_partial"]
+    assert len(got) == n and len(set(got)) == n, "45 题必须全交付且不重复"
+    # 无失败对照：同 seed 同实现（注入换成恒成功）的题面序列
+    calls2 = []
+    monkeypatch.setattr(rr, "_ask_blue", _fake_ask_factory(calls2))
+    pose2 = rr._planned_pose(cfg, n, tmp_path / "kb.md", prompts_dir=None,
+                             prefetch=False)
+    ideal = [pose2(0, 0).question for _ in range(n)]
+    assert got == ideal, "15% 注入下题序必须与无失败版逐条一致"
+    # 浪费判据：asks 只多出单题重试量（修前整片重来=143）；fill 次数接近批数
+    assert len(calls) <= n + n // 2, f"出题次数仍接近整片重来: asks={len(calls)}"
+    assert len(fills) <= 10, f"fill_start 次数异常: {len(fills)}"
+    assert partials and partials[0]["delivered"] == 2, \
+        f"硬失败题前 2 题必须已交付（部分交付观测点）: {partials}"
+
+
+def test_b1_stall_limit_raises_when_no_new_question(tmp_path, monkeypatch):
+    """B1③（复审必修）：pose 等待期间连续无新题落盘超上限 → 抛
+    BlueExhaustedError（不静默）。注入慢失败 ask + 放大单题次数，
+    使「零交付切片」判据来不及触发，专门命中停摆上限。"""
+    import tests.adversarial.run_round as rr
+    calls = []
+
+    def ask(blue, prompt, fallback):
+        calls.append(prompt)
+        time.sleep(0.4)                       # 慢失败：模拟黑洞端点
+        raise ConnectionError("黑洞端点（测试注入）")
+
+    monkeypatch.setattr(rr, "_ask_blue", ask)
+    monkeypatch.setattr(rr, "_FILL_BACKOFF_BASE", 0.01)
+    monkeypatch.setattr(rr, "_POSE_STALL_LIMIT", 0.5)
+    monkeypatch.setattr(rr, "_ASK_ATTEMPTS", 10)          # 让切片长时间零交付
+    monkeypatch.setattr(rr, "_FILL_MAX_FAILS", 10 ** 9)   # 屏蔽 K 判据，专测停摆
+    cfg = _race_cfg()
+    pose = rr._planned_pose(cfg, 10, tmp_path / "kb.md", prompts_dir=None,
+                            prefetch=False)
+    t0 = time.time()
+    with pytest.raises(rr.BlueExhaustedError, match="无新题落盘"):
+        for _ in range(10):
+            pose(0, 0)
+    assert time.time() - t0 < 10, "停摆上限必须限时触发，不许静默卡住"

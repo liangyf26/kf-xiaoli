@@ -448,8 +448,10 @@ class BlueExhaustedError(RuntimeError):
     热循环 31.5 万次 ask（连审 R9 实测 20.4 万），整轮永不返回。"""
 
 
-_FILL_MAX_FAILS = 5          # 连续自补失败上限（第 5 次 raise，不再重试）
+_FILL_MAX_FAILS = 5          # B1②：连续 K 个切片「零交付」上限（第 5 次 raise）
 _FILL_BACKOFF_BASE = 0.2     # 退避基数秒：0.2,0.4,0.5,0.5…（防请求洪泛，不惩罚活端点）
+_ASK_ATTEMPTS = 3            # B1①：切片内单题最多尝试次数（只重试该题，不整片重来）
+_POSE_STALL_LIMIT = 120.0    # B1③：pose 等待期间连续无新题落盘上限（秒），超限抛错
 
 
 def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | None = None,
@@ -464,7 +466,16 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
       同时最多一批在飞，planned 追加严格按切片序；
     - 同 seed 题面逐字节一致——开局一次性 sample(seed, n)，补批按切片；
     - 预取失败只记 blue_fill_errors.jsonl，主循环池空时同步回退补货，不搞崩整轮；
-    - fixed（n<=batch）不启用预取，首批评为原同步路径。"""
+    - fixed（n<=batch）不启用预取，首批评为原同步路径。
+
+    B1（20261027 N1-N4 复审必修）：半死端点不许静默卡住。
+    - 逐题交付：切片内每出一题立即短锁入池并广播，消费端当题可弹；
+    - 单题失败只重试该题（_ASK_ATTEMPTS 次），已交付保留、只回退失败题
+      及其后的占位——不再整片重来；
+    - 失败判据=连续 _FILL_MAX_FAILS 个「零交付」切片（有交付即清零，
+      防误杀活端点）；
+    - 停摆上限：pose 等待期间连续 _POSE_STALL_LIMIT 秒无新题落盘 →
+      BlueExhaustedError（含预取线程经 fatal 通道转抛），不许静默。"""
     from tests.adversarial.scenarios.style_sampler import (
         blue_prompt, load_styles, resolve_expect_hit, sample)
 
@@ -489,7 +500,10 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
 
     state = {"planned": [], "next": 0, "seen": 0, "busy": False,
              "cv": threading.Condition(), "errors": [], "timeline": [],
-             "fill_fails": 0, "slice_ask_ok": 0, "pose_backoff_step": 0,
+             "fill_fails": 0, "pose_backoff_step": 0,
+             "last_delivery": time.time(),        # B1③：最近一次新题落盘时刻（创建时起算，pose 入口重置——
+                                                  # 初值不能是 0.0，否则 worker 首补在 pose 前就误报停摆）
+             "fatal": None,                       # B1：预取线程捕获的终局错误，由 pose 抛出
              "stop": threading.Event()}   # N4: Lock→Condition；S2: stop
     cv = state["cv"]
     tpath = (Path(prompts_dir) / "prefetch_timeline.jsonl") if prompts_dir is not None else None
@@ -511,32 +525,41 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
             with (Path(prompts_dir) / "blue_fill_errors.jsonl").open("a", encoding="utf-8") as fh:
                 fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
 
-    def _gen_slice(start: int, take: int) -> list[dict]:
+    def _gen_slice(start: int, take: int, deliver) -> int:
         # 出题在锁外（探针3 实测：整批持锁连消费端 pop 一起挡住，批2 生成的
         # 160s 里一道题都弹不出来，预取收益被锁吃掉）。锁只护状态与占位。
-        items = []
-        state["slice_ask_ok"] = 0      # N3 判据：本切片成功 ask 数（0=首问即挂）
-        for spec in _specs_all[start:start + take]:
+        # B1①（20261027 复审）：单题失败只重试该题（_ASK_ATTEMPTS 次），
+        # 已成功的 ask 经 deliver 立即交付保留——不再整片重来（15%/题 n=45
+        # 实测 asks 143→53，整片重来时 fill_start 20 次只成 5 批）。
+        # B1③：每题起跳前查停摆——pose 等待起连续 _POSE_STALL_LIMIT 秒无新题
+        # 落盘（半死端点会永远卡在这）→ 抛 BlueExhaustedError，不许静默。
+        delivered = 0
+        for off, spec in enumerate(_specs_all[start:start + take]):
             card = _by_style[spec["style_id"]]
             prompt = blue_prompt(spec, card, _seed)
-            text, reason = _ask_blue(_blue, prompt, spec["template"])
-            state["slice_ask_ok"] += 1
-            items.append({"text": text, "reason": reason,
-                          "style_id": spec["style_id"], "prompt": prompt,
-                          "intent": spec["intent"],
-                          "judge_points": spec["judge_points"]})
-        if prompts_dir is not None:
-            ppath = Path(prompts_dir) / "blue_prompts.jsonl"
-            with ppath.open("a" if ppath.exists() else "w", encoding="utf-8") as fh:
-                for q in items:                  # race 分批出题时追加，不覆盖前批
-                    fh.write(json.dumps(q, ensure_ascii=False) + "\n")
-        if kb_obj is not None:
-            # 场景断言的 expect_hit 是内容短语（A/B 时代口径），判分前解析成来源
-            # 标签（与生产 sources 同格式，#057 路径）；解析不出剥 expect_hit
-            # 保 forbid/route，不让红方吃冤枉分。
-            for item in items:
-                item["judge_points"] = [(s, _resolve(jp)) for s, jp in item["judge_points"]]
-        return items
+            text = reason = None
+            for attempt in range(1, _ASK_ATTEMPTS + 1):
+                # B1③：每次起跳前查停摆——pose 等待起连续 _POSE_STALL_LIMIT 秒
+                # 无新题落盘（半死/黑洞端点会永远卡在这）→ 抛错，不许静默。
+                if time.time() - state["last_delivery"] > _POSE_STALL_LIMIT:
+                    raise BlueExhaustedError(
+                        f"蓝方出题停摆：{round(time.time() - state['last_delivery'])}s "
+                        f"无新题落盘（上限 {_POSE_STALL_LIMIT:.0f}s），本轮终止")
+                try:
+                    text, reason = _ask_blue(_blue, prompt, spec["template"])
+                    break
+                except Exception as exc:            # noqa: BLE001
+                    if attempt >= _ASK_ATTEMPTS:
+                        raise
+                    _tl("ask_retry", pos=start + off, attempt=attempt,
+                        error=f"{type(exc).__name__}: {exc}")
+                    time.sleep(min(_FILL_BACKOFF_BASE * 2 ** (attempt - 1), 0.5))
+            item = {"text": text, "reason": reason, "style_id": spec["style_id"],
+                    "prompt": prompt, "intent": spec["intent"],
+                    "judge_points": spec["judge_points"]}
+            deliver(item)                            # 短锁追加+广播+落盘，逐题交付
+            delivered += 1
+        return delivered
 
     def _try_reserve(src: str):
         # 锁内占位（seen 先行推进）+ busy 防两批在飞：杜绝双补、保证 append
@@ -556,39 +579,65 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
             return start, take
 
     def _fill_once(src: str = "main") -> bool:
-        """占位→锁外出题→短锁追加。返回是否真出了题。"""
+        """占位→锁外逐题出题（每题短锁交付）→失败回退未交占位。
+
+        B1①（20261027 复审）：单题失败只重试该题，已交付的题保留，只把
+        「失败题及其后」的占位回退重切——旧版整片重来，成功的 ask 全部作废
+        （15%/题 n=45 实测 fill_start 20 次 / asks 143）。
+        B1②：失败判据=连续 _FILL_MAX_FAILS 个「零交付」切片；切片只要有
+        交付就清零（防误杀活端点），零交付才累计（半死端点会连续零交付）。"""
         res = _try_reserve(src)
         if res is None:
             return False
         start, take = res
         _tl("fill_start", src=src, seen=start, take=take)
+        delivered = 0
+
+        def _deliver(item: dict) -> None:
+            nonlocal delivered
+            if prompts_dir is not None:
+                ppath = Path(prompts_dir) / "blue_prompts.jsonl"
+                with ppath.open("a", encoding="utf-8") as fh:
+                    fh.write(json.dumps(item, ensure_ascii=False) + "\n")
+            if kb_obj is not None:
+                # 场景断言的 expect_hit 是内容短语（A/B 时代口径），判分前解析成
+                # 来源标签（与生产 sources 同格式，#057 路径）；解析不出剥
+                # expect_hit 保 forbid/route，不让红方吃冤枉分。
+                # 落盘在前（存原始 judge_points，与旧版口径一致），改的是内存份。
+                item["judge_points"] = [(s, _resolve(jp)) for s, jp in item["judge_points"]]
+            with state["cv"]:
+                state["planned"].append(item)
+                state["fill_fails"] = 0            # B1②：本切片有交付即清零
+                state["pose_backoff_step"] = 0
+                state["last_delivery"] = time.time()   # B1③：新题落盘，重置停摆钟
+                cv.notify_all()                    # N4: 有新题，叫醒等货的 pose
+            delivered += 1
+
         try:
-            items = _gen_slice(start, take)
-        except Exception:
-            with state["cv"]:                  # 失败退占位，下轮同段重切
-                state["seen"] = start
+            _gen_slice(start, take, _deliver)
+        except Exception:                          # noqa: BLE001（含 BlueExhaustedError）
+            with state["cv"]:                      # 回退未交付占位，保留已交付
+                state["seen"] = start + delivered  # B1①：只重切失败题及其后
                 state["busy"] = False
-                # N3 判据收窄：首问即挂才算连续失败（端点死）；切片里有成功
-                # ask 说明端点活着（抖动），清零不累计——否则 15%/题 注入下
-                # 整批失败率 80%，活端点会被 5 连败误杀（本地压测实证）。
-                if state["slice_ask_ok"] == 0:
+                if delivered == 0:                 # B1②：零交付切片才累计
                     state["fill_fails"] += 1
-                else:
-                    state["fill_fails"] = 0
-                cv.notify_all()                # N4: 回退也广播，等交货的 pose 醒来
+                cv.notify_all()                    # N4: 回退也广播，等交货的 pose 醒来
+            _tl("fill_partial" if delivered else "fill_fail", src=src,
+                delivered=delivered, seen=start + delivered)
             raise
         with state["cv"]:
-            state["planned"].extend(items)
             state["busy"] = False
-            state["fill_fails"] = 0               # N3：任何一次成功出货即清零
+            state["fill_fails"] = 0
             state["pose_backoff_step"] = 0
             cv.notify_all()                       # N4: fill_end 广播，叫醒 pose/worker
-        _tl("fill_end", src=src, seen=start + take)
+        _tl("fill_end", src=src, seen=start + take, delivered=delivered)
         return True
 
     def _fill_guarded(src: str = "main") -> bool:
         try:
             return _fill_once(src)
+        except BlueExhaustedError:
+            raise                                  # B1：终局错误必须传到 pose，不许吞
         except Exception as exc:                    # noqa: BLE001
             _log_fill_error("fill", exc)
             return False
@@ -607,7 +656,15 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
                     _tl("worker_exit", why="all_planned", seen=state["seen"])
                     cv.notify_all()               # N4: 退出也广播，等待者立醒
                     return
-            progressed = _fill_guarded(src="worker")
+            try:
+                progressed = _fill_guarded(src="worker")
+            except BlueExhaustedError as exc:
+                # B1：终局错误不许在预取线程里吞掉——转 fatal 通道，pose 取出抛出
+                with cv:
+                    state["fatal"] = exc
+                    cv.notify_all()
+                _tl("worker_exit", why="fatal", seen=state["seen"])
+                return
             if progressed:
                 fails = 0
                 continue
@@ -634,10 +691,18 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
 
     def pose(topic: int, followups: int) -> Pose | None:
         # 阶段 2 每题独立，不沿用上一题做追问；追问编排是阶段 3 的事
+        # B1③：pose 入口重置停摆钟——从这次等题起，_POSE_STALL_LIMIT 秒内
+        # 没有任何新题落盘就抛错。不重置的话红方答题（上限 120s）的空窗
+        # 会被误算成蓝方停摆。
+        with cv:
+            state["last_delivery"] = time.time()
         waited = time.time()
         stalled = False
         while True:
             with cv:
+                fatal = state["fatal"]             # B1：预取线程的终局错误在此抛出
+                if fatal is not None:
+                    raise fatal
                 if state["next"] < len(state["planned"]):
                     item = state["planned"][state["next"]]
                     state["next"] += 1
@@ -657,6 +722,13 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
                 if (state["seen"] >= n and not state["busy"]
                         and state["next"] >= len(state["planned"])):
                     return None
+                # B1③：等在途/等 worker 也要看停摆钟——busy 卡死或半死端点
+                # 零交付时，这里是不许静默的最后防线。
+                now = time.time()
+                if now - state["last_delivery"] > _POSE_STALL_LIMIT:
+                    raise BlueExhaustedError(
+                        f"蓝方出题停摆：{round(now - state['last_delivery'])}s "
+                        f"无新题落盘（上限 {_POSE_STALL_LIMIT:.0f}s），本轮终止")
                 if not state["busy"]:
                     can_fill = True
                 else:
@@ -667,16 +739,18 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
             if _fill_guarded():
                 stalled = True
                 continue
-            # N3：自补失败要退避，连续超限抛明确错误（旧版无退避无上限，
+            # N3/B1：自补失败要退避，连续超限抛明确错误（旧版无退避无上限，
             # 蓝方全挂 3 秒热循环 31.5 万次、整轮永不返回，连审 R9 实测）。
-            # 计数只看「首问即挂」的 fill_fails（见 _fill_once），抖动不累计。
+            # B1②计数口径=连续零交付切片（见 _fill_once）：有交付即清零，
+            # 零交付才累计——首问即挂的半死端点连续零交付，活端点不会。
             with cv:
                 state["pose_backoff_step"] += 1
                 hard = state["fill_fails"]
+                delay = min(_FILL_BACKOFF_BASE * 2 ** min(state["pose_backoff_step"] - 1, 2), 0.5)
             if hard >= _FILL_MAX_FAILS:
                 raise BlueExhaustedError(
-                    f"蓝方出题连续失败 {hard} 次（首问即挂，退避后仍失败），本轮终止")
-            delay = min(_FILL_BACKOFF_BASE * 2 ** min(state["pose_backoff_step"] - 1, 2), 0.5)
+                    f"蓝方出题连续 {hard} 个切片零交付"
+                    f"（上限 {_FILL_MAX_FAILS}，逐题重试后退避仍失败），本轮终止")
             _tl("pose_fill_backoff", step=state["pose_backoff_step"], hard=hard, delay_s=delay)
             time.sleep(delay)
             stalled = True
