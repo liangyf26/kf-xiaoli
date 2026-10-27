@@ -77,7 +77,7 @@ def analyze(round_dir: Path) -> dict:
     er_fast = [(s, t) for s, t in er if t.startswith("决策层")]
     er_synth = [(s, t) for s, t in er if "仍转人工且未写理由" in t]
     er_model = [(s, t) for s, t in er if s not in {x for x, _ in er_fast + er_synth}]
-    return {
+    m = {
         "dir": str(round_dir.name), "n": n, "traps": sorted(traps),
         "A": (len(a_hits), sum(lat[r["seq"]] for r in a_hits) / len(a_hits) / 1000 if a_hits else 0),
         "B": (len(b_hits), sum(b_lat) / len(b_lat) / 1000 if b_lat else 0),
@@ -95,7 +95,6 @@ def analyze(round_dir: Path) -> dict:
         "er_fast": er_fast, "er_synth": er_synth, "er_model": er_model,
     }
     # A-wrong 四分（Chief 口径）：顺序判定 ③→④→②→①，互斥
-    wrong_set = set(m["wrong_seqs"])
     m["b1"], m["b2"], m["b3"], m["b4"] = [], [], [], []
     er_map = {r["seq"]: r for r in turns}
     for s in m["wrong_seqs"]:
