@@ -20,9 +20,16 @@ def _snapshot() -> dict:
     return snap
 
 
+def _ledger_snapshot() -> bytes | None:
+    """S3：heldout 真实账本字节快照（不存在记 None，存在则要求逐字节不变）。"""
+    ledger = Path(__file__).resolve().parents[1] / "runs" / "adversarial" / "heldout" / "used.jsonl"
+    return ledger.read_bytes() if ledger.exists() else None
+
+
 @pytest.fixture(scope="session", autouse=True)
 def guard_production_data():
     before = _snapshot()
+    ledger_before = _ledger_snapshot()
     yield
     after = _snapshot()
     assert after["files"] == before["files"], (
@@ -30,3 +37,8 @@ def guard_production_data():
     for name in _BASELINE:
         assert after[name] == before[name], (
             f"生产库 {name} md5 被改动：前={before[name]} 后={after[name]}（G/C 守护）")
+    # S3（20261027 连审建议）：runs/ 账本也纳入会话守护——heldout used.jsonl
+    # 曾被未注 ledger 的单测写脏（a052fde 修过一次），收尾断言防复发。
+    ledger_after = _ledger_snapshot()
+    assert ledger_after == ledger_before, (
+        f"heldout 真实账本被 pytest 改动：前={ledger_before[:60]!r}… 后={ledger_after[:60]!r}…（S3 守护）")
