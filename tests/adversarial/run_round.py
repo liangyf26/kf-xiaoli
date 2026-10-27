@@ -602,7 +602,13 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
                         _tl("pose_pop", next=state["next"])
                     return Pose(question=item["text"], reason=item["reason"],
                                 cid=item["intent"], judge_point=item["judge_points"])
-                if state["seen"] >= n:           # 已全部计划且弹尽：无题可出
+                # N2（20261027 连审必修）：最后一批已占位未交货（busy=True）时
+                # 不能判「出完」。旧条件 seen>=n 就返回 None——末批在生成、
+                # 消费端弹尽即误判弹尽，整批丢失（Architect 压测 40 轮丢 25 题，
+                # 本地复现 5/40 轮 None 25 次）。判「出完」必须三齐：
+                # 全部已计划（seen>=n）＋无在途（!busy）＋池已弹尽。
+                if (state["seen"] >= n and not state["busy"]
+                        and state["next"] >= len(state["planned"])):
                     return None
                 can_fill = not state["busy"]
             if can_fill:
