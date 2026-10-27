@@ -90,9 +90,16 @@ def run(heldout_dir: Path, answer_fn, search_fn, scope_terms: list[str],
     items = [json.loads(l) for l in q_file.read_text(encoding="utf-8").splitlines() if l.strip()]
     sha_file = heldout_dir / "questions.sha256"
     saved = [l for l in sha_file.read_text(encoding="utf-8").splitlines() if l.strip()]
-    if saved != [_sha(it["question"]) for it in items]:
+    now_shas = [_sha(it["question"]) for it in items]
+    if saved != now_shas:
         raise ValueError("封存题题面与已落盘 sha256 不一致，拒绝跑（防换题）")
-    key = _set_key([it["sha256"] for it in items])
+    # N1（20261027 连审必修）：set_key 一律按题面现算，行内 sha256 字段不信任。
+    # 旧 key 取 jsonl 字段——改题面+改 questions.sha256、保留旧字段即可让 set_key
+    # 不变、账本照常放行（连审 R3 实测 ACCEPT）。
+    for it, now in zip(items, now_shas):
+        if it.get("sha256") != now:
+            raise ValueError("封存题行内 sha256 字段与题面现算不一致，拒绝跑（防改字段绕过）")
+    key = _set_key(now_shas)
     _check_unused(key, heldout_dir, ledger=ledger)
     _claim(key, heldout_dir, ledger=ledger)
 

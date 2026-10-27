@@ -213,6 +213,23 @@ def test_d4_rewritten_pair_rejected(tmp_path, heldout_dir, ledger):
                scope_judge=in_scope, resolve_fn=RESOLVE, ledger=ledger)
 
 
+def test_n1_tamper_keeps_field_sha_rejected(tmp_path, heldout_dir, ledger):
+    """N1（连审必修）：改题面+改 questions.sha256、保留每行 sha256 字段 → 必拒。
+
+    修前该组合 ACCEPT（key 取行内旧字段，账本照常放行）。"""
+    d = Path(heldout_dir)
+    items = [json.loads(l) for l in (d / "heldout.jsonl").read_text(encoding="utf-8").splitlines() if l.strip()]
+    for i, it in enumerate(items):
+        it["question"] = f"换掉的新题面{i}？"      # 行内 sha256 字段故意不动
+    (d / "heldout.jsonl").write_text(
+        "".join(json.dumps(it, ensure_ascii=False) + "\n" for it in items), encoding="utf-8")
+    (d / "questions.sha256").write_text(
+        "".join(ho._sha(it["question"]) + "\n" for it in items), encoding="utf-8")
+    with pytest.raises(ValueError, match="字段与题面现算不一致"):
+        ho.run(d, answer_right, _local_search, ["SDWAN"],
+               scope_judge=in_scope, resolve_fn=RESOLVE, ledger=ledger)
+
+
 # ---- E（20261027 复审必修E）：15pp 判据的分母保护 ------------------------------
 
 def test_compare_zero_scoreable_reports_undecidable():
