@@ -449,7 +449,17 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
                                             if k != "expect_hit"}
 
     state = {"planned": [], "next": 0, "seen": 0, "lock": threading.Lock(),
-             "errors": []}
+             "errors": [], "timeline": []}
+    tpath = (Path(prompts_dir) / "prefetch_timeline.jsonl") if prompts_dir is not None else None
+
+    def _tl(event: str, **kw) -> None:
+        # I 观测点（20261027 探针复核）：预取/出题/消费时间线，内存全记，
+        # prompts_dir 给了才落盘轮目录，供报告分解墙钟（批内耗时/暴露段）。
+        rec = {"t": round(time.time(), 3), "event": event, **kw}
+        state["timeline"].append(rec)
+        if tpath is not None:
+            with tpath.open("a", encoding="utf-8") as fh:
+                fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
 
     def _log_fill_error(where: str, exc: Exception) -> None:
         rec = {"at": time.strftime("%Y-%m-%dT%H:%M:%S"), "where": where,
@@ -459,14 +469,16 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
             with (Path(prompts_dir) / "blue_fill_errors.jsonl").open("a", encoding="utf-8") as fh:
                 fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
 
-    def _fill_once() -> None:
+    def _fill_once(src: str = "main") -> None:
         # 整批互斥（I）：worker 与主循环回退共用一把锁，锁内重查水位，
         # 杜绝同批双补（竞态会把 blue_prompts.jsonl 写成重复行）。
         with state["lock"]:
             if state["seen"] >= n or state["next"] < len(state["planned"]):
                 return
             take = min(batch, n - state["seen"])
+            _tl("fill_start", src=src, seen=state["seen"], take=take)
             items = _blue_questions(config, take, kb or Path("."), prompts_dir=prompts_dir)
+            _tl("fill_end", src=src, seen=state["seen"] + take)
             if kb_obj is not None:
                 # 场景断言的 expect_hit 是内容短语（A/B 时代口径），判分前解析成来源
                 # 标签（与生产 sources 同格式，#057 路径）；解析不出剥 expect_hit
@@ -476,25 +488,29 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
             state["planned"].extend(items)
             state["seen"] += take
 
-    def _fill_guarded() -> None:
+    def _fill_guarded(src: str = "main") -> None:
         try:
-            _fill_once()
+            _fill_once(src)
         except Exception as exc:                    # noqa: BLE001
             _log_fill_error("fill", exc)
 
     def _prefetch_worker() -> None:
         # 答题期间后台补货；失败只记日志退出，主循环会同步回退，整轮不受影响。
         # 连续 2 批无进度即让位（防蓝方端点持续故障时空转刷错误日志）。
+        _tl("worker_start", watermark=watermark, n=n)
         fails = 0
         while True:
             with state["lock"]:
                 backlog = state["seen"] - state["next"]
             if backlog >= watermark or state["seen"] >= n:
+                _tl("worker_exit", why="watermark_or_done", backlog=backlog,
+                    seen=state["seen"])
                 return
             before = state["seen"]
-            _fill_guarded()
+            _fill_guarded(src="worker")
             fails = fails + 1 if state["seen"] == before else 0
             if fails >= 2:
+                _tl("worker_exit", why="fails2", seen=state["seen"])
                 return
 
     if prefetch and n > batch:
@@ -504,13 +520,17 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
     def pose(topic: int, followups: int) -> Pose | None:
         # 阶段 2 每题独立，不沿用上一题做追问；追问编排是阶段 3 的事
         if state["next"] >= len(state["planned"]) and state["seen"] < n:
+            _waited = time.time()
             _fill_guarded()                          # 同步回退（预取未赶上/已失败）
             _fill_guarded()                          # 池空最多再给一次机会
+            _tl("pose_fallback", waited_s=round(time.time() - _waited, 3),
+                next=state["next"])
         with state["lock"]:
             if state["next"] >= len(state["planned"]):
                 return None
             item = state["planned"][state["next"]]
             state["next"] += 1
+            _tl("pose_pop", next=state["next"])
             return Pose(question=item["text"], reason=item["reason"],
                         cid=item["intent"], judge_point=item["judge_points"])
 

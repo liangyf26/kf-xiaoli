@@ -729,3 +729,31 @@ def test_prefetch_fills_during_answering(tmp_path, monkeypatch):
     assert worker_tids, "预取线程必须真的在出题（非主线程调用 ask_blue）"
     st = monkey._planned_state
     assert st["seen"] >= 12                               # 水位内提前补货到位
+
+
+def test_prefetch_timeline_written(tmp_path, monkeypatch):
+    """I 观测点（20261027 探针复核）：时间线事件落盘且时序单调，可分解墙钟。"""
+    import tests.adversarial.run_round as rr
+    calls = []
+    ask = _fake_ask_factory(calls)
+    monkeypatch.setattr(rr, "_ask_blue", ask)
+    pdir = tmp_path / "pdir"
+    pdir.mkdir()
+    cfg = _race_cfg()
+    monkey = rr._planned_pose(cfg, 30, tmp_path / "kb.md", prompts_dir=pdir,
+                              prefetch=True)
+    for _ in range(12):                                   # 消费 12 题
+        monkey(0, 0)
+    rows = [json.loads(l) for l in
+            (pdir / "prefetch_timeline.jsonl").read_text(encoding="utf-8").splitlines()]
+    events = [r["event"] for r in rows]
+    assert "worker_start" in events                       # 线程启动有据
+    assert "worker_exit" in events
+    assert "pose_pop" in events                           # 主循环消费有据
+    fills = [r for r in rows if r["event"] == "fill_start"]
+    assert fills and all(r["src"] in ("worker", "main") for r in fills)
+    assert fills[0]["take"] == 10                         # 批大小与 pose_batch 一致
+    ts = [r["t"] for r in rows]
+    assert ts == sorted(ts), "时间线必须单调不减"          # 同文件追加，天然有序
+    st = monkey._planned_state
+    assert len(st["timeline"]) == len(rows)               # 内存与落盘一致
