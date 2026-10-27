@@ -160,6 +160,14 @@ async def handle_faq_match(decision: DecisionResult, knowledge_base: KnowledgeBa
     }
 
 
+# #062 第八节①：缺陷重试时追加的更硬指令（插在题面前，见 handle_llm_generation）
+_FORCED_RETRY_SUFFIX = (
+    "【强制·上轮违规】你上一轮回复了转人工话术，但检索已命中强相关知识库条目，"
+    "这属于违规输出。本轮必须基于【知识库】条目内容直接回答用户问题，"
+    "禁止输出「转接人工客服」「这个问题需要同事确认」等任何话术；"
+    "条目覆盖不全时先回答已覆盖部分，并在 JSON 的 escalate_reason 字段写明具体缺口。")
+
+
 async def handle_llm_generation(
     message: str,
     decision: DecisionResult,
@@ -188,9 +196,21 @@ async def handle_llm_generation(
         kb_top1=kb_top1,
     )
     last_error = None
+    # #062 第八节①收尾（seed42 验证局实测）：约束只进 prompt 不够——强相关 11 题
+    # 模型仍全部回话术（seq3 连理由都没写）。改机械缺陷重试：attempt 0 返话术且
+    # 强制作答生效且模型未写理由 → 不返回，追加更硬指令重试一次；attempt 1 仍话术
+    # 才接受并合成理由落盘。模型自写理由（合法转人工）不重试，不浪费时长。
+    defect_retry = False
     for attempt in range(2):
         try:
-            result = await llm_client.generate([{"role": "user", "content": prompt}])
+            content = prompt
+            if defect_retry:
+                # 硬指令插在「用户当前问题」之前（recency 位置，别落到 AI回复： 之后）
+                anchor = prompt.rfind("\n\n用户当前问题：")
+                suffix = _FORCED_RETRY_SUFFIX
+                content = (prompt[:anchor] + "\n\n" + suffix + prompt[anchor:]
+                           if anchor != -1 else prompt + "\n\n" + suffix)
+            result = await llm_client.generate([{"role": "user", "content": content}])
             parsed = parse_json_response(result["response"])
             # #062 修库附加代码项：出口剥 {{{...}}} 内部占位符（含库原文带出与
             # 模型自行复述两种来源），客户可见文本不漏内部结构
@@ -206,10 +226,15 @@ async def handle_llm_generation(
                     parsed["sources"] = []
                     # #062 第八节①：强相关带下仍给话术=缺陷，理由必须落盘可审计
                     if force_kb_answer:
+                        model_reason = str(parsed.get("escalate_reason") or "").strip()
+                        if attempt == 0 and not model_reason:
+                            defect_retry = True
+                            last_error = (
+                                f"强相关top1={kb_top1:.1f}仍返话术且未写理由，加硬指令重试")
+                            logger.warning("%s（intent=%s）", last_error, decision.intent)
+                            continue
                         parsed["kb_top1"] = round(kb_top1, 1)
-                        parsed["escalate_reason"] = str(
-                            parsed.get("escalate_reason") or ""
-                        ).strip()[:200] or (
+                        parsed["escalate_reason"] = model_reason[:200] or (
                             f"top1={kb_top1:.1f} 超阈值{settings.FORCE_ANSWER_MIN_TOP1}"
                             "仍转人工且未写理由")
                 else:

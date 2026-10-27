@@ -41,7 +41,13 @@ class PromptBuilder:
             self._examples_section(decision, context),
             self._format_section(decision),
         ]
-        prompt = "\n\n".join(s for s in sections if s) + f"\n\n用户当前问题：{message}\nAI回复："
+        prompt = "\n\n".join(s for s in sections if s)
+        # #062 第八节①（seed42 验证局实测）：强制作答约束只放角色段（prompt 开头）
+        # 会被长上下文稀释——强相关 11 题模型仍回话术。题面前再钉一行短提醒（recency）。
+        if force_kb_answer:
+            prompt += ("\n\n（检索强相关：必须基于【知识库】条目直接作答；"
+                       "输出转人工/拒答话术必须写 escalate_reason，否则视为违规）")
+        prompt += f"\n\n用户当前问题：{message}\nAI回复："
 
         # 超限裁剪：先砍知识库，再砍历史；无法再裁剪时硬截断
         while len(prompt) > PROMPT_MAX_CHARS:
