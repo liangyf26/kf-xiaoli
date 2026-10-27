@@ -18,6 +18,25 @@ def _normalize_text(text: str) -> str:
     return re.sub(r"\s+", " ", (text or "").strip())
 
 
+# #062 修库附加代码项（2026-10-27 Chief 指示）：{{{...}}} 内部占位符出口过滤。
+# 不能只靠删库里的字——将来库里再写进占位符也不该漏给客户（#061 seq19 已把
+# 占位符话术发给客户）。剥除是生成链路最后一道，FAQ 与 LLM 两个出口都过。
+_INTERNAL_PLACEHOLDER = re.compile(r"\{\{\{.*?\}\}\}", re.DOTALL)
+
+
+def strip_internal_placeholders(text: str) -> str:
+    """剥掉客户可见文本里的 {{{...}}} 内部占位符（发送图片/发送文件/人工介入等）。
+
+    行内剥除（前后文字保留）；剥空的行压掉连续空行、行尾残留空白一并清。
+    固定话术不含占位符，对其无影响。"""
+    if not text or "{{{" not in text:
+        return text
+    cleaned = _INTERNAL_PLACEHOLDER.sub("", text)
+    cleaned = re.sub(r"[ \t]+$", "", cleaned, flags=re.M)
+    cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
+    return cleaned.strip()
+
+
 def _template_scripts() -> frozenset:
     """模板话术集合（规范化后整串相等才算拒答/转人工回复）。
 
@@ -121,7 +140,8 @@ async def handle_faq_match(decision: DecisionResult, knowledge_base: KnowledgeBa
             "path": "faq_match",
         }
 
-    answer = "\n\n".join(v for v in (_customer_view(qa) for qa in pairs) if v)
+    answer = strip_internal_placeholders(
+        "\n\n".join(v for v in (_customer_view(qa) for qa in pairs) if v))
     return {
         "answer": answer,
         "sources": [source_label(qa.section, qa.number) for qa in pairs],
@@ -154,7 +174,10 @@ async def handle_llm_generation(
         try:
             result = await llm_client.generate([{"role": "user", "content": prompt}])
             parsed = parse_json_response(result["response"])
-            answer = str(parsed.get("answer", "")).strip()
+            # #062 修库附加代码项：出口剥 {{{...}}} 内部占位符（含库原文带出与
+            # 模型自行复述两种来源），客户可见文本不漏内部结构
+            answer = strip_internal_placeholders(str(parsed.get("answer", ""))).strip()
+            parsed["answer"] = answer
             # 解析降级后answer仍是JSON残片（LLM输出被截断）时视为失败，走重试
             broken_json = answer.startswith("{") and '"answer"' in answer
             if answer and not broken_json:
