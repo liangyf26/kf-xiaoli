@@ -689,9 +689,7 @@ def test_prefetch_same_questions_byte_identical(tmp_path, monkeypatch):
             outs.append((monkey(0, 0).question, pf))
         if pf:                                            # 等 worker 收尾再比文件
             st = monkey._planned_state
-            deadline = time.time() + 5
-            while time.time() < deadline and st["seen"] < 30:
-                time.sleep(0.05)
+            assert monkey._planned_wait(lambda: st["seen"] >= 30, 5), "worker 未补齐"
             assert st["seen"] == 30
     serial, prefetch = [o for o in outs if o[1] is False], [o for o in outs if o[1] is True]
     assert [q for q, _ in serial] == [q for q, _ in prefetch], "同 seed 题面序列必须一致"
@@ -716,7 +714,9 @@ def test_prefetch_failure_falls_back_serial(tmp_path, monkeypatch):
     errs = json.loads((pdir / "blue_fill_errors.jsonl").read_text(encoding="utf-8").splitlines()[0])
     assert "ConnectionError" in errs["error"]             # 失败落盘留证
     st = monkey._planned_state
-    assert st["seen"] == 20 and len(st["planned"]) == 20
+    # N4 事件驱动后 worker 被 pop notify 立即唤醒补货，seen 只会 ≥ 已消费数；
+    # 回归判据改为「交货不缺不少」（旧 seen==20 是 sleep 时序快照，已过时）。
+    assert st["seen"] >= 20 and len(st["planned"]) == st["seen"]
 
 
 def test_prefetch_fills_during_answering(tmp_path, monkeypatch):
@@ -751,10 +751,8 @@ def test_prefetch_timeline_written(tmp_path, monkeypatch):
     for _ in range(12):                                   # 消费 12 题
         monkey(0, 0)
     st = monkey._planned_state
-    deadline = time.time() + 5                            # 等 worker 收尾（水位满会短暂等待）
-    while time.time() < deadline and not any(
-            r["event"] == "worker_exit" for r in st["timeline"]):
-        time.sleep(0.05)
+    assert monkey._planned_wait(                          # N4: 事件等待 worker 收尾
+        lambda: any(r["event"] == "worker_exit" for r in st["timeline"]), 5), "worker 未收尾"
     rows = [json.loads(l) for l in
             (pdir / "prefetch_timeline.jsonl").read_text(encoding="utf-8").splitlines()]
     events = [r["event"] for r in rows]
@@ -784,16 +782,12 @@ def test_prefetch_worker_survives_watermark(tmp_path, monkeypatch):
     for _ in range(20):                                   # 消费 20 → 池空
         monkey(0, 0)
     st = monkey._planned_state
-    deadline = time.time() + 5
-    while time.time() < deadline and st["seen"] < 30:     # 批3 必须由 worker 补
-        time.sleep(0.05)
+    assert monkey._planned_wait(lambda: st["seen"] >= 30, 5), "水位满后 worker 不得退出，批3 应由预取补齐"
     assert st["seen"] == 30, "水位满后 worker 不得退出，批3 应由预取补齐"
     for _ in range(5):
         monkey(0, 0)
-    deadline = time.time() + 6                            # worker 退避链最长 ~3s，等它退出
-    while time.time() < deadline and not any(
-            r["event"] == "worker_exit" for r in st["timeline"]):
-        time.sleep(0.05)
+    assert monkey._planned_wait(                          # worker 退避链最长 ~3s，等它退出
+        lambda: any(r["event"] == "worker_exit" for r in st["timeline"]), 6), "worker 未退出"
     rows = [json.loads(l) for l in
             (pdir / "prefetch_timeline.jsonl").read_text(encoding="utf-8").splitlines()]
     wexit = [r["why"] for r in rows if r["event"] == "worker_exit"]
@@ -802,6 +796,20 @@ def test_prefetch_worker_survives_watermark(tmp_path, monkeypatch):
     # 回归判据是退出原因：探针 bug 版在水位处 fails2 让位，修复版必须 all_planned。
     wfills = [r for r in rows if r["event"] == "fill_start" and r["src"] == "worker"]
     assert len(wfills) >= 1, "worker 未参与任何出题"
+
+
+def test_s2_close_stops_prefetch_worker(tmp_path, monkeypatch):
+    """S2（连审建议）：_planned_close 置 stop event，预取线程被叫停退出。"""
+    import tests.adversarial.run_round as rr
+    calls = []
+    monkeypatch.setattr(rr, "_ask_blue", _fake_ask_factory(calls))
+    cfg = _race_cfg()
+    monkey = rr._planned_pose(cfg, 30, tmp_path / "kb.md", prompts_dir=None,
+                              prefetch=True)
+    st = monkey._planned_state
+    monkey._planned_close()
+    assert monkey._planned_wait(
+        lambda: any(r.get("why") == "stop" for r in st["timeline"]), 3), "worker 未被 stop 叫停"
 
 
 def test_n3_blue_always_fails_bounded_then_raises(tmp_path, monkeypatch):

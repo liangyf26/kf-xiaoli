@@ -356,6 +356,9 @@ def run(config: dict, out_root: Path, questions: int | None = None,
         match_log.write_report(round_dir, summary, games)
         return round_dir, 4
     finally:
+        closer = getattr(posed, "_planned_close", None)   # S2: 叫停预取线程
+        if closer is not None:
+            closer()
         if proc is not None and proc.poll() is None:
             proc.kill()
             proc.wait(timeout=5)
@@ -446,7 +449,7 @@ class BlueExhaustedError(RuntimeError):
 
 
 _FILL_MAX_FAILS = 5          # 连续自补失败上限（第 5 次 raise，不再重试）
-_FILL_BACKOFF_BASE = 1.0     # 退避基数秒：1,2,4,8 → 累计 ~15s 后放弃
+_FILL_BACKOFF_BASE = 0.2     # 退避基数秒：0.2,0.4,0.5,0.5…（防请求洪泛，不惩罚活端点）
 
 
 def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | None = None,
@@ -485,8 +488,10 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
                                             if k != "expect_hit"}
 
     state = {"planned": [], "next": 0, "seen": 0, "busy": False,
-             "lock": threading.Lock(), "errors": [], "timeline": [],
-             "fill_fails": 0}
+             "cv": threading.Condition(), "errors": [], "timeline": [],
+             "fill_fails": 0, "slice_ask_ok": 0, "pose_backoff_step": 0,
+             "stop": threading.Event()}   # N4: Lock→Condition；S2: stop
+    cv = state["cv"]
     tpath = (Path(prompts_dir) / "prefetch_timeline.jsonl") if prompts_dir is not None else None
 
     def _tl(event: str, **kw) -> None:
@@ -510,10 +515,12 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
         # 出题在锁外（探针3 实测：整批持锁连消费端 pop 一起挡住，批2 生成的
         # 160s 里一道题都弹不出来，预取收益被锁吃掉）。锁只护状态与占位。
         items = []
+        state["slice_ask_ok"] = 0      # N3 判据：本切片成功 ask 数（0=首问即挂）
         for spec in _specs_all[start:start + take]:
             card = _by_style[spec["style_id"]]
             prompt = blue_prompt(spec, card, _seed)
             text, reason = _ask_blue(_blue, prompt, spec["template"])
+            state["slice_ask_ok"] += 1
             items.append({"text": text, "reason": reason,
                           "style_id": spec["style_id"], "prompt": prompt,
                           "intent": spec["intent"],
@@ -534,7 +541,7 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
     def _try_reserve(src: str):
         # 锁内占位（seen 先行推进）+ busy 防两批在飞：杜绝双补、保证 append
         # 严格按切片序（planned 顺序=spec 序）；失败回退占位，重试同段重切。
-        with state["lock"]:
+        with state["cv"]:
             if state["busy"] or state["seen"] >= n:
                 return None
             if src == "worker":
@@ -558,14 +565,24 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
         try:
             items = _gen_slice(start, take)
         except Exception:
-            with state["lock"]:                  # 失败退占位，下轮同段重切
+            with state["cv"]:                  # 失败退占位，下轮同段重切
                 state["seen"] = start
                 state["busy"] = False
+                # N3 判据收窄：首问即挂才算连续失败（端点死）；切片里有成功
+                # ask 说明端点活着（抖动），清零不累计——否则 15%/题 注入下
+                # 整批失败率 80%，活端点会被 5 连败误杀（本地压测实证）。
+                if state["slice_ask_ok"] == 0:
+                    state["fill_fails"] += 1
+                else:
+                    state["fill_fails"] = 0
+                cv.notify_all()                # N4: 回退也广播，等交货的 pose 醒来
             raise
-        with state["lock"]:
+        with state["cv"]:
             state["planned"].extend(items)
             state["busy"] = False
             state["fill_fails"] = 0               # N3：任何一次成功出货即清零
+            state["pose_backoff_step"] = 0
+            cv.notify_all()                       # N4: fill_end 广播，叫醒 pose/worker
         _tl("fill_end", src=src, seen=start + take)
         return True
 
@@ -580,28 +597,36 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
         # 预取：backlog<水位就补；水位满/在途是健康等待，不退出（探针1/2 根因
         # 之一即到水位即退）。仅「池空还连续 2 次补不到货」才让位（防端点故障
         # 热旋刷日志），让位后主循环池空会同步自补，整轮不受影响。
+        # N4：wait 等 notify（pop/fill_end/回退均广播），timeout 只作兜底；
+        # S2：stop event 让 run() finally 能叫停，同进程多轮不堆积线程。
         _tl("worker_start", watermark=watermark, n=n)
         fails = 0
-        while True:
-            with state["lock"]:
-                done = state["seen"] >= n
-            if done:
-                _tl("worker_exit", why="all_planned", seen=state["seen"])
-                return
+        while not state["stop"].is_set():
+            with cv:
+                if state["seen"] >= n:
+                    _tl("worker_exit", why="all_planned", seen=state["seen"])
+                    cv.notify_all()               # N4: 退出也广播，等待者立醒
+                    return
             progressed = _fill_guarded(src="worker")
             if progressed:
                 fails = 0
                 continue
-            with state["lock"]:
+            with cv:
                 stocked = state["next"] < len(state["planned"]) or state["busy"]
-            if stocked:
-                time.sleep(1.0)          # 水位满/在途/已补上：健康等待
-            else:
-                fails += 1
-                if fails >= 2:
-                    _tl("worker_exit", why="fails2", seen=state["seen"])
-                    return
-                time.sleep(2.0)          # 池空无进展：退避再试
+                if stocked:
+                    cv.wait(timeout=1.0)          # 水位满/在途/已补上：等 notify
+                    continue
+            fails += 1
+            if fails >= 2:
+                _tl("worker_exit", why="fails2", seen=state["seen"])
+                with cv:
+                    cv.notify_all()
+                return
+            with cv:
+                cv.wait(timeout=2.0)              # 池空无进展：退避再试
+        _tl("worker_exit", why="stop", seen=state["seen"])
+        with cv:
+            cv.notify_all()
 
     if prefetch and n > batch:
         threading.Thread(target=_prefetch_worker, name="blue-prefetch",
@@ -612,10 +637,11 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
         waited = time.time()
         stalled = False
         while True:
-            with state["lock"]:
+            with cv:
                 if state["next"] < len(state["planned"]):
                     item = state["planned"][state["next"]]
                     state["next"] += 1
+                    cv.notify_all()              # N4: pop 腾水位，叫醒 worker
                     if stalled:                  # 等过在途/自补：记等待时长
                         _tl("pose_fallback", waited_s=round(time.time() - waited, 3),
                             next=state["next"])
@@ -631,28 +657,44 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
                 if (state["seen"] >= n and not state["busy"]
                         and state["next"] >= len(state["planned"])):
                     return None
-                can_fill = not state["busy"]
-            if can_fill:
-                if _fill_guarded():              # 池空且无人出题：同步自补
-                    stalled = True
+                if not state["busy"]:
+                    can_fill = True
+                else:
+                    stalled = True               # 在途商品：等 fill_end 广播
+                    cv.wait(timeout=2.0)         # N4: notify 即醒，timeout 兜底
                     continue
-                # N3：自补失败要退避，连续超限抛明确错误（旧版无退避无上限，
-                # 蓝方全挂 3 秒热循环 31.5 万次、整轮永不返回，连审 R9 实测）
-                with state["lock"]:
-                    state["fill_fails"] += 1
-                    fails = state["fill_fails"]
-                if fails >= _FILL_MAX_FAILS:
-                    raise BlueExhaustedError(
-                        f"蓝方出题连续失败 {fails} 次（退避后仍失败），本轮终止")
-                delay = min(_FILL_BACKOFF_BASE * 2 ** (fails - 1), 16.0)
-                _tl("pose_fill_backoff", fails=fails, delay_s=delay)
-                time.sleep(delay)
+            # 以下自补/退避在锁外（N3；探针3 教训：出题绝不持锁）
+            if _fill_guarded():
                 stalled = True
-            else:
-                stalled = True                   # 在途商品：等 worker 交货
-                time.sleep(0.2)
+                continue
+            # N3：自补失败要退避，连续超限抛明确错误（旧版无退避无上限，
+            # 蓝方全挂 3 秒热循环 31.5 万次、整轮永不返回，连审 R9 实测）。
+            # 计数只看「首问即挂」的 fill_fails（见 _fill_once），抖动不累计。
+            with cv:
+                state["pose_backoff_step"] += 1
+                hard = state["fill_fails"]
+            if hard >= _FILL_MAX_FAILS:
+                raise BlueExhaustedError(
+                    f"蓝方出题连续失败 {hard} 次（首问即挂，退避后仍失败），本轮终止")
+            delay = min(_FILL_BACKOFF_BASE * 2 ** min(state["pose_backoff_step"] - 1, 2), 0.5)
+            _tl("pose_fill_backoff", step=state["pose_backoff_step"], hard=hard, delay_s=delay)
+            time.sleep(delay)
+            stalled = True
+
+    def _wait(pred, timeout: float = 30.0) -> bool:
+        """N4 测试观测点：等谓词成立（事件驱动，替代 sleep 轮询）。"""
+        with cv:
+            return cv.wait_for(pred, timeout)
+
+    def _close() -> None:
+        """S2：叫停预取线程（run() finally 调，同进程多轮不堆积）。"""
+        state["stop"].set()
+        with cv:
+            cv.notify_all()
 
     pose._planned_state = state          # 测试观测点（水位/回退行为断言用）
+    pose._planned_wait = _wait           # N4：事件等待，替代测试里的 sleep 轮询
+    pose._planned_close = _close         # S2
     return pose
 
 
