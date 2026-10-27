@@ -511,11 +511,16 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
     def _tl(event: str, **kw) -> None:
         # I 观测点（20261027 探针复核）：预取/出题/消费时间线，内存全记，
         # prompts_dir 给了才落盘轮目录，供报告分解墙钟（批内耗时/暴露段）。
-        rec = {"t": round(time.time(), 3), "event": event, **kw}
-        state["timeline"].append(rec)
-        if tpath is not None:
-            with tpath.open("a", encoding="utf-8") as fh:
-                fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
+        # B3（20261027 N1-N4 复审）：取时刻、内存 append、落盘三者必须同一
+        # 临界区——旧版取时刻与写入之间无锁，worker/主循环并发时时间线会
+        # 乱序（test_prefetch_timeline_written 偶发红，全量守卫跑复现 2 次）。
+        # cv 是 RLock：_tl 在锁内被调用（worker_exit/pose_pop 等）可重入。
+        with state["cv"]:
+            rec = {"t": round(time.time(), 3), "event": event, **kw}
+            state["timeline"].append(rec)
+            if tpath is not None:
+                with tpath.open("a", encoding="utf-8") as fh:
+                    fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
 
     def _log_fill_error(where: str, exc: Exception) -> None:
         rec = {"at": time.strftime("%Y-%m-%dT%H:%M:%S"), "where": where,
