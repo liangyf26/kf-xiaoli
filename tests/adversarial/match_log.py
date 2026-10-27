@@ -179,8 +179,8 @@ def write_report(round_dir: Path, summary: dict, games: list[dict]) -> Path:
         "| 指标 | 值 |",
         "|---|---|",
         f"| 无效样本率 | {len(invalid)}/{len(turns)}（{pct(len(invalid), len(turns))}） |",
-        f"| 红方作答耗时 | 平均 {avg}ms，P90 {round(_p90(latencies))}ms"
-        f"（n={len(latencies)}，nearest-rank，取重试后成功那次；无效题不计入） |",
+        f"| 红方作答耗时 | 平均 {avg}ms，P90（nearest-rank）{round(_p90(latencies))}ms"
+        f"（n={len(latencies)}，第 ⌈0.9·N⌉ 个值按升序从1计，取重试后成功那次；无效题不计入） |",
         f"| 能判题占比 | {len(judged_ok)}/{len(judged_turns)}"
         f"（{pct(len(judged_ok), len(judged_turns))}，verdict ∈ no_kb/red_scored/blue_scored） |",
         "",

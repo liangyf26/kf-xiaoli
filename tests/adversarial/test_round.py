@@ -287,7 +287,7 @@ def test_write_report_metrics(tmp_path):
     path = write_report(tmp_path, summarize(games), games)
     text = path.read_text(encoding="utf-8")
     assert "| 无效样本率 | 1/4（25.0%） |" in text
-    assert "平均 2000ms，P90 3000ms（n=3" in text
+    assert "平均 2000ms，P90（nearest-rank）3000ms（n=3" in text   # #062 第五节：口径写进报告
     assert "| 能判题占比 | 2/3（66.7%" in text
     assert "红方 1 / 蓝方 1" in text
     assert "蓝方得分 1、红方得分 1、双方 0 分 1、无效 1（合计 4 题）" in text

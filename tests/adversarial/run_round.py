@@ -808,14 +808,19 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
 
 
 def _broadcast_turn(box: Outbox, game: int, record: dict) -> None:
-    """level=all 时逐题播：出题理由、回答、判分。level 过滤在 Outbox 里。"""
-    box.emit(game, "question", f"出题：{record.get('question', '')}\n理由：{record.get('reason', '')}")
+    """level=all 时逐题播：出题理由、回答、判分。level 过滤在 Outbox 里。
+
+    #062 第五节：题号统一用 seq（turns.jsonl 同款），播报行前缀 seq{N}，
+    复盘材料可直接对回 turns.jsonl；不再出现 topic 编号或 0 起编号。"""
+    n = record.get("seq")
+    prefix = f"seq{n} " if isinstance(n, int) else ""
+    box.emit(game, "question", f"{prefix}出题：{record.get('question', '')}\n理由：{record.get('reason', '')}")
     if record.get("invalid"):
-        box.emit(game, "answer", f"无效：{record.get('error', '')}", lost=True)
+        box.emit(game, "answer", f"{prefix}无效：{record.get('error', '')}", lost=True)
     elif record.get("answer"):
-        box.emit(game, "answer", f"回答：{record['answer']}")
+        box.emit(game, "answer", f"{prefix}回答：{record['answer']}")
     box.emit(game, "judge",
-             f"判分 蓝{record.get('blue_point', 0)} 红{record.get('red_point', 0)} {record.get('end', '')}",
+             f"{prefix}判分 蓝{record.get('blue_point', 0)} 红{record.get('red_point', 0)} {record.get('end', '')}",
              lost=bool(record.get("blue_point")))
 
 
