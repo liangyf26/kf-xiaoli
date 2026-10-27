@@ -183,7 +183,8 @@ def classify_turn(question: str, answer: str, sources: list | None, path: str,
                   open_question: bool = False, scope_judge=None,
                   cid: str = "", judge_point: list | None = None,
                   scope_ctx: "ScopeContext | None" = None, seq: int | None = None,
-                  trap: dict | None = None, trap_reason: str = "") -> dict:
+                  trap: dict | None = None, trap_reason: str = "",
+                  scope_sealed: "tuple[bool, str] | None" = None) -> dict:
     """单轮归类与计分。search(question) -> list[条目]，条目有 .label。
 
     scope_ctx（#062 第二节）：一轮共用的 ScopeContext（词表/正则/库/绑定表）；
