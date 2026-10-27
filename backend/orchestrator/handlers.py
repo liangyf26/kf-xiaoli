@@ -22,16 +22,24 @@ def _normalize_text(text: str) -> str:
 # 不能只靠删库里的字——将来库里再写进占位符也不该漏给客户（#061 seq19 已把
 # 占位符话术发给客户）。剥除是生成链路最后一道，FAQ 与 LLM 两个出口都过。
 _INTERNAL_PLACEHOLDER = re.compile(r"\{\{\{.*?\}\}\}", re.DOTALL)
+# 加载器改写形态（#062 复核 P1）：knowledge.clean_placeholders 把
+# {{{人工介入：X}}} 改写成「（需人工介入：X）」入库——出口必须两种形态都剥，
+# 只剥 {{{…}}} 挡不住改写后的句子（#061 seq19 泄漏即此形态）。
+_REWRITTEN_PLACEHOLDER = re.compile(r"（需人工介入：[^）]*）")
 
 
 def strip_internal_placeholders(text: str) -> str:
-    """剥掉客户可见文本里的 {{{...}}} 内部占位符（发送图片/发送文件/人工介入等）。
+    """剥掉客户可见文本里的内部占位符（发送图片/发送文件/人工介入等）。
 
-    行内剥除（前后文字保留）；剥空的行压掉连续空行、行尾残留空白一并清。
-    固定话术不含占位符，对其无影响。"""
-    if not text or "{{{" not in text:
+    覆盖两种形态：库内原样 `{{{...}}}`（DOTALL 行内剥除）与加载器改写后的
+    「（需人工介入：…）」。行内剥除（前后文字保留）；剥空的行压掉连续空行、
+    行尾残留空白一并清。固定话术不含占位符，对其无影响。"""
+    if not text:
+        return text
+    if "{{{" not in text and "（需人工介入：" not in text:
         return text
     cleaned = _INTERNAL_PLACEHOLDER.sub("", text)
+    cleaned = _REWRITTEN_PLACEHOLDER.sub("", cleaned)
     cleaned = re.sub(r"[ \t]+$", "", cleaned, flags=re.M)
     cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
     return cleaned.strip()
@@ -120,7 +128,10 @@ async def handle_faq_match(decision: DecisionResult, knowledge_base: KnowledgeBa
     if top:
         # D4（#035）：answer 只给客户可读正文——_format 的【章节】头/问题N: 前缀/
         # 【category】标签是内部结构，直发客户即泄漏；sources 保留「章节 / 问题N」标注。
-        answer = "\n\n".join(v for v in (_customer_view(qa) for qa in top) if v)
+        # #062 复核 P1：主路径与回退分支同规——出口 strip（加载器把 {{{人工介入：X}}}
+        # 改写成「（需人工介入：X）」入库，不剥就原样发客户，#061 seq19 即此泄漏）。
+        answer = strip_internal_placeholders(
+            "\n\n".join(v for v in (_customer_view(qa) for qa in top) if v))
         return {
             "answer": answer,
             "sources": [source_label(qa.section, qa.number) for qa in top],

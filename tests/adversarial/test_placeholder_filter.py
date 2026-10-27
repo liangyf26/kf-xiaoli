@@ -69,3 +69,50 @@ def test_llm_generation_exit_strips_placeholder():
     assert res["path"] == "llm_generation"
     assert "{{{" not in res["answer"] and "人工介入" not in res["answer"]
     assert res["answer"] == "先同步时间试试。 完成后告诉我。"
+
+
+def test_strip_rewritten_form_and_templates_untouched():
+    """复核 P1：加载器改写形态「（需人工介入：X）」同剠除；固定话术零改动。"""
+    # 改写形态（knowledge.clean_placeholders 的产物）行内剥除
+    assert strip_internal_placeholders(
+        "已收到反馈（需人工介入：发通知到管理群），我们会处理。") == "已收到反馈，我们会处理。"
+    # 整行改写形态剥后不留空行残骸
+    out = strip_internal_placeholders("答：正常12小时我们一定给你一个满意的回复。\n（需人工介入：发通知到管理群）")
+    assert "人工介入" not in out and "\n\n\n" not in out
+    assert out.endswith("满意的回复。")
+    # 两种形态同时出现也全剥
+    both = strip_internal_placeholders("A{{{人工介入：X}}}B（需人工介入：Y）C")
+    assert both == "ABC"
+    # 固定话术不被改动（settings 两句 + 无占位文本原样透传）
+    from backend.config import settings
+    for s in (settings.HANDOFF_MESSAGE, settings.REFUSE_MESSAGE):
+        assert strip_internal_placeholders(s) == s
+
+
+def test_faq_main_path_strips_rewritten_form(tmp_path):
+    """复核 P1 主路径实测：生产库 :38/:286 原文入库 → search_top 主路径出口零泄漏。
+
+    :38 = 整行 {{{人工介入：发通知到管理群}}}；:286 = 行尾同款——加载器把两者
+    改写成「（需人工介入：…）」，主路径此前不接 strip 原样发客户。"""
+    kb_file = tmp_path / "kb.md"
+    # 原文逐字取自生产库 data/sdwan-new.md :38 与 :286（改库前形态）
+    kb_file.write_text(
+        "**【售后问题】**\n\n"
+        "9、这个检测脚本是什么？\n"
+        "答：这是检测脚本，你下载运行试试"
+        "{{{发送文件：C:\\code\\XiaoLiWx\\knowledge\\sdwan\\files\\sync_time.bat}}}\n\n"
+        "10、多久能给我答复？\n"
+        "答：不好意思老板，我们公司全是搞技术的，不太会做客服哈，抱歉抱歉，我们改正，"
+        "正常12小时我们一定给你一个满意的回复。{{{人工介入：发通知到管理群}}}\n",
+        encoding="utf-8")
+    kb = KnowledgeBase(kb_file)
+    res = asyncio.run(handle_faq_match(_decision(), kb, "多久能给我答复？"))
+    assert res["path"] == "faq_match" and res["sources"]
+    ans = res["answer"]
+    assert "{{{" not in ans and "C:\\code" not in ans
+    assert "需人工介入" not in ans and "人工介入" not in ans   # 改写形态也必须剥
+    assert "正常12小时我们一定给你一个满意的回复。" in ans       # 客户正文保留
+    # 主路径另一条（:38 检测脚本行）同样零泄漏
+    res2 = asyncio.run(handle_faq_match(_decision(), kb, "这个检测脚本是什么？"))
+    assert "需人工介入" not in res2["answer"] and "{{{" not in res2["answer"]
+    assert "这是检测脚本，你下载运行试试" in res2["answer"]
