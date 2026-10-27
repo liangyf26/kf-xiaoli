@@ -46,7 +46,9 @@ class QwenClient:
                 "enable_thinking=True 且 max_tokens=%d < 512（实测思考会吃光 token 出空正文），抬到 512",
                 self.max_tokens)
             self.max_tokens = 512
-        self.timeout = 60.0  # 任务书决策5：平衡体验与复杂问题处理
+        # #062 第八节③：生成超时 60→30s——#061 实测 85-89s 三题全是「60.3s 客户端
+        # 超时+重试」模式；21 字话术不需要 60s，30s 内出不来就走重试/降级
+        self.timeout = 30.0
         self.max_retries = 1
         self._clients: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()
 

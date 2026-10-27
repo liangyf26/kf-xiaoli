@@ -74,16 +74,25 @@ def _call_with_deadline(answer_fn, question: str, timeout_s: float) -> Answer:
 
 
 def _retry(answer_fn, question: str, attempts: int, backoff: list[float], sleep,
-           timeout_s: float) -> tuple[Answer, int]:
-    """attempts 含首次。返回 (最后一次答案, 重试次数)。"""
+           timeout_s: float, total_cap_s: float = 60.0) -> tuple[Answer, int]:
+    """attempts 含首次。返回 (最后一次答案, 重试次数)。
+
+    total_cap_s（#062 第八节③）：单题总时长上限——已耗时 ≥ cap 就不再重试，
+    压掉「60.3s 超时+重试 79-89s」模式（30s 超时×2 已贴 cap）。
+    """
     last = Answer(error="not_called")
+    started = time.monotonic()
+    ran = 0
     for i in range(attempts):
         if i:
+            if time.monotonic() - started >= total_cap_s:
+                break
             sleep(backoff[min(i - 1, len(backoff) - 1)] if backoff else 0)
+        ran = i + 1
         last = _call_with_deadline(answer_fn, question, timeout_s)
         if not last.error:
             return last, i
-    return last, attempts - 1
+    return last, ran - 1
 
 
 def run_game(game: int, config: dict, pose_fn, answer_fn, search_fn,
@@ -101,6 +110,7 @@ def run_game(game: int, config: dict, pose_fn, answer_fn, search_fn,
     retry_n = config.get("retry", {}).get("per_question", 2) + 1   # 含首次
     backoff = config.get("retry", {}).get("backoff_s", [])
     timeout_s = config.get("red", {}).get("timeout_s", 120)
+    total_cap_s = config.get("retry", {}).get("total_cap_s", 60.0)   # 第八节③：单题总上限
     scope = config.get("scope", [])
 
     turns: list[dict] = []
@@ -129,7 +139,8 @@ def run_game(game: int, config: dict, pose_fn, answer_fn, search_fn,
             topic, followups = topic + 1, 0
             continue
 
-        answer, retries = _retry(answer_fn, pose.question, retry_n, backoff, sleep, timeout_s)
+        answer, retries = _retry(answer_fn, pose.question, retry_n, backoff, sleep,
+                                 timeout_s, total_cap_s)
         if answer.error:
             emit({"question": pose.question, "reason": pose.reason, "invalid": True,
                   "error": answer.error, "retries": retries, "scored": False,

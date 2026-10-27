@@ -10,7 +10,7 @@
 red:  {base: http://172.28.29.24:30032/v1, model: qwen3.8-27b, timeout_s: 120}
 blue: {base: http://172.28.50.9:30030/v1, model: Qwen3.8-27B, temperature: 0.7}
 match: {games: 1, mode: race, questions: 60, target_score: 20, max_questions: 60, max_followups: 3, seed: 42, pose_batch: 10}
-retry: {per_question: 2, backoff_s: [5, 20]}
+retry: {per_question: 1, backoff_s: [5], total_cap_s: 60}
 kb:   {seed_path: runs/adversarial/kb/_base/sdwan-new-062.md, work_dir: runs/adversarial/kb}
 broadcast: {enabled: false, group: "kf红蓝对抗直播", level: all, max_per_sec: 2, relay_every_s: 60}
 mode: program
