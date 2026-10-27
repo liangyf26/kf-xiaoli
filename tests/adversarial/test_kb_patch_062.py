@@ -46,6 +46,9 @@ def test_user_approved_entries_present() -> None:
     assert "以客服提供的最新安装包和配置说明为准" in text
     # 第3条 裸截断链接已删（带 ID 的完整链接不受影响）
     assert re.search(r"https://docs\.qq\.com/doc/\s*$", text, re.M) is None
+    # 第8条（复核新增）：库内自写「一定」承诺措辞改掉，红方照库答不踩线
+    assert "正常 12 小时内会给你回复" in text
+    assert "一定给你一个满意的回复" not in text
 
 
 def test_production_kb_untouched() -> None:
