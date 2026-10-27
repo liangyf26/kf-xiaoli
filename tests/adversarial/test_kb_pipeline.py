@@ -12,6 +12,7 @@
 """
 import hashlib
 import json
+from pathlib import Path
 import os
 
 import pytest
@@ -187,11 +188,21 @@ def test_reset_backup_follows_kb_dir(tmp_path):
 
 
 def test_guard_rejects_production_kb_dirs(tmp_path, production_kb_snapshot):
-    """必修1：--kb-dir 指仓库根或 data/ 下 → 三子命令全拒（exit 2），生产库未动。"""
+    """必修A：仓库祖先/仓库根/data 及其祖先/仓库内其它目录 → 三子命令全拒且零写入；
+    直接调库函数同样被拦（守护下沉）；runs/adversarial 与 /tmp 沙盒放行。"""
     data = _production_new_kb().parent
     before = {p: _stat(p) for p in sorted(data.glob("sdwan*.md"))}
+    backend = kp.PROJECT_ROOT / "backend"
+    backend_before = sorted(p.name for p in backend.iterdir()) if backend.exists() else None
     seed = str(_production_new_kb())
-    for kb_dir in ("data", "data/wx_real", "."):
+    # 先做单元级断言：任何实现漏洞在这里就红，危险路径不会进 main 真跑
+    for bad in ("..", str(kp.PROJECT_ROOT.parent), "backend", ".git", "docs",
+                ".", "data", "data/wx_real", str(kp.PROJECT_ROOT)):
+        with pytest.raises(PermissionError):
+            kp._guard_kb_dir(bad)
+    kp._guard_kb_dir(kp.PROJECT_ROOT / "runs" / "adversarial" / "kb")   # 仓库内合法目录
+    kp._guard_kb_dir(tmp_path / "sandbox")                              # /tmp 沙盒放行
+    for kb_dir in ("data", "data/wx_real", ".", "..", "backend", ".git", "docs"):
         rc = kp.main(["add-proposal", "--kb-dir", kb_dir, "--kind", "新增",
                       "--question-id", "G", "--reason", "r"])
         assert rc == 2, ("add-proposal", kb_dir)
@@ -201,11 +212,19 @@ def test_guard_rejects_production_kb_dirs(tmp_path, production_kb_snapshot):
         assert rc == 2, ("reset", kb_dir)
     after = {p: _stat(p) for p in sorted(data.glob("sdwan*.md"))}
     assert after == before
+    assert (sorted(p.name for p in backend.iterdir()) if backend.exists() else None) == backend_before
+    # A 下沉：绕过 main 直接调库函数也必须拒（未来流水线直接 import 也守得住）
+    with pytest.raises(PermissionError):
+        kp.add_proposal(Path("data"), kind="新增", content="题\n答：x", question_id="Z", reason="r")
+    with pytest.raises(PermissionError):
+        kp.apply(Path(".."), Path(seed))
+    with pytest.raises(PermissionError):
+        kp.reset(Path("docs"), tmp_path / "b", Path(seed))
 
 
 def test_add_proposal_rejects_section_header(tmp_path):
     """必修2 前置：content 夹带章节标题行 → add-proposal 直接拒。"""
-    with pytest.raises(ValueError, match="章节标题行"):
+    with pytest.raises(ValueError, match="章节标题"):
         _propose(tmp_path,
                  content="**【新章节】**\n无编号题目\n答：混进来的",
                  question_id="D-3", target="基本介绍")
@@ -224,9 +243,35 @@ def test_gate_rejects_entry_count_mismatch(tmp_path, production_kb_snapshot):
         json.dumps(smuggled, ensure_ascii=False) + "\n", encoding="utf-8")
     out = kp.apply(tmp_path, seed)
     assert out["applied"] is False
-    assert any("章节标题行" in r or "题面不符" in r for r in out["errors"]), out["errors"]
+    assert any("章节标题" in r or "题面不符" in r for r in out["errors"]), out["errors"]
     assert not (tmp_path / "v0.md").exists() and not (tmp_path / "v1.md").exists()
     assert len(kp._split_entries(seed.read_text(encoding="utf-8"))) == base_n
+
+
+def test_apply_rejects_numbered_section_smuggle(tmp_path, production_kb_snapshot):
+    """必修B：绕过 add-proposal 直写 jsonl、夹带被编号吃掉的章节变体
+    （`4、**【新章节】**`）→ apply 动库前整批拒收、candidate/版本零写入。"""
+    seed = _production_new_kb()
+    base_n = len(kp._split_entries(seed.read_text(encoding="utf-8")))
+    variants = [
+        "4、**【新章节】**\n无编号题目\n答：混进来的",          # 编号吃掉章节头（复审实锤 case）
+        "题面\n答：x\n**【又一个】**\n答：正文里夹带",           # 非首行夹带
+    ]
+    for i, content in enumerate(variants):
+        rid = f"P-91{i}"
+        with open(tmp_path / kp.PROPOSALS_FILE, "a", encoding="utf-8") as f:
+            f.write(json.dumps({"id": rid, "kind": "新增", "target": "基本介绍",
+                                "content": content, "question_id": f"D-9{i}",
+                                "reason": "绕过校验的编号变体夹带", "bot": "red-team",
+                                "status": "pending", "created_at": "2026-10-27T07:00:00"},
+                               ensure_ascii=False) + "\n")
+        out = kp.apply(tmp_path, seed)
+        assert out["applied"] is False, (rid, out)
+        assert any("章节标题" in r for r in out["errors"]), out["errors"]
+        assert not (tmp_path / "candidate.md").exists()
+        assert not list(tmp_path.glob("v*.md"))          # 零写入：版本文件不新增
+        assert len(kp._split_entries(seed.read_text(encoding="utf-8"))) == base_n
+    assert [p["status"] for p in kp.load_proposals(tmp_path)] == ["rejected", "rejected"]
 
 
 def test_reset_unique_backup_dirs(tmp_path):

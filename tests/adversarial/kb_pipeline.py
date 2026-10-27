@@ -47,6 +47,9 @@ SIM_THRESHOLD = 0.65          # 冲突关题面相似度阈值（实测来源见
 KINDS = ("新增", "修改", "删除")
 
 _SECTION_RE = re.compile(r"^\*\*【(.+?)】\*\*\s*$")
+# B（20261027 复审必修B）：不锚定整行——「4、**【新章节】**」被自动编号吃成合法
+# 条目头的变体也命中。add-proposal 与 apply 共用，章节一律由 --target 指定。
+_SECTION_ANY_RE = re.compile(r"\*\*【[^】]{1,60}】\*\*")
 _ENTRY_RE = re.compile(r"^(\d+)、\s*(.*)$")
 
 
@@ -55,32 +58,42 @@ def _sha256(path: Path) -> str:
 
 
 def _guard_kb_dir(kb_dir) -> None:
-    """生产库守护：kb-dir 不得是仓库根、不得位于 data/ 下（只改对抗副本）。
+    """生产库守护 v2（A，20261027 Architect 复审必修A）：只允许对抗副本目录。
 
-    Architect 复核 #061-阶段4 必修1（2026-10-27）：此前不校验指向，
-    `reset --kb-dir data` 会把生产 data/ 整体搬进备份、apply 会往 data/ 写文件。
-    在任何写操作之前调用，触发即拒绝（main 转 JSON 返回码 2）。"""
+    v1 只拒「等于仓库根」和「位于 data/ 下」，挡不住祖先——`--kb-dir ..`（=项目
+    父目录）会让 reset 把整个仓库搬进备份。新规则：
+    - 仓库外（/tmp 沙盒等）放行；
+    - 仓库内（含仓库根自身的所有祖先，如 /home/lyf/project）只放行
+      runs/adversarial/ 之下；data/、backend、.git、docs、仓库根、仓库祖先全拒。
+    下沉到 add_proposal/apply/reset 各自入口（直接调库函数也绕不过），main 保留。"""
     resolved = Path(kb_dir).resolve()
-    data_dir = (PROJECT_ROOT / "data").resolve()
-    if resolved == PROJECT_ROOT.resolve():
-        raise PermissionError(f"kb-dir 不允许指向仓库根: {resolved}")
-    if resolved == data_dir or resolved.is_relative_to(data_dir):
-        raise PermissionError(f"kb-dir 不允许位于生产库 data/ 下: {resolved}")
+    root = PROJECT_ROOT.resolve()
+    is_ancestor = root.is_relative_to(resolved)            # 含 resolved == root 自身
+    if not (resolved.is_relative_to(root) or is_ancestor):
+        return                                             # 仓库外放行
+    allowed = (root / "runs" / "adversarial").resolve()
+    if resolved == allowed or resolved.is_relative_to(allowed):
+        return
+    raise PermissionError(
+        f"kb-dir 仓库内仅允许 runs/adversarial/ 之下（祖先目录/仓库根/data/ 一律拒）: {resolved}")
 
 
 # ---------------------------------------------------------------- 建议登记
 def add_proposal(kb_dir: Path, *, kind: str, content: str, question_id: str,
                  reason: str, target: str | None = None, bot: str = "red-team") -> dict:
-    """登记一条结构化建议（追加写 kb_proposals.jsonl，不碰库内容）。"""
+    """登记一条结构化建议（追加写 kb_proposals.jsonl，不碰库内容）。
+
+    入口先过生产库守护（A 下沉）：直接调库函数与走 main 同样被拦。"""
+    _guard_kb_dir(kb_dir)
     if kind not in KINDS:
         raise ValueError(f"改动类型须是 {'/'.join(KINDS)}: {kind!r}")
     if kind in ("修改", "删除") and not target:
         raise ValueError(f"{kind} 类建议必须给 --target，如 '售前问题 · 价格/问3'")
     if kind in ("新增", "修改") and "答：" not in content:
         raise ValueError("content 须含题面行与「答：」正文，例如 '题面\n答：正文'")
-    if any(_SECTION_RE.match(l) for l in content.splitlines()):
-        raise ValueError("content 不允许携带章节标题行（**【…】**），章节由 --target 指定"
-                         "（否则无编号行会被解析丢弃）")
+    if any(_SECTION_ANY_RE.search(l) for l in content.splitlines()):
+        raise ValueError("content 不允许夹带章节标题（**【…】**，含被编号吃掉的变体），"
+                         "章节由 --target 指定（否则无编号行会被解析丢弃）")
     kb_dir = Path(kb_dir)
     kb_dir.mkdir(parents=True, exist_ok=True)
     existing = load_proposals(kb_dir)
@@ -302,11 +315,23 @@ def gate(candidate: Path, *, touched: frozenset = frozenset(),
 
 def apply(kb_dir: Path, seed_path: Path, *, review_bot: bool = False,
           review_fn=None) -> dict:
-    """读 pending 建议 → 候选库 → 四关 → 通过写 v<N>.md，失败整批拒收。"""
+    """读 pending 建议 → 候选库 → 四关 → 通过写 v<N>.md，失败整批拒收。
+
+    入口先过生产库守护（A 下沉）：写候选/写版本前拦截 data/ 与祖先目录。"""
+    _guard_kb_dir(kb_dir)
     kb_dir, seed_path = Path(kb_dir), Path(seed_path)
     pending = [p for p in load_proposals(kb_dir) if p["status"] == "pending"]
     if not pending:
         return {"applied": False, "why": "无 pending 建议"}
+    # B：apply 层对 content 任意行查章节标题（含编号变体）——绕过 add-proposal 直写
+    # jsonl 的夹带在动库之前整批拒收（ Architect 复现路径：直写 jsonl → exit 0 放行）。
+    smuggle = [f"{p['id']}: content 夹带章节标题（{l.strip()!r}）——章节由 --target 指定"
+               for p in pending for l in p["content"].splitlines()
+               if _SECTION_ANY_RE.search(l)]
+    if smuggle:
+        _mark(kb_dir, [p["id"] for p in pending], "rejected",
+              "应用失败整批拒收: " + "; ".join(smuggle))
+        return {"applied": False, "why": "content 夹带章节标题（整批拒收）", "errors": smuggle}
     seed_text = seed_path.read_text(encoding="utf-8")
     versions = _load_versions(kb_dir)
     base_text = seed_text
@@ -387,7 +412,10 @@ def _load_versions(kb_dir: Path) -> list[dict]:
 
 # ---------------------------------------------------------------- reset
 def reset(kb_dir: Path, backup_root: Path, seed_path: Path) -> dict:
-    """kb_dir 整体移入备份，再从种子拷 v0。不删除任何文件。"""
+    """kb_dir 整体移入备份，再从种子拷 v0。不删除任何文件。
+
+    入口先过生产库守护（A 下沉）：祖先目录/仓库根/data/ 一律拒，防整库搬走。"""
+    _guard_kb_dir(kb_dir)
     kb_dir, backup_root, seed_path = Path(kb_dir), Path(backup_root), Path(seed_path)
     backup = backup_root / f"{time.strftime('%Y%m%d-%H%M%S')}-{os.urandom(2).hex()}"
     # 随机后缀（Architect 小问题②）：同秒两次 reset 不再嵌套同名目录
