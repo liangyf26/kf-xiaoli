@@ -70,7 +70,7 @@ def generate(config: dict, out_root: Path = HELDOUT_ROOT, *,
 
 def run(heldout_dir: Path, answer_fn, search_fn, scope_terms: list[str],
         keywords: dict | None = None, scope_judge=None, resolve_fn=None,
-        ledger: Path | None = None) -> dict:
+        ledger: Path | None = None, scope_ctx=None) -> dict:
     """红方对封存题作答并按训练局同款判定链计分。
 
     answer_fn(question) -> {"answer": str, "sources": list, "path": str}
@@ -78,6 +78,7 @@ def run(heldout_dir: Path, answer_fn, search_fn, scope_terms: list[str],
     scope_judge(question) -> {"status": …}（训练局同款蓝方范围判定，集成时注入）
     resolve_fn(jp) -> jp：场景断言 expect_hit 内容短语→来源标签的解析
     （run_round._resolve 同款，集成时注入；不注入则按短语原样判定）
+    scope_ctx（#062 第二节）：一轮共用的范围判定上下文，集成时注入（同主题沿用）
 
     D 一次性核账（20261027 复审必修D，默认账本 runs/adversarial/heldout/used.jsonl，
     测试可注入 ledger）：作答前依次核
@@ -115,7 +116,8 @@ def run(heldout_dir: Path, answer_fn, search_fn, scope_terms: list[str],
                             got.get("path", "llm_generation"), scope_terms, search_fn,
                             keywords=keywords, open_question=False,
                             scope_judge=scope_judge,
-                            cid=it.get("cid", ""), judge_point=judge_points)
+                            cid=it.get("cid", ""), judge_point=judge_points,
+                            scope_ctx=scope_ctx)
         turns.append({"sha256": it["sha256"], "question": it["question"],
                       "classification": cls})
     with (heldout_dir / "heldout_turns.jsonl").open("w", encoding="utf-8") as fh:

@@ -82,8 +82,12 @@ def _retry(answer_fn, question: str, attempts: int, backoff: list[float], sleep,
 
 
 def run_game(game: int, config: dict, pose_fn, answer_fn, search_fn,
-             on_turn, sleep=time.sleep, scope_judge=None) -> dict:
-    """跑一局。on_turn(record) 负责落盘。返回 {turns, expected, void}。"""
+             on_turn, sleep=time.sleep, scope_judge=None, scope_ctx=None) -> dict:
+    """跑一局。on_turn(record) 负责落盘。返回 {turns, expected, void}。
+
+    scope_ctx（#062 第二节）：一轮共用的范围判定上下文（词表/正则/库/主题绑定表），
+    由 run() 建好传入；None 时 classify_turn 内部按旧口径现建（仅词表+scope_judge）。
+    """
     match = config.get("match", {})
     mode = match.get("mode", "fixed")
     limit = match.get("questions", 10) if mode == "fixed" else match.get("max_questions", 60)
@@ -132,7 +136,8 @@ def run_game(game: int, config: dict, pose_fn, answer_fn, search_fn,
         judged = classify_turn(pose.question, answer.answer, answer.sources, answer.path,
                                scope, search_fn, open_question=pose.open_question,
                                scope_judge=scope_judge, cid=pose.cid,
-                               judge_point=pose.judge_point)
+                               judge_point=pose.judge_point, scope_ctx=scope_ctx,
+                               seq=len(turns) + 1)
         blue += judged["blue_point"]
         red += judged["red_point"]
         if judged["blue_point"]:

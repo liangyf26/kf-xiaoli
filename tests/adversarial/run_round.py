@@ -33,6 +33,13 @@ DEFAULTS = {
                   "max_per_sec": 2, "relay_every_s": 60},
     "mode": "program",
     "scope": ["SDWAN", "直播线路", "带宽"],
+    # #062 第二节：拼车/共享IP 及错字变体进规则层（二-3），不走模型
+    "scope_patterns": ["拼[车彻扯多]",
+                       "[几0-9一二三四五六七八九十百]+[个入]?人?[拼平拚]"
+                       "(?!时|常|均|稳|安|凡|淡|衡|静|易)",
+                       "共享\\s*IP"],
+    "scope_relevance_min": 20.0,     # 检索强相关阈值，定标依据见 classify.SCOPE_RELEVANCE_MIN
+    "scope_uncertain_in": False,     # 兜底「拿不准判范围内」默认关（任务书七：第三节实现后才许开）
     "stall_s": 600,
 }
 
@@ -317,6 +324,23 @@ def run(config: dict, out_root: Path, questions: int | None = None,
              if pose_fn is None and not dry_run else pose_fn)
     real_search = search_fn or (_local_search(kb_copy) if kb_copy is not None else None)
     scope_judge = None if dry_run else _scope_judge(config)
+    # #062 第二节：一轮共用的范围判定上下文（词表/正则/库内条目/同主题绑定表）。
+    # dry_run 也建（kb=None 时②③层自动跳过，词表与正则仍生效）。
+    from tests.adversarial.classify import ScopeContext
+    _kb_obj = None
+    if kb_copy is not None:
+        try:
+            from backend.knowledge import KnowledgeBase
+            _kb_obj = KnowledgeBase(kb_copy)
+        except Exception:                        # 库解析失败不卡局，退回纯规则层
+            _kb_obj = None
+    scope_ctx = ScopeContext(
+        scope_terms=config.get("scope") or [],
+        scope_patterns=config.get("scope_patterns") or [],
+        kb=_kb_obj,
+        relevance_min=config.get("scope_relevance_min", 20.0),
+        uncertain_in=bool(config.get("scope_uncertain_in", False)),
+        scope_judge=scope_judge)
     games = []
     try:
         for game_no in range(1, config["match"]["games"] + 1):
@@ -333,7 +357,8 @@ def run(config: dict, out_root: Path, questions: int | None = None,
 
             outcome = run_game(game_no, config, posed or _dry_pose,
                                answer_fn or _dry_answer, real_search or (lambda q: []),
-                               on_turn, sleep=lambda s: None, scope_judge=scope_judge)
+                               on_turn, sleep=lambda s: None, scope_judge=scope_judge,
+                               scope_ctx=scope_ctx)
             games.append({"game": game_no,
                           "expected": outcome["expected"] if match_mode == "race" else n,
                           "turns": outcome["turns"], "stop": outcome["stop"]})
@@ -346,7 +371,8 @@ def run(config: dict, out_root: Path, questions: int | None = None,
         summary = match_log.summarize(games)
         match_log.write_summary(round_dir, summary)
         match_log.write_report(round_dir, summary, games)
-        _run_heldout(config, round_dir, kb_copy, scope_judge, real_search, answer_fn, box)
+        _run_heldout(config, round_dir, kb_copy, scope_judge, real_search, answer_fn, box,
+                     scope_ctx=scope_ctx)
     except BlueExhaustedError as exc:
         # N3：明确错误收尾——已答部分照写 summary/report，退出码 4，不挂死
         box.emit(0, "error", f"蓝方出题连续失败，本轮终止: {exc}")
@@ -380,7 +406,7 @@ def _train_rate(round_dir: Path) -> float:
 
 
 def _run_heldout(config: dict, round_dir: Path, kb_copy, scope_judge, search_fn,
-                 answer_fn, box) -> dict | None:
+                 answer_fn, box, scope_ctx=None) -> dict | None:
     """阶段 5：held-out 封存题复测（round.yaml heldout.enabled 时局末自动跑）。
 
     失败只记录不坏局（封存题生成/红方作答都是额外调用，主局结果不受影响）。"""
@@ -409,7 +435,7 @@ def _run_heldout(config: dict, round_dir: Path, kb_copy, scope_judge, search_fn,
 
         gen = ho.generate(config)
         res = ho.run(gen["dir"], _answer, search_fn, config.get("scope") or [],
-                     scope_judge=scope_judge, resolve_fn=_resolve)
+                     scope_judge=scope_judge, resolve_fn=_resolve, scope_ctx=scope_ctx)
         train = _train_rate(round_dir)
         cmp = ho.compare(train, res["red_rate"], scoreable_n=res["scoreable"])
         ho.report_section(round_dir, cmp, {"dir": gen["dir"], "n": res["n"],
