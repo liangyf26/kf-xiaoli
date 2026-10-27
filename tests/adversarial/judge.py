@@ -210,16 +210,46 @@ SOURCES_EXPECT = {
 _NUM = re.compile(r"问题\s*(\d+)")
 
 
+def _load_keywords() -> dict:
+    return json.loads(_KEYWORDS_PATH.read_text(encoding="utf-8"))
+
+
+def _order_verdict(cid: str, answer: str, order: dict) -> tuple[bool, list[str]] | None:
+    """顺序感知判据（#062 用户拍板 A 口径）：first 组须命中且早于 second 组的命中位置；
+    second 组可缺席——题面只问首步时（如 seq35「断网了第一步到底干啥」），
+    正确首步=先同步系统时间，不该因没提「重启」而失分；「先重启后同步」顺序错照样判错。
+    返回 None 表示该题无顺序条目，走原 MUST 逻辑。
+    """
+    rule = order.get(cid)
+    if not rule:
+        return None
+    first = rule["first"]
+    second = rule.get("second", [])
+    pos_first = min((answer.find(k) for k in first if k in answer), default=-1)
+    if pos_first < 0:
+        return False, [f"首步须先处理时间（缺 {'/'.join(first)}）"]
+    pos_second = min((answer.find(k) for k in second if k in answer), default=-1)
+    if second and pos_second >= 0 and pos_second < pos_first:
+        return False, ["先同步时间再重启（顺序错）"]
+    return True, []
+
+
 def facts_ok(cid: str, answer: str, keywords: dict | None = None) -> tuple[bool, list[str]]:
     """事实判分：判据表每组（OR）须各有命中；空答直接错。
 
+    ORDER 顶层条目（顺序感知）优先于 MUST：现仅 TSH4（#062 用户拍板 A：库 :167
+    原文顺序=先同步系统时间再重启）。
     未知题号一律 False（#038 P2）——判据表没配的题不许默认通过，分母不许虚胖。
     """
-    if keywords is None:
-        keywords = json.loads(_KEYWORDS_PATH.read_text(encoding="utf-8"))["MUST"]
     answer = answer or ""
     if not answer.strip():
         return False, ["空答"]
+    raw = _load_keywords()
+    verdict = _order_verdict(cid, answer, raw.get("ORDER", {}))
+    if verdict is not None:
+        return verdict
+    if keywords is None:
+        keywords = raw["MUST"]
     if cid not in keywords:
         return False, [f"未知题号 {cid}（判据表缺条目）"]
     missing = [grp[0] for grp in keywords.get(cid, []) if not any(k in answer for k in grp)]
