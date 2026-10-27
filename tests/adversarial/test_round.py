@@ -555,10 +555,11 @@ def test_run_heldout_appends_report(tmp_path, monkeypatch):
 
     monkeypatch.setattr(ho, "HELDOUT_ROOT", tmp_path / "root")
 
-    def fake_generate(cfg):
+    def fake_generate(cfg, scope_filter=None):   # 第四节新签名（scope_filter 注入）
         d = tmp_path / "heldout-run"
         d.mkdir()
-        return {"dir": str(d), "n": 2, "seed": "s"}
+        return {"dir": str(d), "n": 2, "seed": "s", "candidates_n": 6,
+                "in_scope_n": 2, "sealed_short": False}
 
     def fake_run(d, answer_fn, search_fn, scope_terms, **kw):
         return {"n": 2, "scoreable": 2, "red_scored": 1, "red_rate": 0.5, "dir": d}
@@ -620,8 +621,10 @@ def test_heldout_runs_while_instance_alive(tmp_path, monkeypatch):
     proc = _FakeProc()
     seen = []
 
-    monkeypatch.setattr(ho, "generate", lambda cfg: {"dir": tmp_path / "hdir", "seed": 1})
-    monkeypatch.setattr(ho, "compare", lambda tr, rr: {"diff_pp": 0.0, "suspected_memorization": False})
+    monkeypatch.setattr(ho, "generate", lambda cfg, scope_filter=None: {
+        "dir": tmp_path / "hdir", "seed": 1, "n": 2, "candidates_n": 6, "in_scope_n": 2})
+    monkeypatch.setattr(ho, "compare", lambda tr, rr, scoreable_n=-1, sealed_n=-1: {
+        "diff_pp": 0.0, "suspected_memorization": False})
     monkeypatch.setattr(ho, "report_section", lambda *a, **k: None)
 
     def fake_run(hdir, answer_fn, search_fn, scope, **kw):

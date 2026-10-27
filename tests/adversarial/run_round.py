@@ -436,15 +436,21 @@ def _run_heldout(config: dict, round_dir: Path, kb_copy, scope_judge, search_fn,
                     "sources": list(getattr(ans, "sources", None) or []),
                     "path": getattr(ans, "path", "") or "llm_generation"}
 
-        gen = ho.generate(config)
+        gen = ho.generate(
+            config,
+            scope_filter=(lambda q: (lambda d: {"in_scope": d[0], "basis": d[1]})(
+                scope_ctx.decide(q))) if scope_ctx is not None else None)
         res = ho.run(gen["dir"], _answer, search_fn, config.get("scope") or [],
                      scope_judge=scope_judge, resolve_fn=_resolve, scope_ctx=scope_ctx)
         train = _train_rate(round_dir)
-        cmp = ho.compare(train, res["red_rate"], scoreable_n=res["scoreable"])
+        cmp = ho.compare(train, res["red_rate"], scoreable_n=res["scoreable"],
+                         sealed_n=gen["n"])
         ho.report_section(round_dir, cmp, {"dir": gen["dir"], "n": res["n"],
                                            "seed": gen["seed"],
                                            "scoreable": res["scoreable"],
-                                           "red_scored": res["red_scored"]})
+                                           "red_scored": res["red_scored"],
+                                           "candidates_n": gen["candidates_n"],
+                                           "in_scope_n": gen["in_scope_n"]})
         if box is not None:
             verdict_txt = ("疑似死记" if cmp["suspected_memorization"]
                            else cmp.get("status", "未见疑似死记"))
