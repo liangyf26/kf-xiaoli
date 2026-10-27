@@ -12,6 +12,8 @@ import json
 import os
 import subprocess
 import sys
+import threading
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -127,8 +129,13 @@ def _spawn_isolated(kb: Path, port: int, red: dict, log: Path) -> subprocess.Pop
     return proc
 
 
-def _blue_questions(config: dict, n: int, kb: Path, ask_blue=None) -> list[dict]:
-    """风格池定题干，蓝方模型只负责改写成题面，并说明为什么选这张卡。"""
+def _blue_questions(config: dict, n: int, kb: Path, ask_blue=None,
+                    prompts_dir: Path | None = None) -> list[dict]:
+    """风格池定题干，蓝方模型只负责改写成题面，并说明为什么选这张卡。
+
+    prompts_dir（G+C 修复）：蓝方题面落盘目录，由 run() 传轮目录（与 outbox 同级）。
+    旧实现写 kb.parent——kb 指生产 data/ 时测试数据直接落进生产目录（20261027
+    Architect 抓到 59 行测试数据）。None=不落盘（单测/工具调用默认不写任何文件）。"""
     from tests.adversarial.scenarios.style_sampler import blue_prompt, load_styles, sample
 
     ask = ask_blue or _ask_blue
@@ -145,10 +152,12 @@ def _blue_questions(config: dict, n: int, kb: Path, ask_blue=None) -> list[dict]
         out.append({"text": text, "reason": reason, "style_id": spec["style_id"],
                     "prompt": prompt, "intent": spec["intent"],
                     "judge_points": spec["judge_points"]})
-    prompts_path = kb.parent / "blue_prompts.jsonl"
-    with prompts_path.open("a" if prompts_path.exists() else "w", encoding="utf-8") as fh:
-        for q in out:                            # race 分批出题时追加，不覆盖前批
-            fh.write(json.dumps(q, ensure_ascii=False) + "\n")
+    if prompts_dir is not None:
+        prompts_path = Path(prompts_dir) / "blue_prompts.jsonl"
+        prompts_path.parent.mkdir(parents=True, exist_ok=True)
+        with prompts_path.open("a" if prompts_path.exists() else "w", encoding="utf-8") as fh:
+            for q in out:                        # race 分批出题时追加，不覆盖前批
+                fh.write(json.dumps(q, ensure_ascii=False) + "\n")
     return out
 
 
@@ -300,7 +309,8 @@ def run(config: dict, out_root: Path, questions: int | None = None,
     proc = None
     if not dry_run and spawn_fn:
         proc = spawn_fn(kb_copy, config["red"])
-    posed = (_planned_pose(config, limit if match_mode == "race" else n, kb_copy)
+    posed = (_planned_pose(config, limit if match_mode == "race" else n, kb_copy,
+                           prompts_dir=round_dir)   # G+C: 蓝方题面落轮目录，不跟 kb.parent
              if pose_fn is None and not dry_run else pose_fn)
     real_search = search_fn or (_local_search(kb_copy) if kb_copy is not None else None)
     scope_judge = None if dry_run else _scope_judge(config)
@@ -326,15 +336,18 @@ def run(config: dict, out_root: Path, questions: int | None = None,
                           "turns": outcome["turns"], "stop": outcome["stop"]})
             box.emit(game_no, "summary",
                      f"game {game_no}: 题 {len(outcome['turns'])} 无效 {outcome['invalid']}")
+        # J 修复：summary/report/heldout 必须在实例存活期内完成——heldout 作答要连
+        # 红方隔离实例（8012），teardown 抢先会 ConnectionRefused（20261027 两轮
+        # outbox seq43 实证）。异常路径照旧：finally 杀实例后异常继续上抛。
+        box.flush()
+        summary = match_log.summarize(games)
+        match_log.write_summary(round_dir, summary)
+        match_log.write_report(round_dir, summary, games)
+        _run_heldout(config, round_dir, kb_copy, scope_judge, real_search, answer_fn, box)
     finally:
         if proc is not None and proc.poll() is None:
             proc.kill()
             proc.wait(timeout=5)
-    box.flush()
-    summary = match_log.summarize(games)
-    match_log.write_summary(round_dir, summary)
-    match_log.write_report(round_dir, summary, games)
-    _run_heldout(config, round_dir, kb_copy, scope_judge, real_search, answer_fn, box)
     return round_dir, (0 if summary["balanced"] else 3)
 
 
@@ -384,13 +397,17 @@ def _run_heldout(config: dict, round_dir: Path, kb_copy, scope_judge, search_fn,
         res = ho.run(gen["dir"], _answer, search_fn, config.get("scope") or [],
                      scope_judge=scope_judge, resolve_fn=_resolve)
         train = _train_rate(round_dir)
-        cmp = ho.compare(train, res["red_rate"])
+        cmp = ho.compare(train, res["red_rate"], scoreable_n=res["scoreable"])
         ho.report_section(round_dir, cmp, {"dir": gen["dir"], "n": res["n"],
-                                           "seed": gen["seed"]})
+                                           "seed": gen["seed"],
+                                           "scoreable": res["scoreable"],
+                                           "red_scored": res["red_scored"]})
         if box is not None:
+            verdict_txt = ("疑似死记" if cmp["suspected_memorization"]
+                           else cmp.get("status", "未见疑似死记"))
             box.emit(0, "heldout",
-                     f"封存题 red_rate={res['red_rate']:.0%}｜训练局 {train:.0%}｜差 {cmp['diff_pp']}pp"
-                     f"｜{'疑似死记' if cmp['suspected_memorization'] else '未见疑似死记'}")
+                     f"封存题 red_rate={res['red_rate']:.0%}（red {res['red_scored']}/可计分 {res['scoreable']}/共 {res['n']}）"
+                     f"｜训练局 {train:.0%}｜差 {cmp['diff_pp']}pp｜{verdict_txt}")
         return {"heldout": {**res, "train_rate": train, **cmp}}
     except Exception as exc:                       # noqa: BLE001
         if box is not None:
@@ -410,45 +427,96 @@ def _kb_object(kb: Path | None):
         return None
 
 
-def _planned_pose(config: dict, n: int, kb: Path | None):
+def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | None = None,
+                  prefetch: bool = True):
     """按需分批出题：fixed 一次补齐 n 题行为不变；race 长局上限 60，一次全计划
-    会浪费几十次蓝方调用，按 match.pose_batch（默认 10）分批补货。"""
+    会浪费几十次蓝方调用，按 match.pose_batch（默认 10）分批补货。
+
+    I（20261027 复审必修I）：答题期间后台预取下一批（水位 = 2×batch），出题
+    串行等待不再压在答题墙钟上。约束：
+    - 同 seed 题面逐字节一致——补货批序/参数与串行版完全相同，只挪时间点；
+    - 预取失败只记 blue_fill_errors.jsonl，主循环池空时同步回退补货，不搞崩整轮；
+    - fixed（n<=batch）不启用预取，首批评为原同步路径。"""
     from tests.adversarial.scenarios.style_sampler import resolve_expect_hit
 
     batch = int((config.get("match") or {}).get("pose_batch", 10))
     kb_obj = _kb_object(kb)
+    watermark = 2 * batch          # 预取水位：已计划-已消费保持 <= 2 批
 
     def _resolve(jp: dict) -> dict:
         got = resolve_expect_hit(jp, kb_obj.qa_pairs)
         return got if got is not None else {k: v for k, v in jp.items()
                                             if k != "expect_hit"}
 
-    state = {"planned": [], "next": 0, "seen": 0}
+    state = {"planned": [], "next": 0, "seen": 0, "lock": threading.Lock(),
+             "errors": []}
 
-    def _fill() -> None:
-        take = min(batch, n - state["seen"])
-        items = _blue_questions(config, take, kb or Path("."))
-        if kb_obj is not None:
-            # 场景断言的 expect_hit 是内容短语（A/B 时代口径），判分前解析成来源标签
-            # （与生产 sources 同格式，#057 路径）；解析不出剥 expect_hit 保 forbid/route，
-            # 不让红方吃冤枉分。
-            for item in items:
-                item["judge_points"] = [(s, _resolve(jp)) for s, jp in item["judge_points"]]
-        state["planned"].extend(items)
-        state["seen"] += take
+    def _log_fill_error(where: str, exc: Exception) -> None:
+        rec = {"at": time.strftime("%Y-%m-%dT%H:%M:%S"), "where": where,
+               "error": f"{type(exc).__name__}: {exc}"}
+        state["errors"].append(rec)
+        if prompts_dir is not None:
+            with (Path(prompts_dir) / "blue_fill_errors.jsonl").open("a", encoding="utf-8") as fh:
+                fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
+
+    def _fill_once() -> None:
+        # 整批互斥（I）：worker 与主循环回退共用一把锁，锁内重查水位，
+        # 杜绝同批双补（竞态会把 blue_prompts.jsonl 写成重复行）。
+        with state["lock"]:
+            if state["seen"] >= n or state["next"] < len(state["planned"]):
+                return
+            take = min(batch, n - state["seen"])
+            items = _blue_questions(config, take, kb or Path("."), prompts_dir=prompts_dir)
+            if kb_obj is not None:
+                # 场景断言的 expect_hit 是内容短语（A/B 时代口径），判分前解析成来源
+                # 标签（与生产 sources 同格式，#057 路径）；解析不出剥 expect_hit
+                # 保 forbid/route，不让红方吃冤枉分。
+                for item in items:
+                    item["judge_points"] = [(s, _resolve(jp)) for s, jp in item["judge_points"]]
+            state["planned"].extend(items)
+            state["seen"] += take
+
+    def _fill_guarded() -> None:
+        try:
+            _fill_once()
+        except Exception as exc:                    # noqa: BLE001
+            _log_fill_error("fill", exc)
+
+    def _prefetch_worker() -> None:
+        # 答题期间后台补货；失败只记日志退出，主循环会同步回退，整轮不受影响。
+        # 连续 2 批无进度即让位（防蓝方端点持续故障时空转刷错误日志）。
+        fails = 0
+        while True:
+            with state["lock"]:
+                backlog = state["seen"] - state["next"]
+            if backlog >= watermark or state["seen"] >= n:
+                return
+            before = state["seen"]
+            _fill_guarded()
+            fails = fails + 1 if state["seen"] == before else 0
+            if fails >= 2:
+                return
+
+    if prefetch and n > batch:
+        threading.Thread(target=_prefetch_worker, name="blue-prefetch",
+                         daemon=True).start()
 
     def pose(topic: int, followups: int) -> Pose | None:
         # 阶段 2 每题独立，不沿用上一题做追问；追问编排是阶段 3 的事
         if state["next"] >= len(state["planned"]) and state["seen"] < n:
-            _fill()
-        if state["next"] >= len(state["planned"]):
-            return None
-        item = state["planned"][state["next"]]
-        state["next"] += 1
-        return Pose(question=item["text"], reason=item["reason"],
-                    cid=item["intent"], judge_point=item["judge_points"])
+            _fill_guarded()                          # 同步回退（预取未赶上/已失败）
+            _fill_guarded()                          # 池空最多再给一次机会
+        with state["lock"]:
+            if state["next"] >= len(state["planned"]):
+                return None
+            item = state["planned"][state["next"]]
+            state["next"] += 1
+            return Pose(question=item["text"], reason=item["reason"],
+                        cid=item["intent"], judge_point=item["judge_points"])
 
+    pose._planned_state = state          # 测试观测点（水位/回退行为断言用）
     return pose
+
 
 
 def _broadcast_turn(box: Outbox, game: int, record: dict) -> None:

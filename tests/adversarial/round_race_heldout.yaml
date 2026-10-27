@@ -1,0 +1,13 @@
+# #061 第一个 20 分正式局（race）：其余与 round.yaml 一致，仅赛制与题量上限。
+red:  {base: http://172.28.29.24:30032/v1, model: qwen3.8-27b, timeout_s: 120}
+blue: {base: http://172.28.50.9:30030/v1, model: Qwen3.8-27B, temperature: 0.7}
+match: {games: 1, mode: race, questions: 60, target_score: 20, max_questions: 60, max_followups: 3, seed: 42, pose_batch: 10}
+retry: {per_question: 2, backoff_s: [5, 20]}
+kb:   {seed_path: data/sdwan-new.md, work_dir: runs/adversarial/kb}
+broadcast: {enabled: true, group: "kf红蓝对抗直播", level: all, max_per_sec: 2, relay_every_s: 60}
+mode: program
+publish: {git_branch: adversarial-logs, push: true}
+scope: ["SDWAN", "直播线路", "带宽", "IP", "备案", "域名"]
+stall_s: 600
+# 分布采样 5 轮专用：heldout 首秀仅对本配置生效（round_race.yaml / round.yaml 默认值不动）
+heldout: {enabled: true, questions: 10}

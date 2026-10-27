@@ -11,7 +11,7 @@ scope: ["SDWAN", "直播线路", "带宽", "IP", "备案", "域名"]
 stall_s: 600
 
 # 阶段 5：held-out 封存题复测（局末自动，任务书 :187）。enabled 由 Chief 定首次真跑时机
-heldout: {enabled: false, questions: 5}
+heldout: {enabled: false, questions: 10}
 
 # 阶段 5：开放题计分开关。校准（docs/校准-061-开放题.md 一致率 ≥85%）通过前保持 false：
 # open_question 题只记录不计分（classify verdict=open）

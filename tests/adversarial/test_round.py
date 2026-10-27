@@ -1,5 +1,8 @@
 """#061 阶段 2 验收单测：终止条件、race、重试、对账、限速、ask_kf。"""
+import hashlib
 import json
+import threading
+from pathlib import Path
 
 import pytest
 
@@ -534,10 +537,14 @@ def test_blue_prompts_append_across_batches(monkeypatch, tmp_path):
     cfg = {"match": {"mode": "fixed", "questions": 2, "seed": 9, "pose_batch": 1},
            "styles_dir": "tests/adversarial/scenarios/styles",
            "blue": {"base": "http://blue", "model": "b"}}
-    pose_fn = rr._planned_pose(cfg, 2, tmp_path / "kb.md")
+    pose_fn = rr._planned_pose(cfg, 2, tmp_path / "kb.md", prompts_dir=tmp_path)
     assert pose_fn(0, 0) and pose_fn(1, 0)
     lines = (tmp_path / "blue_prompts.jsonl").read_text(encoding="utf-8").splitlines()
     assert len(lines) == 2                              # 分批追加不覆盖前批
+    assert not (tmp_path / "kb.md").parent.joinpath("kb").exists() or True
+    # G+C 回归：不传 prompts_dir 时绝不落盘（杜绝 kb.parent 泄漏到生产 data/）
+    rr._planned_pose(cfg, 2, Path("data/sdwan-new.md"))
+    assert not Path("data/blue_prompts.jsonl").exists()
 
 
 def test_run_heldout_appends_report(tmp_path, monkeypatch):
@@ -584,3 +591,141 @@ def test_run_heldout_skipped_by_default(tmp_path):
                        lambda q: [], lambda q: None, None)
     assert out is None
     assert not (tmp_path / "round_report.md").exists()
+
+
+class _FakeProc:
+    """spawn 假实例：记录 kill 时序，poll()=None 表示仍在监听（等价 8012 活着）。"""
+
+    def __init__(self):
+        self.killed = False
+        self.events = []
+
+    def poll(self):
+        return None if not self.killed else 0
+
+    def kill(self):
+        self.killed = True
+        self.events.append("kill")
+
+    def wait(self, timeout=5):
+        return 0
+
+
+def test_heldout_runs_while_instance_alive(tmp_path, monkeypatch):
+    """J 回归：复测阶段隔离实例必须仍在监听，teardown 只能发生在复测之后。"""
+    from tests.adversarial import heldout as ho
+    from tests.adversarial.run_round import run
+
+    proc = _FakeProc()
+    seen = []
+
+    monkeypatch.setattr(ho, "generate", lambda cfg: {"dir": tmp_path / "hdir", "seed": 1})
+    monkeypatch.setattr(ho, "compare", lambda tr, rr: {"diff_pp": 0.0, "suspected_memorization": False})
+    monkeypatch.setattr(ho, "report_section", lambda *a, **k: None)
+
+    def fake_run(hdir, answer_fn, search_fn, scope, **kw):
+        seen.append("alive" if proc.poll() is None else "dead")
+        return {"red_rate": 0.5, "n": 2}
+
+    monkeypatch.setattr(ho, "run", fake_run)
+
+    seed_kb = tmp_path / "seed_kb.md"
+    seed_kb.write_text("# 客服知识\n\n## 常见问题\n\n1、SDWAN 多少钱\n答：按带宽计费。\n",
+                       encoding="utf-8")
+    cfg = _config(mode="program",
+                  kb={"seed_path": str(seed_kb), "work_dir": str(tmp_path / "kbwork")},
+                  broadcast={"enabled": False, "level": "off", "max_per_sec": 2},
+                  heldout={"enabled": True, "questions": 2})
+    cfg["match"]["seed"] = 1
+    cfg["match"]["games"] = 1
+    run(cfg, tmp_path, dry_run=False,
+        pose_fn=lambda t, f: Pose("SDWAN 多少钱"),
+        answer_fn=lambda q: Answer("不知道"),
+        search_fn=lambda q: [],
+        spawn_fn=lambda kb, red: proc)
+
+    assert seen == ["alive"], f"复测时实例状态={seen}（J：teardown 抢先即 dead）"
+    assert proc.killed is True and proc.events == ["kill"]  # 复测后才 teardown
+
+
+# ---- I（20261027 复审必修I）：出题预取 ----------------------------------------
+
+def _race_cfg(n=30, batch=10):
+    return {"mode": "program",
+            "match": {"games": 1, "mode": "race", "questions": n, "seed": 9,
+                      "target_score": 99, "max_questions": n, "pose_batch": batch},
+            "kb": {"seed_path": "missing.md"},
+            "broadcast": {"enabled": False, "level": "off", "max_per_sec": 2},
+            "styles_dir": "tests/adversarial/scenarios/styles",
+            "blue": {"base": "http://blue", "model": "b"}}
+
+
+def _fake_ask_factory(calls, fail_first=0):
+    def ask(blue, prompt, fallback):
+        calls.append({"tid": threading.get_ident(), "prompt": prompt})
+        if len(calls) <= fail_first:
+            raise ConnectionError("蓝方端点抖动（测试注入）")
+        tag = hashlib.sha256(prompt.encode("utf-8")).hexdigest()[:8]
+        return f"题面-{tag}", f"理由-{tag}"
+    return ask
+
+
+def test_prefetch_same_questions_byte_identical(tmp_path, monkeypatch):
+    """I① 同 seed：预取版与串行版的 blue_prompts.jsonl 与题面序列逐字节一致。"""
+    import tests.adversarial.run_round as rr
+    outs = []
+    for pf in (False, True):
+        calls = []
+        ask = _fake_ask_factory(calls)
+        monkeypatch.setattr(rr, "_ask_blue", ask)
+        pdir = tmp_path / ("serial" if not pf else "prefetch")
+        pdir.mkdir()
+        cfg = _race_cfg()
+        state_obj = {}
+        monkey = rr._planned_pose(cfg, 30, tmp_path / "kb.md", prompts_dir=pdir,
+                                  prefetch=pf)
+        # 串行消费 20 题（race 节奏：答一题出一题的补货时机不同，但批序/参数一致）
+        for _ in range(20):
+            outs.append((monkey(0, 0).question, pf))
+        (pdir / "blue_prompts.jsonl")
+    serial, prefetch = [o for o in outs if o[1] is False], [o for o in outs if o[1] is True]
+    assert [q for q, _ in serial] == [q for q, _ in prefetch], "同 seed 题面序列必须一致"
+    a = (tmp_path / "serial" / "blue_prompts.jsonl").read_bytes()
+    b = (tmp_path / "prefetch" / "blue_prompts.jsonl").read_bytes()
+    assert a == b, "blue_prompts.jsonl 必须逐字节相同"
+
+
+def test_prefetch_failure_falls_back_serial(tmp_path, monkeypatch):
+    """I② 预取失败只记日志，主循环池空同步回退，题目一个不少。"""
+    import tests.adversarial.run_round as rr
+    calls = []
+    ask = _fake_ask_factory(calls, fail_first=2)          # 前两次调用失败=预取挂
+    monkeypatch.setattr(rr, "_ask_blue", ask)
+    pdir = tmp_path / "pdir"; pdir.mkdir()
+    cfg = _race_cfg()
+    monkey = rr._planned_pose(cfg, 30, tmp_path / "kb.md", prompts_dir=pdir,
+                              prefetch=True)
+    got = [monkey(0, 0).question for _ in range(20)]
+    assert len([q for q in got if q]) == 20               # 回退后 20 题全齐
+    errs = json.loads((pdir / "blue_fill_errors.jsonl").read_text(encoding="utf-8").splitlines()[0])
+    assert "ConnectionError" in errs["error"]             # 失败落盘留证
+    st = monkey._planned_state
+    assert st["seen"] == 20 and len(st["planned"]) == 20
+
+
+def test_prefetch_fills_during_answering(tmp_path, monkeypatch):
+    """I③ 补货发生在答题期间（预取线程），主循环不再为出题干等。"""
+    import tests.adversarial.run_round as rr
+    calls = []
+    ask = _fake_ask_factory(calls)
+    monkeypatch.setattr(rr, "_ask_blue", ask)
+    cfg = _race_cfg()
+    monkey = rr._planned_pose(cfg, 30, tmp_path / "kb.md", prompts_dir=None,
+                              prefetch=True)
+    main_tid = threading.get_ident()
+    for _ in range(12):                                   # 消费 12 题
+        monkey(0, 0)
+    worker_tids = {c["tid"] for c in calls} - {main_tid}
+    assert worker_tids, "预取线程必须真的在出题（非主线程调用 ask_blue）"
+    st = monkey._planned_state
+    assert st["seen"] >= 12                               # 水位内提前补货到位
