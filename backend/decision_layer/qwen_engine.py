@@ -94,6 +94,20 @@ class QwenEngine(DecisionEngine):
         if history:
             last = history[-1]
             recent = f"\n（上一轮{ '用户' if last.get('role') == 'user' else '客服'}：{str(last.get('content', ''))[:60]}）"
+        # #062 第八节②：检索 top 条目喂给决策——转人工只该发生在真缺口
+        # （库无相关内容，或条目与诉求无关），库里有内容仍转人工是 #061 发票链缺陷
+        kb = context.get("kb_retrieval") or {}
+        retrieval = ""
+        if kb:
+            title = kb.get("top_title") or ""
+            score = kb.get("top1_score", 0.0)
+            shown = f"《{title}》（相关度{score}）" if title else f"无相关内容（最高相关度{score}）"
+            retrieval = (
+                f"\n【知识库检索】最相关条目：{shown}。判断 escalate_to_human 参考："
+                "用户有明确诉求（投诉/议价/查订单/要定制/要优惠承诺）→ true；"
+                "检索显示无相关内容且用户在等答案（有诉求）→ true；"
+                "检索条目与问题主题相符、库里有内容可答 → false；纯抱怨无诉求按情绪判断。\n"
+            )
         return (
             "你是SDWAN专线客服机器人的意图识别模块。判断用户消息的意图、情绪与处理需求，"
             "严格只输出一行JSON，不要输出任何其他内容。字段定义：\n"
@@ -103,7 +117,7 @@ class QwenEngine(DecisionEngine):
             "technical_complexity ∈ 0-100\n"
             "user_emotion ∈ neutral/positive/urgent/dissatisfied（不满）/complaint_risk（要投诉举报）；"
             "complaint_risk时escalate_to_human必须为true\n\n"
-            f"{_FEWSHOT}{recent}\n\n用户：{message}\n输出："
+            f"{_FEWSHOT}{retrieval}{recent}\n\n用户：{message}\n输出："
         )
 
     def _parse_result(self, text: str, latency_ms: int) -> DecisionResult:

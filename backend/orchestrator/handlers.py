@@ -273,11 +273,21 @@ def _resolve_sources(llm_sources: Any, prompt: str) -> list[str]:
 
 
 async def handle_escalation(decision: DecisionResult, context: Dict[str, Any]) -> Dict[str, Any]:
-    """转人工：统一转接话术（#062 话术拆分，文案单一来源 settings）。"""
-    answer = settings.HANDOFF_MESSAGE
+    """转人工：统一转接话术（#062 话术拆分，文案单一来源 settings）。
+
+    第八节②：不生成长文本，决策层判定后直接返回固定话术（目标墙钟≈9.5s=
+    3.0s 等待+6.5s 决策）；判定依据落盘 escalate_reason 供逐题审计。
+    """
+    kb = context.get("kb_retrieval") or {}
+    if kb.get("top_title"):
+        retrieval = f"检索最相关条目《{kb['top_title']}》相关度{kb.get('top1_score', 0)}"
+    else:
+        retrieval = f"检索无相关内容（最高相关度{kb.get('top1_score', 0)}）"
     return {
-        "answer": answer,
+        "answer": settings.HANDOFF_MESSAGE,
         "sources": [],
         "need_clarification": False,
         "path": "human_escalation",
+        "escalate_reason": (f"决策层判定转人工：intent={decision.intent}，"
+                            f"emotion={decision.user_emotion}，{retrieval}"),
     }

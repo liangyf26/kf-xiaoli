@@ -55,12 +55,21 @@ class Orchestrator:
 
     async def process(self, message: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """完整编排流程：决策→路由→处理→统一格式输出。"""
-        # 1. 决策层
+        # 1. 决策层（#062 第八节②：先取检索 top 条目喂给决策——「真缺口才转人工」
+        # 的判定依据，防止模型对库里有内容的题自行转人工（#061 发票链 5 题缺陷））
+        kb_retrieval = {"top1_score": 0.0, "top_title": ""}
+        if message and self.knowledge_base is not None:
+            top = self.knowledge_base.search_top(message, limit=1)
+            kb_retrieval = {
+                "top1_score": round(self.knowledge_base.top1_relevance(message), 1),
+                "top_title": top[0].title if top else "",
+            }
         orchestrator_context = {
             "history": context.get("history", []),
             "previous_intent": context.get("previous_intent"),
             "clarification_count": context.get("clarification_count", 0),
             "covered_topics": context.get("covered_topics", []),
+            "kb_retrieval": kb_retrieval,
         }
         decision = await self.decision_engine.decide(message, orchestrator_context)
         logger.info(
