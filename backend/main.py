@@ -251,6 +251,9 @@ async def handle_aggregated(session, combined: str) -> None:
             "engine": result.get("engine", ""),
             "path": result.get("path", ""),
             "need_clarification": result.get("need_clarification", False),
+            # #062 复核 P1-1：转人工理由与检索 top1 观测字段透传（落逐题记录）
+            "escalate_reason": result.get("escalate_reason"),
+            "kb_top1": result.get("kb_top1"),
             # 决策结果展示（Phase 5任务4）：引擎/决策耗时/意图+置信度/情绪
             "emotion": result["decision"].user_emotion,
             "intent_confidence": round(float(result["decision"].intent_confidence), 2),

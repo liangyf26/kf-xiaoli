@@ -42,12 +42,16 @@ class Pose:
 
 class Answer:
     def __init__(self, answer: str = "", sources=None, path: str = "", error: str = "",
-                 latency_ms: float | None = None):
+                 latency_ms: float | None = None, escalate_reason: str | None = None,
+                 kb_top1: float | None = None):
         self.answer = answer
         self.sources = sources or []
         self.path = path
         self.error = error
         self.latency_ms = latency_ms      # 本次尝试耗时（ms），由 _call_with_deadline 计时
+        # #062 第八节①/复核 P1-1：转人工理由与检索 top1 观测（None=该轮无此数据）
+        self.escalate_reason = escalate_reason
+        self.kb_top1 = kb_top1
 
 
 def _call_with_deadline(answer_fn, question: str, timeout_s: float) -> Answer:
@@ -166,6 +170,9 @@ def run_game(game: int, config: dict, pose_fn, answer_fn, search_fn,
             end = ""
         emit({"question": pose.question, "reason": pose.reason, "answer": answer.answer,
               "sources": answer.sources, "path": answer.path, "retries": retries,
+              # #062 复核 P1-1：转人工理由与检索 top1 落逐题记录（None 不写键）
+              **({} if answer.escalate_reason is None else {"escalate_reason": answer.escalate_reason}),
+              **({} if answer.kb_top1 is None else {"kb_top1": answer.kb_top1}),
               "invalid": False, "classification": judged, "end": end,
               "latency_ms": answer.latency_ms,
               "blue_point": judged["blue_point"], "red_point": judged["red_point"],

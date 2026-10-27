@@ -82,6 +82,18 @@ class Orchestrator:
         path = self.router._determine_path(decision, orchestrator_context, message)
         logger.info("路由路径选择: %s（intent=%s conf=%.2f）", path.value, decision.intent, decision.intent_confidence)
 
+        # #062 复核 P1-2：top1 强相关时 fast path 不得直接返纯话术——决策层
+        # （可能误判「无相关内容」）要转人工，但库里有内容就该答：并入强制作答
+        # 路径（handle_llm_generation 自会带 force 约束与 escalate_reason 落盘）。
+        # complaint_risk 例外：情绪契约优先，投诉风险一律真转人工。
+        if (path == ProcessingPath.HUMAN_ESCALATION
+                and decision.user_emotion != "complaint_risk"
+                and kb_retrieval["top1_score"] >= settings.FORCE_ANSWER_MIN_TOP1):
+            logger.info(
+                "fast path 覆盖: 决策层判转人工但检索 top1=%.1f ≥ %s，并入强制作答",
+                kb_retrieval["top1_score"], settings.FORCE_ANSWER_MIN_TOP1)
+            path = ProcessingPath.LLM_GENERATION
+
         # 3. 处理
         if path == ProcessingPath.CLARIFICATION:
             result = await handle_clarification(message, decision, orchestrator_context)
@@ -95,7 +107,8 @@ class Orchestrator:
                 self.llm_client, self.prompt_builder, self.knowledge_base,
             )
 
-        # 4. 统一格式
+        # 4. 统一格式（#062 复核 P1-1：escalate_reason/kb_top1 必须透传到调用方，
+        # 否则「转人工理由落盘」在编排层断链，turns.jsonl 拿不到）
         return {
             "answer": result.get("answer", ""),
             "sources": result.get("sources", []),
@@ -104,4 +117,6 @@ class Orchestrator:
             "decision": decision,
             "intent": decision.intent,
             "engine": decision.engine,
+            "escalate_reason": result.get("escalate_reason"),
+            "kb_top1": result.get("kb_top1"),
         }

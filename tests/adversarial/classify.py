@@ -198,7 +198,11 @@ def classify_turn(question: str, answer: str, sources: list | None, path: str,
     sources = sources or []
     if scope_ctx is None:
         scope_ctx = ScopeContext(scope_terms, scope_judge=scope_judge)
-    inside, basis = scope_ctx.decide(question, seq=seq)
+    # #062 第四节：封存题沿用封存时的范围判定，不重判（防模型判定前后漂移）
+    if scope_sealed is not None:
+        inside, basis = bool(scope_sealed[0]), f"封存时判定沿用: {scope_sealed[1]}"
+    else:
+        inside, basis = scope_ctx.decide(question, seq=seq)
     result = {"in_scope": inside, "basis": basis, "has_kb": None, "open_question": open_question,
               "scored": False, "blue_point": 0, "red_point": 0, "verdict": "unscored",
               "judge": None, "top3": []}

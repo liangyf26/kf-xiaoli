@@ -284,7 +284,9 @@ def _ws_answer(port: int, timeout_s: float):
         if data.get("error"):
             return Answer(error=data["error"])
         return Answer(answer=data.get("answer", ""), sources=data.get("sources") or [],
-                      path=data.get("path", ""))
+                      path=data.get("path", ""),
+                      escalate_reason=data.get("escalate_reason"),
+                      kb_top1=data.get("kb_top1"))
 
     return answer
 
