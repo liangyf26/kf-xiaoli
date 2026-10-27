@@ -217,19 +217,26 @@ def _load_keywords() -> dict:
 
 
 def _order_verdict(cid: str, answer: str, order: dict) -> tuple[bool, list[str]] | None:
-    """顺序感知判据（#062 用户拍板 A 口径）：first 组须命中且早于 second 组的命中位置；
-    second 组可缺席——题面只问首步时（如 seq35「断网了第一步到底干啥」），
+    """顺序感知判据（#062 用户拍板 A 口径）：first_any 任一动作词命中且
+    first_with 全部在场才算首步命中（复核 P2-2：裸「时间」两字不算，防
+    「这个时间段先重启路由器」蒙混）；首步命中位置须早于 second 组的命中位置；
+    second 可缺席——题面只问首步时（如 seq35「断网了第一步到底干啥」），
     正确首步=先同步系统时间，不该因没提「重启」而失分；「先重启后同步」顺序错照样判错。
     返回 None 表示该题无顺序条目，走原 MUST 逻辑。
     """
     rule = order.get(cid)
     if not rule:
         return None
-    first = rule["first"]
+    first_any = rule.get("first_any") or rule.get("first") or []
+    first_with = rule.get("first_with", [])
     second = rule.get("second", [])
-    pos_first = min((answer.find(k) for k in first if k in answer), default=-1)
-    if pos_first < 0:
-        return False, [f"首步须先处理时间（缺 {'/'.join(first)}）"]
+    if first_with and not all(w in answer for w in first_with):
+        return False, [f"首步须处理时间（缺 {'/'.join(first_with)}）"]
+    positions = [answer.find(k) for k in first_any if k in answer]
+    positions = [p for p in positions if p >= 0]
+    if not positions:
+        return False, [f"首步须按动作匹配（{'/'.join(first_any)} + {'/'.join(first_with)}）"]
+    pos_first = min(positions)
     pos_second = min((answer.find(k) for k in second if k in answer), default=-1)
     if second and pos_second >= 0 and pos_second < pos_first:
         return False, ["先同步时间再重启（顺序错）"]

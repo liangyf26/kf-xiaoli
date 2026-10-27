@@ -40,15 +40,26 @@ def test_kb_full_order_passes() -> None:
 
 
 def test_restart_first_fails_on_order() -> None:
-    """先重启后提时间 = 顺序错（A 口径明确拒绝）。"""
-    ok, missing = facts_ok("TSH4", "重启一下你的手机+电脑+路由器，保证时间是对的。")
+    """先重启后同步 = 顺序错（A 口径明确拒绝；P2-2 后需含动作词才进顺序比较）。"""
+    ok, missing = facts_ok("TSH4", "重启一下你的手机+电脑+路由器，然后再同步一下系统时间。")
     assert ok is False and any("顺序" in m for m in missing)
+    # 「保证时间是对的」无任何首步动作词 → 缺首步（P2-2：裸时间不算）
+    ok, missing = facts_ok("TSH4", "重启一下你的手机+电脑+路由器，保证时间是对的。")
+    assert ok is False and any("首步" in m for m in missing)
 
 
 def test_restart_only_fails() -> None:
     """只重启不提时间 = 缺首步。"""
     ok, missing = facts_ok("TSH4", "重启一下路由器就行了。")
-    assert ok is False and any("时间" in m for m in missing)
+    assert ok is False and any("首步" in m for m in missing)
+
+
+def test_bare_time_word_does_not_count() -> None:
+    """复核 P2-2：裸「时间」两字不算首步动作——「这个时间段先重启路由器」判错。"""
+    ok, missing = facts_ok("TSH4", "这个时间段先重启路由器。")
+    assert ok is False and any("首步" in m for m in missing)
+    # 只有「时间」没有任何动作词，同样不过
+    assert facts_ok("TSH4", "时间不对就会断网。")[0] is False
 
 
 def test_irrelevant_answer_fails() -> None:
