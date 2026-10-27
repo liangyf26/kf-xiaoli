@@ -802,3 +802,29 @@ def test_prefetch_worker_survives_watermark(tmp_path, monkeypatch):
     # 回归判据是退出原因：探针 bug 版在水位处 fails2 让位，修复版必须 all_planned。
     wfills = [r for r in rows if r["event"] == "fill_start" and r["src"] == "worker"]
     assert len(wfills) >= 1, "worker 未参与任何出题"
+
+
+def test_n3_blue_always_fails_bounded_then_raises(tmp_path, monkeypatch):
+    """N3（连审必修）：蓝方持续失败 → 退避 + 次数上限 + 明确抛错，不热循环。
+
+    修前 3 秒 ask 31.5 万次且 pose 永不返回；修后调用有界、超限抛
+    BlueExhaustedError。"""
+    import tests.adversarial.run_round as rr
+    calls = []
+
+    def ask(blue, prompt, fallback):
+        calls.append(prompt)
+        raise ConnectionError("蓝方端点全挂（测试注入）")
+
+    monkeypatch.setattr(rr, "_ask_blue", ask)
+    monkeypatch.setattr(rr, "_FILL_BACKOFF_BASE", 0.01)   # 测试加速退避链
+    cfg = _race_cfg()
+    pose = rr._planned_pose(cfg, 10, tmp_path / "kb.md", prompts_dir=None,
+                            prefetch=False)               # 走主循环自补路径
+    t0 = time.time()
+    with pytest.raises(rr.BlueExhaustedError, match="连续失败"):
+        for _ in range(10):
+            pose(0, 0)
+    elapsed = time.time() - t0
+    assert len(calls) <= 10, f"ask 调用次数无界: {len(calls)}"
+    assert elapsed < 10, f"退避未生效或上限未触发: {elapsed:.1f}s"

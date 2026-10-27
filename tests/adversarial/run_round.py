@@ -347,6 +347,14 @@ def run(config: dict, out_root: Path, questions: int | None = None,
         match_log.write_summary(round_dir, summary)
         match_log.write_report(round_dir, summary, games)
         _run_heldout(config, round_dir, kb_copy, scope_judge, real_search, answer_fn, box)
+    except BlueExhaustedError as exc:
+        # N3：明确错误收尾——已答部分照写 summary/report，退出码 4，不挂死
+        box.emit(0, "error", f"蓝方出题连续失败，本轮终止: {exc}")
+        box.flush()
+        summary = match_log.summarize(games)
+        match_log.write_summary(round_dir, summary)
+        match_log.write_report(round_dir, summary, games)
+        return round_dir, 4
     finally:
         if proc is not None and proc.poll() is None:
             proc.kill()
@@ -430,6 +438,17 @@ def _kb_object(kb: Path | None):
         return None
 
 
+class BlueExhaustedError(RuntimeError):
+    """N3（20261027 连审必修）：蓝方出题连续失败超限——本轮以明确错误结束。
+
+    旧版 pose() 池空自补失败后立刻重来：无退避、无上限，蓝方全挂时 3 秒
+    热循环 31.5 万次 ask（连审 R9 实测 20.4 万），整轮永不返回。"""
+
+
+_FILL_MAX_FAILS = 5          # 连续自补失败上限（第 5 次 raise，不再重试）
+_FILL_BACKOFF_BASE = 1.0     # 退避基数秒：1,2,4,8 → 累计 ~15s 后放弃
+
+
 def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | None = None,
                   prefetch: bool = True):
     """按需分批出题：fixed 一次补齐 n 题行为不变；race 长局上限 60，一次全计划
@@ -466,7 +485,8 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
                                             if k != "expect_hit"}
 
     state = {"planned": [], "next": 0, "seen": 0, "busy": False,
-             "lock": threading.Lock(), "errors": [], "timeline": []}
+             "lock": threading.Lock(), "errors": [], "timeline": [],
+             "fill_fails": 0}
     tpath = (Path(prompts_dir) / "prefetch_timeline.jsonl") if prompts_dir is not None else None
 
     def _tl(event: str, **kw) -> None:
@@ -545,6 +565,7 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
         with state["lock"]:
             state["planned"].extend(items)
             state["busy"] = False
+            state["fill_fails"] = 0               # N3：任何一次成功出货即清零
         _tl("fill_end", src=src, seen=start + take)
         return True
 
@@ -612,7 +633,20 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
                     return None
                 can_fill = not state["busy"]
             if can_fill:
-                _fill_guarded()                  # 池空且无人出题：同步自补
+                if _fill_guarded():              # 池空且无人出题：同步自补
+                    stalled = True
+                    continue
+                # N3：自补失败要退避，连续超限抛明确错误（旧版无退避无上限，
+                # 蓝方全挂 3 秒热循环 31.5 万次、整轮永不返回，连审 R9 实测）
+                with state["lock"]:
+                    state["fill_fails"] += 1
+                    fails = state["fill_fails"]
+                if fails >= _FILL_MAX_FAILS:
+                    raise BlueExhaustedError(
+                        f"蓝方出题连续失败 {fails} 次（退避后仍失败），本轮终止")
+                delay = min(_FILL_BACKOFF_BASE * 2 ** (fails - 1), 16.0)
+                _tl("pose_fill_backoff", fails=fails, delay_s=delay)
+                time.sleep(delay)
                 stalled = True
             else:
                 stalled = True                   # 在途商品：等 worker 交货
