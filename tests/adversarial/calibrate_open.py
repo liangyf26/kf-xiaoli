@@ -17,6 +17,7 @@
 import argparse
 import hashlib
 import json
+import os
 import random
 import sys
 from collections import Counter, defaultdict
@@ -27,8 +28,9 @@ LABELED = PROJECT_ROOT / "data" / "wx_real" / "labeled_060.json"
 SESSIONS = PROJECT_ROOT / "data" / "wx_real" / "sessions.json"
 SESSION_CAP = 3
 AGREE_THRESHOLD = 0.85
-# 开放题问句特征：含问号或常见疑问词（宽松启发式，抽完还有人工复核关）
-_HINTS = ("？", "?", "多少", "怎么", "为什么", "为什么", "能不能", "可以吗", "吗", "咋", "啥", "几")
+# 开放题问句特征：严格按 K 口径清单（20261027 Chief 逐条看样后定）。
+# 旧表里的「几」误命中非问句闲聊（「已几晚加班」「估计局长几天睡不着」实证），已去。
+_HINTS = ("？", "?", "吗", "呢", "多少", "怎么", "能不能", "是不是", "行不行")
 
 
 def _sha(text: str) -> str:
@@ -47,16 +49,30 @@ def load_sessions(path: Path = SESSIONS) -> list[dict]:
     return json.loads(Path(path).read_text(encoding="utf-8"))["sessions"]
 
 
-def open_pool(sessions: list[dict] | None = None, labeled: list[dict] | None = None) -> list[dict]:
+def open_pool(sessions: list[dict] | None = None, labeled: list[dict] | None = None,
+              domain_sessions: set[str] | None = None, min_len: int = 8,
+              max_len: int = 60, require_prior_turn: bool = True) -> list[dict]:
     """开放题候选池：原始会话的客户消息，有问句特征、不在已标卷里（285 卷是
-    closed-book——expected_action 空的全是 not_customer，不是开放题）。"""
+    closed-book——expected_action 空的全是 not_customer，不是开放题）。
+
+    K 修正（20261027，Chief 逐条看过 /tmp/calib061b 样本后定口径）：
+    - 域过滤：默认只抽 labeled_060 出现过的 session（107 个 SDWAN 业务域会话），
+      房产出租/公司转让/开发票类混入会让人工标注白费；
+    - 题面 8-60 字（原来 ≤80，碎片「怎么测」与粘贴段落都进不来）；
+    - 同会话该 turn 之前必须已有 turn（首 turn 多为无上下文碎片，判不了该答该转）。
+    """
     sessions = load_sessions() if sessions is None else sessions
     labeled = load_labeled() if labeled is None else labeled
     known = {_sha(c.get("question") or "") for c in labeled}
     known |= {str(c.get("question") or "").strip() for c in labeled}
+    if domain_sessions is None:
+        domain_sessions = {c.get("session_id") for c in labeled if c.get("session_id")}
     pool: list[dict] = []
     for s in sessions:
-        for i, t in enumerate(s.get("turns") or []):
+        if s["session_id"] not in domain_sessions:
+            continue
+        turns = s.get("turns") or []
+        for i, t in enumerate(turns):
             if t.get("speaker") != "customer":
                 continue
             text = (t.get("text") or "").strip()
@@ -64,7 +80,9 @@ def open_pool(sessions: list[dict] | None = None, labeled: list[dict] | None = N
                 continue
             if not any(h in text for h in _HINTS):
                 continue
-            if len(text) > 80:                       # 长段非问句（粘贴/岗位描述类）剔除
+            if not (min_len <= len(text) <= max_len):
+                continue
+            if require_prior_turn and i == 0:    # 首 turn 无上下文，脱离会话判不了
                 continue
             pool.append({"case_id": f"{s['session_id']}-t{i}",
                          "batch": s.get("session_key", "?")[:1] or "?",
@@ -140,18 +158,31 @@ def dump_cases(cases: list[dict], out_path: Path) -> Path:
 
 
 def agreement(manual_path: Path, rubric_path: Path) -> dict:
-    """人工 vs rubric 逐条一致率。manual/rubric 行均含 case_id 与 verdict(answer/handoff)。"""
+    """人工 vs rubric 逐条一致率。
+
+    F（20261027 复审必修F）分母口径修正：
+    - 分母 = 人工侧给了 verdict 的全部条目（rubric 缺条/漏判=不一致，不再剔除分母——
+      旧口径漏判 3 条被剔后 7/7=100% 虚高开闸）；
+    - 人工未标（verdict 空）且 rubric 也空 → 单列 undecidable「无法判定」，
+      不进分子也不进分母，但报条数（人工允许标不动 5 条的出口）；
+    - 人工已标但 rubric 漏 → blue_missing 单列且计入分母的不一致。"""
     manual = {json.loads(l)["case_id"]: json.loads(l)
               for l in Path(manual_path).read_text(encoding="utf-8").splitlines() if l.strip()}
     rubric = {json.loads(l)["case_id"]: json.loads(l)
               for l in Path(rubric_path).read_text(encoding="utf-8").splitlines() if l.strip()}
-    both = sorted(set(manual) & set(rubric))
-    if not both:
-        return {"n": 0, "agree": 0, "rate": 0.0, "pass": False}
-    agree = sum(1 for cid in both if manual[cid].get("verdict") == rubric[cid].get("verdict"))
-    rate = agree / len(both)
-    return {"n": len(both), "agree": agree, "rate": round(rate, 4),
-            "pass": rate >= AGREE_THRESHOLD}
+    manual_verdict = {cid: (m.get("verdict") or "").strip() for cid, m in manual.items()}
+    rubric_verdict = {cid: (r.get("verdict") or "").strip() for cid, r in rubric.items()}
+    undecidable = sorted(cid for cid, v in manual_verdict.items()
+                         if not v and not rubric_verdict.get(cid, ""))
+    scored = {cid: v for cid, v in manual_verdict.items() if v}
+    blue_missing = sorted(cid for cid in scored if not rubric_verdict.get(cid, ""))
+    agree = sum(1 for cid, v in scored.items()
+                if rubric_verdict.get(cid) and rubric_verdict[cid] == v)
+    n = len(scored)
+    rate = agree / n if n else 0.0
+    return {"n": n, "agree": agree, "rate": round(rate, 4),
+            "pass": n >= len(manual) - 5 and rate >= AGREE_THRESHOLD and not blue_missing,
+            "blue_missing": blue_missing, "undecidable": undecidable}
 
 
 def rubric_prompt(question: str, rubric_text: str) -> str:
@@ -184,20 +215,23 @@ def main(argv=None) -> int:
                          ensure_ascii=False))
         return 0
     if args.cmd == "score":
-        from tests.adversarial.run_round import _ask_blue
+        # L（20261027 复审必修L）：判分必须直调 _blue_chat（temperature=0）。
+        # 旧版两个错：①blue 键名 base_url/api_key 与 _blue_chat 读的 base 不符
+        # →25/25 KeyError: 'base'；②误用 _ask_blue（出题 helper），prompt 被包上
+        # 「按风格卡出一道客户问题」→ 模型被判分任务时被要求出题。
+        from tests.adversarial.run_round import _blue_chat
         rubric_text = Path(args.rubric).read_text(encoding="utf-8")
-        blue = {"base_url": "", "model": "", "api_key": ""}   # 由环境注入
-        import os
-        blue = {"base_url": os.environ.get("BLUE_BASE", ""),
+        blue = {"base": os.environ.get("BLUE_BASE", ""),
                 "model": os.environ.get("BLUE_MODEL", ""),
-                "api_key": os.environ.get("BLUE_API_KEY", "")}
+                "temperature": 0}                     # key 由 _blue_chat 从 QWEN_BLUE_API_KEY 取
         rows = []
         for line in Path(args.cases).read_text(encoding="utf-8").splitlines():
             if not line.strip():
                 continue
             c = json.loads(line)
             try:
-                text, _ = _ask_blue(blue, rubric_prompt(c["question"], rubric_text), "{}")
+                text = _blue_chat(blue, rubric_prompt(c["question"], rubric_text),
+                                  temperature=0)
                 verdict = json.loads(text) if text.strip().startswith("{") else {}
             except Exception as exc:                       # noqa: BLE001
                 verdict = {"verdict": "", "basis": f"{type(exc).__name__}: {exc}"}
