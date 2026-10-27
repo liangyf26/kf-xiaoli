@@ -94,6 +94,22 @@ def analyze(round_dir: Path) -> dict:
         "retries": {r["seq"]: r.get("retries") for r in turns if r.get("retries")},
         "er_fast": er_fast, "er_synth": er_synth, "er_model": er_model,
     }
+    # A-wrong 四分（Chief 口径）：顺序判定 ③→④→②→①，互斥
+    wrong_set = set(m["wrong_seqs"])
+    m["b1"], m["b2"], m["b3"], m["b4"] = [], [], [], []
+    er_map = {r["seq"]: r for r in turns}
+    for s in m["wrong_seqs"]:
+        r = er_map[s]
+        reason = r.get("escalate_reason") or ""
+        if r.get("error") or reason.startswith("生成重试后仍失败"):
+            m["b3"].append(s)          # 重试/兜底失败（工程缺陷）
+        elif r.get("path") == "human_escalation" or reason.startswith("决策层"):
+            m["b4"].append(s)          # 决策层 fast path（阈下按设计）
+        elif reason and "仍转人工且未写理由" not in reason:
+            m["b2"].append(s)          # 模型自写理由（按设计合理）
+        else:
+            m["b1"].append(s)          # 无理由话术（模型决策缺陷，含合成理由兜底）
+    return m
 
 
 for d in sys.argv[1:]:
@@ -109,6 +125,12 @@ for d in sys.argv[1:]:
     w = m["wrong"]
     print(f"该答却转人工A(含字样): {w[0]}/{w[1]}={w[2]:.0f}%{' ✅≤10%' if w[2] <= 10 else ' ❌>10%'}  seq={m['wrong_seqs']}")
     print(f"该答却转人工B(整句):  {m['b_wrong_n']}/{w[1]}={m['b_wrong_n']/w[1]*100:.0f}%  seq={m['b_wrong_seqs']}")
+    # Chief 口径（2026-10-28）：A 口径拆三类——①无理由话术（模型决策缺陷）
+    # ②模型自写理由（按设计合理）③重试/兜底失败（工程缺陷）；决策层 fast path 单列
+    for k, label in (("b1", "①无理由话术"), ("b2", "②模型自写理由"),
+                     ("b3", "③重试/兜底失败"), ("b4", "④决策层fast path")):
+        seqs = m[k]
+        print(f"  {label}: {len(seqs)} 题  seq={seqs}")
     print(f"强相关(top1≥20)全列: {m['strong_all']}")
     print(f"强相关仍转人工: {m['strong_escal']}")
     print(f"P90(nearest-rank): {m['p90']:.1f}s")
