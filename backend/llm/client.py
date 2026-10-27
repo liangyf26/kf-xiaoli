@@ -82,12 +82,23 @@ class QwenClient:
             "chat_template_kwargs": {"enable_thinking": self.enable_thinking},
         }
 
-    async def generate(self, messages: List[Dict[str, str]]) -> Dict[str, Any]:
-        """非流式生成。返回 {response, usage, latency_ms}；失败重试1次后仍失败则抛出异常。"""
+    async def generate(
+        self,
+        messages: List[Dict[str, str]],
+        timeout_s: float | None = None,
+        retries: int | None = None,
+    ) -> Dict[str, Any]:
+        """非流式生成。返回 {response, usage, latency_ms}；失败重试1次后仍失败则抛出异常。
+
+        timeout_s/retries（#062 §9.2 缺陷重试专用）：per-call 覆盖——重试话术这类
+        短输出用 15s 短超时且不再内部重试（默认 None=沿用 30s/max_retries，行为不变）。
+        """
+        timeout = self.timeout if timeout_s is None else timeout_s
+        n_retries = self.max_retries if retries is None else retries
         start = time.monotonic()
         last_error: Exception | None = None
 
-        for attempt in range(self.max_retries + 1):
+        for attempt in range(n_retries + 1):
             try:
                 logger.debug("LLM调用开始: model=%s attempt=%d", self.model, attempt + 1)
                 client = self._get_client()
@@ -95,6 +106,7 @@ class QwenClient:
                     f"{self.base_url}/chat/completions",
                     json=self._payload(messages, stream=False),
                     headers=self._headers(),
+                    timeout=timeout,
                 )
                 if response.status_code >= 400:
                     raise RuntimeError(f"HTTP {response.status_code}: {response.text[:300]}")
@@ -116,7 +128,7 @@ class QwenClient:
 
         if isinstance(last_error, httpx.TimeoutException):
             # httpx超时异常str()为空，转为含明确信息的异常（任务书验收要求消息可读）
-            raise RuntimeError(f"LLM请求超时（timed out after {self.timeout}s）") from last_error
+            raise RuntimeError(f"LLM请求超时（timed out after {timeout}s）") from last_error
         raise last_error  # type: ignore[misc]
 
     async def generate_stream(self, messages: List[Dict[str, str]]) -> AsyncIterator[str]:

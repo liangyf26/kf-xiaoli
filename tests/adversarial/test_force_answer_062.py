@@ -50,9 +50,10 @@ def _run(tmp_path, model_answer: str, raw: str | None = None, payloads: list | N
     captured = {"calls": 0, "prompts": []}
 
     class FakeClient:
-        async def generate(self, messages):
+        async def generate(self, messages, **kwargs):
             captured["calls"] += 1
             captured["prompts"].append(messages[0]["content"])
+            captured.setdefault("kwargs", []).append(kwargs)
             if payloads:
                 payload = payloads[min(captured["calls"] - 1, len(payloads) - 1)]
             else:
@@ -105,6 +106,11 @@ def test_defect_retry_recovers_answer(tmp_path):
     assert "【强制·上轮违规】" in p2 and "【强制·上轮违规】" not in p1
     # 硬指令插在题面前（recency），不许落到「AI回复：」之后
     assert p2.index("【强制·上轮违规】") < p2.index("用户当前问题：")
+    # 重试调用用 15s 短超时且不再内部重试（§9.2：最坏 24+15≈39s 替代 54s）
+    assert cap["kwargs"][0] == {}
+    assert cap["kwargs"][1] == {"timeout_s": 15.0, "retries": 0}
+    # §9.2：约束段在角色段开头 + force 题历史截短到 4 轮
+    assert p1.startswith("【强制作答约束·最优先】")
 
 
 def test_model_written_reason_skips_retry(tmp_path):
@@ -127,11 +133,11 @@ def test_retry_timeout_fallback_keeps_audit_fields(tmp_path):
         def __init__(self):
             self.calls = 0
 
-        async def generate(self, messages):
+        async def generate(self, messages, **kwargs):
             self.calls += 1
             if self.calls == 1:
                 return {"response": handoff, "latency_ms": 24000}
-            raise TimeoutError("生成超时 30s")
+            raise TimeoutError("生成超时 15s")
 
     kb = _kb(tmp_path, "答：我们公司对公开技术服务发票，1%增值税普通专用发票。累计付款满1000元可开。")
 

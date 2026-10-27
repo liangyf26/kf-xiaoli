@@ -64,7 +64,7 @@ def test_llm_client_structure():
     client = QwenClient()
     assert client.base_url == settings.MODEL_API_BASE
     assert client.model == settings.MODEL_NAME
-    assert client.timeout == 60.0
+    assert client.timeout == 30.0   # #062 第八节③：60→30s（旧断言漏更新，本次顺手修）
     assert client.max_retries == 1
     assert hasattr(client, "generate") and hasattr(client, "generate_stream")
 
