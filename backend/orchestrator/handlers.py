@@ -250,12 +250,20 @@ async def handle_llm_generation(
             logger.warning("LLM生成失败: %s", last_error)
 
     # #062：默认兜底=转人工（系统故障属拿不准，必须保跟进，不许丢）。
-    return {
+    # seed7 局实测：强相关题 attempt0 返话术→重试 attempt1 超时落到这里，兜底
+    # 不带观测字段会断审计链——force_kb_answer 时补 kb_top1+escalate_reason。
+    fallback = {
         "answer": settings.HANDOFF_MESSAGE,
         "sources": [],
         "path": "llm_generation",
         "error": last_error,
     }
+    if force_kb_answer:
+        fallback["kb_top1"] = round(kb_top1, 1)
+        fallback["escalate_reason"] = (
+            f"生成重试后仍失败（top1={kb_top1:.1f} 超阈值"
+            f"{settings.FORCE_ANSWER_MIN_TOP1}）：{(last_error or '')[:150]}")
+    return fallback
 
 
 # 【知识库】段之后可能出现的段标记（与 backend/orchestrator/prompt_builder.py 的

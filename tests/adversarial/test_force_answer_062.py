@@ -116,6 +116,38 @@ def test_model_written_reason_skips_retry(tmp_path):
     assert cap["calls"] == 1
 
 
+def test_retry_timeout_fallback_keeps_audit_fields(tmp_path):
+    """seed7 局实测（seq2/9/13/32）：attempt1 超时落兜底，兜底必须带
+    kb_top1+escalate_reason，否则审计断链、该答却转人工漏计。"""
+    import json
+    handoff = json.dumps({"answer": "这个问题需要同事确认，已为您转接人工客服。",
+                          "sources": []}, ensure_ascii=False)
+
+    class FlakyClient:
+        def __init__(self):
+            self.calls = 0
+
+        async def generate(self, messages):
+            self.calls += 1
+            if self.calls == 1:
+                return {"response": handoff, "latency_ms": 24000}
+            raise TimeoutError("生成超时 30s")
+
+    kb = _kb(tmp_path, "答：我们公司对公开技术服务发票，1%增值税普通专用发票。累计付款满1000元可开。")
+
+    class FakePB:
+        def build_prompt(self, **kw):
+            from backend.orchestrator.prompt_builder import PromptBuilder
+            return PromptBuilder().build_prompt(**kw)
+
+    res = asyncio.run(handle_llm_generation("发票怎么开？专票能开吗", _decision(), {},
+                                            FlakyClient(), FakePB(), kb))
+    assert res["answer"] == settings.HANDOFF_MESSAGE
+    assert res["kb_top1"] >= settings.FORCE_ANSWER_MIN_TOP1
+    assert "重试后仍失败" in res["escalate_reason"]
+    assert "超时" in res["escalate_reason"]   # last_error 带进理由可审计
+
+
 def test_top1_below_threshold_keeps_legacy_path(tmp_path):
     """top1<20：不加约束段（seq35 类低分但可答的题不受影响）。"""
     kb_file = tmp_path / "kb2.md"
