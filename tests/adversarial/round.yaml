@@ -15,8 +15,9 @@ scope_patterns: ["拼[车彻扯多]",
 # 检索强相关阈值（第八节4）：定标依据见 classify.SCOPE_RELEVANCE_MIN 注释
 # （#061 四道误判题检索第一名最低 40.9、五道真范围外探针最高 7.8）
 scope_relevance_min: 20.0
-# 兜底「拿不准判范围内」：任务书七要求第三节规则实现后才许开；第三节落地时改 true
-scope_uncertain_in: false
+# 兜底「拿不准判范围内」：第三节陷阱题规则已实现（任务书七条件①）+判定依据
+# 落盘（classify.ScopeContext，条件②）→ 两条已满足，按拍板开启
+scope_uncertain_in: true
 stall_s: 600
 
 # 阶段 5：held-out 封存题复测（局末自动，任务书 :187）。enabled 由 Chief 定首次真跑时机

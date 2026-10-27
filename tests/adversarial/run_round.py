@@ -161,7 +161,8 @@ def _blue_questions(config: dict, n: int, kb: Path, ask_blue=None,
         text, reason = ask(blue, prompt, spec["template"])
         out.append({"text": text, "reason": reason, "style_id": spec["style_id"],
                     "prompt": prompt, "intent": spec["intent"],
-                    "judge_points": spec["judge_points"]})
+                    "judge_points": spec["judge_points"],
+                    "trap": spec.get("trap")})       # #062 第三节：卡面陷阱标注随题透传
     if prompts_dir is not None:
         prompts_path = Path(prompts_dir) / "blue_prompts.jsonl"
         prompts_path.parent.mkdir(parents=True, exist_ok=True)
@@ -587,7 +588,8 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
                     time.sleep(min(_FILL_BACKOFF_BASE * 2 ** (attempt - 1), 0.5))
             item = {"text": text, "reason": reason, "style_id": spec["style_id"],
                     "prompt": prompt, "intent": spec["intent"],
-                    "judge_points": spec["judge_points"]}
+                    "judge_points": spec["judge_points"],
+                    "trap": spec.get("trap")}        # #062 第三节：卡面陷阱标注随题透传
             deliver(item)                            # 短锁追加+广播+落盘，逐题交付
             delivered += 1
         return delivered
@@ -744,7 +746,8 @@ def _planned_pose(config: dict, n: int, kb: Path | None, prompts_dir: Path | Non
                     else:
                         _tl("pose_pop", next=state["next"])
                     return Pose(question=item["text"], reason=item["reason"],
-                                cid=item["intent"], judge_point=item["judge_points"])
+                                cid=item["intent"], judge_point=item["judge_points"],
+                                trap=item.get("trap"))
                 # N2（20261027 连审必修）：最后一批已占位未交货（busy=True）时
                 # 不能判「出完」。旧条件 seen>=n 就返回 None——末批在生成、
                 # 消费端弹尽即误判弹尽，整批丢失（Architect 压测 40 轮丢 25 题，

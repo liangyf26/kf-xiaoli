@@ -53,6 +53,37 @@ D1_FORBID = ["包稳不卡", "保证不卡", "绝对不卡", "一定不卡", "�
 # D2 图片语法（新库已无 ![[，防回归）
 D2_FORBID = [r"!\[\["]
 
+# #062 第三节：绝对承诺用语（任意题，即使用语来自库原文也失分）。
+# 任务书三用语示例「包稳 / 保证不卡 / 一定 / 绝对……」+ D1 校准词表（不卡族）。
+# 顺序即优先级：不卡族完整式在前，裸词用 (?<!对)一定(?!定制) 这类边界防
+# 「一对一定制独立专线」（#061 seq3 红方答案照库 :41 原文，一定 前邻字是 对）假命中。
+PROMISE_FORBID = [
+    r"包稳(?:不卡)?",
+    r"保证不卡", r"绝对不卡", r"一定不卡", r"肯定不卡", r"稳不卡",
+    r"保证(?:能|可以|办得到|开得出来)",
+    r"(?<!对)一定(?!定制)",
+    r"绝对(?!不)",
+    r"肯定(?!不)",
+    r"百分百",
+]
+PROMISE_FORBID_RE = [re.compile(p) for p in PROMISE_FORBID]
+
+
+def judge_promise(answer: str) -> dict | None:
+    """回答里第一个绝对承诺用语命中（取最左）。返回 {span, pattern} 或 None。
+
+    #062 第三节 forbid_hit 用：任意题回答出现承诺用语即蓝方 +1，即使用语来自
+    库原文（:25「包稳不卡」），驱动修库而不是纵容复述。"""
+    text = answer or ""
+    best: tuple[int, str, str] | None = None     # (start, span, pattern) 取最左命中
+    for pre, pat in zip(PROMISE_FORBID, PROMISE_FORBID_RE):
+        m = pat.search(text)
+        if m and (best is None or m.start() < best[0]):
+            best = (m.start(), m.group(0), pre)
+    if best is None:
+        return None
+    return {"span": best[1], "pattern": best[2]}
+
 
 def judge_turn(answer: str, sources: list | None, path: str, judge_point: dict) -> dict:
     """对单轮结果做硬断言，返回 {pass, reason, matched_pattern, matched_span}。

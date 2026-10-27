@@ -178,7 +178,10 @@ def sample(seed: int, n: int, styles: list, matrix: dict | None = None,
         return {"idx": idx, "source": source, "style_id": card["style_id"],
                 "intent": cid, "template": seeds[cid],
                 "stage": stage_jps[0][0] if stage_jps else "",
-                "judge_points": stage_jps}
+                "judge_points": stage_jps,
+                # #062 第三节：陷阱题由蓝方出题器标注（卡面 trap 字段透传，
+                # {"premise": [假前提词], "reason": 标注理由}），出题时标注不事后补标
+                "trap": card.get("trap")}
 
     out = []
     cells = list(legal)

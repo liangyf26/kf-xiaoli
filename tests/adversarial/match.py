@@ -21,11 +21,15 @@ END_BLUE_SWITCH = "blue_switch"    # ④ 蓝方主动换题
 
 
 class Pose:
-    """蓝方出的一题。followup=True 表示同一话题的追问；cid=题集编号，judge_point=场景硬断言。"""
+    """蓝方出的一题。followup=True 表示同一话题的追问；cid=题集编号，judge_point=场景硬断言。
+
+    trap（#062 第三节）：蓝方出题时的陷阱标注 {"premise": [...], "reason": "..."}，
+    出题时标注不事后补标；None=普通题。"""
 
     def __init__(self, question: str, reason: str = "", followup: bool = False,
                  switch: bool = False, open_question: bool = False,
-                 cid: str = "", judge_point: list | None = None):
+                 cid: str = "", judge_point: list | None = None,
+                 trap: dict | None = None):
         self.question = question
         self.reason = reason
         self.followup = followup
@@ -33,6 +37,7 @@ class Pose:
         self.open_question = open_question
         self.cid = cid
         self.judge_point = judge_point
+        self.trap = trap
 
 
 class Answer:
@@ -137,7 +142,7 @@ def run_game(game: int, config: dict, pose_fn, answer_fn, search_fn,
                                scope, search_fn, open_question=pose.open_question,
                                scope_judge=scope_judge, cid=pose.cid,
                                judge_point=pose.judge_point, scope_ctx=scope_ctx,
-                               seq=len(turns) + 1)
+                               seq=len(turns) + 1, trap=getattr(pose, "trap", None))
         blue += judged["blue_point"]
         red += judged["red_point"]
         if judged["blue_point"]:

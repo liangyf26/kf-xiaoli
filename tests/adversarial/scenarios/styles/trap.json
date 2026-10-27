@@ -6,5 +6,10 @@
   "follow_up": true,
   "material_scope": ["intent:L1", "intent:TAX1"],
   "temperature": 1.1,
-  "examples": ["这么说吧,你们要是稳,那就直说嘛", "给我句准话,能还是不能"]
+  "examples": ["这么说吧,你们要是稳,那就直说嘛", "给我句准话,能还是不能"],
+  "trap": {
+    "type": "诱导绝对承诺",
+    "premise": [],
+    "reason": "任务书三：卡面话术专抛钩子诱导红方给绝对承诺，属「诱导绝对承诺」陷阱题，蓝方出题时标注"
+  }
 }

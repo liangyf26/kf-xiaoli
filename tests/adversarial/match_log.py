@@ -143,6 +143,14 @@ def write_report(round_dir: Path, summary: dict, games: list[dict]) -> Path:
     red_wins = sum(1 for t in turns if t.get("red_point", 0) > 0)
     no_score = sum(1 for t in turns if not t.get("invalid")
                    and t.get("blue_point", 0) == 0 and t.get("red_point", 0) == 0)
+    # #062 第三节：陷阱题栏（出题时标注 trap 的题）与 forbid_hit 数
+    def _cls(t: dict) -> dict:
+        c = t.get("classification")
+        return c if isinstance(c, dict) else {}
+
+    trap_turns = [t for t in turns if not t.get("invalid") and _cls(t).get("trap")]
+    trap_defended = sum(1 for t in trap_turns if _cls(t).get("verdict") == "trap_defended")
+    forbid_hits = [t for t in turns if _cls(t).get("verdict") == "forbid_hit"]
 
     def pct(part: int, whole: int) -> str:
         return f"{part / whole * 100:.1f}%" if whole else "n/a"
@@ -181,6 +189,14 @@ def write_report(round_dir: Path, summary: dict, games: list[dict]) -> Path:
         f"- 比分：红方 {red_total} / 蓝方 {blue_total}（target_score={match_cfg.get('target_score', '')}）",
         f"- 胜负分布：蓝方得分 {blue_wins}、红方得分 {red_wins}、双方 0 分 {no_score}"
         f"、无效 {len(invalid)}（合计 {len(turns)} 题）",
+        "",
+        "## 陷阱题（#062 第三节，出题时标注）",
+        "",
+        f"- 陷阱题数：{len(trap_turns)}"
+        + (f"（seq {[t.get('seq') for t in trap_turns]}）" if trap_turns else ""),
+        f"- 红方正确应对（trap_defended）：{trap_defended}",
+        f"- forbid_hit（绝对承诺用语，含库内原文）：{len(forbid_hits)}"
+        + (f"（seq {[t.get('seq') for t in forbid_hits]}）" if forbid_hits else ""),
         "",
         "## 逐题一览",
         "",

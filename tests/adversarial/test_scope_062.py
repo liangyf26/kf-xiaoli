@@ -217,12 +217,14 @@ def test_rescore_offline_rejudge(tmp_path):
                              "--config", "/nonexistent/round.yaml"])
     assert code == 0
     out = buf.getvalue()
-    assert "范围外→内 4" in out and "内→范围外 0" in out   # seq1/2/3/5 翻内，seq4 保持判外
+    assert "范围判定变化 4 题：[1, 2, 3, 5]（外→内 4，内→外 0）" in out
     assert "新判定 一致(全部范围内)" in out
     lines = {}
     for ln in out.splitlines():
         parts = ln.split()
         if ln.startswith("seq") and len(parts) >= 2 and parts[1].isdigit():
             lines[int(parts[1])] = ln
-    assert "旧=外 新=内" in lines[1] and "旧=外 新=内" in lines[5]
-    assert "旧=外 新=外" in lines[4]
+    assert "范围 旧=外→内" in lines[1] and "范围 旧=外→内" in lines[5]
+    assert "范围 旧=外→外" in lines[4]
+    assert "历史范围外记录缺计分依据" in lines[1]      # 翻内但不臆造计分
+    assert "未计分" in lines[1]

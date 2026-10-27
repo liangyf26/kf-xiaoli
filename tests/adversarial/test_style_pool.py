@@ -48,12 +48,17 @@ CARDS = load_styles(STYLES_DIR)
 
 
 def test_cards_have_exact_8_keys():
-    """5.1.1：字段集合恰为 4.1 的 8 个键；style_id=文件名；temperature 在范围内。"""
+    """5.1.1：字段集合=4.1 的 8 键；#062 第三节允许第 9 个可选键 trap（出题时
+    标注陷阱题，{"type","premise","reason"}，任务书三「题型字段加上标注理由」）。"""
     assert set(c["style_id"] for c in CARDS) == set(STYLE_IDS)   # 5 卡齐全（load_styles 按 id 排序）
     for card in CARDS:
         p = STYLES_DIR / f"{card['style_id']}.json"
         raw = json.loads(p.read_text(encoding="utf-8"))
-        assert set(raw) == CARD_KEYS, f"{p.name} 字段集不符 4.1（8 键不多不少）"
+        extra = set(raw) - CARD_KEYS - {"trap"}
+        assert not extra and CARD_KEYS <= set(raw), f"{p.name} 字段集不符（8 键+可选 trap）"
+        if "trap" in raw:
+            assert isinstance(raw["trap"], dict) and raw["trap"].get("reason"), \
+                f"{p.name} trap 标注必须带 reason"
         assert card["style_id"] == p.stem
         assert card["sentence_len"] in ("short", "medium", "long")
         assert isinstance(card["follow_up"], bool)

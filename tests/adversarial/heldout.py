@@ -57,7 +57,8 @@ def generate(config: dict, out_root: Path = HELDOUT_ROOT, *,
             fh.write(json.dumps({"sha256": _sha(it["text"]),
                                  "question": it["text"], "cid": it.get("intent", ""),
                                  "judge_points": it.get("judge_points", []),
-                                 "reason": it.get("reason", "")}, ensure_ascii=False) + "\n")
+                                 "reason": it.get("reason", ""),
+                                 "trap": it.get("trap")}, ensure_ascii=False) + "\n")
     # D：生成即登记账本（state=started）——封存题一出生就占坑，作答中途崩溃
     # 也留痕（绕过口③：旧版作答成功后才记账，崩一次就白嫖一次）。
     key = _set_key([_sha(it["text"]) for it in items])
@@ -117,7 +118,7 @@ def run(heldout_dir: Path, answer_fn, search_fn, scope_terms: list[str],
                             keywords=keywords, open_question=False,
                             scope_judge=scope_judge,
                             cid=it.get("cid", ""), judge_point=judge_points,
-                            scope_ctx=scope_ctx)
+                            scope_ctx=scope_ctx, trap=it.get("trap"))
         turns.append({"sha256": it["sha256"], "question": it["question"],
                       "classification": cls})
     with (heldout_dir / "heldout_turns.jsonl").open("w", encoding="utf-8") as fh:
