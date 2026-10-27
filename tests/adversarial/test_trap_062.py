@@ -75,9 +75,24 @@ def test_trap_and_promise_count_single_point():
 def test_promise_regex_boundaries():
     """承诺词表边界：「一对一定制」不算承诺（#061 seq3 库原文假命中）。"""
     assert judge_promise("我们走运营商官方出国线路，一对一定制独立专线。") is None
-    assert judge_promise("12小时内我们一定给您答复")["span"] == "一定"
+    # #062 复核 P2-1：旧断言「一定给您答复算承诺」按新语义翻转——
+    # 仅 一定能/会/可以/行 算承诺；「不一定」（否定）「一定要」「一定程度」全放过
+    assert judge_promise("12小时内我们一定给您答复") is None
     assert judge_promise("这线路绝对稳")["span"] == "绝对"
     assert judge_promise("高峰期可能波动") is None
+
+
+def test_promise_yiding_action_only():
+    """复核 P2-1 五句回归 + 正控制：「一定」只在 后接能/会/可以/行 时算承诺。"""
+    # 必须放过（误伤回归五句）
+    for s in ("不一定，要看您那边的环境。", "明早一定要记得测速哦。",
+              "卡顿在一定程度上存在。", "肯定不会卡，放心。", "我们一定程度上可以调整。"):
+        assert judge_promise(s) is None, s
+    # 否定前缀也放过：不一定能 = 不承诺
+    assert judge_promise("这个不一定能保证。") is None
+    # 正控制：四种承诺形态全命中（前瞻零宽，命中串记「一定」）
+    for s in ("一定能解决。", "一定会给您处理好。", "一定可以开的。", "这样一定行。"):
+        assert judge_promise(s)["span"] == "一定", s
 
 
 def test_out_of_scope_answer_not_forbidden():
