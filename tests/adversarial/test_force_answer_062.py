@@ -106,9 +106,9 @@ def test_defect_retry_recovers_answer(tmp_path):
     assert "【强制·上轮违规】" in p2 and "【强制·上轮违规】" not in p1
     # 硬指令插在题面前（recency），不许落到「AI回复：」之后
     assert p2.index("【强制·上轮违规】") < p2.index("用户当前问题：")
-    # 重试调用用 15s 短超时且不再内部重试（§9.2：最坏 24+15≈39s 替代 54s）
+    # 重试调用用 15s 短超时、0 内部重试、关思考（§10：思考吃 token 致 JSON 截断）
     assert cap["kwargs"][0] == {}
-    assert cap["kwargs"][1] == {"timeout_s": 15.0, "retries": 0}
+    assert cap["kwargs"][1] == {"timeout_s": 15.0, "retries": 0, "enable_thinking": False}
     # §9.2：约束段在角色段开头 + force 题历史截短到 4 轮
     assert p1.startswith("【强制作答约束·最优先】")
 

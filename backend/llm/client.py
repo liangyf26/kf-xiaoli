@@ -68,18 +68,21 @@ class QwenClient:
             headers["Authorization"] = f"Bearer {self.api_key}"
         return headers
 
-    def _payload(self, messages: List[Dict[str, str]], stream: bool) -> Dict[str, Any]:
+    def _payload(self, messages: List[Dict[str, str]], stream: bool,
+                 enable_thinking: bool | None = None) -> Dict[str, Any]:
         """构造chat/completions请求体。
 
-        思考开关走 chat_template_kwargs（Qwen3.8 实测唯一生效写法）。
+        思考开关走 chat_template_kwargs（Qwen3.8 实测唯一生效写法）；
+        enable_thinking 形参可 per-call 覆盖（#062 §10 缺陷重试关思考防 JSON 截断）。
         """
+        thinking = self.enable_thinking if enable_thinking is None else enable_thinking
         return {
             "model": self.model,
             "messages": messages,
             "temperature": self.temperature,
             "max_tokens": self.max_tokens,
             "stream": stream,
-            "chat_template_kwargs": {"enable_thinking": self.enable_thinking},
+            "chat_template_kwargs": {"enable_thinking": thinking},
         }
 
     async def generate(
@@ -87,11 +90,14 @@ class QwenClient:
         messages: List[Dict[str, str]],
         timeout_s: float | None = None,
         retries: int | None = None,
+        enable_thinking: bool | None = None,
     ) -> Dict[str, Any]:
         """非流式生成。返回 {response, usage, latency_ms}；失败重试1次后仍失败则抛出异常。
 
-        timeout_s/retries（#062 §9.2 缺陷重试专用）：per-call 覆盖——重试话术这类
-        短输出用 15s 短超时且不再内部重试（默认 None=沿用 30s/max_retries，行为不变）。
+        timeout_s/retries/enable_thinking（#062 §9.2/§10 缺陷重试专用）：per-call
+        覆盖——重试用 15s 短超时、不内部重试、关思考（seed11 实测 12/68 次调用
+        completion_tokens 打满 1024=GEN_MAX_TOKENS，思考吃 token 致 JSON 截断）。
+        缺省 None=沿用构造配置，行为不变。
         """
         timeout = self.timeout if timeout_s is None else timeout_s
         n_retries = self.max_retries if retries is None else retries
@@ -104,7 +110,8 @@ class QwenClient:
                 client = self._get_client()
                 response = await client.post(
                     f"{self.base_url}/chat/completions",
-                    json=self._payload(messages, stream=False),
+                    json=self._payload(messages, stream=False,
+                                       enable_thinking=enable_thinking),
                     headers=self._headers(),
                     timeout=timeout,
                 )
@@ -113,14 +120,20 @@ class QwenClient:
                 data = response.json()
 
                 latency_ms = int((time.monotonic() - start) * 1000)
+                choice = data["choices"][0]
+                content = choice["message"]["content"]
+                # #062 §10：finish_reason/响应长度进日志——「空回复或JSON残缺」要能
+                # 逐题自证是 max_tokens 截断（finish_reason=length）而不是超时
                 logger.info(
-                    "LLM调用结束: %dms completion_tokens=%s",
+                    "LLM调用结束: %dms completion_tokens=%s finish_reason=%s resp_chars=%d",
                     latency_ms, data.get("usage", {}).get("completion_tokens", "?"),
+                    choice.get("finish_reason"), len(content or ""),
                 )
                 return {
-                    "response": data["choices"][0]["message"]["content"],
+                    "response": content,
                     "usage": data.get("usage", {}),
                     "latency_ms": latency_ms,
+                    "finish_reason": choice.get("finish_reason"),
                 }
             except Exception as exc:  # noqa: BLE001 重试一次
                 last_error = exc

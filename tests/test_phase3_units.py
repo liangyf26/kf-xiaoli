@@ -69,6 +69,19 @@ def test_llm_client_structure():
     assert hasattr(client, "generate") and hasattr(client, "generate_stream")
 
 
+def test_llm_client_payload_thinking_override():
+    """#062 §10：generate 的 enable_thinking 形参要落到 chat_template_kwargs（缺省不变）。"""
+    from backend.llm.client import QwenClient
+
+    client = QwenClient()
+    base = client._payload([{"role": "user", "content": "x"}], stream=False)
+    assert base["chat_template_kwargs"]["enable_thinking"] == settings.GEN_ENABLE_THINKING
+    off = client._payload([{"role": "user", "content": "x"}], stream=False,
+                          enable_thinking=False)
+    assert off["chat_template_kwargs"]["enable_thinking"] is False
+    assert off["max_tokens"] == base["max_tokens"]   # 其余字段不动
+
+
 def test_llm_client_real_call():
     """任务书1.1验收测试1：真实对话（API不可达时按标准skip处理）。
 

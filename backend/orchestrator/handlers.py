@@ -215,7 +215,10 @@ async def handle_llm_generation(
                 # #062 §9.2（Chief 批）：重试是短输出（话术或带条目短答），15s 短超时
                 # 且不再内部重试——最坏 24+15≈39s，替代原 54s；seed7 实测重试撞 30s
                 # 上限四题全落兜底
-                **({"timeout_s": 15.0, "retries": 0} if defect_retry else {}),
+                # #062 §10（Chief 批）：重试再关思考——seed11 实测 12/68 次调用
+                # completion_tokens 打满 1024（思考吃 token 致 JSON 截断=③的根因）
+                **({"timeout_s": 15.0, "retries": 0, "enable_thinking": False}
+                   if defect_retry else {}),
             )
             parsed = parse_json_response(result["response"])
             # #062 修库附加代码项：出口剥 {{{...}}} 内部占位符（含库原文带出与
