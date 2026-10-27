@@ -64,7 +64,8 @@ def test_llm_generation_exit_strips_placeholder():
             return "prompt"
 
     class FakeKB:
-        pass
+        def top1_relevance(self, query: str) -> float:
+            return 0.0   # 第八节①接口：占位符测试不关心阈值行为
     res = asyncio.run(handle_llm_generation("断网了", _decision(), {}, FakeClient(), FakePB(), FakeKB()))
     assert res["path"] == "llm_generation"
     assert "{{{" not in res["answer"] and "人工介入" not in res["answer"]

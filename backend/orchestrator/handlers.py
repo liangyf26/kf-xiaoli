@@ -174,11 +174,18 @@ async def handle_llm_generation(
     来源标注：LLM自报的sources仅保留prompt知识库段中真实提供的条目（防幻觉编号）；
     LLM未报或全部无效时，回填prompt实际提供的知识库条目（答案的接地依据）。
     """
+    # #062 第八节①：top1 阈值枢轴。强相关（≥FORCE_ANSWER_MIN_TOP1）→ 强制带条目
+    # 作答，模型仍输出话术时必须落 escalate_reason；不足阈值 → 走原生成路径
+    # （作答/自行转人工均可能——#061 实测 top1 分布重叠，单阈值判不了转人工）。
+    kb_top1 = knowledge_base.top1_relevance(message) if message else 0.0
+    force_kb_answer = kb_top1 >= settings.FORCE_ANSWER_MIN_TOP1
     prompt = prompt_builder.build_prompt(
         message=message,
         decision=decision,
         context=context,
         knowledge_base=knowledge_base,
+        force_kb_answer=force_kb_answer,
+        kb_top1=kb_top1,
     )
     last_error = None
     for attempt in range(2):
@@ -197,10 +204,19 @@ async def handle_llm_generation(
                 # 其余回答照常做来源校验/回填。
                 if _normalize_text(answer) in _template_scripts():
                     parsed["sources"] = []
+                    # #062 第八节①：强相关带下仍给话术=缺陷，理由必须落盘可审计
+                    if force_kb_answer:
+                        parsed["kb_top1"] = round(kb_top1, 1)
+                        parsed["escalate_reason"] = str(
+                            parsed.get("escalate_reason") or ""
+                        ).strip()[:200] or (
+                            f"top1={kb_top1:.1f} 超阈值{settings.FORCE_ANSWER_MIN_TOP1}"
+                            "仍转人工且未写理由")
                 else:
                     parsed["sources"] = _resolve_sources(parsed.get("sources"), prompt)
                 parsed["path"] = "llm_generation"
                 parsed["llm_latency_ms"] = result["latency_ms"]
+                parsed["kb_top1"] = round(kb_top1, 1)   # 第八节①：观测字段，落逐题记录
                 return parsed
             last_error = f"LLM第{attempt+1}次返回空回复或JSON残缺"
             logger.warning("%s（intent=%s）", last_error, decision.intent)

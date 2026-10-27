@@ -25,10 +25,16 @@ class PromptBuilder:
         decision: DecisionResult,
         context: dict,
         knowledge_base: KnowledgeBase,
+        force_kb_answer: bool = False,
+        kb_top1: float = 0.0,
     ) -> str:
-        """组装完整prompt，返回字符串。"""
+        """组装完整prompt，返回字符串。
+
+        force_kb_answer（#062 第八节①）：检索 top1 ≥ FORCE_ANSWER_MIN_TOP1 时为
+        True——角色段追加「必须带条目作答、转人工须写 escalate_reason」硬约束。
+        """
         sections = [
-            self._role_section(),
+            self._role_section(force_kb_answer=force_kb_answer, kb_top1=kb_top1),
             self._knowledge_section(decision, knowledge_base, message),
             self._history_section(context),
             self._intent_section(decision),
@@ -48,9 +54,9 @@ class PromptBuilder:
                 break
         return prompt
 
-    def _role_section(self) -> str:
+    def _role_section(self, force_kb_answer: bool = False, kb_top1: float = 0.0) -> str:
         """系统角色定义与知识库使用原则（#062：拒答/转人工两动作分开）。"""
-        return (
+        role = (
             "你是SDWAN智能客服机器人，负责回答SDWAN专线产品相关问题。"
             "回复要少而准、像人一样聊天、不贴长文，直接回答问题，不要重复自我介绍。"
             "优先使用【知识库】内容回答用户问题，禁止编造知识库以外的产品信息。"
@@ -63,6 +69,16 @@ class PromptBuilder:
             "我们确实没有这项业务。\n"
             "拿不准一律按转人工处理。"
         )
+        if force_kb_answer:
+            # #062 第八节①：top1 强相关时不许裸转人工——#061 发票链 5 题（seq13/23/33/
+            # 7/14）内容已注入模型仍转人工即此缺陷；转人工必须写理由落盘。
+            role += (
+                f"\n\n【强制作答约束】检索显示【知识库】条目与用户问题强相关（top1={kb_top1:.1f}），"
+                "此时必须基于条目内容直接回答用户问题，不允许回复转人工或拒答话术；"
+                "若条目确实无法覆盖问题的全部子项，就先回答已覆盖的部分，并在 JSON 里加字段"
+                "「escalate_reason」简述缺口（如「条目只覆盖部分子问题」），不许只给话术不写理由。"
+            )
+        return role
 
     def _knowledge_section(self, decision: DecisionResult, knowledge_base: KnowledgeBase, message: str = "") -> str:
         """生成层的知识库注入：query 优先全库相关度 Top-N（#024），回退意图→类别。
