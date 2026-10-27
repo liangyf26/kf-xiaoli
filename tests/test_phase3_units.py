@@ -70,8 +70,16 @@ def test_llm_client_structure():
 
 
 def test_llm_client_real_call():
-    """任务书1.1验收测试1：真实对话（API不可达时按标准skip处理）。"""
+    """任务书1.1验收测试1：真实对话（API不可达时按标准skip处理）。
+
+    B2（20261027 N1-N4 复审必修）：本用例默认先探 settings.MODEL_API_BASE
+    （真实环境=30032 红方端点），探活通过就真发请求——全量 pytest 会顺手压
+    端点（守卫实测拦截 ('172.28.29.24', 30032)）。与 S5 同款：默认跳过，
+    KF_TEST_LIVE=1 显式开启。"""
     import httpx
+
+    if os.environ.get("KF_TEST_LIVE") != "1":
+        raise unittest.SkipTest("B2：默认不连真实端点；KF_TEST_LIVE=1 显式开启")
 
     from backend.llm.client import QwenClient
 

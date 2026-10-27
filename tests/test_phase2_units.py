@@ -265,9 +265,14 @@ def test_jev_answers_parsing():
 
 
 def test_jev_timeout_fallback():
-    """任务书3.1验收3：连接失败/超时返回低置信度结果。"""
-    engine = JevEngine("fake-key")
-    engine.base_url = "http://localhost:9999"  # 无服务的端口
+    """任务书3.1验收3：连接失败/超时返回低置信度结果。
+
+    B2（20261027 N1-N4 复审必修）：旧写法 `engine.base_url = "http://localhost:9999"`
+    只改属性、不改渠道链——legacy 构造时渠道已指向真实 settings.JEV_API_BASE
+    （外网中转），decide() 实际每次全量 pytest 都真连外网（守卫实测拦截
+    Cloudflare 443 多次，fake-key 401 后碰巧走回退）。改为构造时显式传
+    回环死端口，渠道本身不可达 → 连接拒绝走回退，测试意图不变。"""
+    engine = JevEngine("fake-key", base_url="http://127.0.0.1:9")  # 回环死端口：拒绝即走回退
 
     async def run():
         return await engine.decide("测试", {})
@@ -425,7 +430,14 @@ def test_factory_invalid_engine_raises():
 
 
 def test_compare_engines_script():
-    """任务书5.2验收：对比测试脚本运行成功，输出JSON≥10个问题且包含规则引擎结果。"""
+    """任务书5.2验收：对比测试脚本运行成功，输出JSON≥10个问题且包含规则引擎结果。
+
+    B2（20261027 N1-N4 复审必修）：本用例 subprocess 真跑 compare_engines.py，
+    jev 渠道走真实外网中转（守卫全量实测 240 次外连重试）。默认跳过，
+    KF_TEST_LIVE=1 显式开启（live-fire 对比本就不是单测）。"""
+    import unittest
+    if os.environ.get("KF_TEST_LIVE") != "1":
+        raise unittest.SkipTest("B2：对比脚本真连外网（jev 真渠道），KF_TEST_LIVE=1 显式开启")
     result = subprocess.run(
         [sys.executable, str(ROOT / "tests" / "compare_engines.py"),
          str(ROOT / "tests" / "test_questions_phase2.txt")],
@@ -452,14 +464,28 @@ def test_compare_engines_script():
 
 
 def test_decision_engine_integrated_in_main():
-    """任务书5.3验收：决策引擎集成到main.py且可正常决策。"""
+    """任务书5.3验收：决策引擎集成到main.py且可正常决策。
+
+    B2（20261027 N1-N4 复审必修）：decide() 走什么引擎取决于 DECISION_ENGINE
+    环境变量——全量跑时被前面用例的模块级污染翻转成 jev/qwen，就真连
+    30032/外网中转（守卫全量实测 2 次 30032）。本用例验收的是「集成且可
+    决策」，不是模型质量：强制 rule 引擎（本地、零网络、确定性）。"""
+    import unittest
     from backend.main import app  # noqa: F401 导入即验证启动路径无错
 
-    engine = create_decision_engine()
-    assert engine is not None
+    original = os.environ.get("DECISION_ENGINE")
+    os.environ["DECISION_ENGINE"] = "rule"
+    try:
+        engine = create_decision_engine()
+        assert engine is not None
 
-    result = asyncio.run(engine.decide("测试集成", {}))
-    assert result.intent is not None
+        result = asyncio.run(engine.decide("测试集成", {}))
+        assert result.intent is not None
+    finally:
+        if original is None:
+            os.environ.pop("DECISION_ENGINE", None)
+        else:
+            os.environ["DECISION_ENGINE"] = original
 
 
 ALL_TESTS = [
