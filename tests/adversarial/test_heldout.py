@@ -71,7 +71,8 @@ def in_scope(q):
 
 def test_generate_sha_locked_before_questions(tmp_path):
     """题面 sha256 先落盘且与题面一致（防事后换题）。"""
-    r = ho.generate(CFG, tmp_path, ask_blue=fake_blue, n=2)
+    r = ho.generate(CFG, tmp_path, ask_blue=fake_blue, n=2,
+                    ledger=tmp_path / "ledger" / LEDGER_NAME)
     d = tmp_path / r["dir"] if not (tmp_path / r["dir"]).exists() else tmp_path / r["dir"]
     items = [json.loads(l) for l in (d / "heldout.jsonl").read_text(encoding="utf-8").splitlines()]
     saved = [l for l in (d / "questions.sha256").read_text(encoding="utf-8").splitlines() if l.strip()]
@@ -85,7 +86,8 @@ def test_generate_leaves_no_partial_set_on_blue_failure(tmp_path):
         raise TimeoutError("蓝方超时")
 
     with pytest.raises(TimeoutError):
-        ho.generate(CFG, tmp_path, ask_blue=boom, n=1)
+        ho.generate(CFG, tmp_path, ask_blue=boom, n=1,
+                    ledger=tmp_path / "ledger" / LEDGER_NAME)
     assert list(tmp_path.glob("*/heldout.jsonl")) == []
 
 
