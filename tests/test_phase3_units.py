@@ -105,7 +105,12 @@ def test_few_shot_example_counts():
 
 
 def test_llm_client_timeout_message():
-    """任务书1.1验收测试2：超时异常消息含timeout/timed out。"""
+    """任务书1.1验收测试2：超时异常消息含timeout/timed out。
+
+    S5（20261027 连审建议）：本用例经 settings.MODEL_API_BASE 直连真实红方
+    端点（30032），全量 pytest 会顺手压端点。默认跳过，KF_TEST_LIVE=1 显式开启。"""
+    if os.environ.get("KF_TEST_LIVE") != "1":
+        raise unittest.SkipTest("S5：默认不连真实端点；KF_TEST_LIVE=1 显式开启")
     from backend.llm.client import QwenClient
 
     async def run():
