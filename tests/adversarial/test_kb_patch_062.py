@@ -74,3 +74,29 @@ def test_upgrade_entry_retrievable() -> None:
     kb = KnowledgeBase(PATCHED)
     hits = kb.search_top("已经在用的套餐能中途升级吗 补差价怎么算", limit=3)
     assert hits and "中途升级" in hits[0].title
+
+
+def test_qual_alias_present() -> None:
+    """§9.2（Chief 批）资质簇问法别名进对抗副本标题，生产库不动。"""
+    text = _text()
+    assert "公司全称发我一下" in text and "营业执照、行业认证这些资质文件" in text
+    assert "供应商建档" in text and "存档资质证照" in text
+    assert hashlib.md5(PROD.read_bytes()).hexdigest() == PROD_MD5
+
+
+def test_qual_questions_hit_qual_entry_above_threshold() -> None:
+    """seed7 seq3/13/23 同款问法：资质条目必须排 top1 且 ≥20（进强制作答带）。"""
+    kb = KnowledgeBase(PATCHED)
+    questions = (
+        "您好，我这边刚接手采购对接的工作，想麻烦您发一下贵公司的全称和资质文件，"
+        "比如营业执照、行业认证这些，我这边好做供应商建档",
+        "你好，打扰一下，我这边刚接手采购行政这块，想跟您核对下咱们公司全称是什么呀？"
+        "另外你们那边有营业执照或者相关资质证明吗？",
+        "您好，我这边刚接手采购对接，想麻烦您确认下贵公司的全称，另外资质证照那些"
+        "方便发我一份吗？走内部审批要存档，辛苦您了。",
+    )
+    for q in questions:
+        top1 = max(kb._relevance(qa, q) for qa in kb.qa_pairs)
+        assert top1 >= 20.0, f"top1={top1:.1f} <20，资质条目仍排不进强相关带：{q[:30]}"
+    hits = kb.search_top(questions[2], limit=1)
+    assert hits and "资质" in hits[0].title

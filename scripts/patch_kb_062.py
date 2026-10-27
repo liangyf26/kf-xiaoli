@@ -59,6 +59,15 @@ NEW_UPGRADE = [
     "答：暂不支持中途升级，只能等到期后再换套餐。",
 ]
 
+# §9.2（Chief 批，2026-10-28）：资质簇问法别名——seed7 局 seq3/13/23 问
+# 「公司全称/资质文件/营业执照/行业认证/供应商建档」时 top1 被路由器条目占据
+# （16.8/13.3），库里有条目却排不进注入段（seq4/17 同款排位反例）。只改对抗副本
+# 标题，追加同义问法（沿用库内「一题多问」标题格式），生产库 md5 不动。
+OLD_QUAL_TITLE = "7、你们公司介绍有吗，我想看下你们的资质？你们是什么公司？公司叫啥？"
+NEW_QUAL_TITLE = ("7、你们公司介绍有吗，我想看下你们的资质？你们是什么公司？公司叫啥？"
+                  "公司全称发我一下？营业执照、行业认证这些资质文件方便发一份吗？"
+                  "我们供应商建档要走内部审批，需要存档资质证照。")
+
 # (1-based 行号, 期望原文, 动作)
 EDITS = [
     (6,   PH_IMG, "delete"),
@@ -68,6 +77,7 @@ EDITS = [
     (41,  OLD_ANCHOR_4, "insert_after:" + "\n".join(NEW_UPGRADE)),
     (114, PH_BAT, "replace:这是检测脚本，请联系人工获取。"),
     (212, OLD_V2, "insert_after:" + NEW_V2_LINE),
+    (279, OLD_QUAL_TITLE, "replace:" + NEW_QUAL_TITLE),
     (280, OLD_COMPANY, "replace:" + NEW_COMPANY),
     (286, OLD_286, "replace:" + NEW_286),
 ]
