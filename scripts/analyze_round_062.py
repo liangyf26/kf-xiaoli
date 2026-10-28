@@ -11,15 +11,32 @@
 用法：python analyze_round_062.py <round_dir> [round_dir2 ...]
 """
 import json
+import os
+import re
 import sys
 from pathlib import Path
 
-sys.path.insert(0, "/tmp/kf062_impl")
+ROOT = Path(__file__).resolve().parents[1]   # 仓库根（不再写死 worktree）
+# settings 的必填字段从仓库根 .env 读（backend/config.py 支持 ENV_FILE 指路），
+# 与 CWD 无关——worktree 删除后从主检出也能跑
+if (ROOT / ".env").exists():
+    os.environ.setdefault("ENV_FILE", str(ROOT / ".env"))
+sys.path.insert(0, str(ROOT))
 from backend.config import settings  # noqa: E402
 
 HANDOFF = settings.HANDOFF_MESSAGE
 HANDOFF_KEY = "转接人工客服"
 FORCE_THRESHOLD = settings.FORCE_ANSWER_MIN_TOP1
+
+# 理由不实判定（与 scripts/reason_audit_062.py 的规则保持同步；终审 900f51e 实锤
+# seq34/seq21 后收紧：全面否认=top1≥20 即存疑；部分否认需「纯话术+自认仅覆盖」
+# ——理由自己说条目覆盖了 X，纯话术却连 X 都没答，行为与理由矛盾）
+FULL_DENY_RE = re.compile(
+    r"知识库(完全不?|没|无|未)覆盖此类|完全不覆盖|(不|未)覆盖此类|"
+    r"无法提供公司(资质|全称)|库里(没有|无)|库中无")
+PARTIAL_COVER_RE = re.compile(r"仅覆盖|只覆盖")
+DENY_RE = re.compile(FULL_DENY_RE.pattern + "|" +
+                     r"仅覆盖|只覆盖|未涉及|未提及|未覆盖|仅确认|仅提到|仅提供")
 
 
 def norm(s: str) -> str:
@@ -94,18 +111,30 @@ def analyze(round_dir: Path) -> dict:
         "retries": {r["seq"]: r.get("retries") for r in turns if r.get("retries")},
         "er_fast": er_fast, "er_synth": er_synth, "er_model": er_model,
     }
-    # A-wrong 五分（Chief 口径+收口局细化）：顺序判定 ③→②→①→④→⑤，互斥
-    m["b1"], m["b2"], m["b3"], m["b4"], m["b5"] = [], [], [], [], []
+    # A-wrong 六分（终审后口径，Chief 2026-10-28）：③→②'→②→①→④→⑤，互斥。
+    # ②'（理由不实）先于 ② 判——理由声称库没覆盖/只覆盖了部分，但注入段 top1≥20
+    # 的条目与理由矛盾（全面否认；或自认「仅覆盖X」却纯话术连 X 都没答），不算②。
+    m["b1"], m["b2p"], m["b2"], m["b3"], m["b4"], m["b5"] = [], [], [], [], [], []
     er_map = {r["seq"]: r for r in turns}
     for s in m["wrong_seqs"]:
         r = er_map[s]
         reason = r.get("escalate_reason") or ""
+        strong = (top1.get(s) or 0) >= FORCE_THRESHOLD
+        is_b = norm(r.get("answer", "")) == norm(HANDOFF)
+        # 订单锚定豁免（终审裁定 seq11 误报）：按单号/具体订单查数据，库结构性
+        # 没有这单的信息，理由「无对应条目」成立，不算不实
+        order_anchored = bool(re.search(r"单号|具体订单|订单核对|单据", 
+                                        (r.get("question") or "") + reason))
         if r.get("error") or reason.startswith("生成重试后仍失败"):
             m["b3"].append(s)          # 重试/兜底失败（工程缺陷）
+        elif strong and not order_anchored and DENY_RE.search(reason) and (
+                FULL_DENY_RE.search(reason)
+                or (is_b and PARTIAL_COVER_RE.search(reason))):
+            m["b2p"].append(s)         # 理由不实（真缺陷候选：与注入条目矛盾）
         elif reason and "仍转人工且未写理由" not in reason \
                 and r.get("path") != "human_escalation":
-            m["b2"].append(s)          # 模型自写理由（按设计合理）
-        elif (top1.get(s) or 0) >= FORCE_THRESHOLD:
+            m["b2"].append(s)          # 模型自写理由（理由与库一致，按设计合理）
+        elif strong:
             m["b1"].append(s)          # 无理由话术（限强制作答带=真缺陷）
         elif r.get("path") == "human_escalation" or reason.startswith("决策层"):
             m["b4"].append(s)          # 决策层 fast path（阈下按设计）
@@ -129,7 +158,8 @@ for d in sys.argv[1:]:
     print(f"该答却转人工B(整句):  {m['b_wrong_n']}/{w[1]}={m['b_wrong_n']/w[1]*100:.0f}%  seq={m['b_wrong_seqs']}")
     # Chief 口径（2026-10-28）：A 口径拆三类——①无理由话术（模型决策缺陷）
     # ②模型自写理由（按设计合理）③重试/兜底失败（工程缺陷）；决策层 fast path 单列
-    for k, label in (("b1", "①无理由话术(限top1≥20)"), ("b2", "②模型自写理由"),
+    for k, label in (("b1", "①无理由话术(限top1≥20)"), ("b2p", "②'理由不实(真缺陷候选)"),
+                     ("b2", "②模型自写理由(一致)"),
                      ("b3", "③重试/兜底失败"), ("b4", "④决策层fast path"),
                      ("b5", "⑤阈下生成层自主")):
         seqs = m[k]

@@ -18,11 +18,17 @@
 局限：关键词规则，语义判断靠人——flag 只是把可疑题挑出来给报告，不进判分。
 """
 import json
+import os
 import re
 import sys
 from pathlib import Path
 
-sys.path.insert(0, "/tmp/kf062_impl")
+ROOT = Path(__file__).resolve().parents[1]   # 仓库根（不再写死 worktree）
+# settings 的必填字段从仓库根 .env 读（backend/config.py 支持 ENV_FILE 指路），
+# 与 CWD 无关——worktree 删除后从主检出也能跑
+if (ROOT / ".env").exists():
+    os.environ.setdefault("ENV_FILE", str(ROOT / ".env"))
+sys.path.insert(0, str(ROOT))
 from backend.config import settings  # noqa: E402
 from backend.knowledge import KnowledgeBase  # noqa: E402
 
@@ -61,9 +67,14 @@ def audit(round_dir: Path) -> None:
     for r in audited:
         reason = r.get("escalate_reason") or ""
         full = bool(FULL_DENY.search(reason))
+        # 订单锚定豁免（终审核实 seq11 属误报）：按单号/具体订单查数据，库结构性
+        # 没有这单的信息，理由成立——不进存疑
+        order_anchored = bool(re.search(r"单号|具体订单|订单核对|单据",
+                                        (r.get("question") or "") + reason))
         top = sorted(((kb._relevance(qa, r["question"] or ""), qa)
                       for qa in kb.qa_pairs), key=lambda t: -t[0])[:2]
-        suspect = full and r["kb_top1"] >= settings.FORCE_ANSWER_MIN_TOP1
+        suspect = (full and r["kb_top1"] >= settings.FORCE_ANSWER_MIN_TOP1
+                   and not order_anchored)
         suspects += suspect
         tag = "⚠️理由存疑" if suspect else ("部分否认" if not full else "全面否认但top1<20")
         print(f"  seq{r['seq']} top1={r['kb_top1']:.1f} [{tag}] "
