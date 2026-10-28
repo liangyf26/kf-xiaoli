@@ -32,45 +32,97 @@ def _set_key(shas: list[str]) -> str:
     return _sha("\n".join(sorted(shas)))
 
 
+TOPUP_BATCH = 4             # 第四节：范围内不足时每次补 4 题
+TOPUP_MAX = 2               # 最多补 2 次
+
+
 def generate(config: dict, out_root: Path = HELDOUT_ROOT, *,
              ask_blue=None, n: int | None = None,
-             ledger: Path | None = None) -> dict:
-    """用新 seed 生成一套封存题。sha 先落盘，题面后落档；蓝方失败不落半套题面。"""
+             ledger: Path | None = None,
+             scope_filter=None) -> dict:
+    """生成一套封存题（第四节口径）。sha 先落盘，题面后落档；蓝方失败不落半套题面。
+
+    第四节流程：先生成 n+4 题候选 → 按生成顺序过第二节的范围判定 → 取前 n 道
+    范围内的题落 sha 封存；不足 n 时每次补 TOPUP_BATCH 题、最多 TOPUP_MAX 次，
+    仍不足就按实际数量封存并在返回里标 sealed_short=True。
+    scope_filter(question) -> {"in_scope": bool, "basis": str}（第二节的判定，
+    集成时注入 scope_ctx.decide 同款；None 时全部按范围内——旧口径）。
+    候选（含落选）全部记进 candidates.jsonl：sha+题面+范围判定+是否入选。
+    封存行带 scope_sealed，作答沿用封存时判定不重判。
+    """
     from tests.adversarial.run_round import _blue_questions
 
     seed = f"{config['match']['seed']}-heldout-{time.strftime('%Y%m%d%H%M%S')}"
     cfg = {**config, "match": {**config["match"], "seed": seed}}
     kb = Path(config["kb"]["seed_path"])
     n = n or int(cfg["match"].get("heldout_questions", 10))   # E：默认 10 题（可计分 <8 判样本不足）
-    items = _blue_questions(cfg, n, kb, ask_blue=ask_blue)
+
+    # 第四节：候选池 + 范围筛 + 补批（补批换 seed 尾巴，避免同 seed 出同题）
+    candidates: list[dict] = []
+
+    def _take(batch_seed: str, k: int) -> None:
+        bcfg = {**cfg, "match": {**cfg["match"], "seed": batch_seed}}
+        for it in _blue_questions(bcfg, k, kb, ask_blue=ask_blue):
+            dec = (scope_filter(it["text"]) if scope_filter
+                   else {"in_scope": True, "basis": "未提供范围判定（旧口径）"})
+            candidates.append({**it, "sha": _sha(it["text"]),
+                               "scope": {"in_scope": bool(dec.get("in_scope")),
+                                         "basis": str(dec.get("basis", ""))}})
+
+    _take(seed, n + 4)                       # 首批 14 题候选
+    in_scope = [c for c in candidates if c["scope"]["in_scope"]]
+    topups = 0
+    while len(in_scope) < n and topups < TOPUP_MAX:
+        topups += 1
+        _take(f"{seed}-topup{topups}", TOPUP_BATCH)
+        in_scope = [c for c in candidates if c["scope"]["in_scope"]]
+    selected = in_scope[:n]
+    sealed_short = len(selected) < n
+
     out_root = Path(out_root)
     out_root.mkdir(parents=True, exist_ok=True)
     stamp = time.strftime("%Y%m%d-%H%M%S")
     run_dir = out_root / stamp
     run_dir.mkdir()
+    # 审计：候选（含落选）全部落档——候选数/范围内数/入选数三数可对账
+    audit_file = run_dir / "candidates.jsonl"
+    selected_shas = {c["sha"] for c in selected}
+    with audit_file.open("w", encoding="utf-8") as fh:
+        for idx, c in enumerate(candidates):
+            fh.write(json.dumps({"seq": idx + 1, "sha256": c["sha"],
+                                 "question": c["text"], "cid": c.get("intent", ""),
+                                 "scope": c["scope"],
+                                 "selected": c["sha"] in selected_shas},
+                                ensure_ascii=False) + "\n")
     sha_file = run_dir / "questions.sha256"
-    # 题面哈希先落盘（任务书 :187）：先固定承诺这套题，再写题面全文
-    sha_file.write_text("\n".join(_sha(it["text"]) for it in items) + "\n", encoding="utf-8")
+    # 题面哈希先落盘（任务书 :187）：先固定承诺这套题（入选集合），再写题面全文
+    sha_file.write_text("\n".join(c["sha"] for c in selected) + "\n", encoding="utf-8")
     q_file = run_dir / "heldout.jsonl"
     with q_file.open("w", encoding="utf-8") as fh:
-        for it in items:
-            fh.write(json.dumps({"sha256": _sha(it["text"]),
+        for it in selected:
+            fh.write(json.dumps({"sha256": it["sha"],
                                  "question": it["text"], "cid": it.get("intent", ""),
                                  "judge_points": it.get("judge_points", []),
-                                 "reason": it.get("reason", "")}, ensure_ascii=False) + "\n")
+                                 "reason": it.get("reason", ""),
+                                 "trap": it.get("trap"),
+                                 "scope_sealed": it["scope"]}, ensure_ascii=False) + "\n")
     # D：生成即登记账本（state=started）——封存题一出生就占坑，作答中途崩溃
     # 也留痕（绕过口③：旧版作答成功后才记账，崩一次就白嫖一次）。
-    key = _set_key([_sha(it["text"]) for it in items])
+    key = _set_key([c["sha"] for c in selected])
     _ledger_append({"set_key": key, "dir": str(run_dir.resolve()), "state": "started",
-                    "sha256": [_sha(it["text"]) for it in items],
-                    "created_at": time.strftime("%Y-%m-%dT%H:%M:%S")}, ledger=ledger)
+                    "sha256": [c["sha"] for c in selected],
+                    "created_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+                    "candidates_n": len(candidates), "in_scope_n": len(in_scope),
+                    "selected_n": len(selected)}, ledger=ledger)
     return {"dir": str(run_dir), "questions_file": str(q_file), "sha_file": str(sha_file),
-            "n": len(items), "seed": seed, "set_key": key}
+            "audit_file": str(audit_file), "n": len(selected), "seed": seed, "set_key": key,
+            "candidates_n": len(candidates), "in_scope_n": len(in_scope),
+            "sealed_short": sealed_short}
 
 
 def run(heldout_dir: Path, answer_fn, search_fn, scope_terms: list[str],
         keywords: dict | None = None, scope_judge=None, resolve_fn=None,
-        ledger: Path | None = None) -> dict:
+        ledger: Path | None = None, scope_ctx=None) -> dict:
     """红方对封存题作答并按训练局同款判定链计分。
 
     answer_fn(question) -> {"answer": str, "sources": list, "path": str}
@@ -78,6 +130,7 @@ def run(heldout_dir: Path, answer_fn, search_fn, scope_terms: list[str],
     scope_judge(question) -> {"status": …}（训练局同款蓝方范围判定，集成时注入）
     resolve_fn(jp) -> jp：场景断言 expect_hit 内容短语→来源标签的解析
     （run_round._resolve 同款，集成时注入；不注入则按短语原样判定）
+    scope_ctx（#062 第二节）：一轮共用的范围判定上下文，集成时注入（同主题沿用）
 
     D 一次性核账（20261027 复审必修D，默认账本 runs/adversarial/heldout/used.jsonl，
     测试可注入 ledger）：作答前依次核
@@ -115,7 +168,11 @@ def run(heldout_dir: Path, answer_fn, search_fn, scope_terms: list[str],
                             got.get("path", "llm_generation"), scope_terms, search_fn,
                             keywords=keywords, open_question=False,
                             scope_judge=scope_judge,
-                            cid=it.get("cid", ""), judge_point=judge_points)
+                            cid=it.get("cid", ""), judge_point=judge_points,
+                            scope_ctx=scope_ctx, trap=it.get("trap"),
+                            scope_sealed=(it["scope_sealed"]["in_scope"],
+                                          it["scope_sealed"]["basis"])
+                            if it.get("scope_sealed") else None)
         turns.append({"sha256": it["sha256"], "question": it["question"],
                       "classification": cls})
     with (heldout_dir / "heldout_turns.jsonl").open("w", encoding="utf-8") as fh:
@@ -130,7 +187,8 @@ def run(heldout_dir: Path, answer_fn, search_fn, scope_terms: list[str],
     return result
 
 
-def compare(train_rate: float, heldout_rate: float, scoreable_n: int = -1) -> dict:
+def compare(train_rate: float, heldout_rate: float, scoreable_n: int = -1,
+            sealed_n: int = -1) -> dict:
     """训练局得分率 − 封存题得分率 > 15pp → 疑似死记。
 
     E（20261027 复审必修E）两种不判情形，绝不让 0 分母/小样本污染结论：
@@ -138,11 +196,17 @@ def compare(train_rate: float, heldout_rate: float, scoreable_n: int = -1) -> di
       60% 就误报死记）；
     - 0 < scoreable_n < MIN_SCOREABLE(=8) → status="样本不足，不下结论"
       （默认 10 题差 1 题就 20pp 的假阳性来源）。
-    两种情形 suspected_memorization 一律 False、diff_pp 保留计算值供参考但不参与判定。"""
+    第四节新增：sealed_n ∈ (0,10) → status="封存数不足，不下结论"——入选数不足
+    10 只记账不判死记（主局不受影响）。
+    各不判情形 suspected_memorization 一律 False、diff_pp 保留计算值供参考但不参与判定。"""
     diff_pp = round((train_rate - heldout_rate) * 100, 1)
     if scoreable_n == 0:
         return {"train_rate": train_rate, "heldout_rate": heldout_rate, "diff_pp": diff_pp,
                 "status": "无法判定", "scoreable_n": 0, "suspected_memorization": False}
+    if 0 <= sealed_n < 10:
+        return {"train_rate": train_rate, "heldout_rate": heldout_rate, "diff_pp": diff_pp,
+                "status": f"封存数不足，不下结论（入选 {sealed_n} < 10）",
+                "scoreable_n": scoreable_n, "suspected_memorization": False}
     if scoreable_n < MIN_SCOREABLE:
         return {"train_rate": train_rate, "heldout_rate": heldout_rate, "diff_pp": diff_pp,
                 "status": f"样本不足，不下结论（可计分 {scoreable_n} < {MIN_SCOREABLE}）",
@@ -159,6 +223,10 @@ def report_section(round_dir: Path, compare_result: dict, meta: dict) -> Path:
     lines = [
         "\n## held-out 封存题复测",
         f"- 封存题目录：`{meta.get('dir', '')}`（n={meta.get('n', '?')}，seed={meta.get('seed', '?')}）",
+        # 第四节四数：候选数 / 范围内数 / 入选数 / 可计分
+        f"- 第四节四数：候选 {meta.get('candidates_n', '?')} / 范围内 {meta.get('in_scope_n', '?')}"
+        f" / 入选 {meta.get('n', '?')} / 可计分 {meta.get('scoreable', '?')}"
+        + ("｜**封存数不足 10**" if meta.get("candidates_n") is not None and meta.get("n", 10) < 10 else ""),
         f"- 可计分（分子/分母口径）：red_scored {meta.get('red_scored', '?')} / 可计分 {meta.get('scoreable', '?')}"
         f" / 出题 {meta.get('n', '?')}",
         f"- 训练局得分率 {compare_result['train_rate']:.1%}｜封存题得分率 {compare_result['heldout_rate']:.1%}"

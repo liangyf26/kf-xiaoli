@@ -259,6 +259,17 @@ class KnowledgeBase:
                 total += math.log((n + 1) / (df + 1)) + 1
         return total
 
+    def top1_relevance(self, query: str) -> float:
+        """全库最高相关度（#062 第八节①：强制带条目作答的阈值枢轴）。
+
+        与 search_top 同一评分器（_relevance，IDF 2-gram），取全库最大值；
+        空查询/全库零相关返回 0.0。O(N) 与 search_top 同阶，不在热路径重复
+        排序。阈值定标依据见 docs/交付-062.md §8（#061 36 题实测）。
+        """
+        if not query:
+            return 0.0
+        return max((self._relevance(qa, query) for qa in self.qa_pairs), default=0.0)
+
     def search_top(self, query: str, limit: int = 6) -> list[QAPair]:
         """全库相关度检索，返回结构化条目列表（#023：FAQ 命中路径 query 优先用）。
 

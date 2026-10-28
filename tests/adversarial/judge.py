@@ -53,6 +53,40 @@ D1_FORBID = ["包稳不卡", "保证不卡", "绝对不卡", "一定不卡", "�
 # D2 图片语法（新库已无 ![[，防回归）
 D2_FORBID = [r"!\[\["]
 
+# #062 第三节：绝对承诺用语（任意题，即使用语来自库原文也失分）。
+# 任务书三用语示例「包稳 / 保证不卡 / 一定 / 绝对……」+ D1 校准词表（不卡族）。
+# 顺序即优先级：不卡族完整式在前，裸词用 (?<!对)一定(?!定制) 这类边界防
+# 「一对一定制独立专线」（#061 seq3 红方答案照库 :41 原文，一定 前邻字是 对）假命中。
+PROMISE_FORBID = [
+    r"包稳(?:不卡)?",
+    r"保证不卡", r"绝对不卡", r"一定不卡", r"肯定不卡", r"稳不卡",
+    r"保证(?:能|可以|办得到|开得出来)",
+    # #062 复核 P2-1（Architect 二审）：排除法——先命中「一定」，再排除
+    # 不一定（否定前缀）/ 一定要 / 一定程度 / 一对一定制（前缀对）四类；
+    # 一定给/保证/没问题/帮 都必须算（蓝方该得的分不许漏，库原文 :288 也因此必须修）
+    r"(?<!不)(?<!对)一定(?!要|程度)",
+    r"绝对(?!不)",
+    r"肯定(?!不)",
+    r"百分百",
+]
+PROMISE_FORBID_RE = [re.compile(p) for p in PROMISE_FORBID]
+
+
+def judge_promise(answer: str) -> dict | None:
+    """回答里第一个绝对承诺用语命中（取最左）。返回 {span, pattern} 或 None。
+
+    #062 第三节 forbid_hit 用：任意题回答出现承诺用语即蓝方 +1，即使用语来自
+    库原文（:25「包稳不卡」），驱动修库而不是纵容复述。"""
+    text = answer or ""
+    best: tuple[int, str, str] | None = None     # (start, span, pattern) 取最左命中
+    for pre, pat in zip(PROMISE_FORBID, PROMISE_FORBID_RE):
+        m = pat.search(text)
+        if m and (best is None or m.start() < best[0]):
+            best = (m.start(), m.group(0), pre)
+    if best is None:
+        return None
+    return {"span": best[1], "pattern": best[2]}
+
 
 def judge_turn(answer: str, sources: list | None, path: str, judge_point: dict) -> dict:
     """对单轮结果做硬断言，返回 {pass, reason, matched_pattern, matched_span}。
@@ -179,16 +213,53 @@ SOURCES_EXPECT = {
 _NUM = re.compile(r"问题\s*(\d+)")
 
 
+def _load_keywords() -> dict:
+    return json.loads(_KEYWORDS_PATH.read_text(encoding="utf-8"))
+
+
+def _order_verdict(cid: str, answer: str, order: dict) -> tuple[bool, list[str]] | None:
+    """顺序感知判据（#062 用户拍板 A 口径）：first_any 任一动作词命中且
+    first_with 全部在场才算首步命中（复核 P2-2：裸「时间」两字不算，防
+    「这个时间段先重启路由器」蒙混）；首步命中位置须早于 second 组的命中位置；
+    second 可缺席——题面只问首步时（如 seq35「断网了第一步到底干啥」），
+    正确首步=先同步系统时间，不该因没提「重启」而失分；「先重启后同步」顺序错照样判错。
+    返回 None 表示该题无顺序条目，走原 MUST 逻辑。
+    """
+    rule = order.get(cid)
+    if not rule:
+        return None
+    first_any = rule.get("first_any") or rule.get("first") or []
+    first_with = rule.get("first_with", [])
+    second = rule.get("second", [])
+    if first_with and not all(w in answer for w in first_with):
+        return False, [f"首步须处理时间（缺 {'/'.join(first_with)}）"]
+    positions = [answer.find(k) for k in first_any if k in answer]
+    positions = [p for p in positions if p >= 0]
+    if not positions:
+        return False, [f"首步须按动作匹配（{'/'.join(first_any)} + {'/'.join(first_with)}）"]
+    pos_first = min(positions)
+    pos_second = min((answer.find(k) for k in second if k in answer), default=-1)
+    if second and pos_second >= 0 and pos_second < pos_first:
+        return False, ["先同步时间再重启（顺序错）"]
+    return True, []
+
+
 def facts_ok(cid: str, answer: str, keywords: dict | None = None) -> tuple[bool, list[str]]:
     """事实判分：判据表每组（OR）须各有命中；空答直接错。
 
+    ORDER 顶层条目（顺序感知）优先于 MUST：现仅 TSH4（#062 用户拍板 A：库 :167
+    原文顺序=先同步系统时间再重启）。
     未知题号一律 False（#038 P2）——判据表没配的题不许默认通过，分母不许虚胖。
     """
-    if keywords is None:
-        keywords = json.loads(_KEYWORDS_PATH.read_text(encoding="utf-8"))["MUST"]
     answer = answer or ""
     if not answer.strip():
         return False, ["空答"]
+    raw = _load_keywords()
+    verdict = _order_verdict(cid, answer, raw.get("ORDER", {}))
+    if verdict is not None:
+        return verdict
+    if keywords is None:
+        keywords = raw["MUST"]
     if cid not in keywords:
         return False, [f"未知题号 {cid}（判据表缺条目）"]
     missing = [grp[0] for grp in keywords.get(cid, []) if not any(k in answer for k in grp)]

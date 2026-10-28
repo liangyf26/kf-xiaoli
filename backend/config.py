@@ -38,6 +38,13 @@ class Settings(BaseSettings):
     DECISION_ENABLE_THINKING: bool = False
     GEN_ENABLE_THINKING: bool = True
 
+    # #062 第八节①：检索 top1 相关度 ≥ 此阈值时，生成层必须带条目作答，不许裸转
+    # 人工（仍要转人工必须在 JSON 写 escalate_reason 落盘）。定标（#061 36 题实测，
+    # docs/交付-062.md §8）：转人工题 top1 最高 63.8、缺陷带自 20.4 起连续；作答题
+    # 最高 36.4、最低 3.6，两带在 ~20 处分界最干净；seq4/17 的相关条目排第 10/11 位
+    # 未进注入段（top1=13.5/4.6 在阈下），归第八节②决策层判真缺口，不归本阈值。
+    FORCE_ANSWER_MIN_TOP1: float = 20.0
+
     # Jev 渠道链（2026-10-22 用户定案）：逗号分隔渠道名，按序降级，全挂才回退。
     # 每渠道 4 项 JEV_<NAME大写>_BASE_URL/_ENDPOINT/_MODEL/_API_KEY，
     # 任一为空跳过该渠道。endpoint 路径不同：官方/OpenCode 走 /v1/systemone，

@@ -18,6 +18,33 @@ def _normalize_text(text: str) -> str:
     return re.sub(r"\s+", " ", (text or "").strip())
 
 
+# #062 修库附加代码项（2026-10-27 Chief 指示）：{{{...}}} 内部占位符出口过滤。
+# 不能只靠删库里的字——将来库里再写进占位符也不该漏给客户（#061 seq19 已把
+# 占位符话术发给客户）。剥除是生成链路最后一道，FAQ 与 LLM 两个出口都过。
+_INTERNAL_PLACEHOLDER = re.compile(r"\{\{\{.*?\}\}\}", re.DOTALL)
+# 加载器改写形态（#062 复核 P1）：knowledge.clean_placeholders 把
+# {{{人工介入：X}}} 改写成「（需人工介入：X）」入库——出口必须两种形态都剥，
+# 只剥 {{{…}}} 挡不住改写后的句子（#061 seq19 泄漏即此形态）。
+_REWRITTEN_PLACEHOLDER = re.compile(r"（需人工介入：[^）]*）")
+
+
+def strip_internal_placeholders(text: str) -> str:
+    """剥掉客户可见文本里的内部占位符（发送图片/发送文件/人工介入等）。
+
+    覆盖两种形态：库内原样 `{{{...}}}`（DOTALL 行内剥除）与加载器改写后的
+    「（需人工介入：…）」。行内剥除（前后文字保留）；剥空的行压掉连续空行、
+    行尾残留空白一并清。固定话术不含占位符，对其无影响。"""
+    if not text:
+        return text
+    if "{{{" not in text and "（需人工介入：" not in text:
+        return text
+    cleaned = _INTERNAL_PLACEHOLDER.sub("", text)
+    cleaned = _REWRITTEN_PLACEHOLDER.sub("", cleaned)
+    cleaned = re.sub(r"[ \t]+$", "", cleaned, flags=re.M)
+    cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
+    return cleaned.strip()
+
+
 def _template_scripts() -> frozenset:
     """模板话术集合（规范化后整串相等才算拒答/转人工回复）。
 
@@ -101,7 +128,10 @@ async def handle_faq_match(decision: DecisionResult, knowledge_base: KnowledgeBa
     if top:
         # D4（#035）：answer 只给客户可读正文——_format 的【章节】头/问题N: 前缀/
         # 【category】标签是内部结构，直发客户即泄漏；sources 保留「章节 / 问题N」标注。
-        answer = "\n\n".join(v for v in (_customer_view(qa) for qa in top) if v)
+        # #062 复核 P1：主路径与回退分支同规——出口 strip（加载器把 {{{人工介入：X}}}
+        # 改写成「（需人工介入：X）」入库，不剥就原样发客户，#061 seq19 即此泄漏）。
+        answer = strip_internal_placeholders(
+            "\n\n".join(v for v in (_customer_view(qa) for qa in top) if v))
         return {
             "answer": answer,
             "sources": [source_label(qa.section, qa.number) for qa in top],
@@ -121,12 +151,21 @@ async def handle_faq_match(decision: DecisionResult, knowledge_base: KnowledgeBa
             "path": "faq_match",
         }
 
-    answer = "\n\n".join(v for v in (_customer_view(qa) for qa in pairs) if v)
+    answer = strip_internal_placeholders(
+        "\n\n".join(v for v in (_customer_view(qa) for qa in pairs) if v))
     return {
         "answer": answer,
         "sources": [source_label(qa.section, qa.number) for qa in pairs],
         "path": "faq_match",
     }
+
+
+# #062 第八节①：缺陷重试时追加的更硬指令（插在题面前，见 handle_llm_generation）
+_FORCED_RETRY_SUFFIX = (
+    "【强制·上轮违规】你上一轮回复了转人工话术，但检索已命中强相关知识库条目，"
+    "这属于违规输出。本轮必须基于【知识库】条目内容直接回答用户问题，"
+    "禁止输出「转接人工客服」「这个问题需要同事确认」等任何话术；"
+    "条目覆盖不全时先回答已覆盖部分，并在 JSON 的 escalate_reason 字段写明具体缺口。")
 
 
 async def handle_llm_generation(
@@ -143,18 +182,49 @@ async def handle_llm_generation(
     来源标注：LLM自报的sources仅保留prompt知识库段中真实提供的条目（防幻觉编号）；
     LLM未报或全部无效时，回填prompt实际提供的知识库条目（答案的接地依据）。
     """
+    # #062 第八节①：top1 阈值枢轴。强相关（≥FORCE_ANSWER_MIN_TOP1）→ 强制带条目
+    # 作答，模型仍输出话术时必须落 escalate_reason；不足阈值 → 走原生成路径
+    # （作答/自行转人工均可能——#061 实测 top1 分布重叠，单阈值判不了转人工）。
+    kb_top1 = knowledge_base.top1_relevance(message) if message else 0.0
+    force_kb_answer = kb_top1 >= settings.FORCE_ANSWER_MIN_TOP1
     prompt = prompt_builder.build_prompt(
         message=message,
         decision=decision,
         context=context,
         knowledge_base=knowledge_base,
+        force_kb_answer=force_kb_answer,
+        kb_top1=kb_top1,
     )
     last_error = None
+    # #062 第八节①收尾（seed42 验证局实测）：约束只进 prompt 不够——强相关 11 题
+    # 模型仍全部回话术（seq3 连理由都没写）。改机械缺陷重试：attempt 0 返话术且
+    # 强制作答生效且模型未写理由 → 不返回，追加更硬指令重试一次；attempt 1 仍话术
+    # 才接受并合成理由落盘。模型自写理由（合法转人工）不重试，不浪费时长。
+    defect_retry = False
     for attempt in range(2):
         try:
-            result = await llm_client.generate([{"role": "user", "content": prompt}])
+            content = prompt
+            if defect_retry:
+                # 硬指令插在「用户当前问题」之前（recency 位置，别落到 AI回复： 之后）
+                anchor = prompt.rfind("\n\n用户当前问题：")
+                suffix = _FORCED_RETRY_SUFFIX
+                content = (prompt[:anchor] + "\n\n" + suffix + prompt[anchor:]
+                           if anchor != -1 else prompt + "\n\n" + suffix)
+            result = await llm_client.generate(
+                [{"role": "user", "content": content}],
+                # #062 §9.2/§10（Chief 批）：重试（attempt1，无论成因=话术缺陷还是
+                # JSON 截断/空回复）一律 15s 短超时、不内部重试、关思考。
+                # 收口局实测：关 thinking 只挂 defect_retry 分支时，attempt0 走
+                # 「JSON残缺→普通重试」的题（seq27）attempt1 仍思考烧光 1024 token
+                # （finish_reason=length resp_chars=87）二次截断落兜底——③ 未清零的根因。
+                **({"timeout_s": 15.0, "retries": 0, "enable_thinking": False}
+                   if attempt == 1 else {}),
+            )
             parsed = parse_json_response(result["response"])
-            answer = str(parsed.get("answer", "")).strip()
+            # #062 修库附加代码项：出口剥 {{{...}}} 内部占位符（含库原文带出与
+            # 模型自行复述两种来源），客户可见文本不漏内部结构
+            answer = strip_internal_placeholders(str(parsed.get("answer", ""))).strip()
+            parsed["answer"] = answer
             # 解析降级后answer仍是JSON残片（LLM输出被截断）时视为失败，走重试
             broken_json = answer.startswith("{") and '"answer"' in answer
             if answer and not broken_json:
@@ -163,10 +233,24 @@ async def handle_llm_generation(
                 # 其余回答照常做来源校验/回填。
                 if _normalize_text(answer) in _template_scripts():
                     parsed["sources"] = []
+                    # #062 第八节①：强相关带下仍给话术=缺陷，理由必须落盘可审计
+                    if force_kb_answer:
+                        model_reason = str(parsed.get("escalate_reason") or "").strip()
+                        if attempt == 0 and not model_reason:
+                            defect_retry = True
+                            last_error = (
+                                f"强相关top1={kb_top1:.1f}仍返话术且未写理由，加硬指令重试")
+                            logger.warning("%s（intent=%s）", last_error, decision.intent)
+                            continue
+                        parsed["kb_top1"] = round(kb_top1, 1)
+                        parsed["escalate_reason"] = model_reason[:200] or (
+                            f"top1={kb_top1:.1f} 超阈值{settings.FORCE_ANSWER_MIN_TOP1}"
+                            "仍转人工且未写理由")
                 else:
                     parsed["sources"] = _resolve_sources(parsed.get("sources"), prompt)
                 parsed["path"] = "llm_generation"
                 parsed["llm_latency_ms"] = result["latency_ms"]
+                parsed["kb_top1"] = round(kb_top1, 1)   # 第八节①：观测字段，落逐题记录
                 return parsed
             last_error = f"LLM第{attempt+1}次返回空回复或JSON残缺"
             logger.warning("%s（intent=%s）", last_error, decision.intent)
@@ -175,12 +259,20 @@ async def handle_llm_generation(
             logger.warning("LLM生成失败: %s", last_error)
 
     # #062：默认兜底=转人工（系统故障属拿不准，必须保跟进，不许丢）。
-    return {
+    # seed7 局实测：强相关题 attempt0 返话术→重试 attempt1 超时落到这里，兜底
+    # 不带观测字段会断审计链——force_kb_answer 时补 kb_top1+escalate_reason。
+    fallback = {
         "answer": settings.HANDOFF_MESSAGE,
         "sources": [],
         "path": "llm_generation",
         "error": last_error,
     }
+    if force_kb_answer:
+        fallback["kb_top1"] = round(kb_top1, 1)
+        fallback["escalate_reason"] = (
+            f"生成重试后仍失败（top1={kb_top1:.1f} 超阈值"
+            f"{settings.FORCE_ANSWER_MIN_TOP1}）：{(last_error or '')[:150]}")
+    return fallback
 
 
 # 【知识库】段之后可能出现的段标记（与 backend/orchestrator/prompt_builder.py 的
@@ -223,11 +315,21 @@ def _resolve_sources(llm_sources: Any, prompt: str) -> list[str]:
 
 
 async def handle_escalation(decision: DecisionResult, context: Dict[str, Any]) -> Dict[str, Any]:
-    """转人工：统一转接话术（#062 话术拆分，文案单一来源 settings）。"""
-    answer = settings.HANDOFF_MESSAGE
+    """转人工：统一转接话术（#062 话术拆分，文案单一来源 settings）。
+
+    第八节②：不生成长文本，决策层判定后直接返回固定话术（目标墙钟≈9.5s=
+    3.0s 等待+6.5s 决策）；判定依据落盘 escalate_reason 供逐题审计。
+    """
+    kb = context.get("kb_retrieval") or {}
+    if kb.get("top_title"):
+        retrieval = f"检索最相关条目《{kb['top_title']}》相关度{kb.get('top1_score', 0)}"
+    else:
+        retrieval = f"检索无相关内容（最高相关度{kb.get('top1_score', 0)}）"
     return {
-        "answer": answer,
+        "answer": settings.HANDOFF_MESSAGE,
         "sources": [],
         "need_clarification": False,
         "path": "human_escalation",
+        "escalate_reason": (f"决策层判定转人工：intent={decision.intent}，"
+                            f"emotion={decision.user_emotion}，{retrieval}"),
     }

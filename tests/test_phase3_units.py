@@ -64,9 +64,22 @@ def test_llm_client_structure():
     client = QwenClient()
     assert client.base_url == settings.MODEL_API_BASE
     assert client.model == settings.MODEL_NAME
-    assert client.timeout == 60.0
+    assert client.timeout == 30.0   # #062 第八节③：60→30s（旧断言漏更新，本次顺手修）
     assert client.max_retries == 1
     assert hasattr(client, "generate") and hasattr(client, "generate_stream")
+
+
+def test_llm_client_payload_thinking_override():
+    """#062 §10：generate 的 enable_thinking 形参要落到 chat_template_kwargs（缺省不变）。"""
+    from backend.llm.client import QwenClient
+
+    client = QwenClient()
+    base = client._payload([{"role": "user", "content": "x"}], stream=False)
+    assert base["chat_template_kwargs"]["enable_thinking"] == settings.GEN_ENABLE_THINKING
+    off = client._payload([{"role": "user", "content": "x"}], stream=False,
+                          enable_thinking=False)
+    assert off["chat_template_kwargs"]["enable_thinking"] is False
+    assert off["max_tokens"] == base["max_tokens"]   # 其余字段不动
 
 
 def test_llm_client_real_call():

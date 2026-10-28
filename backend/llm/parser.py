@@ -79,7 +79,13 @@ def parse_json_response(text: str) -> Dict[str, Any]:
             if not isinstance(sources, list):
                 sources = []
             sources = [str(s) for s in sources]
-            return {"answer": answer, "sources": sources}
+            out: Dict[str, Any] = {"answer": answer, "sources": sources}
+            # #062 第八节①：转人工理由落盘——模型按强制作答约束输出的
+            # escalate_reason 原样透传（缺省/空不伪造）
+            reason = data.get("escalate_reason")
+            if isinstance(reason, (str, int, float)) and str(reason).strip():
+                out["escalate_reason"] = str(reason).strip()[:200]
+            return out
 
     # 全部失败：原文降级
     return {"answer": text, "sources": []}

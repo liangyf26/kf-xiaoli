@@ -21,11 +21,15 @@ END_BLUE_SWITCH = "blue_switch"    # ④ 蓝方主动换题
 
 
 class Pose:
-    """蓝方出的一题。followup=True 表示同一话题的追问；cid=题集编号，judge_point=场景硬断言。"""
+    """蓝方出的一题。followup=True 表示同一话题的追问；cid=题集编号，judge_point=场景硬断言。
+
+    trap（#062 第三节）：蓝方出题时的陷阱标注 {"premise": [...], "reason": "..."}，
+    出题时标注不事后补标；None=普通题。"""
 
     def __init__(self, question: str, reason: str = "", followup: bool = False,
                  switch: bool = False, open_question: bool = False,
-                 cid: str = "", judge_point: list | None = None):
+                 cid: str = "", judge_point: list | None = None,
+                 trap: dict | None = None):
         self.question = question
         self.reason = reason
         self.followup = followup
@@ -33,16 +37,21 @@ class Pose:
         self.open_question = open_question
         self.cid = cid
         self.judge_point = judge_point
+        self.trap = trap
 
 
 class Answer:
     def __init__(self, answer: str = "", sources=None, path: str = "", error: str = "",
-                 latency_ms: float | None = None):
+                 latency_ms: float | None = None, escalate_reason: str | None = None,
+                 kb_top1: float | None = None):
         self.answer = answer
         self.sources = sources or []
         self.path = path
         self.error = error
         self.latency_ms = latency_ms      # 本次尝试耗时（ms），由 _call_with_deadline 计时
+        # #062 第八节①/复核 P1-1：转人工理由与检索 top1 观测（None=该轮无此数据）
+        self.escalate_reason = escalate_reason
+        self.kb_top1 = kb_top1
 
 
 def _call_with_deadline(answer_fn, question: str, timeout_s: float) -> Answer:
@@ -69,21 +78,34 @@ def _call_with_deadline(answer_fn, question: str, timeout_s: float) -> Answer:
 
 
 def _retry(answer_fn, question: str, attempts: int, backoff: list[float], sleep,
-           timeout_s: float) -> tuple[Answer, int]:
-    """attempts 含首次。返回 (最后一次答案, 重试次数)。"""
+           timeout_s: float, total_cap_s: float = 60.0) -> tuple[Answer, int]:
+    """attempts 含首次。返回 (最后一次答案, 重试次数)。
+
+    total_cap_s（#062 第八节③）：单题总时长上限——已耗时 ≥ cap 就不再重试，
+    压掉「60.3s 超时+重试 79-89s」模式（30s 超时×2 已贴 cap）。
+    """
     last = Answer(error="not_called")
+    started = time.monotonic()
+    ran = 0
     for i in range(attempts):
         if i:
+            if time.monotonic() - started >= total_cap_s:
+                break
             sleep(backoff[min(i - 1, len(backoff) - 1)] if backoff else 0)
+        ran = i + 1
         last = _call_with_deadline(answer_fn, question, timeout_s)
         if not last.error:
             return last, i
-    return last, attempts - 1
+    return last, ran - 1
 
 
 def run_game(game: int, config: dict, pose_fn, answer_fn, search_fn,
-             on_turn, sleep=time.sleep, scope_judge=None) -> dict:
-    """跑一局。on_turn(record) 负责落盘。返回 {turns, expected, void}。"""
+             on_turn, sleep=time.sleep, scope_judge=None, scope_ctx=None) -> dict:
+    """跑一局。on_turn(record) 负责落盘。返回 {turns, expected, void}。
+
+    scope_ctx（#062 第二节）：一轮共用的范围判定上下文（词表/正则/库/主题绑定表），
+    由 run() 建好传入；None 时 classify_turn 内部按旧口径现建（仅词表+scope_judge）。
+    """
     match = config.get("match", {})
     mode = match.get("mode", "fixed")
     limit = match.get("questions", 10) if mode == "fixed" else match.get("max_questions", 60)
@@ -92,6 +114,7 @@ def run_game(game: int, config: dict, pose_fn, answer_fn, search_fn,
     retry_n = config.get("retry", {}).get("per_question", 2) + 1   # 含首次
     backoff = config.get("retry", {}).get("backoff_s", [])
     timeout_s = config.get("red", {}).get("timeout_s", 120)
+    total_cap_s = config.get("retry", {}).get("total_cap_s", 60.0)   # 第八节③：单题总上限
     scope = config.get("scope", [])
 
     turns: list[dict] = []
@@ -120,7 +143,8 @@ def run_game(game: int, config: dict, pose_fn, answer_fn, search_fn,
             topic, followups = topic + 1, 0
             continue
 
-        answer, retries = _retry(answer_fn, pose.question, retry_n, backoff, sleep, timeout_s)
+        answer, retries = _retry(answer_fn, pose.question, retry_n, backoff, sleep,
+                                 timeout_s, total_cap_s)
         if answer.error:
             emit({"question": pose.question, "reason": pose.reason, "invalid": True,
                   "error": answer.error, "retries": retries, "scored": False,
@@ -132,7 +156,8 @@ def run_game(game: int, config: dict, pose_fn, answer_fn, search_fn,
         judged = classify_turn(pose.question, answer.answer, answer.sources, answer.path,
                                scope, search_fn, open_question=pose.open_question,
                                scope_judge=scope_judge, cid=pose.cid,
-                               judge_point=pose.judge_point)
+                               judge_point=pose.judge_point, scope_ctx=scope_ctx,
+                               seq=len(turns) + 1, trap=getattr(pose, "trap", None))
         blue += judged["blue_point"]
         red += judged["red_point"]
         if judged["blue_point"]:
@@ -145,6 +170,9 @@ def run_game(game: int, config: dict, pose_fn, answer_fn, search_fn,
             end = ""
         emit({"question": pose.question, "reason": pose.reason, "answer": answer.answer,
               "sources": answer.sources, "path": answer.path, "retries": retries,
+              # #062 复核 P1-1：转人工理由与检索 top1 落逐题记录（None 不写键）
+              **({} if answer.escalate_reason is None else {"escalate_reason": answer.escalate_reason}),
+              **({} if answer.kb_top1 is None else {"kb_top1": answer.kb_top1}),
               "invalid": False, "classification": judged, "end": end,
               "latency_ms": answer.latency_ms,
               "blue_point": judged["blue_point"], "red_point": judged["red_point"],
