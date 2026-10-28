@@ -7,6 +7,10 @@
 - 转人工题耗时：口径B 题的 latency_ms 均值
 - 该答却转人工：口径B 且非陷阱 且 top1>8.0；分母=非陷阱题数；门槛 ≤10%
 - 强相关子集：top1≥FORCE_ANSWER_MIN_TOP1(20.0) 单列
+- 分桶（终审二审口径）：①无理由话术 ②模型自写理由 ③重试/兜底失败
+  ④决策层fast path ⑤阈下自主；②'候选拆 ②'a结论错误（真缺陷·人工审计）/
+  ②'b理由夸大但结论正确（观测）/ 待审；⑥检索漏排（库能答·top1<20·fast path，
+  人工审计）。机械真缺陷=①+③，人工审计真缺陷=②'a+⑥，两口径并存不合并。
 - P90：nearest-rank，全题 latency_ms
 用法：python analyze_round_062.py <round_dir> [round_dir2 ...]
 """
@@ -37,6 +41,31 @@ FULL_DENY_RE = re.compile(
 PARTIAL_COVER_RE = re.compile(r"仅覆盖|只覆盖")
 DENY_RE = re.compile(FULL_DENY_RE.pattern + "|" +
                      r"仅覆盖|只覆盖|未涉及|未提及|未覆盖|仅确认|仅提到|仅提供")
+
+# —— ②'/④ 二级归属：人工审计裁定表（终审二审 Chief 2026-10-28）——
+# 机械正则判不了「问题本身库能不能答」（实锤两例：seq31 理由夸大但转人工结论
+# 正确；seq30 口语化错字致 top1<20、fast path 短路而库能答），二级归属只能以
+# 逐条人工审计为准。无裁定记录的 ②' 候选落「待人工审计」池，不计任何缺陷。
+# 裁定来源：
+#  * turtleschool docs/口径样例-062-带理由转人工.md（86ce231，收口局 11 例
+#    逐条）：seq34/seq30=真缺陷、seq21=半不实；seq31 的「合理」初判按 Chief
+#    2026-10-28 消息改记「结论正确、理由夸大」（②'b）。
+#  * 标「同族延伸」的三条：同一问题族+同一答法形态，按样例裁定口径类推，
+#    库内容已逐条核过（:281-282 全称/一级资质/有效期、:285 专票类型）。
+# 键=(局目录名, seq)；换局目录需同步维护。
+MANUAL_AUDIT = {
+    # seed11v3（收口局，= 样例文档 11 例所在局）
+    ("20261028-032656", 34): ("2a", "样例seq34真缺陷：库:282明写全称/一级资质/有效期，top1 68.6 却纯话术"),
+    ("20261028-032656", 30): ("6", "样例seq30真缺陷：库:105-110能答50元100G/不够可翻倍；口语化错字致 top1 8.4<20，fast path 短路——检索漏排，机械口径抓不到"),
+    ("20261028-032656", 31): ("2b", "Chief裁定：结论正确（税目编码/税率拆分/合规判定库确无），理由夸大（称仅覆盖SDWAN，库另有开票/合同条目）"),
+    ("20261028-032656", 21): ("2b", "样例seq21半不实：:285明写专票类型；6%/13%/价税分离确无（混合答，结论正确）"),
+    # seed11v1
+    ("20261028-024133", 4): ("2a", "同族延伸：问全称/营业执照/资质认证，库:281-282能答全称/一级资质/有效期，纯话术全盘否认"),
+    ("20261028-024133", 1): ("2b", "结论正确：税目13%/9%与进项抵扣库确无；理由夸大（:285有专票类型，「完全不覆盖」不成立）"),
+    ("20261028-024133", 21): ("2b", "样例seq21同族延伸：:285有专票类型，理由称未涉及专票普票不实；13%/6%混合订单确无（混合答，结论正确）"),
+    # seed7v2
+    ("20261028-022900", 13): ("2a", "同族延伸：问全称/信用代码/资质证书，库:282能答全称/资质/有效期，纯话术全盘否认"),
+}
 
 
 def norm(s: str) -> str:
@@ -111,10 +140,13 @@ def analyze(round_dir: Path) -> dict:
         "retries": {r["seq"]: r.get("retries") for r in turns if r.get("retries")},
         "er_fast": er_fast, "er_synth": er_synth, "er_model": er_model,
     }
-    # A-wrong 六分（终审后口径，Chief 2026-10-28）：③→②'→②→①→④→⑤，互斥。
-    # ②'（理由不实）先于 ② 判——理由声称库没覆盖/只覆盖了部分，但注入段 top1≥20
-    # 的条目与理由矛盾（全面否认；或自认「仅覆盖X」却纯话术连 X 都没答），不算②。
+    # A-wrong 分桶（终审二审口径，Chief 2026-10-28 08:06）：③→审计裁定→②'→
+    # ②→①→④/⑥→⑤，互斥。②'拆两级：②'a=结论错误（库能答却纯话术，真缺陷）、
+    # ②'b=理由夸大但结论正确（只作观测，不算缺陷）；二级归属看「问题本身库
+    # 能不能答」，机械正则判不了 → 查 MANUAL_AUDIT 人工裁定表，无裁定落待审池。
     m["b1"], m["b2p"], m["b2"], m["b3"], m["b4"], m["b5"] = [], [], [], [], [], []
+    m["b2a"], m["b2b"], m["b6"] = [], [], []
+    m["audit_notes"] = {}
     er_map = {r["seq"]: r for r in turns}
     for s in m["wrong_seqs"]:
         r = er_map[s]
@@ -123,23 +155,30 @@ def analyze(round_dir: Path) -> dict:
         is_b = norm(r.get("answer", "")) == norm(HANDOFF)
         # 订单锚定豁免（终审裁定 seq11 误报）：按单号/具体订单查数据，库结构性
         # 没有这单的信息，理由「无对应条目」成立，不算不实
-        order_anchored = bool(re.search(r"单号|具体订单|订单核对|单据", 
+        order_anchored = bool(re.search(r"单号|具体订单|订单核对|单据",
                                         (r.get("question") or "") + reason))
         if r.get("error") or reason.startswith("生成重试后仍失败"):
-            m["b3"].append(s)          # 重试/兜底失败（工程缺陷）
-        elif strong and not order_anchored and DENY_RE.search(reason) and (
+            m["b3"].append(s)          # ③ 重试/兜底失败（工程缺陷）
+            continue
+        aud = MANUAL_AUDIT.get((round_dir.name, s))
+        if aud:
+            level, note = aud          # 二级归属以人工审计为准
+            m[{"2a": "b2a", "2b": "b2b", "6": "b6"}[level]].append(s)
+            m["audit_notes"][s] = note
+            continue
+        if strong and not order_anchored and DENY_RE.search(reason) and (
                 FULL_DENY_RE.search(reason)
                 or (is_b and PARTIAL_COVER_RE.search(reason))):
-            m["b2p"].append(s)         # 理由不实（真缺陷候选：与注入条目矛盾）
+            m["b2p"].append(s)         # ②' 候选：无审计裁定 → 待人工审计
         elif reason and "仍转人工且未写理由" not in reason \
                 and r.get("path") != "human_escalation":
-            m["b2"].append(s)          # 模型自写理由（理由与库一致，按设计合理）
+            m["b2"].append(s)          # ② 模型自写理由（理由与库一致，按设计合理）
         elif strong:
-            m["b1"].append(s)          # 无理由话术（限强制作答带=真缺陷）
+            m["b1"].append(s)          # ① 无理由话术（限强制作答带=机械真缺陷）
         elif r.get("path") == "human_escalation" or reason.startswith("决策层"):
-            m["b4"].append(s)          # 决策层 fast path（阈下按设计）
+            m["b4"].append(s)          # ④ 决策层 fast path（每例需人工审计库能否答）
         else:
-            m["b5"].append(s)          # 阈下生成层自主（top1<20，政策允许，含混合答）
+            m["b5"].append(s)          # ⑤ 阈下生成层自主（top1<20，政策允许，含混合答）
     return m
 
 
@@ -156,14 +195,28 @@ for d in sys.argv[1:]:
     w = m["wrong"]
     print(f"该答却转人工A(含字样): {w[0]}/{w[1]}={w[2]:.0f}%{' ✅≤10%' if w[2] <= 10 else ' ❌>10%'}  seq={m['wrong_seqs']}")
     print(f"该答却转人工B(整句):  {m['b_wrong_n']}/{w[1]}={m['b_wrong_n']/w[1]*100:.0f}%  seq={m['b_wrong_seqs']}")
-    # Chief 口径（2026-10-28）：A 口径拆三类——①无理由话术（模型决策缺陷）
-    # ②模型自写理由（按设计合理）③重试/兜底失败（工程缺陷）；决策层 fast path 单列
-    for k, label in (("b1", "①无理由话术(限top1≥20)"), ("b2p", "②'理由不实(真缺陷候选)"),
+    # 终审二审口径（Chief 2026-10-28 08:06）：②'拆②'a结论错误/②'b理由夸大，
+    # fast path 真缺陷单列⑥；机械口径（①+③）与人工审计（②'a+⑥）两口径并存，
+    # 不给单一达标数
+    for k, label in (("b1", "①无理由话术(限top1≥20)"),
+                     ("b2a", "②'a结论错误(真缺陷:库能答却纯话术)"),
+                     ("b2b", "②'b理由夸大但结论正确(观测,不算缺陷)"),
+                     ("b2p", "②'候选待人工审计"),
                      ("b2", "②模型自写理由(一致)"),
-                     ("b3", "③重试/兜底失败"), ("b4", "④决策层fast path"),
+                     ("b3", "③重试/兜底失败"),
+                     ("b6", "⑥检索漏排(库能答·top1<20·fast path)"),
+                     ("b4", "④决策层fast path(每例需人工审计库能否答)"),
                      ("b5", "⑤阈下生成层自主")):
         seqs = m[k]
         print(f"  {label}: {len(seqs)} 题  seq={seqs}")
+    mech = len(m["b1"]) + len(m["b3"])
+    audited = sorted(m["b2a"] + m["b6"])
+    print(f"真缺陷: 机械口径①+③={mech}；人工审计②'a+⑥={len(audited)} seq={audited}"
+          f"（两口径并存，不给单一达标数）")
+    if m["audit_notes"]:
+        print("人工审计裁定（来源：口径样例-062-带理由转人工.md 86ce231 + Chief 2026-10-28）：")
+        for s, note in sorted(m["audit_notes"].items()):
+            print(f"  seq{s}: {note}")
     print(f"强相关(top1≥20)全列: {m['strong_all']}")
     print(f"强相关仍转人工: {m['strong_escal']}")
     print(f"P90(nearest-rank): {m['p90']:.1f}s")
